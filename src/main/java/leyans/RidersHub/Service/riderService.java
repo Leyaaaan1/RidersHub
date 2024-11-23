@@ -1,17 +1,30 @@
 package leyans.RidersHub.Service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
+import leyans.RidersHub.User.rider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.riderRepository;
+
+import java.util.List;
+import java.util.Optional;
+
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class riderService {
 
-    private final riderRepository riderRepository;
+    @Autowired
+    private riderRepository riderRepository;
 
-    public List
+    public List<rider> getAllRiders() {
+        return riderRepository.findAll();
+    }
+
+    public Optional<rider> getRiderById(Integer rider_id) {
+        return riderRepository.findById(rider_id);
+    }
+    public rider addRider(rider rider) {
+        return riderRepository.save(rider);
+    }
 
 }
 

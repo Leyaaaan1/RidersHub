@@ -1,0 +1,17 @@
+package leyans.RidersHub.Controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import leyans.RidersHub.Service.riderService;
+
+@RestController
+@RequestMapping("/rider")
+public class riderController {
+
+    @Autowired
+    private riderService riderService;
+
+
+
+}
