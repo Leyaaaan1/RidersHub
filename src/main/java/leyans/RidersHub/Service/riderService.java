@@ -1,7 +1,7 @@
 package leyans.RidersHub.Service;
 
 
-import leyans.RidersHub.User.rider;
+import leyans.RidersHub.User.Rider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.riderRepository;
@@ -15,14 +15,14 @@ public class riderService {
     @Autowired
     private riderRepository riderRepository;
 
-    public List<rider> getAllRiders() {
+    public List<Rider> getAllRiders() {
         return riderRepository.findAll();
     }
 
-    public Optional<rider> getRiderById(Integer rider_id) {
+    public Optional<Rider> getRiderById(Integer rider_id) {
         return riderRepository.findById(rider_id);
     }
-    public rider addRider(rider rider) {
+    public Rider addRider(Rider rider) {
         return riderRepository.save(rider);
     }
 

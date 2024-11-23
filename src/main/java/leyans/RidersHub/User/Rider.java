@@ -7,7 +7,7 @@ import jakarta.persistence.Id;
 
 @Entity
 
-public class rider {
+public class Rider {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,10 +15,10 @@ public class rider {
     private String name;
     private String ride;
 
-    public rider() {
+    public Rider() {
 
     }
-    public rider(Integer rider_id, String name, String ride) {
+    public Rider(Integer rider_id, String name, String ride) {
         this.rider_id = rider_id;
         this.name = name;
         this.ride = ride;
