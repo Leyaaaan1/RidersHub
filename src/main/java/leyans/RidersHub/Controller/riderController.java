@@ -1,12 +1,11 @@
 package leyans.RidersHub.Controller;
 
+import leyans.RidersHub.Repository.riderRepository;
 import leyans.RidersHub.Service.riderService;
 import leyans.RidersHub.User.Rider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -15,16 +14,20 @@ import java.util.List;
 public class riderController {
 
     @Autowired
+    private riderRepository riderRepository; // Correct naming for clarity
+    @Autowired
     private riderService riderService;
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/all")
     public List<Rider> getAllRiders() {
-        return riderService.getAllRiders();
+        return riderService.getAllRiders(); // Fetch all riders using the service
     }
 
-    public Rider createrider(@RequestBody Rider rider) {
-        return riderService.addRider(rider);
+    @PostMapping("/add")
+    public ResponseEntity<Rider> addUser(@RequestBody Rider newRider) {
+        Rider savedRider = riderRepository.save(newRider); // Save using the repository
+        return ResponseEntity.ok(savedRider); // Return the saved Rider
     }
 
 }
