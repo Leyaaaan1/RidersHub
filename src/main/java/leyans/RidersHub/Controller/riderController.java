@@ -21,13 +21,27 @@ public class riderController {
 
     @GetMapping("/all")
     public List<Rider> getAllRiders() {
-        return riderService.getAllRiders(); // Fetch all riders using the service
+        return riderService.getAllRiders();
     }
 
+
+
     @PostMapping("/add")
-    public ResponseEntity<Rider> addUser(@RequestBody Rider newRider) {
-        Rider savedRider = riderRepository.save(newRider); // Save using the repository
-        return ResponseEntity.ok(savedRider); // Return the saved Rider
+    public ResponseEntity<Rider> addRiders(@RequestBody Rider rider) {
+        Rider savedRider = riderService.addRider(rider);
+        return ResponseEntity.ok(savedRider);
     }
+
+    public ResponseEntity<Rider> updateRider(@RequestBody Rider rider) {
+        Rider updatedRider = riderService.updateRider(rider);
+        return  ResponseEntity.ok(updatedRider);
+    }
+
+
+//    @PutMapping("/update")
+//    public ResponseEntity<Rider> updateriders(@RequestBody Rider updatedRider) {
+//        Rider savedRider = riderService.updateRider(updatedRider);
+//        return ResponseEntity.ok(savedRider);
+//    }
 
 }

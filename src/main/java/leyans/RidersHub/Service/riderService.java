@@ -22,5 +22,14 @@ public class riderService {
         return riderRepository.save(rider);
     }
 
+    public Rider updateRider(Rider rider) {
+        return riderRepository.save(rider);
+    }
+
+
+//    public Rider updateRider(Rider rider) {
+//        return riderRepository.save(rider);
+//    }
+
 }
 
