@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/rider")
@@ -26,22 +27,18 @@ public class riderController {
 
 
 
+
     @PostMapping("/add")
     public ResponseEntity<Rider> addRiders(@RequestBody Rider rider) {
         Rider savedRider = riderService.addRider(rider);
         return ResponseEntity.ok(savedRider);
     }
 
+    @PostMapping("/update")
     public ResponseEntity<Rider> updateRider(@RequestBody Rider rider) {
         Rider updatedRider = riderService.updateRider(rider);
         return  ResponseEntity.ok(updatedRider);
     }
 
-
-//    @PutMapping("/update")
-//    public ResponseEntity<Rider> updateriders(@RequestBody Rider updatedRider) {
-//        Rider savedRider = riderService.updateRider(updatedRider);
-//        return ResponseEntity.ok(savedRider);
-//    }
 
 }

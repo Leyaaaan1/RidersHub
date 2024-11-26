@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.riderRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class riderService {
@@ -18,6 +19,10 @@ public class riderService {
         return riderRepository.findAll();
     }
 
+    public Optional<Rider> getRider(Rider rider_id) {
+        return  riderRepository.findById(rider_id.getRider_id());
+    }
+
     public Rider addRider(Rider rider) {
         return riderRepository.save(rider);
     }
@@ -26,10 +31,6 @@ public class riderService {
         return riderRepository.save(rider);
     }
 
-
-//    public Rider updateRider(Rider rider) {
-//        return riderRepository.save(rider);
-//    }
 
 }
 
