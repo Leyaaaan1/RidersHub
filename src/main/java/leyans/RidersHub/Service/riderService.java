@@ -15,6 +15,10 @@ public class riderService {
     @Autowired
     private riderRepository riderRepository;
 
+    public riderService(riderRepository riderRepository) {
+        this.riderRepository = riderRepository;
+    }
+
     public List<Rider> getAllRiders() {
         return riderRepository.findAll();
     }
