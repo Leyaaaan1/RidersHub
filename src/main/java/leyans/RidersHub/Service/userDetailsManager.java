@@ -14,8 +14,12 @@ public class userDetailsManager implements org.springframework.security.core.use
     @Autowired
     private final riderRepository riderRepository;
 
-    public userDetailsManager(leyans.RidersHub.Repository.riderRepository riderRepository) {
+    @Autowired
+    private final userDetailsManager userDetailsManager;
+
+    public userDetailsManager(riderRepository riderRepository, userDetailsManager userDetailsManager) {
         this.riderRepository = riderRepository;
+        this.userDetailsManager = userDetailsManager;
     }
 
     @Override
