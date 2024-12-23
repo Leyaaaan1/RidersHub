@@ -38,7 +38,7 @@ public class SecurityConfiguration {
         AuthenticationManagerBuilder authenticationManagerBuilder =
                 httpSecurity.getSharedObjects(AuthenticationManagerBuilder.class);
 
-
+        https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/index.html#customize-global-authentication-manager
     }
 
 }
