@@ -7,12 +7,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -21,8 +20,10 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
 
+
+    // Renamed the method to avoid conflicts
     @Bean
-    public SecurityFilterChain securityConfiguration(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .authorizeHttpRequests((authorize) -> authorize
                         .anyRequest().authenticated())
@@ -37,14 +38,13 @@ public class SecurityConfiguration {
             userDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsManager);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        authenticationProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
 
         return new ProviderManager(authenticationProvider);
     }
-
-
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
     }
+
 }

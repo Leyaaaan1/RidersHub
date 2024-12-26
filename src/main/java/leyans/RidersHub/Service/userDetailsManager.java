@@ -14,26 +14,24 @@ public class userDetailsManager implements org.springframework.security.core.use
     @Autowired
     private final riderRepository riderRepository;
 
-    @Autowired
-    private final userDetailsManager userDetailsManager;
 
-    public userDetailsManager(riderRepository riderRepository, userDetailsManager userDetailsManager) {
+    public userDetailsManager(riderRepository riderRepository ) {
         this.riderRepository = riderRepository;
-        this.userDetailsManager = userDetailsManager;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
+        // Retrieve the rider from the database
         Rider rider = riderRepository.findByUsername(username);
 
+
+        // Build UserDetails object for Spring Security
         return User.builder()
                 .username(rider.getUsername())
                 .password(rider.getPassword())
                 .roles("USER")
                 .disabled(!rider.getEnabled())
                 .build();
-
-
     }
+
 }
