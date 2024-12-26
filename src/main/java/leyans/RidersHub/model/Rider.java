@@ -1,4 +1,4 @@
-package leyans.RidersHub.User;
+package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
 

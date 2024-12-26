@@ -1,6 +1,6 @@
 package leyans.RidersHub.Service;
 
-import leyans.RidersHub.User.Rider;
+import leyans.RidersHub.model.Rider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
