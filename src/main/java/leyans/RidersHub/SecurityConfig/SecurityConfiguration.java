@@ -16,7 +16,9 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
+import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 
 import static org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter.Directive.COOKIES;
@@ -24,6 +26,9 @@ import static org.springframework.security.web.header.writers.ClearSiteDataHeade
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
+
+
+
 
 
 
@@ -37,9 +42,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession))
                 .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/rider/add").authenticated()
                         .requestMatchers("rider/update").authenticated()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/rider/add").hasRole("Admin").anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults());
 
