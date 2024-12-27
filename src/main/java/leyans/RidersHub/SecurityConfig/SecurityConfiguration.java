@@ -27,6 +27,9 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session-> session
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true))
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/rider/add").authenticated()
                         .requestMatchers("rider/update").authenticated()
