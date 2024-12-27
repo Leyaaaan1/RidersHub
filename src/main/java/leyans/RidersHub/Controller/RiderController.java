@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/rider")
-public class riderController {
+public class RiderController {
 
     @Autowired
     private riderRepository riderRepository; // Correct naming for clarity
