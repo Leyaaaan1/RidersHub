@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/rider")
@@ -32,6 +33,13 @@ public class RiderController {
         Rider savedRider = riderService.addRider(rider);
         return ResponseEntity.ok(savedRider);
     }
+
+
+    @PostMapping("/{rider_id}")
+    public Rider gerRider(@PathVariable Integer rider_id) {
+        
+    }
+
 
     @PostMapping("/update")
     public ResponseEntity<Rider> updateRider(@RequestBody Rider rider) {
