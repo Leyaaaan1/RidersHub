@@ -6,32 +6,34 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "authorities")
-public class Authority {
+@Table(name = "rider_Type")
+public class RiderType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "authority_id")
-    private Integer authorityId;
+    @Column(name = "rider_TypeId")
+    private Integer ryderTypeId;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "authorities")
+    @ManyToMany(mappedBy = "rider_Type")
     private Set<Rider> riders = new HashSet<>();
 
-    public Authority() {}
+    public RiderType() {}
 
-    public Authority(String name) {
+    public RiderType(Integer ryderTypeId, String name, Set<Rider> riders) {
+        this.ryderTypeId = ryderTypeId;
         this.name = name;
+        this.riders = riders;
     }
 
-    public Integer getAuthorityId() {
-        return authorityId;
+    public Integer getRyderTypeId() {
+        return ryderTypeId;
     }
 
-    public void setAuthorityId(Integer authorityId) {
-        this.authorityId = authorityId;
+    public void setRyderTypeId(Integer authorityId) {
+        this.ryderTypeId = authorityId;
     }
 
     public String getName() {

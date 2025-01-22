@@ -1,8 +1,8 @@
 package leyans.RidersHub.Service;
 
 
-import leyans.RidersHub.Repository.AuthorityRepository;
-import leyans.RidersHub.model.Authority;
+import leyans.RidersHub.Repository.RyderTypeRepository;
+import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,15 +20,15 @@ public class RiderService {
     private RiderRepository riderRepository;
 
     @Autowired
-    private AuthorityRepository authorityRepository;
+    private RyderTypeRepository authorityRepository;
 
     @Autowired
-    private AuthorityService authorityService;
+    private RyderTypeService ryderTypeService;
 
-    public RiderService(RiderRepository riderRepository, AuthorityRepository authorityRepository, AuthorityService authorityService) {
+    public RiderService(RiderRepository riderRepository, RyderTypeRepository ryderTypeRepository, RyderTypeService ryderTypeService) {
         this.riderRepository = riderRepository;
-        this.authorityRepository = authorityRepository;
-        this.authorityService = authorityService;
+        this.authorityRepository = ryderTypeRepository;
+        this.ryderTypeService = ryderTypeService;
     }
 
     public List<Rider> getAllRiders() {
@@ -42,10 +42,10 @@ public class RiderService {
 
     public Rider addRider(Rider riderAdd) {
         // Fetch authorities
-        Set<Authority> authorities = authorityService.findByName(
-                riderAdd.getAuthorities()
+        Set<RiderType> authorities = ryderTypeService.findByName(
+                riderAdd.getRider_Type()
                         .stream()
-                        .map(Authority::getName)
+                        .map(RiderType::getName)
                         .collect(Collectors.toSet())
         );
 
@@ -55,7 +55,7 @@ public class RiderService {
         }
 
         // Set authorities and save the rider
-        riderAdd.setAuthorities(authorities);
+        riderAdd.setRider_Type(authorities);
         return riderRepository.save(riderAdd);
     }
 
