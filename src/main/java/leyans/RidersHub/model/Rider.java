@@ -2,6 +2,7 @@ package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,30 +23,27 @@ public class Rider {
     @Column(name = "ride")
     private String ride;
 
-
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable (
+    @JoinTable(
             name = "rider_Authority",
             joinColumns = @JoinColumn(name = "rider_id"),
-            inverseJoinColumns = @JoinColumn(name = "authoityId")
+            inverseJoinColumns = @JoinColumn(name = "authorityId")
     )
-    private Set<Authority> authorities;
+    private Set<Authority> authorities = new HashSet<>();
 
+    // Constructors, Getters, Setters
+    public Rider() {
+    }
 
-    public Rider(Integer rider_id, String username, String password, String ride, Boolean enabled, Set<Authority> authorities) {
-        this.rider_id = rider_id;
+    public Rider(String username, String password, String ride, Boolean enabled, Set<Authority> authorities) {
         this.username = username;
         this.password = password;
         this.ride = ride;
         this.enabled = enabled;
         this.authorities = authorities;
-    }
-
-    public Rider() {
-
     }
 
     public Integer getRider_id() {
@@ -95,6 +93,4 @@ public class Rider {
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
     }
-
-
 }

@@ -6,16 +6,16 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import leyans.RidersHub.Repository.riderRepository;
+import leyans.RidersHub.Repository.RiderRepository;
 
 @Service
-public class userDetailsManager implements org.springframework.security.core.userdetails.UserDetailsService{
+public class UserDetailsManager implements org.springframework.security.core.userdetails.UserDetailsService{
 
     @Autowired
-    private final riderRepository riderRepository;
+    private final RiderRepository riderRepository;
 
 
-    public userDetailsManager(riderRepository riderRepository ) {
+    public UserDetailsManager(RiderRepository riderRepository ) {
         this.riderRepository = riderRepository;
     }
 
@@ -30,7 +30,7 @@ public class userDetailsManager implements org.springframework.security.core.use
                 .username(rider.getUsername())
                 .password(rider.getPassword())
                 .authorities(rider.getAuthorities().stream()
-                        .map(authority -> "ROLE" + authority.getName())
+                        .map(authority -> "ROLE" + authority.getRiders())
                         .toArray(String[]::new))
                 .disabled(!rider.getEnabled())
                 .build();
