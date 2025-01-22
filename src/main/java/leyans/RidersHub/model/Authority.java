@@ -2,6 +2,7 @@ package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -10,30 +11,27 @@ public class Authority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "AuthorityId")
-    private Integer authoityId;
+    @Column(name = "authority_id")
+    private Integer authorityId;
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "authorities")
-    private Set<Rider> rider;
+    private Set<Rider> riders = new HashSet<>();
 
-    public Authority() {
+    public Authority() {}
 
-    }
-    public Authority(Integer authoityId, String name, Set<Rider> rider) {
-        this.authoityId = authoityId;
+    public Authority(String name) {
         this.name = name;
-        this.rider = rider;
     }
 
-    public Integer getAuthoityId() {
-        return authoityId;
+    public Integer getAuthorityId() {
+        return authorityId;
     }
 
-    public void setAuthoityId(Integer authoityId) {
-        this.authoityId = authoityId;
+    public void setAuthorityId(Integer authorityId) {
+        this.authorityId = authorityId;
     }
 
     public String getName() {
@@ -44,11 +42,11 @@ public class Authority {
         this.name = name;
     }
 
-    public Set<Rider> getRider() {
-        return rider;
+    public Set<Rider> getRiders() {
+        return riders;
     }
 
-    public void setRider(Set<Rider> rider) {
-        this.rider = rider;
+    public void setRiders(Set<Rider> riders) {
+        this.riders = riders;
     }
 }

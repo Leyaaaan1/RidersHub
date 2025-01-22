@@ -1,44 +1,54 @@
 package leyans.RidersHub.Controller;
-
-import leyans.RidersHub.Repository.riderRepository;
-import leyans.RidersHub.Service.riderService;
+import leyans.RidersHub.Repository.RiderRepository;
+import leyans.RidersHub.Service.AuthorityService;
+import leyans.RidersHub.Service.RiderService;
+import leyans.RidersHub.model.Authority;
 import leyans.RidersHub.model.Rider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/rider")
 public class RiderController {
 
     @Autowired
-    private riderRepository riderRepository; // Correct naming for clarity
+    private RiderRepository riderRepository;
     @Autowired
-    private riderService riderService;
+    private RiderService riderService;
 
+
+    public RiderController(RiderRepository riderRepository, RiderService riderService) {
+        this.riderRepository = riderRepository;
+        this.riderService = riderService;
+    }
 
     @GetMapping("/all")
     public List<Rider> getAllRiders() {
         return riderService.getAllRiders();
     }
 
+    @GetMapping("/{rider_id}")
+    public Rider getRiderById(@PathVariable Integer rider_id) {
+        Optional<Rider> rider = riderRepository.findById(rider_id);
+        return rider.orElse(null);
+    }
 
 
 
     @PostMapping("/add")
-    public ResponseEntity<Rider> addRiders(@RequestBody Rider rider) {
-        Rider savedRider = riderService.addRider(rider);
-        return ResponseEntity.ok(savedRider);
+    public ResponseEntity<Rider> addRiders(@RequestBody Rider riderAdd) {
+        try {
+            Rider savedRider = riderService.addRider(riderAdd);
+            return ResponseEntity.ok(savedRider);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null); // Return bad request for invalid authorities
+        }
     }
 
-
-    @PostMapping("/{rider_id}")
-    public Rider gerRider(@PathVariable Integer rider_id) {
-        
-    }
 
 
     @PostMapping("/update")
