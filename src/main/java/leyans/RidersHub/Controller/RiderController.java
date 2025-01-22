@@ -1,15 +1,12 @@
 package leyans.RidersHub.Controller;
 import leyans.RidersHub.Repository.RiderRepository;
-import leyans.RidersHub.Service.AuthorityService;
 import leyans.RidersHub.Service.RiderService;
-import leyans.RidersHub.model.Authority;
 import leyans.RidersHub.model.Rider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/rider")

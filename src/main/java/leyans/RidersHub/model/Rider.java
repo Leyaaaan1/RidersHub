@@ -28,22 +28,22 @@ public class Rider {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "rider_Authority",
+            name = "rider_type",
             joinColumns = @JoinColumn(name = "rider_id"),
-            inverseJoinColumns = @JoinColumn(name = "authorityId")
+            inverseJoinColumns = @JoinColumn(name = "rider_TypeId")
     )
-    private Set<Authority> authorities = new HashSet<>();
+    private Set<RiderType> rider_Type = new HashSet<>();
 
     // Constructors, Getters, Setters
     public Rider() {
     }
 
-    public Rider(String username, String password, String ride, Boolean enabled, Set<Authority> authorities) {
+    public Rider(String username, String password, String ride, Boolean enabled, Set<RiderType> rider_Type) {
         this.username = username;
         this.password = password;
         this.ride = ride;
         this.enabled = enabled;
-        this.authorities = authorities;
+        this.rider_Type = rider_Type;
     }
 
     public Integer getRider_id() {
@@ -86,11 +86,11 @@ public class Rider {
         this.enabled = enabled;
     }
 
-    public Set<Authority> getAuthorities() {
-        return authorities;
+    public Set<RiderType> getRider_Type() {
+        return rider_Type;
     }
 
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
+    public void setRider_Type(Set<RiderType> ryderType) {
+        this.rider_Type = ryderType;
     }
 }

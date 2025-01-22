@@ -29,8 +29,8 @@ public class UserDetailsManager implements org.springframework.security.core.use
         return User.builder()
                 .username(rider.getUsername())
                 .password(rider.getPassword())
-                .authorities(rider.getAuthorities().stream()
-                        .map(authority -> "ROLE" + authority.getRiders())
+                .authorities(rider.getRider_Type().stream()
+                        .map(ryderType -> "ROLE" + ryderType.getRiders())
                         .toArray(String[]::new))
                 .disabled(!rider.getEnabled())
                 .build();
