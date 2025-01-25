@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users")
+@Table(name = "rider")
 public class Rider {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "riderId")
-    private Integer rider_id;
+    @Column(name = "id")
+    private Integer id;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -20,38 +20,32 @@ public class Rider {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "ride")
-    private String ride;
-
     @Column(name = "enabled", nullable = false)
     private Boolean enabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "rider_type",
-            joinColumns = @JoinColumn(name = "rider_id"),
-            inverseJoinColumns = @JoinColumn(name = "rider_TypeId")
-    )
-    private Set<RiderType> rider_Type = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "rider_type", referencedColumnName = "rider_type", nullable = false)
+    private RiderType riderType;
 
-    // Constructors, Getters, Setters
-    public Rider() {
-    }
-
-    public Rider(String username, String password, String ride, Boolean enabled, Set<RiderType> rider_Type) {
+    public Rider(Integer id, String username, String password, Boolean enabled, RiderType riderType) {
+        this.id = id;
         this.username = username;
         this.password = password;
-        this.ride = ride;
         this.enabled = enabled;
-        this.rider_Type = rider_Type;
+        this.riderType = riderType;
     }
 
-    public Integer getRider_id() {
-        return rider_id;
+
+    public Rider() {
+
     }
 
-    public void setRider_id(Integer rider_id) {
-        this.rider_id = rider_id;
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUsername() {
@@ -70,14 +64,6 @@ public class Rider {
         this.password = password;
     }
 
-    public String getRide() {
-        return ride;
-    }
-
-    public void setRide(String ride) {
-        this.ride = ride;
-    }
-
     public Boolean getEnabled() {
         return enabled;
     }
@@ -86,11 +72,11 @@ public class Rider {
         this.enabled = enabled;
     }
 
-    public Set<RiderType> getRider_Type() {
-        return rider_Type;
+    public RiderType getRiderType() {
+        return riderType;
     }
 
-    public void setRider_Type(Set<RiderType> ryderType) {
-        this.rider_Type = ryderType;
+    public void setRiderType(RiderType riderType) {
+        this.riderType = riderType;
     }
 }

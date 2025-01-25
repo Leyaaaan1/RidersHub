@@ -1,69 +1,61 @@
 package leyans.RidersHub.Service;
 
 
-import leyans.RidersHub.Repository.RyderTypeRepository;
-import leyans.RidersHub.model.RiderType;
+import jakarta.transaction.Transactional;
+import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.RiderRepository;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class RiderService {
 
     @Autowired
-    private RiderRepository riderRepository;
+    private final RiderRepository riderRepository;
 
     @Autowired
-    private RyderTypeRepository authorityRepository;
+    private final RiderTypeRepository riderTypeRepository;
 
-    @Autowired
-    private RyderTypeService ryderTypeService;
-
-    public RiderService(RiderRepository riderRepository, RyderTypeRepository ryderTypeRepository, RyderTypeService ryderTypeService) {
+    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository) {
         this.riderRepository = riderRepository;
-        this.authorityRepository = ryderTypeRepository;
-        this.ryderTypeService = ryderTypeService;
+        this.riderTypeRepository = riderTypeRepository;
     }
+
+    public RiderType addRiderType(String riderTypeName) {
+        RiderType riderType = new RiderType();
+        riderType.setRiderType(riderTypeName);
+        return riderTypeRepository.save(riderType);
+    }
+
+    public Rider addRider(String username, String password, Boolean enabled, String riderType) {
+
+        RiderType riderTypeName= riderTypeRepository.findByRiderType(riderType);
+
+        if(riderTypeName == null){
+            throw new IllegalArgumentException("RiderType '" + riderType + "' does not exist");
+        }
+
+        Rider newRider = new Rider();
+
+        newRider.setUsername(username);
+        newRider.setPassword(password);
+        newRider.setEnabled(enabled);
+        newRider.setRiderType(riderTypeName);
+        return riderRepository.save(newRider);
+
+    }
+
 
     public List<Rider> getAllRiders() {
         return riderRepository.findAll();
+
     }
-
-    public Rider getRiderById(int rider_id) {
-        Optional<Rider> rider = riderRepository.findById(rider_id);
-        return rider.orElse(null);
-    }
-
-    public Rider addRider(Rider riderAdd) {
-        // Fetch authorities
-        Set<RiderType> authorities = ryderTypeService.findByName(
-                riderAdd.getRider_Type()
-                        .stream()
-                        .map(RiderType::getName)
-                        .collect(Collectors.toSet())
-        );
-
-        // Ensure that authorities are found
-        if (authorities.isEmpty()) {
-            throw new IllegalArgumentException("Invalid authorities provided.");
-        }
-
-        // Set authorities and save the rider
-        riderAdd.setRider_Type(authorities);
-        return riderRepository.save(riderAdd);
-    }
-
-
-    public Rider updateRider(Rider rider) {
-        return riderRepository.save(rider);
-    }
-
-
 }
+
+
 

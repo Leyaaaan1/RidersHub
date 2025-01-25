@@ -3,52 +3,51 @@ package leyans.RidersHub.model;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.*;
+
 @Entity
-@Table(name = "rider_Type")
+@Table(name = "rider_type")
 public class RiderType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "rider_TypeId")
-    private Integer ryderTypeId;
+    @Column(name = "rider_type_id")
+    private Integer riderTypeId;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
 
-    @ManyToMany(mappedBy = "rider_Type")
-    private Set<Rider> riders = new HashSet<>();
+    @Column(name = "rider_type", nullable = false, unique = true)
+    private String riderType;
 
-    public RiderType() {}
+    @OneToMany(mappedBy = "riderType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Rider> riders;
 
-    public RiderType(Integer ryderTypeId, String name, Set<Rider> riders) {
-        this.ryderTypeId = ryderTypeId;
-        this.name = name;
-        this.riders = riders;
+    public RiderType(Integer riderTypeId, String riderType) {
+        this.riderTypeId = riderTypeId;
+        this.riderType = riderType;
     }
 
-    public Integer getRyderTypeId() {
-        return ryderTypeId;
+    public RiderType() {
+
     }
 
-    public void setRyderTypeId(Integer authorityId) {
-        this.ryderTypeId = authorityId;
+
+    // Getters and Setters
+    public Integer getRiderTypeId() {
+        return riderTypeId;
     }
 
-    public String getName() {
-        return name;
+    public void setRiderTypeId(Integer riderTypeId ) {
+        this.riderTypeId = riderTypeId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getRiderType() {
+        return riderType;
     }
 
-    public Set<Rider> getRiders() {
-        return riders;
-    }
-
-    public void setRiders(Set<Rider> riders) {
-        this.riders = riders;
+    public void setRiderType(String riderType) {
+        this.riderType = riderType;
     }
 }

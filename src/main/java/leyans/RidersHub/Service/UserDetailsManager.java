@@ -1,39 +1,44 @@
 package leyans.RidersHub.Service;
 
 import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.Repository.RiderRepository;
+import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import leyans.RidersHub.Repository.RiderRepository;
 
 @Service
-public class UserDetailsManager implements org.springframework.security.core.userdetails.UserDetailsService{
+public class UserDetailsManager implements org.springframework.security.core.userdetails.UserDetailsService {
 
-    @Autowired
     private final RiderRepository riderRepository;
 
-
-    public UserDetailsManager(RiderRepository riderRepository ) {
+    @Autowired
+    public UserDetailsManager(RiderRepository riderRepository) {
         this.riderRepository = riderRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Retrieve the rider from the database
         Rider rider = riderRepository.findByUsername(username);
 
+        if (rider == null) {
+            throw new UsernameNotFoundException("Rider not found with username: " + username);
+        }
 
-        // Build UserDetails object for Spring Security
+        RiderType riderType = rider.getRiderType();
+        if (riderType == null) {
+            throw new UsernameNotFoundException("Rider type not found for user: " + username);
+        }
+
+        String role = "ROLE_" + riderType.getRiderType().toUpperCase();
+
         return User.builder()
                 .username(rider.getUsername())
                 .password(rider.getPassword())
-                .authorities(rider.getRider_Type().stream()
-                        .map(ryderType -> "ROLE" + ryderType.getRiders())
-                        .toArray(String[]::new))
+                .authorities(role)
                 .disabled(!rider.getEnabled())
                 .build();
     }
-
 }

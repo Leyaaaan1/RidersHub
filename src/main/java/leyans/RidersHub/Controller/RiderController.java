@@ -1,7 +1,10 @@
 package leyans.RidersHub.Controller;
+import leyans.RidersHub.DTO.RiderRequest;
+import leyans.RidersHub.DTO.RiderTypeRequest;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,50 +12,36 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/rider")
+@RequestMapping("/riders")
 public class RiderController {
 
-    @Autowired
-    private RiderRepository riderRepository;
-    @Autowired
-    private RiderService riderService;
+    private final RiderService riderService;
 
-
-    public RiderController(RiderRepository riderRepository, RiderService riderService) {
-        this.riderRepository = riderRepository;
+    @Autowired
+    public RiderController(RiderService riderService) {
         this.riderService = riderService;
     }
 
-    @GetMapping("/all")
-    public List<Rider> getAllRiders() {
-        return riderService.getAllRiders();
+    @PostMapping("/rider-type")
+    public ResponseEntity<RiderType> addRiderType(@RequestBody RiderTypeRequest request) {
+        RiderType riderType = riderService.addRiderType(request.getRiderType());
+        return ResponseEntity.ok(riderType);
     }
-
-    @GetMapping("/{rider_id}")
-    public Rider getRiderById(@PathVariable Integer rider_id) {
-        Optional<Rider> rider = riderRepository.findById(rider_id);
-        return rider.orElse(null);
-    }
-
-
 
     @PostMapping("/add")
-    public ResponseEntity<Rider> addRiders(@RequestBody Rider riderAdd) {
-        try {
-            Rider savedRider = riderService.addRider(riderAdd);
-            return ResponseEntity.ok(savedRider);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // Return bad request for invalid authorities
-        }
+    public ResponseEntity<Rider> addRider(@RequestBody RiderRequest request) {
+        Rider rider = riderService.addRider(
+                request.getUsername(),
+                request.getPassword(),
+                request.getEnabled(),
+                request.getRiderType()
+        );
+        return ResponseEntity.ok(rider);
     }
 
-
-
-    @PostMapping("/update")
-    public ResponseEntity<Rider> updateRider(@RequestBody Rider rider) {
-        Rider updatedRider = riderService.updateRider(rider);
-        return  ResponseEntity.ok(updatedRider);
+    @GetMapping("/all")
+    public ResponseEntity<List<Rider>> getAllRiders() {
+        List<Rider> riders = riderService.getAllRiders();
+        return ResponseEntity.ok(riders);
     }
-
-
 }
