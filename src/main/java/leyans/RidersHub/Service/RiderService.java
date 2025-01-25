@@ -36,10 +36,6 @@ public class RiderService {
 
         RiderType riderTypeName= riderTypeRepository.findByRiderType(riderType);
 
-        if(riderTypeName == null){
-            throw new IllegalArgumentException("RiderType '" + riderType + "' does not exist");
-        }
-
         Rider newRider = new Rider();
 
         newRider.setUsername(username);

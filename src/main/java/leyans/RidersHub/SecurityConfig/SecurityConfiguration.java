@@ -30,8 +30,10 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/rider/all").hasRole("CAR")
-                        .anyRequest().authenticated())
+                        .requestMatchers("/riders/rider-type").hasRole("MOTOR")
+                        .requestMatchers("/riders/all").hasRole("CAR")
+                        .requestMatchers("/riders/add").hasRole("CAR").anyRequest().authenticated())
+
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults());
 

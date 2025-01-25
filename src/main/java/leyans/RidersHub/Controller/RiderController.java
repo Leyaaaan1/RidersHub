@@ -6,6 +6,7 @@ import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -30,12 +31,12 @@ public class RiderController {
 
     @PostMapping("/add")
     public ResponseEntity<Rider> addRider(@RequestBody RiderRequest request) {
+
         Rider rider = riderService.addRider(
                 request.getUsername(),
                 request.getPassword(),
                 request.getEnabled(),
-                request.getRiderType()
-        );
+                request.getRiderType());
         return ResponseEntity.ok(rider);
     }
 
