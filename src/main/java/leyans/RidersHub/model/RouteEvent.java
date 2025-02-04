@@ -5,13 +5,13 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "event_rides")
-public class EventRides {
+@Table(name = "route_rides")
+public class RouteEvent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "eventsId", nullable  = false)
-    private Integer eventsId;
+    @Column(name = "routesId", nullable  = false)
+    private Integer routesId;
 
     @Column(name = "routes", nullable = false, unique = true)
     private String routes;
@@ -32,11 +32,11 @@ public class EventRides {
     @Column(name = "date", nullable = false)
     private Date date;
 
-    public EventRides() {
+    public RouteEvent() {
     }
 
-    public EventRides(Integer eventsId, String routes, Rider username, String riders, Integer distance, String meeting, Date date) {
-        this.eventsId = eventsId;
+    public RouteEvent(Integer routesId, String routes, Rider username, String riders, Integer distance, String meeting, Date date) {
+        this.routesId = routesId;
         this.routes = routes;
         this.username = username;
         this.riders = riders;
@@ -45,12 +45,12 @@ public class EventRides {
         this.date = date;
     }
 
-    public Integer getEventsId() {
-        return eventsId;
+    public Integer getRoutesId() {
+        return routesId;
     }
 
-    public void setEventsId(Integer eventsId) {
-        this.eventsId = eventsId;
+    public void setRoutesId(Integer eventsId) {
+        this.routesId = eventsId;
     }
 
     public String getRoutes() {
