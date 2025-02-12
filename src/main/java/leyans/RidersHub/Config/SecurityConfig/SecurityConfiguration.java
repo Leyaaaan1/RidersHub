@@ -1,4 +1,4 @@
-package leyans.RidersHub.SecurityConfig;
+package leyans.RidersHub.Config.SecurityConfig;
 
 import leyans.RidersHub.Service.UserDetailsManager;
 import org.springframework.context.annotation.Bean;
