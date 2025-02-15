@@ -23,6 +23,8 @@ public class RiderController {
         this.riderService = riderService;
     }
 
+
+    // add type of rider with the entities of rider type
     @PostMapping("/rider-type")
     public ResponseEntity<RiderType> addRiderType(@RequestBody RiderTypeRequest request) {
         RiderType riderType = riderService.addRiderType(request.getRiderType());
