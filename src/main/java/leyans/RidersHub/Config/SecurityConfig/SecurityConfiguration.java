@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/riders/rider-type").hasRole("MOTOR")
+                        .requestMatchers("/riders/rider-type").hasRole("CAR")
                         .requestMatchers("/riders/all").hasRole("CAR")
                         .requestMatchers("/riders/add").hasRole("CAR").anyRequest().authenticated())
 
