@@ -4,7 +4,6 @@ package leyans.RidersHub.Service;
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.model.Location;
 import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,21 +20,24 @@ public class SampleLocationService {
     }
 
 
-    public Location addLocation(String newLocationName) {
-        Location newLocation = new Location();
-        newLocation.setLocationName(newLocationName);
-        return  locationRepository.save(newLocation);
-    }
+
 
     public List <Location> getAllLocations() {
         return locationRepository.findAll();
    }
 
+   public Location addLocation(String locationName, String latitude, String longitude, String username) {
+
+        Rider newRider = new Rider();
+
+        Location newLocation = new Location();
+        newLocation.setLocationName(locationName);
+        newLocation.setLatitude(latitude);
+        newLocation.setLongitude(longitude);
+        newLocation.setRider(newRider);
+        return locationRepository.save(newLocation);
+    }
 
 
+    }
 
-
-
-
-
-}

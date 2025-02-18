@@ -29,17 +29,25 @@ public class LocationController {
         this.sampleLocationService = sampleLocationService;
     }
 
-    @GetMapping("/alllocations")
+    @GetMapping("/all-locations")
     public ResponseEntity<List<Location>> getAllLocations() {
         List<Location> locations = locationRepository.findAll();
         return ResponseEntity.ok(locations);
     }
 
 
-    @PostMapping("/addlocation")
+
+    @PostMapping("/add-location")
     public ResponseEntity<Location> addLocation(@RequestBody LocationRequest locationRequest) {
-        Location newLocation = sampleLocationService.addLocation(locationRequest.getLocation());
-        return ResponseEntity.ok(newLocation);
+        Location location = sampleLocationService.addLocation(
+                locationRequest.getRider(),
+                locationRequest.getLocationName(),
+                locationRequest.getLatitude(),
+                locationRequest.getLongitude()
+        );
+
+        return ResponseEntity.ok(location);
     }
+
 
 }

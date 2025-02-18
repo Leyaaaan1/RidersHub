@@ -13,22 +13,30 @@ public class Location {
     // @Column(columnDefinition = "geometry(Point, 4325)")
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
+    @JoinColumn(name = "username", referencedColumnName = "username")
     private Rider username;
 
 
-    @Column(name = "location",  nullable = false, unique = true)
+    @Column(name = "location")
     private String locationName;
 
-    @Column(name = "latitude", nullable = false)
+    @Column(name = "latitude")
     private String latitude;
 
-    @Column(name = "longtitude", nullable = false)
-    private String longtitude;
+    @Column(name = "longitude")
+    private String longitude;
 
 
     public Location() {
 
+    }
+
+    public Location(Integer locationId, Rider username, String locationName, String latitude, String longitude) {
+        this.locationId = locationId;
+        this.username = username;
+        this.locationName = locationName;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Integer getLocationId() {
@@ -39,11 +47,11 @@ public class Location {
         this.locationId = locationId;
     }
 
-    public Rider getUsername() {
+    public Rider getRider() {
         return username;
     }
 
-    public void setUsername(Rider username) {
+    public void setRider(Rider username) {
         this.username = username;
     }
 
@@ -63,11 +71,11 @@ public class Location {
         this.latitude = latitude;
     }
 
-    public String getLongtitude() {
-        return longtitude;
+    public String getLongitude() {
+        return longitude;
     }
 
-    public void setLongtitude(String longtitude) {
-        this.longtitude = longtitude;
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 }
