@@ -14,7 +14,7 @@ public class Location {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "username", referencedColumnName = "username")
-    private Rider username;
+    private Rider rider;
 
 
     @Column(name = "location")
@@ -31,9 +31,9 @@ public class Location {
 
     }
 
-    public Location(Integer locationId, Rider username, String locationName, String latitude, String longitude) {
+    public Location(Integer locationId, Rider rider, String locationName, String latitude, String longitude) {
         this.locationId = locationId;
-        this.username = username;
+        this.rider = rider;
         this.locationName = locationName;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -48,11 +48,11 @@ public class Location {
     }
 
     public Rider getRider() {
-        return username;
+        return rider;
     }
 
-    public void setRider(Rider username) {
-        this.username = username;
+    public void setRider(Rider rider) {
+        this.rider = rider;
     }
 
     public String getLocationName() {

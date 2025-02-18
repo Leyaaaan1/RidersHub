@@ -40,11 +40,10 @@ public class LocationController {
     @PostMapping("/add-location")
     public ResponseEntity<Location> addLocation(@RequestBody LocationRequest locationRequest) {
         Location location = sampleLocationService.addLocation(
-                locationRequest.getRider(),
                 locationRequest.getLocationName(),
                 locationRequest.getLatitude(),
-                locationRequest.getLongitude()
-        );
+                locationRequest.getLongitude(),
+                locationRequest.getUsername());
 
         return ResponseEntity.ok(location);
     }
