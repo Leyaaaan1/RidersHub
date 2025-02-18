@@ -1,4 +1,4 @@
-package leyans.RidersHub.Config.KafkaConfig.Service;
+package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
