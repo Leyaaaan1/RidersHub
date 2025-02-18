@@ -68,12 +68,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.locationtech.jts</groupId>
-			<artifactId>jts-core</artifactId>
-			<version>1.21.0</version> <!-- Use the latest version available -->
+			<groupId>org.locationtech.geomesa</groupId>
+			<artifactId>geomesa-kafka-datastore_2.13</artifactId>
+			<version>5.2.0</version>
 		</dependency>
 
-			<dependency>
+
+		<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-spatial</artifactId>
 				<version>5.6.14.Final</version>
@@ -83,6 +84,20 @@
 
 
 	</dependencies>
+
+	<repositories>
+		<!-- GeoTools repository -->
+		<repository>
+			<id>osgeo</id>
+			<url>https://repo.osgeo.org/repository/release</url>
+		</repository>
+		<!-- Confluent repository for Kafka dependencies -->
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
+
 
 	<build>
 		<plugins>
