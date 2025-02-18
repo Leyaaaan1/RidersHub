@@ -2,16 +2,25 @@ package leyans.RidersHub.DTO;
 
 public class LocationRequest {
 
-    private String location;
+    private String locationName;
     private String latitude;
     private String longitude;
+    private String username;
 
-    public String getLocation() {
-        return location;
+    public String getRider() {
+        return username;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setRider(String username) {
+        this.username = username;
+    }
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
     public String getLatitude() {
