@@ -3,6 +3,8 @@ package leyans.RidersHub.Service;
 
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.model.Location;
+import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,12 @@ public class SampleLocationService {
         this.locationRepository = locationRepository;
     }
 
-    public Locti
+
+    public Location addLocation(String newLocationName) {
+        Location newLocation = new Location();
+        newLocation.setLocationName(newLocationName);
+        return  locationRepository.save(newLocation);
+    }
 
     public List <Location> getAllLocations() {
         return locationRepository.findAll();

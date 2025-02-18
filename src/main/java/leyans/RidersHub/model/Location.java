@@ -2,8 +2,6 @@ package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
 
-import java.awt.*;
-
 @Entity
 public class Location {
 
@@ -12,35 +10,26 @@ public class Location {
     @Column(name = "locationId", unique = true, nullable = false)
     private Integer locationId;
 
-   // @Column(columnDefinition = "geometry(Point, 4325)")
+    // @Column(columnDefinition = "geometry(Point, 4325)")
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
-    private Rider usernamae;
+    private Rider username;
 
 
-    @Column(name = "location", nullable = true)
+    @Column(name = "location",  nullable = false, unique = true)
     private String locationName;
 
     @Column(name = "latitude", nullable = false)
-    private String latitud;
+    private String latitude;
 
     @Column(name = "longtitude", nullable = false)
     private String longtitude;
 
-    public Location(Integer locationId, Rider usernamae, String locationName, String latitud, String longtitude) {
-        this.locationId = locationId;
-        this.usernamae = usernamae;
-        this.locationName = locationName;
-        this.latitud = latitud;
-        this.longtitude = longtitude;
-    }
 
     public Location() {
 
     }
-    //private static final GeometryFactory geo = new GeometryFactory();
-
 
     public Integer getLocationId() {
         return locationId;
@@ -50,14 +39,12 @@ public class Location {
         this.locationId = locationId;
     }
 
-
-
-    public Rider getUsernamae() {
-        return usernamae;
+    public Rider getUsername() {
+        return username;
     }
 
-    public void setUsernamae(Rider usernamae) {
-        this.usernamae = usernamae;
+    public void setUsername(Rider username) {
+        this.username = username;
     }
 
     public String getLocationName() {
@@ -68,12 +55,12 @@ public class Location {
         this.locationName = locationName;
     }
 
-    public String getLatitud() {
-        return latitud;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setLatitud(String latitud) {
-        this.latitud = latitud;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
     public String getLongtitude() {
@@ -84,4 +71,3 @@ public class Location {
         this.longtitude = longtitude;
     }
 }
-

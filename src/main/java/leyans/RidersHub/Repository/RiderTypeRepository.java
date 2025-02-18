@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RiderTypeRepository extends JpaRepository<RiderType, Integer> {
+
     RiderType findByRiderType(String riderType);
 
 
