@@ -2,8 +2,10 @@ package leyans.RidersHub.Service;
 
 
 import leyans.RidersHub.Repository.LocationRepository;
+import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.model.Location;
 import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ public class SampleLocationService {
 
     @Autowired
     private LocationRepository locationRepository;
+    @Autowired
+    private RiderRepository riderRepository;
 
     public SampleLocationService(LocationRepository locationRepository) {
         this.locationRepository = locationRepository;
@@ -26,16 +30,16 @@ public class SampleLocationService {
         return locationRepository.findAll();
    }
 
-   public Location addLocation(String locationName, String latitude, String longitude, String username) {
+    public Location addLocation(String locationName, String latitude, String longitude, String rider) {
 
-        Rider newRider = new Rider();
+        Rider newRider = riderRepository.findByUsername(rider);
+       Location newLocation = new Location();
 
-        Location newLocation = new Location();
         newLocation.setLocationName(locationName);
         newLocation.setLatitude(latitude);
         newLocation.setLongitude(longitude);
         newLocation.setRider(newRider);
-        return locationRepository.save(newLocation);
+    return locationRepository.save(newLocation);
     }
 
 

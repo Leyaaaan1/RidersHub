@@ -3,9 +3,6 @@ package leyans.RidersHub.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.NaturalId;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Entity
 @Table(name = "rider")
 public class Rider {
