@@ -1,9 +1,7 @@
 package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
-
-import java.util.HashSet;
-import java.util.Set;
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "rider")
@@ -14,6 +12,7 @@ public class Rider {
     @Column(name = "id")
     private Integer id;
 
+    @NaturalId
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 

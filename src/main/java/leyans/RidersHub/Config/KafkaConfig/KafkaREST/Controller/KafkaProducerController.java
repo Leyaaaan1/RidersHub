@@ -1,7 +1,7 @@
-package leyans.RidersHub.Config.KafkaConfig.Controller;
+package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Controller;
 
 
-import leyans.RidersHub.Config.KafkaConfig.Service.KafkaProducerService;
+import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service.KafkaProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
