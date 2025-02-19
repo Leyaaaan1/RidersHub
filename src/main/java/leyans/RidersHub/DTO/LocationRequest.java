@@ -7,7 +7,7 @@ public class LocationRequest {
     private String locationName;
     private String latitude;
     private String longitude;
-    private String username; // Keep as username for clarity
+    private String username;
 
     public String getUsername() {
 

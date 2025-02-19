@@ -1,4 +1,4 @@
-package leyans.RidersHub.Config.KafkaConfig;
+package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Config;
 
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -16,6 +16,19 @@ import java.util.Map;
 @EnableKafka
 @Configuration
 public class KafkaConfig {
+
+//    @Bean
+//    public ConsumerFactory<String, String> consumerFactoryLocation() {
+//        Map<String, Object> locationConfigs = new HashMap<>();
+//        locationConfigs.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+//        locationConfigs.put(ConsumerConfig.GROUP_ID_CONFIG, "locations");
+//        locationConfigs.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+//
+//        return new DefaultKafkaConsumerFactory<>(locationConfigs);
+//
+//
+//    }
+//
 
 
     @Bean
