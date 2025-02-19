@@ -1,10 +1,8 @@
-package leyans.RidersHub.Config.KafkaConfig;
+package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Consumer;
 
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-
-import java.lang.module.Configuration;
 
 @Component
 public class KafkaConsumer {
