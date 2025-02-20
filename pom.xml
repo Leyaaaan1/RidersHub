@@ -1,31 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.3.2</version>
+		<relativePath/>
 	</parent>
 	<groupId>leyans</groupId>
 	<artifactId>RidersHub</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>RidersHub</name>
 	<description>Hub for motorcycle enthusiasts</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -43,8 +30,6 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
@@ -54,51 +39,39 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.locationtech.geomesa</groupId>
-			<artifactId>geomesa-kafka-datastore_2.13</artifactId>
+			<artifactId>geomesa-kafka-datastore_2.12</artifactId>
 			<version>5.2.0</version>
 		</dependency>
-
-
 		<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-spatial</artifactId>
-				<version>5.6.14.Final</version>
-			</dependency>
-
-
-
-
+			<groupId>org.locationtech.geomesa</groupId>
+			<artifactId>geomesa-gt_2.12</artifactId>
+			<version>5.2.0</version>  <!-- Add the version here -->
+		</dependency>
 	</dependencies>
-
 	<repositories>
-		<!-- GeoTools repository -->
 		<repository>
-			<id>osgeo</id>
-			<url>https://repo.osgeo.org/repository/release</url>
+			<id>locationtech-releases</id>
+			<url>https://repo.locationtech.org/content/repositories/releases/</url>
 		</repository>
-		<!-- Confluent repository for Kafka dependencies -->
 		<repository>
-			<id>confluent</id>
-			<url>https://packages.confluent.io/maven/</url>
+			<id>locationtech-snapshots</id>
+			<url>https://repo.locationtech.org/content/repositories/snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
-
-
 	<build>
 		<plugins>
 			<plugin>
@@ -107,5 +80,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
