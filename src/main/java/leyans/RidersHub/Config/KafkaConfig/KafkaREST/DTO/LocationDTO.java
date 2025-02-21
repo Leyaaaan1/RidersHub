@@ -3,7 +3,6 @@ package leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO;
 public class LocationDTO {
     private String username;
     private String locationName;
-    // Represented as "longitude,latitude"
     private String point;
 
     public LocationDTO() {}
@@ -14,7 +13,6 @@ public class LocationDTO {
         this.point = point;
     }
 
-    // Getters and setters
     public String getUsername() {
         return username;
     }

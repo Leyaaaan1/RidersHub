@@ -4,7 +4,6 @@ public class LocationResponseDTO {
     private Integer locationId;
     private String username;
     private String locationName;
-    // A simple representation of coordinates (e.g., "longitude,latitude")
     private String point;
 
     public LocationResponseDTO() {}
@@ -16,7 +15,6 @@ public class LocationResponseDTO {
         this.point = point;
     }
 
-    // Getters and setters
     public Integer getLocationId() {
         return locationId;
     }
