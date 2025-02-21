@@ -1,55 +1,36 @@
 package leyans.RidersHub.DTO;
 
-import java.awt.*;
-
 public class LocationRequest {
-
+    private String username;
     private String locationName;
-    private Point Location;
     private double latitude;
     private double longitude;
-    private String Rider;
 
+    public LocationRequest() {}
+
+    // Getters and setters
     public String getUsername() {
-
-        return Rider;
+        return username;
     }
-
-    public void setUsername(String Rider) {
-        this.Rider = Rider
-        ;
+    public void setUsername(String username) {
+        this.username = username;
     }
     public String getLocationName() {
         return locationName;
     }
-
     public void setLocationName(String locationName) {
         this.locationName = locationName;
     }
-
     public double getLatitude() {
         return latitude;
     }
-
     public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
-
     public double getLongitude() {
         return longitude;
     }
-
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
-
-
-    public Point getLocation() {
-        return Location;
-    }
-
-    public void setLocation(Point location) {
-        Location = location;
-    }
-
 }

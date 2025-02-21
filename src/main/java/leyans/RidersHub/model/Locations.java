@@ -12,6 +12,7 @@ public class Locations {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "locationId")
     private Integer locationId;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -21,8 +22,10 @@ public class Locations {
     @Column(name = "locationName", nullable = false)
     private String locationName;
 
-    @Column(name = "coordinates", columnDefinition = "geometry(Point,4326)", nullable = false)
+    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
     //ensure the type coordinates is mapped to the correct type in the database
+    // since  @JdbcTypeCode(SqlTypes.OTHER) is not working need a converter
+   //@Convert(converter = PointConverter.class)
     @JdbcTypeCode(SqlTypes.OTHER)
     private Point coordinates;
 
