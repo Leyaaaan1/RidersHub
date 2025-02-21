@@ -26,6 +26,8 @@
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-spatial</artifactId>
+			<version>6.5.2.Final</version>
+
 		</dependency>
 
 		<dependency>
@@ -61,6 +63,11 @@
 			<version>5.2.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
 
 
 		<!-- PostGIS Support for JPA -->
@@ -69,8 +76,6 @@
 			<artifactId>jts-core</artifactId>
 			<version>1.18.2</version>  <!-- Latest stable version -->
 		</dependency>
-
-
 
 	</dependencies>
 
