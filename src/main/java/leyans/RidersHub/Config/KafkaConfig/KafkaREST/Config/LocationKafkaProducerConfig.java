@@ -1,7 +1,6 @@
 package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Config;
 
 import leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO.LocationDTO;
-import leyans.RidersHub.model.Locations;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class KafkaProducerConfig {
+public class LocationKafkaProducerConfig {
 
     @Bean
     public ProducerFactory<String, LocationDTO> locationProducerFactory() {

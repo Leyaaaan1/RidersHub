@@ -23,9 +23,6 @@ public class Locations {
     private String locationName;
 
     @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
-    //ensure the type coordinates is mapped to the correct type in the database
-    // since  @JdbcTypeCode(SqlTypes.OTHER) is not working need a converter
-   //@Convert(converter = PointConverter.class)
     @JdbcTypeCode(SqlTypes.OTHER)
     private Point coordinates;
 

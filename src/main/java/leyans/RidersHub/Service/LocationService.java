@@ -36,10 +36,9 @@ public class LocationService {
     // wrong it will roll back the transaction preventing to commit the changes
     @Transactional
     public LocationResponseDTO saveLocation(String username, String locationName, double latitude, double longitude) {
-        Rider rider = riderRepository.findByUsernameAfter(username)
-                .orElseThrow(() -> new EntityNotFoundException("Rider not found with username: " + username));
-
+        Rider rider = riderRepository.findByUsername(username);
         // Create coordinates (order: longitude, latitude)
+        // point is used for latitude and longtitude using PostGis
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         Locations location = new Locations(rider, locationName, coordinates);
         location = locationRepository.save(location);
