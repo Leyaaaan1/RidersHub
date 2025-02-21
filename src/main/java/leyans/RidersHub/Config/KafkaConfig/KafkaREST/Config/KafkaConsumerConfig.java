@@ -18,7 +18,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConsumerConfig {
 
-    // --- "riders" Group Configuration ---
+    // --- "riders"
     @Bean
     public ConsumerFactory<String, String> riderConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -37,7 +37,7 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
-    // --- "location-group" Configuration for Locations objects ---
+    // --- "location-group"
     @Bean
     public ConsumerFactory<String, LocationDTO> locationConsumerFactory() {
         Map<String, Object> configProps = new HashMap<>();
