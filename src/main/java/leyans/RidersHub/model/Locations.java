@@ -22,9 +22,11 @@ public class Locations {
     @Column(name = "locationName", nullable = false)
     private String locationName;
 
-    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
-    @JdbcTypeCode(SqlTypes.OTHER)
-    private Point coordinates;
+   // @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+    //@JdbcTypeCode(SqlTypes.OTHER)
+   @Convert(converter = PointConverter.class)
+   @Column(columnDefinition = "TEXT")
+   private Point coordinates;
 
     public Locations() {
     }

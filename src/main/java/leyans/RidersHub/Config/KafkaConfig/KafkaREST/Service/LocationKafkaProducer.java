@@ -19,4 +19,6 @@ public class LocationKafkaProducer {
         kafkaTemplate.send(TOPIC, locationDTO);
         System.out.println("Sent location update: " + locationDTO.getLocationName());
     }
+
+
 }
