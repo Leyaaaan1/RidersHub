@@ -1,6 +1,6 @@
 package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Config;
 
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO.LocationDTO;
+import leyans.RidersHub.DTO.LocationDTO;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;

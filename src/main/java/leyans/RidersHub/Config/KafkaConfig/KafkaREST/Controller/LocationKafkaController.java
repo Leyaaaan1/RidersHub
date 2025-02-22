@@ -1,11 +1,8 @@
 package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Controller;
 
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO.LocationResponseDTO;
+import leyans.RidersHub.DTO.LocationResponseDTO;
 import leyans.RidersHub.DTO.LocationRequest;
 import leyans.RidersHub.Service.LocationService;
-import leyans.RidersHub.model.Locations;
-import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

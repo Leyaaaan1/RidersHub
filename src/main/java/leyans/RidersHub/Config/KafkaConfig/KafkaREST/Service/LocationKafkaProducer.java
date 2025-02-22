@@ -1,8 +1,7 @@
 package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service;
 
 
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO.LocationDTO;
-import leyans.RidersHub.model.Locations;
+import leyans.RidersHub.DTO.LocationDTO;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
