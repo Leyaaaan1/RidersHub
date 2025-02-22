@@ -1,10 +1,9 @@
 package leyans.RidersHub.Service;
 
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO.LocationDTO;
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO.LocationResponseDTO;
+import leyans.RidersHub.DTO.LocationDTO;
+import leyans.RidersHub.DTO.LocationResponseDTO;
 import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service.LocationKafkaProducer;
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;

@@ -12,6 +12,7 @@ public class KafkaConsumer {
             containerFactory = "riderKafkaListenerContainerFactory"
     )
     public void consumeCar(String message) {
+
         System.out.println("Car message received: " + message);
     }
 
