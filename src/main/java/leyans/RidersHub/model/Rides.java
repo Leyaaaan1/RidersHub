@@ -5,7 +5,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "event_rides")
@@ -18,7 +20,6 @@ public class Rides {
 
     //@Column(nullable = false, columnDefinition = "geometry(Point,4326)")
     //@JdbcTypeCode(SqlTypes.OTHER)
-
     @Convert(converter = PointConverter.class)
     @Column(columnDefinition = "TEXT")
     private Point coordinates;
@@ -35,7 +36,7 @@ public class Rides {
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     private Rider username;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rider_type", referencedColumnName = "rider_type", nullable = false)
     private RiderType riderType;
 
@@ -51,6 +52,7 @@ public class Rides {
     public Rides() {
     }
 
+
     public Rides(Integer ridesId, Point coordinates, String locationName, String ridesName, Rider username, RiderType riderType, Integer distance, String startingPoint, Date date) {
         this.ridesId = ridesId;
         this.coordinates = coordinates;
@@ -63,12 +65,11 @@ public class Rides {
         this.date = date;
     }
 
-
-
-
     public Integer getRidesId() {
         return ridesId;
     }
+
+
 
     public void setRidesId(Integer ridesId) {
         this.ridesId = ridesId;

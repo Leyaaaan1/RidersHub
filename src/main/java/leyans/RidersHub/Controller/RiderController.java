@@ -54,21 +54,20 @@ public class RiderController {
         return ResponseEntity.ok(riders);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Rides> createRide(@RequestBody RidesRequestDTO request) {
-        Rides ride = ridesService.createRides(
-                request.getLocationName(),
-                request.getRidesName(),
-                request.getUsername(),
-                request.getRiderType(),
-                request.getDistance(),
-                request.getStartingPoint(),
-                request.getDate(),
-                request.getLatitude(),
-                request.getLongitude()
+    @PostMapping("/create-ride")
+    public ResponseEntity<Rides> createRide(@RequestBody RideRequestDTO rideRequest) {
+        Rides response = ridesService.createRide(
+                rideRequest.getUsername(),
+                rideRequest.getRidesName(),
+                rideRequest.getLocationName(),
+                rideRequest.getRiderType(),
+                rideRequest.getDistance(),
+                rideRequest.getStartingPoint(),
+                rideRequest.getDate(),
+                rideRequest.getLatitude(),
+                rideRequest.getLongitude()
         );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(ride);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/add-locations")

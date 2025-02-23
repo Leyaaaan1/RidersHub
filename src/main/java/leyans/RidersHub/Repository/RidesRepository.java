@@ -13,6 +13,4 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
     Rides findRidesByUsername(Rider username);
 
-    Rides findByRiderType(RiderType riderType);
-
 }
