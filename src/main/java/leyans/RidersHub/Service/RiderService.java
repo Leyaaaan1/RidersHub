@@ -50,7 +50,9 @@ public class RiderService {
     public List<Rider> getAllRiders() {
         return riderRepository.findAll();
 
+
     }
+
 }
 
 

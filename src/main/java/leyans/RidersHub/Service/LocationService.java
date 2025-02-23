@@ -36,7 +36,6 @@ public class LocationService {
     @Transactional
     public LocationResponseDTO saveLocation(String username, String locationName, double latitude, double longitude) {
         Rider rider = riderRepository.findByUsername(username);
-        // point is used for latitude and longtitude using PostGis
 
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         Locations location = new Locations(rider, locationName, coordinates);
