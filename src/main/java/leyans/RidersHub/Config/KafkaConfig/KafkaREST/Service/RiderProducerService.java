@@ -18,7 +18,12 @@ public class RiderProducerService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
+
+
+
     public void sendMessage(String riderType, String message) {
+
+
         System.out.println("Sending message to topic: " + riderType);
         kafkaTemplate.send(riderType, message);
         System.out.println("Sent message: " + message + " to RiderType: " + riderType);
