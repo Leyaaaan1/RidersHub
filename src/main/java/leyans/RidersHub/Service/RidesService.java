@@ -22,62 +22,17 @@ public class RidesService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
-    private final LocationService   locationService;
 
 
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
 
-    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, LocationService locationService, RidesRepository ridesRepository) {
+    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
-        this.locationService = locationService;
         this.ridesRepository = ridesRepository;
     }
 
-//    @Transactional
-//    public Rides createRides(String username, String ridesName, String
-//            locationName, List<String> riderTypeNames, Integer distance, String startingPoint, Date date, double latitude, double longitude) {
-//
-//
-//
-//        Rider rider = riderRepository.findByUsername(username);
-//
-//
-//        Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-//        Locations location = new Locations(rider, locationName, coordinates);
-//        location = locationRepository.save(location);
-//
-//        String pointStr = coordinates.getX() + "," + coordinates.getY();
-//        LocationDTO locationDTO = new LocationDTO(username, locationName, pointStr);
-//
-//        kafkaProducer.sendLocationUpdate( locationDTO);
-//
-//        // Fetch RiderType objects from the database
-//        List<RiderType> riderTypes = riderTypeNames.stream()
-//                .map(name -> riderTypeRepository.findByRiderType(name))
-//                .filter(Objects::nonNull) // Avoid null values if no match is found
-//                .collect(Collectors.toList());
-//
-//        if (riderTypes.isEmpty()) {
-//            throw new IllegalArgumentException("No valid RiderType found for given names.");
-//        }
-//
-//
-//
-//        Rides newRides = new Rides();
-//        newRides.setCoordinates(coordinates);
-//        newRides.setLocationName(locationName);
-//        newRides.setRidesName(ridesName);
-//        newRides.setUsername(rider);
-//        newRides.setDistance(distance);
-//        newRides.setStartingPoint(startingPoint);
-//        newRides.setDate(date);
-//        newRides.setRiderTypes(riderTypes); // Set fetched rider types
-//
-//
-//        return ridesRepository.save(newRides);
-//    }
 
 
     @Transactional
@@ -94,6 +49,7 @@ public class RidesService {
         RidesDTO ridesDTO = new RidesDTO(username, locationName, pointStr, ridesName,
                 riderType, distance, startingPoint, date
         );
+
 
         Rides newRides = new Rides();
         newRides.setCoordinates(coordinates);

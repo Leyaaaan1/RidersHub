@@ -7,19 +7,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class RiderProducer {
 
-    private final KafkaTemplate<Object, String> kafkaTemplate;
+    private final KafkaTemplate<String , String> kafkaTemplate;
 
-    public RiderProducer(KafkaTemplate<Object, String> kafkaTemplate) {
+    public RiderProducer(KafkaTemplate<String, String> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
 
-    public void sendMessage(RiderTypeDTO riderMessageDTO) {
-        kafkaTemplate.send(riderMessageDTO.getRiderType(), riderMessageDTO.getMessage());
+
+    public void sendMessageProducer(String topic, String message) {
+        kafkaTemplate.send(topic, message);
+        System.out.println("Sending message to topic: " + message);
+        System.out.println("Sent message: " + message + " to RiderType: " + topic);
 
 
-        System.out.println("Sending message to topic: " + riderMessageDTO.getMessage());
-        System.out.println("Sent message: " + riderMessageDTO.getMessage() + " to RiderType: " + riderMessageDTO.getRiderType());
     }
 }
 

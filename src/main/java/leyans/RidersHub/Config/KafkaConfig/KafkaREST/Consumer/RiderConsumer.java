@@ -8,14 +8,21 @@ import org.springframework.stereotype.Service;
 @Service
 public class RiderConsumer {
 
-
     @KafkaListener(topics = "car", groupId = "rider-group")
-    public void consume(RiderTypeDTO riderMessageDTO) {
-        System.out.println("Received message: " + riderMessageDTO.getMessage() +
-                " for RiderType: " + riderMessageDTO.getRiderType());
+    public void consumeCar(String message) {
+        System.out.println("Received message for car: " + message);
     }
 
+    @KafkaListener(topics = "motor", groupId = "rider-group")
+    public void consumeMotor(String message) {
+        System.out.println("Received message for motor: " + message);
     }
+
+    @KafkaListener(topics = "bike", groupId = "rider-group")
+    public void consumeBike(String message) {
+        System.out.println("Received message for bike: " + message);
+    }
+}
 
 
 

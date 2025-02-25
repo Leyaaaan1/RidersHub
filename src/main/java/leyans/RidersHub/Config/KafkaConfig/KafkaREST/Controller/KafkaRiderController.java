@@ -2,8 +2,8 @@ package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Controller;
 
 
 import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Producer.RiderProducer;
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service.RiderProducerService;
 import leyans.RidersHub.DTO.RiderTypeDTO;
+import leyans.RidersHub.Service.RiderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,16 +12,20 @@ import org.springframework.web.bind.annotation.*;
 public class KafkaRiderController {
 
     @Autowired
-    private final RiderProducerService riderProducerService;
+    private final RiderService riderService;
 
-    public KafkaRiderController(RiderProducerService riderProducerService) {
-        this.riderProducerService = riderProducerService;
+    @Autowired
+    private final RiderProducer riderProducer;
+
+    public KafkaRiderController(RiderService riderService, RiderProducer riderProducer) {
+        this.riderService = riderService;
+        this.riderProducer = riderProducer;
     }
 
 
     @PostMapping("/send")
-    public String sendMessage(@RequestBody RiderTypeDTO riderMessageDTO) {
-        riderProducerService.sendMessage(riderMessageDTO);
-        return "Message sent for RiderType: " + riderMessageDTO.getRiderType();
+    public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
+        riderService.sendMessageFromService(riderType, message);
+        return "Message sent for RiderType: " + riderType  + " " + message + "!";
     }
 }
