@@ -4,7 +4,6 @@ package leyans.RidersHub.Service;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.LocationDTO;
 import leyans.RidersHub.DTO.LocationResponseDTO;
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service.LocationKafkaProducer;
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.model.Locations;
@@ -18,15 +17,13 @@ import org.springframework.stereotype.Service;
 public class LocationService {
 
     private final LocationRepository locationRepository;
-    private final LocationKafkaProducer kafkaProducer;
     private final GeometryFactory geometryFactory = new GeometryFactory();
     private final RiderRepository riderRepository;
 
 
 
-    public LocationService(LocationRepository locationRepository, LocationKafkaProducer kafkaProducer, RiderRepository riderRepository) {
+    public LocationService(LocationRepository locationRepository, RiderRepository riderRepository) {
         this.locationRepository = locationRepository;
-        this.kafkaProducer = kafkaProducer;
         this.riderRepository = riderRepository;
     }
 
@@ -45,7 +42,7 @@ public class LocationService {
         String pointStr = coordinates.getX() + "," + coordinates.getY();
         LocationDTO locationDTO = new LocationDTO(username, locationName, pointStr);
 
-        kafkaProducer.sendLocationUpdate(locationDTO);
+      //  kafkaProducer.sendLocationUpdate(locationDTO);
 
         return new LocationResponseDTO(location.getLocationId(), username, locationName, pointStr);
     }
