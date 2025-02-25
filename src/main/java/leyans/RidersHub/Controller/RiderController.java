@@ -55,8 +55,8 @@ public class RiderController {
     }
 
     @PostMapping("/create-ride")
-    public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
-        RideResponseDTO response = ridesService.createRide(
+    public ResponseEntity<Rides> createRide(@RequestBody RideRequestDTO rideRequest) {
+        Rides response = ridesService.createRide(
                 rideRequest.getUsername(),
                 rideRequest.getRidesName(),
                 rideRequest.getLocationName(),

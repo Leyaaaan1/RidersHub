@@ -2,16 +2,10 @@ package leyans.RidersHub.Service;
 
 
 import jakarta.transaction.Transactional;
-import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service.LocationKafkaProducer;
-import leyans.RidersHub.DTO.LocationDTO;
-import leyans.RidersHub.DTO.LocationRequest;
-import leyans.RidersHub.DTO.LocationResponseDTO;
 import leyans.RidersHub.DTO.RidesDTO;
-import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.model.Locations;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
@@ -20,11 +14,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class RidesService {
@@ -36,15 +26,13 @@ public class RidesService {
 
 
     private final GeometryFactory geometryFactory = new GeometryFactory();
-    private final LocationKafkaProducer kafkaProducer;
 
 
-    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, LocationService locationService, RidesRepository ridesRepository, LocationKafkaProducer kafkaProducer) {
+    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, LocationService locationService, RidesRepository ridesRepository) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.locationService = locationService;
         this.ridesRepository = ridesRepository;
-        this.kafkaProducer = kafkaProducer;
     }
 
 //    @Transactional
@@ -106,9 +94,6 @@ public class RidesService {
         RidesDTO ridesDTO = new RidesDTO(username, locationName, pointStr, ridesName,
                 riderType, distance, startingPoint, date
         );
-
-        kafkaProducer.sendLocationUpdate(ridesDTO);
-        kafkaProducer.
 
         Rides newRides = new Rides();
         newRides.setCoordinates(coordinates);
