@@ -6,6 +6,7 @@ import leyans.RidersHub.Config.KafkaConfig.KafkaREST.Service.LocationKafkaProduc
 import leyans.RidersHub.DTO.LocationDTO;
 import leyans.RidersHub.DTO.LocationRequest;
 import leyans.RidersHub.DTO.LocationResponseDTO;
+import leyans.RidersHub.DTO.RidesDTO;
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
@@ -98,14 +99,16 @@ public class RidesService {
 
         Rider rider = riderRepository.findByUsername(username);
         RiderType newRiderType = riderTypeRepository.findByRiderType(riderType);
-        LocationResponseDTO locationResponseDTO = locationService.saveLocation(username, locationName, latitude, longitude);
 
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
 
         String pointStr = coordinates.getX() + "," + coordinates.getY();
-        LocationDTO locationDTO = new LocationDTO(username, locationName, pointStr);
+        RidesDTO ridesDTO = new RidesDTO(username, locationName, pointStr, ridesName,
+                riderType, distance, startingPoint, date
+        );
 
-
+        kafkaProducer.sendLocationUpdate(ridesDTO);
+        kafkaProducer.
 
         Rides newRides = new Rides();
         newRides.setCoordinates(coordinates);

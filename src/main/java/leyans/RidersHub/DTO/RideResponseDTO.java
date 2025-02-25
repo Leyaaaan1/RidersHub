@@ -16,6 +16,8 @@ public class RideResponseDTO {
     private String coordinates;
     private Date date;
 
+    public  RideResponseDTO(){}
+
     public RideResponseDTO(Rides ride) {
         this.ridesName = ride.getRidesName();
         this.locationName = ride.getLocationName();
