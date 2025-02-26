@@ -18,13 +18,13 @@ public class Rides {
     @Column(name = "ridesId", nullable  = false)
     private Integer ridesId;
 
-    //@Column(nullable = false, columnDefinition = "geometry(Point,4326)")
-    //@JdbcTypeCode(SqlTypes.OTHER)
+//    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+//    @JdbcTypeCode(SqlTypes.OTHER)
     @Convert(converter = PointConverter.class)
-    @Column(columnDefinition = "TEXT")
+   @Column(columnDefinition = "TEXT")
     private Point coordinates;
 
-    @Column(name = "locationName", nullable = false, unique = true)
+    @Column(name = "locationName", nullable = false)
     private String locationName;
 
 

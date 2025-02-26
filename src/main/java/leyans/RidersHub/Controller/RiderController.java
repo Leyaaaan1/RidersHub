@@ -1,6 +1,5 @@
 package leyans.RidersHub.Controller;
 import leyans.RidersHub.DTO.*;
-import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
@@ -8,11 +7,9 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/riders")
@@ -21,6 +18,7 @@ public class RiderController {
     private final RiderService riderService;
     private final RidesService ridesService;
     private final LocationService locationService;
+
 
     @Autowired
     public RiderController(RiderService riderService, RidesService ridesService, LocationService locationService) {
@@ -55,8 +53,8 @@ public class RiderController {
     }
 
     @PostMapping("/create-ride")
-    public ResponseEntity<Rides> createRide(@RequestBody RideRequestDTO rideRequest) {
-        Rides response = ridesService.createRide(
+    public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
+        RideResponseDTO response = ridesService.createRide(
                 rideRequest.getUsername(),
                 rideRequest.getRidesName(),
                 rideRequest.getLocationName(),
@@ -81,9 +79,11 @@ public class RiderController {
         return ResponseEntity.ok(savedLocation);
     }
 
-
-
-
+    @PostMapping("/send")
+    public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
+        riderService.sendMessage(riderType, message);
+        return "Message sent to RiderType: " + riderType;
+    }
 
 
 }
