@@ -48,12 +48,19 @@ public class RidesService {
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
 
         String pointStr = coordinates.getX() + "," + coordinates.getY();
+//        RidesDTO ridesDTO = new RidesDTO(
+//                username,
+//                locationName,
+//                ridesName,
+//                riderType,
+//                distance,
+//                startingPoint,
+//                date
+//        );
+//
 
-        RidesDTO ridesDTO = new RidesDTO(username, locationName, ridesName,
-                riderType, distance, startingPoint, date
-        );
 
-
+        //Initiate new instace for Rides in the database
         Rides newRides = new Rides();
         newRides.setCoordinates(coordinates);
         newRides.setLocationName(locationName);
@@ -64,22 +71,39 @@ public class RidesService {
         newRides.setDate(date);
         newRides.setRiderType(newRiderType);
         newRides = ridesRepository.save(newRides);
+
+
+        //Put the new instance in the DTO for the kafka template and broker.
+        RidesDTO ridesDTO = new RidesDTO(
+                newRides.getUsername().getUsername(),
+                newRides.getLocationName(),
+                newRides.getRidesName(),
+                newRides.getRiderType().getRiderType(),
+                newRides.getDistance(),
+                newRides.getStartingPoint(),
+                newRides.getDate(),
+                newRides.getCoordinates().getX(),
+                newRides.getCoordinates().getY()
+        );
+
         kafkaTemplate.send("location-group", ridesDTO);
 
 
-
-//        kafkaTemplate.send("location-group",
-//
 //                newRides.getRidesName(),
-//                newRides.getCoordinates(),
 //                newRides.getLocationName(),
-//                newRides.getUsername(),
+//                newRides.getRiderType().getRiderType(),
 //                newRides.getDistance(),
 //                newRides.getStartingPoint(),
 //                newRides.getDate(),
-//                newRides.getRiderType()
-//                );
+//                newRides.getCoordinates().getX(),
+//                newRides.getCoordinates().getY(),
+//                newRides.getUsername().getUsername()
 
+
+
+
+
+       System.out.println( newRides.getRidesName());
 
         return new RideResponseDTO(ridesDTO, pointStr);
     }
