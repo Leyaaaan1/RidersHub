@@ -11,11 +11,11 @@ public class RidesDTO {
     private Integer distance;
     private String startingPoint;
     private Date date;
-    private Point coordinates;
+    private String coordinates;
 
     public RidesDTO() {}
 
-    public RidesDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, Date date, Point coordinates) {
+    public RidesDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, Date date, String coordinates) {
         this.username = username;
         this.ridesName = ridesName;
         this.locationName = locationName;
@@ -32,11 +32,11 @@ public class RidesDTO {
     public RidesDTO(String username, String locationName, String ridesName, String riderType, Integer distance, String startingPoint, java.util.Date date) {
     }
 
-    public Point getCoordinates() {
+    public String getCoordinates() {
         return coordinates;
     }
 
-    public void setCoordinates(Point coordinates) {
+    public void setCoordinates(String coordinates) {
         this.coordinates = coordinates;
     }
 

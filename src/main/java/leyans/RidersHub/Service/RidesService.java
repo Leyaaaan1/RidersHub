@@ -64,8 +64,22 @@ public class RidesService {
         newRides.setDate(date);
         newRides.setRiderType(newRiderType);
         newRides = ridesRepository.save(newRides);
+        kafkaTemplate.send("location-group", ridesDTO);
 
-        kafkaTemplate.send("rides-group", );
+
+
+//        kafkaTemplate.send("location-group",
+//
+//                newRides.getRidesName(),
+//                newRides.getCoordinates(),
+//                newRides.getLocationName(),
+//                newRides.getUsername(),
+//                newRides.getDistance(),
+//                newRides.getStartingPoint(),
+//                newRides.getDate(),
+//                newRides.getRiderType()
+//                );
+
 
         return new RideResponseDTO(ridesDTO, pointStr);
     }
