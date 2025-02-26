@@ -28,6 +28,11 @@ public class RideResponseDTO {
         this.date = (Date) ride.getDate();
     }
 
+    public RideResponseDTO(String locationName, String username, String locationName1, String pointStr, String ridesName, String riderType, Integer distance, String startingPoint, java.util.Date date) {
+    }
+
+    public RideResponseDTO(RidesDTO ridesDTO, String pointStr) {
+    }
 
     public Long getRideId() {
         return rideId;

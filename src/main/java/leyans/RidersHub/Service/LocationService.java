@@ -11,6 +11,7 @@ import leyans.RidersHub.model.Rider;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,12 +20,14 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final GeometryFactory geometryFactory = new GeometryFactory();
     private final RiderRepository riderRepository;
+    private final KafkaTemplate<String, LocationDTO> kafkaTemplate;
 
 
 
-    public LocationService(LocationRepository locationRepository, RiderRepository riderRepository) {
+    public LocationService(LocationRepository locationRepository, RiderRepository riderRepository, KafkaTemplate<String, LocationDTO> kafkaTemplate) {
         this.locationRepository = locationRepository;
         this.riderRepository = riderRepository;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     // transactional annotation is used to ensure that
@@ -42,8 +45,7 @@ public class LocationService {
         String pointStr = coordinates.getX() + "," + coordinates.getY();
         LocationDTO locationDTO = new LocationDTO(username, locationName, pointStr);
 
-      //  kafkaProducer.sendLocationUpdate(locationDTO);
-
+        kafkaTemplate.send("location-group", locationDTO);
         return new LocationResponseDTO(location.getLocationId(), username, locationName, pointStr);
     }
 }

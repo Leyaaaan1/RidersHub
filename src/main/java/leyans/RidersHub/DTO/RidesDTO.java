@@ -29,6 +29,9 @@ public class RidesDTO {
     public RidesDTO(String username, String locationName, String pointStr, String ridesName, String riderType, Integer distance, String startingPoint, java.util.Date date) {
     }
 
+    public RidesDTO(String username, String locationName, String ridesName, String riderType, Integer distance, String startingPoint, java.util.Date date) {
+    }
+
     public Point getCoordinates() {
         return coordinates;
     }
@@ -92,4 +95,6 @@ public class RidesDTO {
     public void setUsername(String username) {
         this.username = username;
     }
+
+
 }

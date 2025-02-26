@@ -13,18 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class KafkaRiderController {
 
 
-
     @Autowired
     private final RiderProducerService riderProducerService;
+
+
 
 
     public KafkaRiderController(RiderProducerService riderProducerService) {
         this.riderProducerService = riderProducerService;
     }
 
-    @PostMapping("/send")
-    public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
-        riderProducerService.sendMessage(riderType, message);
-        return "Message sent to RiderType: " + riderType;
-    }
+//    @PostMapping("/send")
+//    public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
+//        p.sendMessage(riderType, message);
+//        return "Message sent to RiderType: " + riderType;
+//    }
 }
