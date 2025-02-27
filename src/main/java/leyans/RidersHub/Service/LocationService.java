@@ -45,7 +45,7 @@ public class LocationService {
         String pointStr = coordinates.getX() + "," + coordinates.getY();
         LocationDTO locationDTO = new LocationDTO(username, locationName, pointStr);
 
-        kafkaTemplate.send("location-group", locationDTO);
+        kafkaTemplate.send("new-location", locationDTO);
         return new LocationResponseDTO(location.getLocationId(), username, locationName, pointStr);
     }
 }

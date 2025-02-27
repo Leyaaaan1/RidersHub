@@ -1,4 +1,4 @@
-package leyans.RidersHub.Config.KafkaConfig.KafkaREST.Consumer;
+package leyans.RidersHub.Config.Kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,6 +15,17 @@ public class RiderConsumer {
 
             System.out.println("Received message: " + message + " for RiderType: " + riderType);
         }
+
+        @KafkaListener(topics = "location", groupId = "rides-group")
+        public void consumerNewRide() {
+            System.out.println("New ride request received");
+        }
+
+        @KafkaListener(topics = "new-location", groupId = "location-group")
+        public void consumerNewLocation() {
+            System.out.println("New location received");
+        }
+
     }
 
 

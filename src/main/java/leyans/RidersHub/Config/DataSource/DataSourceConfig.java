@@ -1,4 +1,4 @@
-package leyans.RidersHub.Config;
+package leyans.RidersHub.Config.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
