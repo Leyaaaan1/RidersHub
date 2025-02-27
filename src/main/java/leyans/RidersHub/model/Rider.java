@@ -13,7 +13,7 @@ public class Rider {
     private Integer id;
 
     @NaturalId
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(name = "username", nullable = false)
     private String username;
 
     @Column(name = "password", nullable = false)

@@ -1,5 +1,8 @@
-package leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO;
+package leyans.RidersHub.DTO;
 
+//LocationResponseDTO  more detailed version of LocationDTO ,
+//DTOs for the REST response (LocationResponseDTO).
+// two DTO For maintainability and clear separation of concerns
 public class LocationResponseDTO {
     private Integer locationId;
     private String username;
