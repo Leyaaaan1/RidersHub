@@ -1,16 +1,16 @@
 package leyans.RidersHub.Repository;
 
+
+import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
+import leyans.RidersHub.model.Rides;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
-public interface RiderTypeRepository extends JpaRepository<RiderType, Integer> {
+public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
-    RiderType findByRiderType(String riderType);
 
+    Rides findRidesByUsername(Rider username);
 
 }

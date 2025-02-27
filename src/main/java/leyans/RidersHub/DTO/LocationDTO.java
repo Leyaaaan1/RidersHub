@@ -1,5 +1,10 @@
-package leyans.RidersHub.Config.KafkaConfig.KafkaREST.DTO;
+package leyans.RidersHub.DTO;
 
+
+//LocationDTO is used in the LocationKafkaConsumer class to receive location updates from Kafka.
+//DTOs for Kafka message (LocationDTO)
+// and one for the REST response (LocationResponseDTO).
+// two DTO For maintainability and clear separation of concerns
 public class LocationDTO {
     private String username;
     private String locationName;

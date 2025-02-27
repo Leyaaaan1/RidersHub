@@ -1,6 +1,7 @@
 package leyans.RidersHub.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -22,9 +23,11 @@ public class Locations {
     @Column(name = "locationName", nullable = false)
     private String locationName;
 
-    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
-    @JdbcTypeCode(SqlTypes.OTHER)
-    private Point coordinates;
+   // @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+    //@JdbcTypeCode(SqlTypes.OTHER)
+   @Convert(converter = PointConverter.class)
+   @Column(columnDefinition = "TEXT")
+   private Point coordinates;
 
     public Locations() {
     }
@@ -34,6 +37,8 @@ public class Locations {
         this.locationName = locationName;
         this.coordinates = coordinates;
     }
+
+
 
 
     public Integer getLocationId() { return locationId; }

@@ -8,6 +8,9 @@ public class LocationRequest {
 
     public LocationRequest() {}
 
+    public LocationRequest(String username, String locationName, double latitude, double longitude) {
+    }
+
     // Getters and setters
     public String getUsername() {
         return username;

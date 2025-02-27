@@ -2,6 +2,7 @@ package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,8 +19,9 @@ public class RiderType {
     private Integer riderTypeId;
 
 
-    @Column(name = "rider_type", nullable = false, unique = true)
+    @Column(name = "rider_type", nullable = false)
     private String riderType;
+
 
     @OneToMany(mappedBy = "riderType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Rider> riders;
@@ -35,13 +37,6 @@ public class RiderType {
 
 
     // Getters and Setters
-    public Integer getRiderTypeId() {
-        return riderTypeId;
-    }
-
-    public void setRiderTypeId(Integer riderTypeId ) {
-        this.riderTypeId = riderTypeId;
-    }
 
     public String getRiderType() {
         return riderType;
