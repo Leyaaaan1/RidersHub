@@ -1,8 +1,8 @@
 package leyans.RidersHub.DTO;
 
+import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
 
-import java.awt.*;
 import java.sql.Date;
 
 public class RidesDTO {
@@ -29,8 +29,6 @@ public class RidesDTO {
     }
 
 
-    public RidesDTO(String username, String locationName, String ridesName, String riderType, Integer distance, String startingPoint, java.util.Date date, double x, double y) {
-    }
 
     public String getCoordinates() {
         return coordinates;
