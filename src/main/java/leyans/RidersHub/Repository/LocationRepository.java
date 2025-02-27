@@ -9,4 +9,6 @@ public interface LocationRepository extends JpaRepository<Locations, Integer> {
 
 
 
+
+
 }
