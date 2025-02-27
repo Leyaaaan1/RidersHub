@@ -68,7 +68,7 @@ public class RidesService {
 
 
 
-        kafkaTemplate.send("location-group", ridesDTO );
+        kafkaTemplate.send("location", ridesDTO );
 
 
 
