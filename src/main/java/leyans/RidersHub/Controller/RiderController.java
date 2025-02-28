@@ -63,8 +63,10 @@ public class RiderController {
                 rideRequest.getStartingPoint(),
                 rideRequest.getDate(),
                 rideRequest.getLatitude(),
-                rideRequest.getLongitude()
-        );
+                rideRequest.getLongitude(),
+                rideRequest.getEndingPoint()
+
+                );
         return ResponseEntity.ok(response);
     }
 

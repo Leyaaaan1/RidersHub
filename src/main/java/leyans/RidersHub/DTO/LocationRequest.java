@@ -1,5 +1,7 @@
 package leyans.RidersHub.DTO;
 
+import java.sql.Timestamp;
+
 public class LocationRequest {
     private String username;
     private String locationName;
@@ -9,9 +11,14 @@ public class LocationRequest {
     public LocationRequest() {}
 
     public LocationRequest(String username, String locationName, double latitude, double longitude) {
+        this.username = username;
+        this.locationName = locationName;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
-
     // Getters and setters
+
+
     public String getUsername() {
         return username;
     }

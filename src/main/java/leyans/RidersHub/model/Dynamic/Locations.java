@@ -1,11 +1,13 @@
-package leyans.RidersHub.model;
+package leyans.RidersHub.model.Dynamic;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import leyans.RidersHub.model.PointConverter;
+import leyans.RidersHub.model.Rider;
 import org.locationtech.jts.geom.Point;
+
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "locations")
@@ -29,16 +31,20 @@ public class Locations {
    @Column(columnDefinition = "TEXT")
    private Point coordinates;
 
+//    @Column(name = "ride_date", nullable = false)
+//    private LocalDateTime date = LocalDateTime.now();
+
     public Locations() {
     }
+
+
+
 
     public Locations(Rider rider, String locationName, Point coordinates) {
         this.rider = rider;
         this.locationName = locationName;
         this.coordinates = coordinates;
     }
-
-
 
 
     public Integer getLocationId() { return locationId; }

@@ -13,6 +13,7 @@ public interface RiderRepository extends JpaRepository<Rider, Integer> {
 
     Optional<Rider> findByUsernameAfter(String username);
 
+
 }
 
 

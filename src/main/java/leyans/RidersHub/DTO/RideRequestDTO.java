@@ -1,6 +1,7 @@
 package leyans.RidersHub.DTO;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 public class RideRequestDTO {
 
@@ -10,11 +11,12 @@ public class RideRequestDTO {
     private String riderType;
     private Integer distance;
     private String startingPoint;
-    private Date date;
+    private String endingPoint;
+    private LocalDateTime date;
     private double latitude;
     private double longitude;
 
-    public RideRequestDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, Date date, double latitude, double longitude) {
+    public RideRequestDTO(String username, String ridesName, String endingPoint, String locationName, String riderType, Integer distance, String startingPoint, LocalDateTime date, double latitude, double longitude) {
         this.username = username;
         this.ridesName = ridesName;
         this.locationName = locationName;
@@ -24,7 +26,16 @@ public class RideRequestDTO {
         this.date = date;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.endingPoint = endingPoint;
 
+    }
+
+    public String getEndingPoint() {
+        return endingPoint;
+    }
+
+    public void setEndingPoint(String endingPoint) {
+        this.endingPoint = endingPoint;
     }
 
     public String getUsername() {
@@ -75,11 +86,11 @@ public class RideRequestDTO {
         this.startingPoint = startingPoint;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

@@ -16,6 +16,7 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -39,7 +40,7 @@ public class RidesService {
 
     @Transactional
     public RideResponseDTO createRide(String username, String ridesName, String
-            locationName, String riderType, Integer distance, String startingPoint, Date date, double latitude, double longitude) {
+            locationName, String riderType, Integer distance, String startingPoint, LocalDateTime date, double latitude, double longitude, String endingPoint) {
 
 
         Rider rider = riderRepository.findByUsername(username);
@@ -57,14 +58,15 @@ public class RidesService {
         newRides.setUsername(rider);
         newRides.setDistance(distance);
         newRides.setStartingPoint(startingPoint);
+        newRides.setEndingPoint(endingPoint);
         newRides.setDate(date);
         newRides.setRiderType(newRiderType);
+
         newRides = ridesRepository.save(newRides);
 
 
         RidesDTO ridesDTO = new RidesDTO(username, ridesName,
-                locationName, riderType, distance, startingPoint,
-                (java.sql.Date) date, pointStr);
+                locationName, riderType, distance, startingPoint, endingPoint, date, pointStr);
 
 
 
