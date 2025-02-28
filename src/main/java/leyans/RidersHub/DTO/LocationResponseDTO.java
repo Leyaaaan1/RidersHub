@@ -1,5 +1,8 @@
 package leyans.RidersHub.DTO;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+
 //LocationResponseDTO  more detailed version of LocationDTO ,
 //DTOs for the REST response (LocationResponseDTO).
 // two DTO For maintainability and clear separation of concerns

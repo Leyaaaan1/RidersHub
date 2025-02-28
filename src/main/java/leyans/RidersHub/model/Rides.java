@@ -5,6 +5,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,17 +44,21 @@ public class Rides {
     @Column(name = "distance", nullable = false)
     private Integer distance;
 
+    @Column(name = "endingPoint", nullable = false)
+    private String endingPoint;
+
     @Column(name = "startingPoint", nullable = false)
     private String startingPoint;
 
-    @Column(name = "date", nullable = false)
-    private Date date;
+    @Column(name = "ride_date", nullable = false)
+    private LocalDateTime date;
+
 
     public Rides() {
     }
 
 
-    public Rides(Integer ridesId, Point coordinates, String locationName, String ridesName, Rider username, RiderType riderType, Integer distance, String startingPoint, Date date) {
+    public Rides(Integer ridesId, Point coordinates, String locationName, String ridesName, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
         this.ridesId = ridesId;
         this.coordinates = coordinates;
         this.locationName = locationName;
@@ -63,17 +68,25 @@ public class Rides {
         this.distance = distance;
         this.startingPoint = startingPoint;
         this.date = date;
+        this.endingPoint = endingPoint;
     }
 
     public Integer getRidesId() {
         return ridesId;
     }
 
-
-
     public void setRidesId(Integer ridesId) {
         this.ridesId = ridesId;
     }
+
+    public String getEndingPoint() {
+        return endingPoint;
+    }
+
+    public void setEndingPoint(String endingPoint) {
+        this.endingPoint = endingPoint;
+    }
+
 
     public Point getCoordinates() {
         return coordinates;
@@ -131,11 +144,11 @@ public class Rides {
         this.startingPoint = startingPoint;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 }
