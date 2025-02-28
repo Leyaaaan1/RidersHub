@@ -21,6 +21,9 @@ public class LocationResponseDTO {
         this.point = point;
     }
 
+    public LocationResponseDTO(Integer locationId, String username, String locationName, double latitude, double longitude) {
+    }
+
     public Integer getLocationId() {
         return locationId;
     }

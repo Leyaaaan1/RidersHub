@@ -29,21 +29,26 @@ public class DynamicLocationController {
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<newRidesDTO> streamUpdates() {
-        System.out.println("Stream updates");
+        System.out.println("Stream updates real-time updates...");
         return sink.asFlux();
     }
 
     @PostMapping("/update")
     public void updateRide(@RequestBody newRidesDTO newRidesDTO) {
         dynamicLocations.newLocationUpdate(newRidesDTO);
-        System.out.println("Updating ride: " + newRidesDTO);
+        System.out.println("\n🔄 [UPDATE] Received new location update:");
+        System.out.println("   📌 Username: " + newRidesDTO.getUsername());
+        System.out.println("   📍 Location: " + newRidesDTO.getLocationName());
+        System.out.println("   🌍 Coordinates: (" + newRidesDTO.getLatitude() + ", " + newRidesDTO.getLongitude() + ")");
     }
 
     @KafkaListener(topics = "new-location", groupId = "location-group")
     public void listenToKafka(newRidesDTO newRidesDTO) {
         sink.tryEmitNext(newRidesDTO); // Push updates to SSE clients
-        System.out.println("Received new location: " + newRidesDTO);
-    }
+        System.out.println("\n📥 [KAFKA] New location received from topic:");
+        System.out.println("   📌 Username: " + newRidesDTO.getUsername());
+        System.out.println("   📍 Location: " + newRidesDTO.getLocationName());
+        System.out.println("   🌍 Coordinates: (" + newRidesDTO.getLatitude() + ", " + newRidesDTO.getLongitude() + ")");    }
 
 
 

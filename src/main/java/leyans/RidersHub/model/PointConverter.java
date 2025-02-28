@@ -3,6 +3,7 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
@@ -10,7 +11,7 @@ import org.locationtech.jts.io.WKTWriter;
 @Converter(autoApply = true)
 public class PointConverter implements AttributeConverter<Point, String> {
 
-    private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     private final WKTWriter wktWriter = new WKTWriter();
     private final WKTReader wktReader = new WKTReader(geometryFactory);
 
@@ -19,7 +20,7 @@ public class PointConverter implements AttributeConverter<Point, String> {
         if (point == null) {
             return null;
         }
-        return wktWriter.write(point); // Converts Point to WKT format
+        return "SRID=4326;" + wktWriter.write(point); // Include SRID
     }
 
     @Override
@@ -28,7 +29,10 @@ public class PointConverter implements AttributeConverter<Point, String> {
             return null;
         }
         try {
-            return (Point) wktReader.read(wkt); // Converts WKT back to Point
+            if (!wkt.startsWith("SRID=4326;")) {
+                wkt = "SRID=4326;" + wkt;
+            }
+            return (Point) wktReader.read(wkt.replace("SRID=4326;", "")); // Remove SRID before parsing
         } catch (ParseException e) {
             throw new RuntimeException("Failed to convert WKT to Point", e);
         }

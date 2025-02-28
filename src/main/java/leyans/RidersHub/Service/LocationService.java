@@ -41,17 +41,16 @@ public class LocationService {
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
 
 
-        Locations location = new Locations(rider, locationName, coordinates);
+        Locations location = new Locations(rider, locationName, latitude, longitude);
         location = locationRepository.save(location);
 
-        // Create a DTO with the necessary fields since it is json type it is easy to send it to the kafka producer
-        String pointStr = coordinates.getX() + "," + coordinates.getY();
-        LocationDTO locationDTO = new LocationDTO(username, locationName, pointStr);
+
+        LocationDTO locationDTO = new LocationDTO(username, locationName, latitude, longitude);
 
         kafkaTemplate.send("new-location", locationDTO);
 
 
-        return new LocationResponseDTO(location.getLocationId(), username, locationName, pointStr);
+        return new LocationResponseDTO(location.getLocationId(), username, locationName, latitude, longitude);
     }
 
 
