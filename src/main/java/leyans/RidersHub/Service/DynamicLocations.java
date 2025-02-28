@@ -10,14 +10,12 @@ import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.model.PointConverter;
 import leyans.RidersHub.model.Rides;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.WKTWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
@@ -38,7 +36,9 @@ public class DynamicLocations {
 
     private Producer producer;
 
-    private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    private final PointConverter pointConverter = new PointConverter();
+
 
     public DynamicLocations(RiderRepository riderRepository, LocationRepository locationRepository, KafkaTemplate<String, newRidesDTO> kafkaTemplate) {
         this.riderRepository = riderRepository;
@@ -49,52 +49,43 @@ public class DynamicLocations {
     @KafkaListener(topics = "new-location", groupId = "location-group")
     @Transactional
     public void newLocationUpdate(newRidesDTO ridesDTO) {
-
         String username = ridesDTO.getUsername();
-        String locationName = ridesDTO.getLocationName();
-
-
         double latitude = ridesDTO.getLatitude();
         double longitude = ridesDTO.getLongitude();
 
+        // Create a new Point object for the updated location
         Point updatedCoordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
 
-
-        if (updatedCoordinates != null) {
-            Rides lastRide = ridesRepository.findLastRideByUsername(username);
-
-            if (lastRide != null && lastRide.getCoordinates() != null) {
-                // Use your converter to transform the Point into a String
-                PointConverter pointConverter = new PointConverter();
-                String lastPointString = pointConverter.convertToDatabaseColumn(lastRide.getCoordinates());
-                String updatedPointString = pointConverter.convertToDatabaseColumn(updatedCoordinates);
-
-                double distance = ridesRepository.calculateDistance(lastPointString, updatedPointString);
-
-                if (distance < 100.0) {
-                    System.out.println("Rides is less than 100m: " + username);
-                    return;
-                }
-                System.out.println("Rides is more than 100m: " + username);
-            } else {
-                System.out.println("No previous ride found, skipping distance check.");
-            }
+        if (updatedCoordinates == null) {
+            System.out.println("Invalid coordinates received.");
+            return;
         }
 
-        kafkaTemplate.send("new-location", ridesDTO);
+        Rides lastRide = ridesRepository.findLastRideByUsername(username);
+
+        if (lastRide != null && lastRide.getCoordinates() != null) {
+            double lastLatitude = lastRide.getCoordinates().getY();
+            double lastLongitude = lastRide.getCoordinates().getX();
+
+            double updatedLatitude = updatedCoordinates.getY();
+            double updatedLongitude = updatedCoordinates.getX();
+
+            // Calculate distance in meters
+            double distance = ridesRepository.findClosestLocation(lastLatitude, lastLongitude, updatedLatitude, updatedLongitude);
+
+            System.out.println("User: " + username + " - Distance moved: " + distance + " meters.");
+
+            if (distance > 100.0) {
+                System.out.println("User " + username + " is within 100m range, NOT sending Kafka message.");
+                return; // Prevent sending message if within 100m
+            }
+
+            System.out.println("User " + username + " moved more than 100m, sending to 'new-location'.");
+           // kafkaTemplate.send("new-location", ridesDTO);
+        } else {
+            System.out.println("No previous ride found for " + username + ". Sending first location update.");
+          //  kafkaTemplate.send("new-location", ridesDTO);
+        }
     }
 }
-//        lastRide.setCoordinates(updatedCoordinates);
-//        lastRide.setDate(ridesDTO.getDate());
-//        lastRide.setUsername(riderRepository.findByUsername(username));
-//        lastRide.setLocationName(locationName);
-
-        //prducer.sendRideUpdate("ride-updates", ridesDTO);
-
-
-//    public void processRideUpdate(RidesDTO ridesDTO) {
-//        producer.sendRideUpdate(ridesDTO);
-//        System.out.println("Ride update sent to Kafka: " + ridesDTO.getUsername());
-//    }
-
 

@@ -20,6 +20,8 @@ public class LocationDTO {
         this.point = point;
     }
 
+    public LocationDTO(String username, String locationName, double latitude, double longitude) {
+    }
 
 
     public String getUsername() {

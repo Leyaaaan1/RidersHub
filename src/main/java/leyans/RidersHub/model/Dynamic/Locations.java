@@ -25,11 +25,19 @@ public class Locations {
     @Column(name = "locationName", nullable = false)
     private String locationName;
 
-   // @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
-    //@JdbcTypeCode(SqlTypes.OTHER)
-   @Convert(converter = PointConverter.class)
-   @Column(columnDefinition = "TEXT")
-   private Point coordinates;
+//   // @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+//    //@JdbcTypeCode(SqlTypes.OTHER)
+//   @Convert(converter = PointConverter.class)
+//   @Column(columnDefinition = "TEXT")
+//   private Point coordinates;
+
+
+
+    @Column(name = "latitude", nullable = false)
+    private double latitude;  // Store latitude separately
+
+    @Column(name = "longitude", nullable = false)
+    private double longitude; // Store longitude separately
 
 //    @Column(name = "ride_date", nullable = false)
 //    private LocalDateTime date = LocalDateTime.now();
@@ -37,15 +45,32 @@ public class Locations {
     public Locations() {
     }
 
-
-
-
-    public Locations(Rider rider, String locationName, Point coordinates) {
+    public Locations(Integer locationId, Rider rider, String locationName, double latitude, double longitude) {
+        this.locationId = locationId;
         this.rider = rider;
         this.locationName = locationName;
-        this.coordinates = coordinates;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
+    public Locations(Rider rider, String locationName, double latitude, double longitude) {
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     public Integer getLocationId() { return locationId; }
     public void setLocationId(Integer locationId) { this.locationId = locationId; }
@@ -56,6 +81,4 @@ public class Locations {
     public String getLocationName() { return locationName; }
     public void setLocationName(String locationName) { this.locationName = locationName; }
 
-    public Point getCoordinates() { return coordinates; }
-    public void setCoordinates(Point coordinates) { this.coordinates = coordinates; }
 }
