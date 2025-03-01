@@ -1,6 +1,8 @@
 package leyans.RidersHub.DTO;
 
 
+import java.sql.Timestamp;
+
 //LocationDTO is used in the LocationKafkaConsumer class to receive location updates from Kafka.
 //DTOs for Kafka message (LocationDTO)
 // and one for the REST response (LocationResponseDTO).
@@ -17,6 +19,10 @@ public class LocationDTO {
         this.locationName = locationName;
         this.point = point;
     }
+
+    public LocationDTO(String username, String locationName, double latitude, double longitude) {
+    }
+
 
     public String getUsername() {
         return username;

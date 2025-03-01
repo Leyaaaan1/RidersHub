@@ -1,9 +1,7 @@
 package leyans.RidersHub.DTO;
 
-import leyans.RidersHub.model.RiderType;
-import leyans.RidersHub.model.Rides;
-
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 public class RidesDTO {
     private String username;
@@ -12,12 +10,14 @@ public class RidesDTO {
     private String riderType;
     private Integer distance;
     private String startingPoint;
+    private String endingPoint;
     private Date date;
     private String coordinates;
 
-    public RidesDTO() {}
+    public RidesDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, String endingPoint, LocalDateTime date, String pointStr) {}
 
-    public RidesDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, Date date, String coordinates) {
+
+    public RidesDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, String endingPoint, Date date, String pointStr) {
         this.username = username;
         this.ridesName = ridesName;
         this.locationName = locationName;
@@ -26,9 +26,21 @@ public class RidesDTO {
         this.startingPoint = startingPoint;
         this.date = date;
         this.coordinates = coordinates;
+        this.endingPoint = endingPoint;
+
     }
 
+    public RidesDTO() {
 
+    }
+
+    public String getEndingPoint() {
+        return endingPoint;
+    }
+
+    public void setEndingPoint(String endingPoint) {
+        this.endingPoint = endingPoint;
+    }
 
     public String getCoordinates() {
         return coordinates;
