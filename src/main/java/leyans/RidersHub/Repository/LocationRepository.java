@@ -13,6 +13,4 @@ import java.util.List;
 @Repository
 public interface LocationRepository extends JpaRepository<Locations, Integer> {
 
-
-//Locations findByUsername(String username);
 }

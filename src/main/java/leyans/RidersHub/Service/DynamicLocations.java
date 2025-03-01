@@ -73,6 +73,8 @@ public class DynamicLocations {
                 latitude, longitude
         );
 
+
+
         HaversineDistance newDistance = new HaversineDistance();
         double distance = newDistance.getDistance();
 

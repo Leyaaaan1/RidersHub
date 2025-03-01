@@ -4,9 +4,13 @@ package leyans.RidersHub.Service;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.RideResponseDTO;
 import leyans.RidersHub.DTO.RidesDTO;
+import leyans.RidersHub.DTO.newRidesDTO;
+import leyans.RidersHub.Kafka.ProducerService;
+import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.model.Dynamic.Locations;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
@@ -25,16 +29,18 @@ public class RidesService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
-    private final KafkaTemplate<String, RidesDTO> kafkaTemplate;
-
-
+    private final LocationRepository locationRepository;
+    private final ProducerService producerService;
     private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final KafkaTemplate<String, Locations> kafkaTemplate;
 
 
-    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository, KafkaTemplate<String, RidesDTO> kafkaTemplate) {
+    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository, LocationRepository locationRepository, ProducerService producerService, KafkaTemplate<String, Locations> kafkaTemplate) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.ridesRepository = ridesRepository;
+        this.locationRepository = locationRepository;
+        this.producerService = producerService;
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -68,9 +74,21 @@ public class RidesService {
         RidesDTO ridesDTO = new RidesDTO(username, ridesName,
                 locationName, riderType, distance, startingPoint, endingPoint, date, pointStr);
 
+        Locations newLocation = new Locations();
+        newLocation.setLocationName(locationName);
+        newLocation.setLatitude(latitude);
+        newLocation.setLongitude(longitude);
+        newLocation.setRider(rider);
 
 
-        kafkaTemplate.send("location", ridesDTO );
+
+        locationRepository.save(newLocation);
+        kafkaTemplate.send("updated-locations", newLocation);
+
+
+        producerService.sendNewRide(ridesDTO );
+
+
 
 
 
