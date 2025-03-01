@@ -5,6 +5,7 @@ import leyans.RidersHub.DTO.newRidesDTO;
 import leyans.RidersHub.Service.DynamicLocations;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -35,6 +36,9 @@ public class DynamicLocationController {
         System.out.println("   📌 Username: " + newRidesDTO.getUsername());
         System.out.println("   📍 Location: " + newRidesDTO.getLocationName());
         System.out.println("   🌍 Coordinates: (" + newRidesDTO.getLatitude() + ", " + newRidesDTO.getLongitude() + ")");
+        System.out.println("   📅 distance: " + newRidesDTO.getDistance());
+
+
     }
 
     @KafkaListener(topics = "new-location", groupId = "location-group")

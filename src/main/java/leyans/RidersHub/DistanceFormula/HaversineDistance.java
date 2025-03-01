@@ -9,6 +9,7 @@ public class HaversineDistance {
     private double prevLat = 0.0;
     private double prevLon = 0.0;
     private boolean isFirstUpdate = true;
+    private double distance;
 
     /**
      * Checks if the new location update should be sent based on distance moved.
@@ -25,7 +26,7 @@ public class HaversineDistance {
 
         }
 
-        double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
+        distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
 
         System.out.println("📏 Distance moved: " + distance + " meters");
 
@@ -36,10 +37,12 @@ public class HaversineDistance {
         }
         return false;
     }
+
     public double getDistance() {
-        return
+        return distance;
 
     }
+
 
     /**
      * Uses the Haversine formula to calculate distance between two GPS points.
