@@ -3,6 +3,7 @@ package leyans.RidersHub.DTO;
 import leyans.RidersHub.model.Rides;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 public class RideResponseDTO {
 
@@ -13,8 +14,9 @@ public class RideResponseDTO {
     private String riderType;
     private Integer distance;
     private String startingPoint;
+    private String endingPont;
     private String coordinates;
-    private Date date;
+    private LocalDateTime date;
 
     public  RideResponseDTO(){}
 
@@ -25,13 +27,26 @@ public class RideResponseDTO {
         this.distance = ride.getDistance();
         this.startingPoint = ride.getStartingPoint();
         this.coordinates = ride.getCoordinates().toString();
-        this.date = (Date) ride.getDate();
+        this.date = date;
+        this.endingPont = ride.getEndingPoint();
     }
 
-    public RideResponseDTO(String locationName, String username, String locationName1, String pointStr, String ridesName, String riderType, Integer distance, String startingPoint, java.util.Date date) {
+    public RideResponseDTO(String locationName, String endingPont, String username, String locationName1, String pointStr, String ridesName, String riderType, Integer distance, String startingPoint, LocalDateTime date) {
     }
 
     public RideResponseDTO(RidesDTO ridesDTO, String pointStr) {
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    public String getEndingPont() {
+        return endingPont;
+    }
+
+    public void setEndingPont(String endingPont) {
+        this.endingPont = endingPont;
     }
 
     public Long getRideId() {
@@ -98,11 +113,4 @@ public class RideResponseDTO {
         this.coordinates = coordinates;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
 }
