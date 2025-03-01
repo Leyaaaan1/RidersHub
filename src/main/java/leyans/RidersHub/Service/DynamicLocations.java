@@ -38,32 +38,44 @@ public class DynamicLocations {
         this.producerService = producerService;
     }
 
+
+
     @Transactional
     public void newLocationUpdate(newRidesDTO ridesDTO) {
+        String locationName = ridesDTO.getLocationName();
         String username = ridesDTO.getUsername();
         double latitude = ridesDTO.getLatitude();
         double longitude = ridesDTO.getLongitude();
         double distance = ridesDTO.getDistance();
 
-        // Create a new Point object for the updated location
         Point updatedCoordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+
+
+
 
         if (updatedCoordinates == null) {
             System.out.println("Invalid coordinates received.");
             return;
         }
 
-        // Use Haversine formula to calculate the distance moved
         boolean shouldUpdate = haversineDistance.shouldSendUpdate(latitude, longitude);
 
-        double newDistance = haversineDistance.calculateDistance(latitude, longitude);
 
-        if (shouldUpdate) {
-            System.out.println("User: " + username + " moved a significant distance. Sending update.");
-            producerService.sendNewLocation(ridesDTO);
-        } else {
-            System.out.println("User: " + username + " has not moved significantly. No update sent.");
+
+            if (shouldUpdate) {
+                System.out.println("User: " + username + " moved a significant distance. Sending update.");
+//                 distance = haversineDistance.getDistance();
+//                haversineDistance.shouldSendUpdate(distance);
+                ridesDTO.setDistance(distance);
+                producerService.sendNewLocation(ridesDTO);
+            } else {
+                System.out.println("User: " + username + " has not moved significantly. No update sent.");
+            }
+
+//        Location newRidesDTO = new Location(username, locationName, latitude, longitude, distance);
+//        locationRepository.save(newRidesDTO);
         }
-    }
+
+
 }
 

@@ -22,9 +22,11 @@ public class HaversineDistance {
             prevLon = newLon;
             isFirstUpdate = false;
             return true;
+
         }
 
         double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
+
         System.out.println("📏 Distance moved: " + distance + " meters");
 
         if (distance > 100) {
@@ -33,6 +35,10 @@ public class HaversineDistance {
             return true;
         }
         return false;
+    }
+    public double getDistance() {
+        return
+
     }
 
     /**
@@ -44,7 +50,7 @@ public class HaversineDistance {
      * @return Distance in meters
      */
     public double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
-        final int R = 6371000; // Earth's radius in meters
+        final int R = 6371000;
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
         double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -53,4 +59,7 @@ public class HaversineDistance {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
+
+
+
 }
