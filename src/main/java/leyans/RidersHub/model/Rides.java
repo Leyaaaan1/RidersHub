@@ -19,11 +19,11 @@ public class Rides {
     @Column(name = "ridesId", nullable  = false)
     private Integer ridesId;
 
-//    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
-//    @JdbcTypeCode(SqlTypes.OTHER)
-    @Convert(converter = PointConverter.class)
-   @Column(columnDefinition = "TEXT")
-    private Point coordinates;
+////    @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
+////    @JdbcTypeCode(SqlTypes.OTHER)
+//    @Convert(converter = PointConverter.class)
+//   @Column(columnDefinition = "TEXT")
+//    private Point coordinates;
 
     @Column(name = "locationName", nullable = false)
     private String locationName;
@@ -32,6 +32,28 @@ public class Rides {
     @Column(name = "ridesName", nullable = false, unique = true)
     private String ridesName;
 
+
+    @Column(name = "latitude", nullable = false)
+    private double latitude;  // Store latitude separately
+
+    @Column(name = "longitude", nullable = false)
+    private double longitude; // Store longitude separately
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     @ManyToOne
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
@@ -57,19 +79,20 @@ public class Rides {
     public Rides() {
     }
 
-
-    public Rides(Integer ridesId, Point coordinates, String locationName, String ridesName, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
+    public Rides(Integer ridesId, String locationName, String ridesName, double latitude, double longitude, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
         this.ridesId = ridesId;
-        this.coordinates = coordinates;
         this.locationName = locationName;
         this.ridesName = ridesName;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.username = username;
         this.riderType = riderType;
         this.distance = distance;
+        this.endingPoint = endingPoint;
         this.startingPoint = startingPoint;
         this.date = date;
-        this.endingPoint = endingPoint;
     }
+
 
     public Integer getRidesId() {
         return ridesId;
@@ -88,13 +111,7 @@ public class Rides {
     }
 
 
-    public Point getCoordinates() {
-        return coordinates;
-    }
 
-    public void setCoordinates(Point coordinates) {
-        this.coordinates = coordinates;
-    }
 
     public String getLocationName() {
         return locationName;

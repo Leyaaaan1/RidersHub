@@ -17,7 +17,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Service
 public class RidesService {
@@ -25,13 +24,13 @@ public class RidesService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
-    private final KafkaTemplate<String, RidesDTO> kafkaTemplate;
+    private final KafkaTemplate<Object, Rides> kafkaTemplate;
 
 
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
 
-    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository, KafkaTemplate<String, RidesDTO> kafkaTemplate) {
+    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository, KafkaTemplate<Object, Rides> kafkaTemplate) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.ridesRepository = ridesRepository;
@@ -52,7 +51,6 @@ public class RidesService {
 
         //Initiate new instace for Rides in the database
         Rides newRides = new Rides();
-        newRides.setCoordinates(coordinates);
         newRides.setLocationName(locationName);
         newRides.setRidesName(ridesName);
         newRides.setUsername(rider);
@@ -61,21 +59,25 @@ public class RidesService {
         newRides.setEndingPoint(endingPoint);
         newRides.setDate(date);
         newRides.setRiderType(newRiderType);
+        newRides.setLatitude(latitude);
+        newRides.setLongitude(longitude);
 
         newRides = ridesRepository.save(newRides);
+        kafkaTemplate.send("location", newRides);
+
+        RidesDTO ridesDTO = new RidesDTO(newRides.getRidesName(),
+                newRides.getLocationName(), newRides.getDistance(), newRides.getStartingPoint(),
+                newRides.getEndingPoint(), newRides.getDate(), newRides.getLatitude(),
+                newRides.getLongitude());
+
+       // kafkaTemplate.send("location", ridesDTO);
 
 
-        RidesDTO ridesDTO = new RidesDTO(username, ridesName,
-                locationName, riderType, distance, startingPoint, endingPoint, date, pointStr);
-
-
-
-        kafkaTemplate.send("location", ridesDTO );
-
-
-
-        return new RideResponseDTO(ridesDTO, pointStr);
+        return new RideResponseDTO(newRides.getRidesName(), newRides.getLocationName(),
+                newRides.getDistance(), newRides.getStartingPoint(), newRides.getEndingPoint(),
+                newRides.getDate(), newRides.getLatitude(), newRides.getLongitude());
     }
+
 }
 
 

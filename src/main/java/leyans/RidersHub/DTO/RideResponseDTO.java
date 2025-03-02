@@ -15,8 +15,29 @@ public class RideResponseDTO {
     private Integer distance;
     private String startingPoint;
     private String endingPont;
-    private String coordinates;
     private LocalDateTime date;
+    private double latitude;
+    private double longitude;
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
 
     public  RideResponseDTO(){}
 
@@ -26,7 +47,6 @@ public class RideResponseDTO {
         this.riderType = ride.getRiderType().getRiderType();
         this.distance = ride.getDistance();
         this.startingPoint = ride.getStartingPoint();
-        this.coordinates = ride.getCoordinates().toString();
         this.date = date;
         this.endingPont = ride.getEndingPoint();
     }
@@ -35,6 +55,9 @@ public class RideResponseDTO {
     }
 
     public RideResponseDTO(RidesDTO ridesDTO, String pointStr) {
+    }
+
+    public RideResponseDTO(String ridesName, String locationName, Integer distance, String startingPoint, String endingPoint, LocalDateTime date, double latitude, double longitude) {
     }
 
     public void setDate(LocalDateTime date) {
@@ -105,12 +128,5 @@ public class RideResponseDTO {
         this.startingPoint = startingPoint;
     }
 
-    public String getCoordinates() {
-        return coordinates;
-    }
-
-    public void setCoordinates(String coordinates) {
-        this.coordinates = coordinates;
-    }
 
 }
