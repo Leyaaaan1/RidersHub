@@ -36,10 +36,10 @@ public class HaversineDistance {
         }
         return false;
     }
-    public double getDistance() {
-        return
-
-    }
+//    public double getDistance() {
+//        return dis
+//
+//    }
 
     /**
      * Uses the Haversine formula to calculate distance between two GPS points.
