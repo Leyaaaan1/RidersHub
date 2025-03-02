@@ -19,7 +19,7 @@ public class RiderType {
     private Integer riderTypeId;
 
 
-    @Column(name = "rider_type", nullable = false)
+    @Column(name = "rider_type", nullable = false, unique = true)
     private String riderType;
 
 
