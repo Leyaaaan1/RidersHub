@@ -34,6 +34,12 @@ public class RidesDTO {
 
     }
 
+    public RidesDTO(String username, String ridesName, String locationName, String riderType, Integer distance, String startingPoint, String endingPoint, LocalDateTime date, double latitude, double longitude) {
+    }
+
+    public RidesDTO(String ridesName, String locationName, Integer distance, String startingPoint, String endingPoint, LocalDateTime date, double latitude, double longitude) {
+    }
+
     public String getEndingPoint() {
         return endingPoint;
     }
