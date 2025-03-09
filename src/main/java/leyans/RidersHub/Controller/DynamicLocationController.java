@@ -31,6 +31,11 @@ public class DynamicLocationController {
     @PostMapping("/update")
     public void updateRide(@RequestBody newRidesDTO newRidesDTO) {
         dynamicLocations.newLocationUpdate(newRidesDTO);
+        System.out.println("📡 Received update from " + newRidesDTO.getUsername());
+        System.out.println("📡 Location: " + newRidesDTO.getLocationName());
+        System.out.println("📡 Latitude: " + newRidesDTO.getLatitude());
+        System.out.println("📡 Longitude: " + newRidesDTO.getLongitude());
+        System.out.println("📡 Distance: " + newRidesDTO.getDistance());
 
     }
 

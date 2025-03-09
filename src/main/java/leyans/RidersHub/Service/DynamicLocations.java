@@ -5,11 +5,9 @@ import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.newRidesDTO;
 import leyans.RidersHub.DistanceFormula.HaversineDistance;
 import leyans.RidersHub.Kafka.ProducerService;
-import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -18,7 +16,8 @@ import java.util.Map;
 @Service
 public class DynamicLocations {
 
-    private final Map<String, LocalDateTime> userLastUpdateTime = new HashMap<>(); // Stores last update time per user
+    private final Map<String, LocalDateTime> userLastUpdateTime = new HashMap<>();
+    private final KafkaTemplate<Object, newRidesDTO> kafkaTemplate;
 
 
     @Autowired
@@ -29,7 +28,8 @@ public class DynamicLocations {
     private HaversineDistance haversineDistance;
 
 
-    public DynamicLocations(ProducerService producerService) {
+    public DynamicLocations(KafkaTemplate<Object, newRidesDTO> kafkaTemplate, ProducerService producerService) {
+        this.kafkaTemplate = kafkaTemplate;
         this.producerService = producerService;
     }
 
@@ -58,17 +58,19 @@ public class DynamicLocations {
 
         HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude, minutesSinceLastUpdate);
 
-        double calculatedDistance = result.getDistance();
+        double distance = result.distance();
         boolean shouldUpdate = result.shouldUpdate();
+        System.out.println(distance);
 
         if (shouldUpdate) {
-            System.out.println("User: " + username + " moved a significant distance (" + calculatedDistance + "m). Sending update.");
+            System.out.println("User: " + username + " moved a significant distance (" + distance + "m). Sending update.");
 
 
-            newRidesDTO ridesUpdate = new newRidesDTO(username, locationName, latitude, longitude, calculatedDistance);
+            newRidesDTO ridesUpdate = new newRidesDTO(username, locationName, latitude, longitude, distance);
+            kafkaTemplate.send("rides-topic", ridesUpdate);
 
             userLastUpdateTime.put(username, currentTime);
-            producerService.sendNewLocation(ridesUpdate);
+           // producerService.sendNewLocation(ridesUpdate);
 
 
         }
