@@ -5,14 +5,8 @@ import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.newRidesDTO;
 import leyans.RidersHub.DistanceFormula.HaversineDistance;
 import leyans.RidersHub.Kafka.ProducerService;
-import leyans.RidersHub.Repository.LocationRepository;
-import leyans.RidersHub.Repository.RiderRepository;
-import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.model.PointConverter;
-import leyans.RidersHub.model.Rides;
 import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -45,7 +39,7 @@ public class DynamicLocations {
         Point updatedCoordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
 
 
-        if (updatedCoordinates == null) {
+        if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
             System.out.println("Invalid coordinates received.");
             return;
         }
@@ -57,9 +51,15 @@ public class DynamicLocations {
 
         if (shouldUpdate) {
             System.out.println("User: " + username + " moved a significant distance (" + calculatedDistance + "m). Sending update.");
+//
+//            ridesDTO.setDistance(calculatedDistance);
+//            producerService.sendNewLocation(ridesDTO);
 
-            ridesDTO.setDistance(calculatedDistance);
-            producerService.sendNewLocation(ridesDTO);
+
+            newRidesDTO ridesUpdate = new newRidesDTO(username, locationName, latitude, longitude, calculatedDistance);
+            producerService.sendNewLocation(ridesUpdate);
+
+            System.out.println(ridesUpdate);
 
         } else {
             System.out.println("User: " + username + " has not moved significantly (" + calculatedDistance + "m). No update sent.");

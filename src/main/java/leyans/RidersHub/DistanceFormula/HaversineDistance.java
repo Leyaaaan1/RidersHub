@@ -20,7 +20,7 @@ public class HaversineDistance {
 
         double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
 
-        System.out.println("📏 Distance moved: " + distance + " meters");
+        System.out.println("📏 : " + distance + " meters");
 
         if (distance > 100) {
             prevLat = newLat;

@@ -4,6 +4,7 @@ package leyans.RidersHub.Service;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
+import leyans.RidersHub.DTO.newRidesDTO;
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
@@ -114,6 +115,7 @@ public class RidesService {
                 newRides.getLongitude()
 
         );
+
 
 
 
