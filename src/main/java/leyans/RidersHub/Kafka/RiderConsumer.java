@@ -51,4 +51,9 @@ public class RiderConsumer {
         System.out.println("Ride updates received: " + message);
     }
 
+//    @KafkaListener(topics = "rides-topic", groupId = "group_id")
+//    public void consume(newRidesDTO ridesUpdate) {
+//       // System.out.println("Received Message: " + ridesUpdate.getDistance());
+//    }
+
 }
