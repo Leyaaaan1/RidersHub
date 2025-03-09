@@ -26,28 +26,23 @@ public class RidesService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
+
     @Autowired
     private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
     @Autowired
     private final KafkaTemplate<Object, LocationResponseDTO> kafkaTemplate2;
 
-    private final LocationRepository locationRepository;
-
-    private final GeometryFactory geometryFactory = new GeometryFactory();
 
 
     public RidesService(RiderRepository riderRepository,
                         RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository,
                         KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
-                        KafkaTemplate<Object, LocationResponseDTO> kafkaTemplate2,
-                        LocationRepository locationRepository) {
-
+                        KafkaTemplate<Object, LocationResponseDTO> kafkaTemplate2) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.ridesRepository = ridesRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.kafkaTemplate2 = kafkaTemplate2;
-        this.locationRepository = locationRepository;
     }
 
     @Transactional
@@ -72,19 +67,10 @@ public class RidesService {
         newRides.setLatitude(latitude);
         newRides.setLongitude(longitude);
 
-        newRides = ridesRepository.saveAndFlush(newRides); // Ensure it is flushed to DB
-
-        Locations location = new Locations(
-                newRides.getUsername(),
-                newRides.getLocationName(),
-                newRides.getLatitude(),
-                newRides.getLongitude()
-        );
-
-        locationRepository.save(location);
+        newRides = ridesRepository.save(newRides);
 
 
-        // 3️⃣ Create Response DTO
+        // DTO for kafka  updates of new rides
         RideResponseDTO ridesDTO = new RideResponseDTO(
                 newRides.getLocationName(),
                 newRides.getRidesName(),
@@ -98,32 +84,15 @@ public class RidesService {
                 newRides.getLongitude()
 
         );
-//                newRides.getRidesName(), newRides.getLocationName(), newRides.getDistance(),
-//                newRides.getStartingPoint(), newRides.getEndingPoint(), newRides.getDate(),
-//                newRides.getLatitude(), newRides.getLongitude()
-
-
-
-
-        // 2️⃣ Save Locations Synchronously (inside transaction)
-
-
+        //DTO for kafka location updates of new rides
         LocationResponseDTO newLocations = new LocationResponseDTO(
                 newRides.getLocationName(),
                 newRides.getUsername().getUsername(),
                 newRides.getLatitude(),
                 newRides.getLongitude()
-
         );
-
-
-
-
         kafkaTemplate.send("location", ridesDTO);
-
         kafkaTemplate2.send("new-location", newLocations);
-
-
         return ridesDTO;
     }
 
