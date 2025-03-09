@@ -23,7 +23,7 @@ public class HaversineDistance {
         double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
 
         System.out.println("📏 Distance moved: " + distance + " meters");
-        boolean shouldUpdate = (distance > 100) || (minutesSinceLastUpdate >= 5);
+        boolean shouldUpdate = (distance > 100) || (minutesSinceLastUpdate >= 1);
 
         if (shouldUpdate ) {
             prevLat = newLat;

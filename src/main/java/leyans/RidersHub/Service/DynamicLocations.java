@@ -51,7 +51,7 @@ public class DynamicLocations {
 
         // Get the current time
         LocalDateTime currentTime = LocalDateTime.now();
-        LocalDateTime lastUpdateTime = userLastUpdateTime.getOrDefault(username, currentTime.minusMinutes(11));
+        LocalDateTime lastUpdateTime = userLastUpdateTime.getOrDefault(username, currentTime.minusMinutes(1));
 
 
         long minutesSinceLastUpdate = java.time.Duration.between(lastUpdateTime, currentTime).toMinutes();
@@ -67,11 +67,10 @@ public class DynamicLocations {
 
             newRidesDTO ridesUpdate = new newRidesDTO(username, locationName, latitude, longitude, calculatedDistance);
 
+            userLastUpdateTime.put(username, currentTime);
             producerService.sendNewLocation(ridesUpdate);
 
-        } else {
 
-            System.out.println("User: " + username + " has not moved significantly (" + calculatedDistance + "m). No update sent.");
         }
     }
 }

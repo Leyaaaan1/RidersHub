@@ -18,7 +18,7 @@ public class ProducerService {
     }
 
     public void sendNewLocation(newRidesDTO ridesDTO) {
-        kafkaTemplate.send("updated-locations", ridesDTO);
+        kafkaTemplate.send("kafka-updated", ridesDTO);
         System.out.println("Sent to Kafka: " + ridesDTO.getUsername());
     }
 }
