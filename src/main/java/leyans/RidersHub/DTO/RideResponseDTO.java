@@ -2,7 +2,6 @@ package leyans.RidersHub.DTO;
 
 import leyans.RidersHub.model.Rides;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 public class RideResponseDTO {
@@ -14,7 +13,7 @@ public class RideResponseDTO {
     private String riderType;
     private Integer distance;
     private String startingPoint;
-    private String endingPont;
+    private String endingPoint;
     private LocalDateTime date;
     private double latitude;
     private double longitude;
@@ -48,10 +47,10 @@ public class RideResponseDTO {
         this.distance = ride.getDistance();
         this.startingPoint = ride.getStartingPoint();
         this.date = date;
-        this.endingPont = ride.getEndingPoint();
+        this.endingPoint = ride.getEndingPoint();
     }
 
-    public RideResponseDTO(String locationName, String endingPont, String username, String locationName1, String pointStr, String ridesName, String riderType, Integer distance, String startingPoint, LocalDateTime date) {
+    public RideResponseDTO(String locationName, String endingPoint, String username, String locationName1, String pointStr, String ridesName, String riderType, Integer distance, String startingPoint, LocalDateTime date) {
     }
 
     public RideResponseDTO(RidesDTO ridesDTO, String pointStr) {
@@ -64,12 +63,12 @@ public class RideResponseDTO {
         this.date = date;
     }
 
-    public String getEndingPont() {
-        return endingPont;
+    public String getEndingPoint() {
+        return endingPoint;
     }
 
-    public void setEndingPont(String endingPont) {
-        this.endingPont = endingPont;
+    public void setEndingPoint(String endingPoint) {
+        this.endingPoint = endingPoint;
     }
 
     public Long getRideId() {

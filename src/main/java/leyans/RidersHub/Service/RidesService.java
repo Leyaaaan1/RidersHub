@@ -3,7 +3,6 @@ package leyans.RidersHub.Service;
 
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.RideResponseDTO;
-import leyans.RidersHub.DTO.RidesDTO;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.Repository.RidesRepository;
@@ -24,13 +23,13 @@ public class RidesService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
-    private final KafkaTemplate<Object, Rides> kafkaTemplate;
+    private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
 
 
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
 
-    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository, KafkaTemplate<Object, Rides> kafkaTemplate) {
+    public RidesService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository, KafkaTemplate<Object, RideResponseDTO> kafkaTemplate) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.ridesRepository = ridesRepository;
@@ -63,14 +62,14 @@ public class RidesService {
         newRides.setLongitude(longitude);
 
         newRides = ridesRepository.save(newRides);
-        kafkaTemplate.send("location", newRides);
+     //   kafkaTemplate.send("location", newRides);
 
-        RidesDTO ridesDTO = new RidesDTO(newRides.getRidesName(),
+        RideResponseDTO ridesDTO = new RideResponseDTO(newRides.getRidesName(),
                 newRides.getLocationName(), newRides.getDistance(), newRides.getStartingPoint(),
                 newRides.getEndingPoint(), newRides.getDate(), newRides.getLatitude(),
                 newRides.getLongitude());
 
-       // kafkaTemplate.send("location", ridesDTO);
+        kafkaTemplate.send("location", ridesDTO);
 
 
         return new RideResponseDTO(newRides.getRidesName(), newRides.getLocationName(),
