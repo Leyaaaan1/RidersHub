@@ -1,11 +1,12 @@
 package leyans.RidersHub.Controller;
 import leyans.RidersHub.DTO.*;
+import leyans.RidersHub.DTO.Response.LocationResponseDTO;
+import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
-import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @Transactional
-public class RiderService {
+public class    RiderService {
 
     @Autowired
     private final RiderRepository riderRepository;

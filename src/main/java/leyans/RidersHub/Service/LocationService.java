@@ -3,8 +3,7 @@ package leyans.RidersHub.Service;
 
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.LocationDTO;
-import leyans.RidersHub.DTO.LocationResponseDTO;
-import leyans.RidersHub.DTO.RidesDTO;
+import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.model.Dynamic.Locations;
@@ -47,10 +46,10 @@ public class LocationService {
 
         LocationDTO locationDTO = new LocationDTO(username, locationName, latitude, longitude);
 
-        kafkaTemplate.send("new-location", locationDTO);
+        kafkaTemplate.send("new", locationDTO);
 
-
-        return new LocationResponseDTO(location.getLocationId(), username, locationName, latitude, longitude);
+        return null;
+      //  return new LocationResponseDTO(location.getLocationId(), username, locationName, latitude, longitude);
     }
 
 

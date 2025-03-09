@@ -22,7 +22,7 @@ public class Locations {
     @JoinColumn(name = "username", referencedColumnName = "username")
     private Rider rider;
 
-    @Column(name = "locationName", nullable = false)
+    @Column(name = "locationName")
     private String locationName;
 
 //   // @Column(nullable = false, columnDefinition = "geometry(Point,4326)")
@@ -54,6 +54,9 @@ public class Locations {
     }
 
     public Locations(Rider rider, String locationName, double latitude, double longitude) {
+    }
+
+    public Locations(String ridesName, String locationName, double latitude, double longitude) {
     }
 
     public double getLatitude() {
