@@ -11,8 +11,14 @@ import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class DynamicLocations {
+
+    private final Map<String, LocalDateTime> userLastUpdateTime = new HashMap<>(); // Stores last update time per user
 
 
     @Autowired
@@ -22,7 +28,6 @@ public class DynamicLocations {
     @Autowired
     private HaversineDistance haversineDistance;
 
-    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
     public DynamicLocations(ProducerService producerService) {
         this.producerService = producerService;
@@ -31,6 +36,7 @@ public class DynamicLocations {
 
     @Transactional
     public void newLocationUpdate(newRidesDTO ridesDTO) {
+
         String locationName = ridesDTO.getLocationName();
         String username = ridesDTO.getUsername();
         double latitude = ridesDTO.getLatitude();
@@ -43,7 +49,15 @@ public class DynamicLocations {
             return;
         }
 
-        HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude);
+        // Get the current time
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime lastUpdateTime = userLastUpdateTime.getOrDefault(username, currentTime.minusMinutes(11));
+
+
+        long minutesSinceLastUpdate = java.time.Duration.between(lastUpdateTime, currentTime).toMinutes();
+
+        HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude, minutesSinceLastUpdate);
+
         double calculatedDistance = result.getDistance();
         boolean shouldUpdate = result.shouldUpdate();
 

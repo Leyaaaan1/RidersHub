@@ -2,6 +2,8 @@ package leyans.RidersHub.DistanceFormula;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+
 @Service
 public class HaversineDistance {
 
@@ -10,7 +12,7 @@ public class HaversineDistance {
     private boolean isFirstUpdate = true;
 
     // New method to return distance and update decision
-    public DistanceResult shouldSendUpdate(double newLat, double newLon) {
+    public DistanceResult shouldSendUpdate(double newLat, double newLon, long minutesSinceLastUpdate) {
         if (isFirstUpdate) {
             prevLat = newLat;
             prevLon = newLon;
@@ -20,12 +22,13 @@ public class HaversineDistance {
 
         double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
 
-        System.out.println("📏 : " + distance + " meters");
+        System.out.println("📏 Distance moved: " + distance + " meters");
+        boolean shouldUpdate = (distance > 100) || (minutesSinceLastUpdate >= 5);
 
-        if (distance > 100) {
+        if (shouldUpdate ) {
             prevLat = newLat;
             prevLon = newLon;
-            return new DistanceResult(distance, true);
+            System.out.println("📡 Sending update to Kafka");
         }
         return new DistanceResult(distance, false);
     }
