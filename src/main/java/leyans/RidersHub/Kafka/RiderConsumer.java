@@ -18,6 +18,22 @@ public class RiderConsumer {
         this.sink = sink;
     }
 
+
+    @KafkaListener(topics = "new-location", groupId = "location-group")
+    public void listenToKafka(String message) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            newRidesDTO ridesDTO = objectMapper.readValue(message, newRidesDTO.class);
+            sink.tryEmitNext(ridesDTO);
+
+            System.out.println("Processed new ride location: " + ridesDTO.getLocationName() + ridesDTO.getLongitude() + ", " + ridesDTO.getLatitude() +
+                    " for rider: " + ridesDTO.getUsername());
+        } catch (Exception e) {
+            System.err.println("Error processing Kafka message: " + e.getMessage());
+        }
+    }
+
+
     @KafkaListener(topics = {"car", "motor", "bike"}, groupId = "rider-group")
     public void consume(ConsumerRecord<String, String> record) {
         String riderType = record.topic();
@@ -35,15 +51,4 @@ public class RiderConsumer {
         System.out.println("Ride updates received: " + message);
     }
 
-    @KafkaListener(topics = "new-location", groupId = "location-group")
-    public void listenToKafka(String message) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            newRidesDTO ridesDTO = objectMapper.readValue(message, newRidesDTO.class);
-            sink.tryEmitNext(ridesDTO);
-            System.out.println("Processed new ride location: " + ridesDTO.getLongitude() + ", " + ridesDTO.getLatitude());
-        } catch (Exception e) {
-            System.err.println("Error processing Kafka message: " + e.getMessage());
-        }
-    }
 }

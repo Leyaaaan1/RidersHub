@@ -29,7 +29,7 @@ public class Rides {
     private String locationName;
 
 
-    @Column(name = "ridesName", nullable = false, unique = true)
+    @Column(name = "ridesName", nullable = false)
     private String ridesName;
 
 

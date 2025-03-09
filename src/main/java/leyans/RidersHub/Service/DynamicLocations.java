@@ -21,23 +21,18 @@ import org.locationtech.jts.geom.Point;
 public class DynamicLocations {
 
 
-
-
     @Autowired
     private ProducerService producerService;
 
-    @Autowired
-    private LocationRepository locationRepository;
 
     @Autowired
     private HaversineDistance haversineDistance;
 
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-    public DynamicLocations( ProducerService producerService) {
+    public DynamicLocations(ProducerService producerService) {
         this.producerService = producerService;
     }
-
 
 
     @Transactional
@@ -46,11 +41,8 @@ public class DynamicLocations {
         String username = ridesDTO.getUsername();
         double latitude = ridesDTO.getLatitude();
         double longitude = ridesDTO.getLongitude();
-        double distance = ridesDTO.getDistance();
 
         Point updatedCoordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-
-
 
 
         if (updatedCoordinates == null) {
@@ -58,24 +50,19 @@ public class DynamicLocations {
             return;
         }
 
-        boolean shouldUpdate = haversineDistance.shouldSendUpdate(latitude, longitude);
+        // Get distance and update decision
+        HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude);
+        double calculatedDistance = result.getDistance();
+        boolean shouldUpdate = result.shouldUpdate();
 
+        if (shouldUpdate) {
+            System.out.println("User: " + username + " moved a significant distance (" + calculatedDistance + "m). Sending update.");
 
+            ridesDTO.setDistance(calculatedDistance);
+            producerService.sendNewLocation(ridesDTO);
 
-            if (shouldUpdate) {
-                System.out.println("User: " + username + " moved a significant distance. Sending update.");
-//                 distance = haversineDistance.getDistance();
-//                haversineDistance.shouldSendUpdate(distance);
-                ridesDTO.setDistance(distance);
-                producerService.sendNewLocation(ridesDTO);
-            } else {
-                System.out.println("User: " + username + " has not moved significantly. No update sent.");
-            }
-
-//        Location newRidesDTO = new Location(username, locationName, latitude, longitude, distance);
-//        locationRepository.save(newRidesDTO);
+        } else {
+            System.out.println("User: " + username + " has not moved significantly (" + calculatedDistance + "m). No update sent.");
         }
-
-
+    }
 }
-
