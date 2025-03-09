@@ -31,19 +31,14 @@ public class DynamicLocationController {
     @PostMapping("/update")
     public void updateRide(@RequestBody newRidesDTO newRidesDTO) {
         dynamicLocations.newLocationUpdate(newRidesDTO);
-        System.out.println("\n🔄 [UPDATE] Received new location update:");
-        System.out.println("   📌 Username: " + newRidesDTO.getUsername());
-        System.out.println("   📍 Location: " + newRidesDTO.getLocationName());
-        System.out.println("   🌍 Coordinates: (" + newRidesDTO.getLatitude() + ", " + newRidesDTO.getLongitude() + ")");
+
     }
 
     @KafkaListener(topics = "new-location", groupId = "location-group")
     public void listenToKafka(newRidesDTO newRidesDTO) {
         sink.tryEmitNext(newRidesDTO); // Push updates to SSE clients
-        System.out.println("\n📥 [KAFKA] New location received from topic:");
-        System.out.println("   📌 Username: " + newRidesDTO.getUsername());
-        System.out.println("   📍 Location: " + newRidesDTO.getLocationName());
-        System.out.println("   🌍 Coordinates: (" + newRidesDTO.getLatitude() + ", " + newRidesDTO.getLongitude() + ")");    }
+
+    }
 
 
 
