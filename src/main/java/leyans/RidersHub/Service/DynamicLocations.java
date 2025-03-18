@@ -49,7 +49,6 @@ public class DynamicLocations {
             return;
         }
 
-
         HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude);
 
         double distance = result.distance();
@@ -73,10 +72,10 @@ public class DynamicLocations {
     @Scheduled(fixedDelay = 10000)
     public void timeInterval() {
           if (latestRidesDTO != null) {
-            System.out.println("📡 Sending latest location update to Kafka..." + latestRidesDTO.getDistance());
+            System.out.println("Sending latest location update to Kafka..." + latestRidesDTO.getDistance());
             kafkaTemplate.send("rides-topic", latestRidesDTO);
         } else {
-            System.out.println("❌ No location update available.");
+            System.out.println(" No location update available.");
         }
     }
 
