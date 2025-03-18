@@ -39,15 +39,23 @@ public class DynamicLocationController {
 
     }
 
+//    @PostMapping("/time")
+//    public void timeInterval(@RequestBody newRidesDTO newRidesDTO) {
+//        dynamicLocations.timeInterval();
+//        System.out.println("📡 Received update from " + newRidesDTO.getUsername());
+//        System.out.println("📡 Location: " + newRidesDTO.getLocationName());
+//        System.out.println("📡 Latitude: " + newRidesDTO.getLatitude());
+//        System.out.println("📡 Longitude: " + newRidesDTO.getLongitude());
+//        System.out.println("📡 Distance: " + newRidesDTO.getDistance());
+//
+//    }
+
     @KafkaListener(topics = "new-location", groupId = "location-group")
     public void listenToKafka(newRidesDTO newRidesDTO) {
         sink.tryEmitNext(newRidesDTO); // Push updates to SSE clients
 
     }
+    }
 
 
 
-
-
-
-}

@@ -10,7 +10,7 @@ public class HaversineDistance {
     private boolean isFirstUpdate = true;
 
     // New method to return distance and update decision
-    public DistanceResult shouldSendUpdate(double newLat, double newLon, long minutesSinceLastUpdate) {
+    public DistanceResult shouldSendUpdate(double newLat, double newLon) {
         if (isFirstUpdate) {
             prevLat = newLat;
             prevLon = newLon;
@@ -21,7 +21,7 @@ public class HaversineDistance {
         double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
 
         System.out.println("📏 Distance moved: " + distance + " meters");
-        boolean shouldUpdate = (distance > 1) || (minutesSinceLastUpdate >= 1);
+        boolean shouldUpdate = (distance > 1);
 
         if (shouldUpdate ) {
             prevLat = newLat;
