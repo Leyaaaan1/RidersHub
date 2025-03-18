@@ -2,11 +2,13 @@ package leyans.RidersHub.Service;
 
 
 import jakarta.transaction.Transactional;
+import leyans.RidersHub.DTO.RidesDTO;
 import leyans.RidersHub.DTO.newRidesDTO;
 import leyans.RidersHub.DistanceFormula.HaversineDistance;
 import leyans.RidersHub.Kafka.ProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,17 +18,15 @@ import java.util.Map;
 @Service
 public class DynamicLocations {
 
-    private final Map<String, LocalDateTime> userLastUpdateTime = new HashMap<>();
+    @Autowired
     private final KafkaTemplate<Object, newRidesDTO> kafkaTemplate;
-
-
     @Autowired
     private ProducerService producerService;
-
-
     @Autowired
     private HaversineDistance haversineDistance;
 
+
+    private newRidesDTO latestRidesDTO;
 
     public DynamicLocations(KafkaTemplate<Object, newRidesDTO> kafkaTemplate, ProducerService producerService) {
         this.kafkaTemplate = kafkaTemplate;
@@ -49,14 +49,8 @@ public class DynamicLocations {
             return;
         }
 
-        // Get the current time
-        LocalDateTime currentTime = LocalDateTime.now();
-        LocalDateTime lastUpdateTime = userLastUpdateTime.getOrDefault(username, currentTime.minusMinutes(1));
 
-
-        long minutesSinceLastUpdate = java.time.Duration.between(lastUpdateTime, currentTime).toMinutes();
-
-        HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude, minutesSinceLastUpdate);
+        HaversineDistance.DistanceResult result = haversineDistance.shouldSendUpdate(latitude, longitude);
 
         double distance = result.distance();
         boolean shouldUpdate = result.shouldUpdate();
@@ -69,10 +63,21 @@ public class DynamicLocations {
             newRidesDTO ridesUpdate = new newRidesDTO(username, locationName, latitude, longitude, distance);
             kafkaTemplate.send("rides-topic", ridesUpdate);
 
-            userLastUpdateTime.put(username, currentTime);
            // producerService.sendNewLocation(ridesUpdate);
 
 
         }
     }
+
+    @Scheduled(fixedDelay = 5000)
+    public void timeInterval() {
+          if (latestRidesDTO != null) {
+            System.out.println("📡 Sending latest location update to Kafka...");
+            kafkaTemplate.send("rides-topic", latestRidesDTO);
+        } else {
+            System.out.println("❌ No location update available.");
+        }
+    }
+
+
 }
