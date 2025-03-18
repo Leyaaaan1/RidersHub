@@ -62,6 +62,7 @@ public class DynamicLocations {
 
             newRidesDTO ridesUpdate = new newRidesDTO(username, locationName, latitude, longitude, distance);
             kafkaTemplate.send("rides-topic", ridesUpdate);
+            this.latestRidesDTO = ridesUpdate;
 
            // producerService.sendNewLocation(ridesUpdate);
 
@@ -69,10 +70,10 @@ public class DynamicLocations {
         }
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 10000)
     public void timeInterval() {
           if (latestRidesDTO != null) {
-            System.out.println("📡 Sending latest location update to Kafka...");
+            System.out.println("📡 Sending latest location update to Kafka..." + latestRidesDTO.getDistance());
             kafkaTemplate.send("rides-topic", latestRidesDTO);
         } else {
             System.out.println("❌ No location update available.");
