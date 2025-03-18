@@ -8,7 +8,6 @@ public class newRidesDTO {
     private double distance;
 
     public newRidesDTO() {}
-
     public newRidesDTO(String username, String locationName, double latitude, double longitude, double distance) {
         this.username = username;
         this.locationName = locationName;
@@ -16,7 +15,6 @@ public class newRidesDTO {
         this.longitude = longitude;
         this.distance = distance;
     }
-
 
     public String getUsername() {
         return username;
