@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Location Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .location-update {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+        }
+        .nearby-rider {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<h1>Ride Location Tracker</h1>
+
+<div id="map"></div>
+
+<h2>Control Panel</h2>
+<div>
+    <input type="text" id="locationName" placeholder="Location Name">
+    <button onclick="startRide()">Start Ride</button>
+    <button onclick="endRide()">End Ride</button>
+</div>
+
+<h2>Current Location</h2>
+<div id="current-location"></div>
+
+<h2>Live Location Updates</h2>
+<div id="location-updates"></div>
+
+<h2>Nearby Riders</h2>
+<div id="nearby-riders"></div>
+
+<script>
+    // Global variables
+    let stompClient = null;
+    let currentRideId = null;
+    let map = null;
+    let currentMarker = null;
+    let riderMarkers = [];
+
+    // Connect to WebSocket
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to location updates
+            stompClient.subscribe('/topic/ride-locations', function(message) {
+                const locationUpdate = JSON.parse(message.body);
+                displayLocationUpdate(locationUpdate);
+                updateMap(locationUpdate);
+            });
+
+            // If we have a current ride, subscribe to its HTML updates
+            if (currentRideId) {
+                subscribeToRideUpdates(currentRideId);
+            }
+        });
+    }
+
+    // Subscribe to specific ride updates
+    function subscribeToRideUpdates(rideId) {
+        if (stompClient) {
+            stompClient.subscribe('/topic/ride-locations/html/' + rideId, function(message) {
+                document.getElementById('current-location').innerHTML = message.body;
+            });
+        }
+    }
+
+    // Start a new ride
+    function startRide() {
+        const locationName = document.getElementById('locationName').value;
+        if (!locationName) {
+            alert('Please enter a location name');
+            return;
+        }
+
+        // Get current location
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            fetch('/api/rides/location/start?locationName=' + encodeURIComponent(locationName) +
+                '&latitude=' + latitude + '&longitude=' + longitude, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Ride started:', data);
+                    currentRideId = data.currentRideId;
+                    document.getElementById('current-location').innerHTML = '<p>Ride started at ' + locationName + '</p>';
+
+                    // Subscribe to ride updates
+                    subscribeToRideUpdates(currentRideId);
+
+                    // Start location tracking
+                    startLocationTracking();
+                })
+                .catch(error => {
+                    console.error('Error starting ride:', error);
+                    alert('Error starting ride: ' + error.message);
+                });
+        }, function(error) {
+            console.error('Error getting location:', error);
+            alert('Error getting location: ' + error.message);
+        });
+    }
+
+    // End the current ride
+    function endRide() {
+        if (!currentRideId) {
+            alert('No active ride to end');
+            return;
+        }
+
+        fetch('/api/rides/location/end?rideId=' + currentRideId, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Ride ended:', data);
+                document.getElementById('current-location').innerHTML += '<p>Ride ended</p>';
+
+                // Stop location tracking
+                stopLocationTracking();
+                currentRideId = null;
+            })
+            .catch(error => {
+                console.error('Error ending ride:', error);
+                alert('Error ending ride: ' + error.message);
+            });
+    }
+
+    // Start location tracking
+    let locationWatchId = null;
+    function startLocationTracking() {
+        if (locationWatchId) return;
+
+        locationWatchId = navigator.geolocation.watchPosition(function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            // Update location on server
+            updateLocation(latitude, longitude);
+
+            // Update nearby riders
+            fetchNearbyRiders(latitude, longitude);
+        }, function(error) {
+            console.error('Error tracking location:', error);
+        }, {
+            enableHighAccuracy: true,
+            maximumAge: 10000,
+            timeout: 10000
+        });
+    }
+
+    // Stop location tracking
+    function stopLocationTracking() {
+        if (locationWatchId !== null) {
+            navigator.geolocation.clearWatch(locationWatchId);
+            locationWatchId = null;
+        }
+    }
+
+    // Update location on server
+    function updateLocation(latitude, longitude) {
+        if (!currentRideId) return;
+
+        // Send location update via REST API
+        fetch('/api/rides/location/update?rideId=' + currentRideId +
+            '&latitude=' + latitude + '&longitude=' + longitude, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Location updated:', data);
+            })
+            .catch(error => {
+                console.error('Error updating location:', error);
+            });
+
+        // Alternatively, send via WebSocket for more efficient updates
+        if (stompClient && stompClient.connected) {
+            stompClient.send("/app/location-update", {}, JSON.stringify({
+                rideId: currentRideId,
+                latitude: latitude,
+                longitude: longitude
+            }));
+        }
+    }
+
+    // Fetch nearby riders
+    function fetchNearbyRiders(latitude, longitude) {
+        fetch('/api/rides/location/nearby?latitude=' + latitude +
+            '&longitude=' + longitude + '&radius=1000', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                displayNearbyRiders(data);
+            })
+            .catch(error => {
+                console.error('Error fetching nearby riders:', error);
+            });
+    }
+
+    // Display location update
+    function displayLocationUpdate(locationUpdate) {
+        const updatesContainer = document.getElementById('location-updates');
+
+        // Create new update element
+        const updateElement = document.createElement('div');
+        updateElement.className = 'location-update';
+        updateElement.innerHTML = `
+                <p><strong>Rider:</strong> ${locationUpdate.riderUsername}</p>
+                <p><strong>Location:</strong> ${locationUpdate.locationName}</p>
+                <p><strong>Coordinates:</strong> ${locationUpdate.latitude.toFixed(6)}, ${locationUpdate.longitude.toFixed(6)}</p>
+                <p><strong>Last Updated:</strong> ${new Date(locationUpdate.lastUpdated).toLocaleString()}</p>
+                <p><strong>Status:</strong> ${locationUpdate.started ? 'Active' : 'Ended'}</p>
+            `;
+
+        // Add to container (limit to 5 most recent updates)
+        updatesContainer.prepend(updateElement);
+        if (updatesContainer.children.length > 5) {
+            updatesContainer.removeChild(updatesContainer.lastChild);
+        }
+    }
+
+    // Display nearby riders
+    function displayNearbyRiders(riders) {
+        const container = document.getElementById('nearby-riders');
+        container.innerHTML = '';
+
+        if (riders.length === 0) {
+            container.innerHTML = '<p>No nearby riders found</p>';
+            return;
+        }
+
+        riders.forEach(rider => {
+            const riderElement = document.createElement('div');
+            riderElement.className = 'nearby-rider';
+            riderElement.innerHTML = `
+                    <p><strong>${rider.riderUsername}</strong> at ${rider.locationName}</p>
+                    <p>Distance: ${(rider.distanceInMeters).toFixed(0)} meters away</p>
+                `;
+            container.appendChild(riderElement);
+        });
+    }
+
+    // Initialize map
+    function initMap() {
+        // This function would initialize a map using Google Maps, Leaflet, or another mapping library
+        // For brevity, we're just creating a placeholder
+        document.getElementById('map').innerHTML = '<p>Map would be displayed here with real-time location tracking</p>';
+    }
+
+    // Update map with location data
+    function updateMap(locationUpdate) {
+        // In a real implementation, this would update markers on the map
+        console.log('Map would update with:', locationUpdate);
+    }
+
+    // Initialize on page load
+    window.onload = function() {
+        connect();
+        initMap();
+    };
+</script>
+</body>
+</html>

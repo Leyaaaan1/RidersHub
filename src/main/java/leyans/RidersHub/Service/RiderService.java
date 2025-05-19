@@ -22,8 +22,8 @@ public class    RiderService {
     @Autowired
     private final RiderTypeRepository riderTypeRepository;
 
-    @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
+//    @Autowired
+//    KafkaTemplate<String, String> kafkaTemplate;
 
     public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository) {
         this.riderRepository = riderRepository;
@@ -49,15 +49,15 @@ public class    RiderService {
         return riderRepository.save(newRider);
 
     }
-
-    public void sendMessage(String riderType, String message) {
-
-
-        System.out.println("Sending message to topic: " + riderType);
-        kafkaTemplate.send(riderType, message);
-        System.out.println("Sent message: " + message + " to RiderType: " + riderType);
-
-    }
+//
+//    public void sendMessage(String riderType, String message) {
+//
+//
+//        System.out.println("Sending message to topic: " + riderType);
+//        kafkaTemplate.send(riderType, message);
+//        System.out.println("Sent message: " + message + " to RiderType: " + riderType);
+//
+//    }
 
 
     public List<Rider> getAllRiders() {
