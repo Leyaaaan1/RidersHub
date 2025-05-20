@@ -37,6 +37,8 @@ public class RiderLocation {
 
     }
 
+
+
     public Integer getId() {
         return id;
     }
