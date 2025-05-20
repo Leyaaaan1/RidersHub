@@ -15,6 +15,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class RidesService {
@@ -42,7 +45,7 @@ public class RidesService {
     public RideResponseDTO createRide(String username, String ridesName, String locationName,
                                       String riderType, Integer distance, String startingPoint,
                                       LocalDateTime date, double latitude, double longitude,
-                                      String endingPoint) {
+                                      String endingPoint, List<String> participantUsernames) {
 
         Rider rider = riderRepository.findByUsername(username);
         RiderType newRiderType = riderTypeRepository.findByRiderType(riderType);
@@ -60,10 +63,18 @@ public class RidesService {
         newRides.setLatitude(latitude);
         newRides.setLongitude(longitude);
 
+        // Add participants if provided
+        if (participantUsernames != null && !participantUsernames.isEmpty()) {
+            List<Rider> participants = participantUsernames.stream()
+                    .map(riderRepository::findByUsername)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            newRides.setParticipants(participants);
+        }
+
         newRides = ridesRepository.save(newRides);
 
-
-        // DTO for kafka  updates of new rides
+        // DTO for kafka updates of new rides
         RideResponseDTO ridesDTO = new RideResponseDTO(
                 newRides.getLocationName(),
                 newRides.getRidesName(),
@@ -74,7 +85,8 @@ public class RidesService {
                 newRides.getEndingPoint(),
                 newRides.getDate(),
                 newRides.getLatitude(),
-                newRides.getLongitude()
+                newRides.getLongitude(),
+                newRides.getParticipants()
 
         );
 

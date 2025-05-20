@@ -65,6 +65,16 @@ public class Rides {
     @Column(name = "distance", nullable = false)
     private Integer distance;
 
+    @ManyToMany
+    @JoinTable(
+            name = "ride_participants",
+            joinColumns = @JoinColumn(name = "ride_id"),
+            inverseJoinColumns = @JoinColumn(name = "rider_username")
+    )
+    private List<Rider> participants = new ArrayList<>();
+
+
+
     @Column(name = "endingPoint", nullable = false)
     private String endingPoint;
 
@@ -73,6 +83,7 @@ public class Rides {
 
     @Column(name = "ride_date", nullable = false)
     private LocalDateTime date;
+
 
 
     public Rides() {
@@ -93,6 +104,23 @@ public class Rides {
     }
 
 
+
+
+    public List<Rider> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Rider> participants) {
+        this.participants = participants;
+    }
+
+    public void addParticipant(Rider participant) {
+        this.participants.add(participant);
+    }
+
+    public void removeParticipant(Rider participant) {
+        this.participants.remove(participant);
+    }
     public Integer getRidesId() {
         return ridesId;
     }

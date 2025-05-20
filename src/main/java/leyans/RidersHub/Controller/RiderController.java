@@ -62,22 +62,14 @@ public class RiderController {
                 rideRequest.getDate(),
                 rideRequest.getLatitude(),
                 rideRequest.getLongitude(),
-                rideRequest.getEndingPoint()
+                rideRequest.getEndingPoint(),
+                rideRequest.getParticipants()
 
                 );
         return ResponseEntity.ok(response);
     }
 
-//    @PostMapping("/add-locations")
-//    public ResponseEntity<LocationResponseDTO> createLocation(@RequestBody LocationRequest request) {
-//        LocationResponseDTO savedLocation = locationService.saveLocation(
-//                request.getUsername(),
-//                request.getLocationName(),
-//                request.getLatitude(),
-//                request.getLongitude()
-//        );
-//        return ResponseEntity.ok(savedLocation);
-//    }
+
 
     @PostMapping("/send")
     public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
