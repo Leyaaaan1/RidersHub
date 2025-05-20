@@ -4,16 +4,12 @@ package leyans.RidersHub.Service;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
-import leyans.RidersHub.DTO.newRidesDTO;
-import leyans.RidersHub.Repository.LocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.model.Dynamic.Locations;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -30,19 +26,16 @@ public class RidesService {
     @Autowired
     private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
     @Autowired
-    private final KafkaTemplate<Object, LocationResponseDTO> kafkaTemplate2;
 
 
 
     public RidesService(RiderRepository riderRepository,
                         RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository,
-                        KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
-                        KafkaTemplate<Object, LocationResponseDTO> kafkaTemplate2) {
+                        KafkaTemplate<Object, RideResponseDTO> kafkaTemplate) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.ridesRepository = ridesRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.kafkaTemplate2 = kafkaTemplate2;
     }
 
     @Transactional
@@ -84,15 +77,8 @@ public class RidesService {
                 newRides.getLongitude()
 
         );
-        //DTO for kafka location updates of new rides
-        LocationResponseDTO newLocations = new LocationResponseDTO(
-                newRides.getLocationName(),
-                newRides.getUsername().getUsername(),
-                newRides.getLatitude(),
-                newRides.getLongitude()
-        );
+
         kafkaTemplate.send("location", ridesDTO);
-        kafkaTemplate2.send("new-location", newLocations);
         return ridesDTO;
     }
 

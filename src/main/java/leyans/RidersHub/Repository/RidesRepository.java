@@ -1,6 +1,5 @@
 package leyans.RidersHub.Repository;
 
-import leyans.RidersHub.model.Dynamic.Locations;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import org.springframework.data.jpa.repository.JpaRepository;
