@@ -4,6 +4,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class RideResponseDTO {
 
@@ -17,10 +18,12 @@ public class RideResponseDTO {
     private LocalDateTime date;
     private double latitude;
     private double longitude;
+    List<Rider> participants;
+
 
     public RideResponseDTO(String locationName, String ridesName, Rider username, RiderType riderType,
                            Integer distance, String startingPoint, String endingPoint, LocalDateTime
-                                   date, double latitude, double longitude) {
+                                   date, double latitude, double longitude, List<Rider> participants) {
         this.locationName = locationName;
         this.ridesName = ridesName;
         this.username = username.getUsername();
@@ -31,8 +34,17 @@ public class RideResponseDTO {
         this.date = date;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.participants = participants;
 
     }
+    public List<Rider> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Rider> participants) {
+        this.participants = participants;
+    }
+
 
     public String getUsername() {
         return username;
