@@ -1,6 +1,6 @@
 package leyans.RidersHub.Controller;
 
-import leyans.RidersHub.DTO.Response.LocationUpdateResponseDTO;
+import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Service.RideLocationService;
 import leyans.RidersHub.Service.StartRideService;
@@ -31,11 +31,11 @@ public class StartRideController {
 
 
     @PostMapping("/{id}/riderName")
-    public ResponseEntity<LocationUpdateResponseDTO> updateLocation(
+    public ResponseEntity<LocationUpdateRequestDTO> updateLocation(
             @PathVariable("id") Integer rideId,
             @RequestParam("latitude") double latitude,
             @RequestParam("longitude") double longitude) {
-        LocationUpdateResponseDTO response = rideLocationService.updateLocation(
+        LocationUpdateRequestDTO response = rideLocationService.updateLocation(
                 rideId, latitude, longitude);
         return ResponseEntity.ok(response);
     }

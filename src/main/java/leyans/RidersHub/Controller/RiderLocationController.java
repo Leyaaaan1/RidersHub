@@ -1,45 +1,54 @@
 package leyans.RidersHub.Controller;
 
-import leyans.RidersHub.Repository.RiderLocationRepository;
-import leyans.RidersHub.Repository.StartedRideRepository;
-import leyans.RidersHub.model.RiderLocation;
-import leyans.RidersHub.model.StartedRide;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
+import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.Service.RideLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/locations")
 public class RiderLocationController {
 
     @Autowired
-    private RiderLocationRepository riderLocationRepository;
+    private RideLocationService rideLocationService;
 
-    @Autowired
-    private StartedRideRepository startedRideRepository;
 
-    private final GeometryFactory geometryFactory = new GeometryFactory();
+//    @PostMapping("/update")
+//    public ResponseEntity<LocationUpdateResponseDTO> updateLocation(
+//            @RequestParam double latitude,
+//            @RequestParam double longitude) {
+//
+//        try {
+//            leyans.RidersHub.DTO.Response.LocationUpdateResponseDTO response =
+//                    rideLocationService.updateLocation(rideId, latitude, longitude);
+//
+//            // Set the additional fields in the response
+//            response.setRideId(rideId);
+//            response.setLatitude(latitude);
+//            response.setLongitude(longitude);
+//
+//            return ResponseEntity.ok(response);
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
 
-    @PostMapping
-    public RiderLocation saveLocation(
-            @RequestParam double latitude,
-            @RequestParam double longitude,
-            @RequestParam int rideId
-    ) {
-        StartedRide ride = startedRideRepository.findById(rideId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ride ID"));
+    @PostMapping("/update/{rideId}")
+    public ResponseEntity<LocationUpdateRequestDTO> updateLocation(
+            @PathVariable Integer rideId,
+            @RequestBody Map<String, Double> coordinates) {
 
-        Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-        point.setSRID(4326); // Important for PostGIS
+        double latitude = coordinates.get("latitude");
+        double longitude = coordinates.get("longitude");
 
-        RiderLocation location = new RiderLocation(null, ride, point, LocalDateTime.now());
-        return riderLocationRepository.save(location);
+        LocationUpdateRequestDTO response = rideLocationService.updateLocation(rideId, latitude, longitude);
+        return ResponseEntity.ok(response);
     }
-
-
-
 }
+
+
+
+

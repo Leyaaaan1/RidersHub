@@ -1,13 +1,11 @@
 package leyans.RidersHub.Service;
 
-import leyans.RidersHub.DTO.Response.LocationUpdateResponseDTO;
+import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Repository.RiderLocationRepository;
-import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
 import leyans.RidersHub.model.RiderLocation;
 import leyans.RidersHub.model.StartedRide;
 import org.locationtech.jts.geom.Coordinate;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -20,26 +18,21 @@ public class RideLocationService {
 
     private final StartedRideRepository startedRideRepo;
     private final RiderLocationRepository locationRepo;
-    private final RidesRepository rideRepo;
-    private final KafkaTemplate<Object, LocationUpdateResponseDTO> kafkaTemplate;
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Autowired
     public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo,
-                               RidesRepository rideRepo,
-                               KafkaTemplate<Object, LocationUpdateResponseDTO> kafkaTemplate) {
+                               RiderLocationRepository locationRepo) {
         this.startedRideRepo = startedRideRepo;
         this.locationRepo = locationRepo;
-        this.rideRepo = rideRepo;
-        this.kafkaTemplate = kafkaTemplate;
+
     }
 
     /**
      * Record rider's location update and compute distance via PostGIS.
      */
     @Transactional
-    public LocationUpdateResponseDTO updateLocation(Integer rideId, double latitude, double longitude) {
+    public LocationUpdateRequestDTO updateLocation(Integer rideId, double latitude, double longitude) {
 
         StartedRide started = startedRideRepo.findById(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + rideId));
@@ -53,15 +46,10 @@ public class RideLocationService {
         loc.setTimestamp(LocalDateTime.now());
         loc = locationRepo.save(loc);
 
+        Point startPoint = started.getLocation();
 
+        double distanceMeters = locationRepo.getDistanceBetweenPoints(userPoint, startPoint);
 
-        double distance = locationRepo.findDistanceMeters(loc.getId(), latitude, longitude);
-
-        LocationUpdateResponseDTO response = new LocationUpdateResponseDTO(
-                rideId, latitude, longitude, distance
-        );
-
-        kafkaTemplate.send("rides-location", response);
-        return response;
+        return new LocationUpdateRequestDTO(distanceMeters);
     }
 }

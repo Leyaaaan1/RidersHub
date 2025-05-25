@@ -1,16 +1,21 @@
-package leyans.RidersHub.DTO.Response;
+package leyans.RidersHub.DTO;
 
-public class LocationUpdateResponseDTO {
+public class LocationUpdateRequestDTO {
     private Integer rideId;
     private double latitude;
     private double longitude;
     private double distanceMeters;
 
-    public LocationUpdateResponseDTO(Integer rideId, double latitude, double longitude, double distanceMeters) {
+    public LocationUpdateRequestDTO(Integer rideId, double latitude, double longitude, double distanceMeters) {
         this.rideId = rideId;
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceMeters = distanceMeters;
+    }
+
+    public LocationUpdateRequestDTO(double distanceMeters) {
+        this.distanceMeters = distanceMeters;
+
     }
 
     public Integer getRideId() {
