@@ -3,6 +3,7 @@ package leyans.RidersHub.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,27 +29,28 @@ public class Rides {
     private String ridesName;
 
 
-    @Column(name = "latitude", nullable = false)
-    private double latitude;  // Store latitude separately
 
-    @Column(name = "longitude", nullable = false)
-    private double longitude; // Store longitude separately
+//    @Column(name = "latitude", nullable = false)
+//    private double latitude;  // Store latitude separately
+//
+//    @Column(name = "longitude", nullable = false)
+//    private double longitude; // Store longitude separately
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
+//    public double getLatitude() {
+//        return latitude;
+//    }
+//
+//    public void setLatitude(double latitude) {
+//        this.latitude = latitude;
+//    }
+//
+//    public double getLongitude() {
+//        return longitude;
+//    }
+//
+//    public void setLongitude(double longitude) {
+//        this.longitude = longitude;
+//    }
 
     @ManyToOne
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
@@ -80,17 +82,18 @@ public class Rides {
     @Column(name = "ride_date", nullable = false)
     private LocalDateTime date;
 
+    @Column(name = "location", columnDefinition = "geometry(Point,4326)")
+    private Point location;
 
 
     public Rides() {
     }
 
-    public Rides(Integer ridesId, String locationName, String ridesName, double latitude, double longitude, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
+    public Rides(Integer ridesId, String locationName, Point location, String ridesName, double latitude, double longitude, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
         this.ridesId = ridesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
         this.username = username;
         this.riderType = riderType;
         this.distance = distance;
@@ -100,7 +103,13 @@ public class Rides {
     }
 
 
+    public Point getLocation() {
+        return location;
+    }
 
+    public void setLocation(Point location) {
+        this.location = location;
+    }
 
     public List<Rider> getParticipants() {
         return participants;
