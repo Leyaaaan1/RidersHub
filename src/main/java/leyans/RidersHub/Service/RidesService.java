@@ -63,7 +63,6 @@ public class RidesService {
         newRides.setLatitude(latitude);
         newRides.setLongitude(longitude);
 
-        // Add participants if provided
         if (participantUsernames != null && !participantUsernames.isEmpty()) {
             List<Rider> participants = participantUsernames.stream()
                     .map(riderRepository::findByUsername)
@@ -72,9 +71,13 @@ public class RidesService {
             newRides.setParticipants(participants);
         }
 
-        newRides = ridesRepository.save(newRides);
+        try {
+            newRides = ridesRepository.save(newRides);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
 
-        // DTO for kafka updates of new rides
+
         RideResponseDTO ridesDTO = new RideResponseDTO(
                 newRides.getLocationName(),
                 newRides.getRidesName(),

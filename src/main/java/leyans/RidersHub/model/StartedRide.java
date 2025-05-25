@@ -1,7 +1,12 @@
 package leyans.RidersHub.model;
 
 import jakarta.persistence.*;
+import org.locationtech.jts.geom.Point;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "started_rides")
@@ -18,12 +23,44 @@ public class StartedRide {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
+
+    @Column(name = "location", columnDefinition = "geometry(Point,4326)")
+    private Point location;
+
+
+    @ManyToMany
+    @JoinTable(
+            name = "started_ride_participants", // Avoid conflict with Rides entity
+            joinColumns = @JoinColumn(name = "started_ride_id"),
+            inverseJoinColumns = @JoinColumn(name = "rider_username")
+    )
+    @JsonIgnore
+    private List<Rider> participants = new ArrayList<>();
     // Constructors
     public StartedRide() {}
 
-    public StartedRide(Rides ride, LocalDateTime startTime) {
+    public StartedRide(Rides ride, LocalDateTime startTime, Point location, List<Rider> participants) {
         this.ride = ride;
         this.startTime = startTime;
+        this.location = location;
+        this.participants = participants != null ? new ArrayList<>(participants) : new ArrayList<>();
+
+    }
+
+    public Point getLocation() {
+        return location;
+    }
+
+    public void setLocation(Point location) {
+        this.location = location;
+    }
+
+    public List<Rider> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Rider> participants) {
+        this.participants = participants;
     }
 
     // Getters and Setters
