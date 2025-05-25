@@ -40,13 +40,10 @@ public class RideLocationService {
      */
     @Transactional
     public LocationUpdateResponseDTO updateLocation(Integer rideId, double latitude, double longitude) {
-       //find active ride by ID
+
         StartedRide started = startedRideRepo.findById(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + rideId));
 
-
-
-       // Uses geometryFactory to create a geographical point from the coordinates
         Point userPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         userPoint.setSRID(4326);
 
@@ -55,6 +52,8 @@ public class RideLocationService {
         loc.setLocation(userPoint);
         loc.setTimestamp(LocalDateTime.now());
         loc = locationRepo.save(loc);
+
+
 
         double distance = locationRepo.findDistanceMeters(loc.getId(), latitude, longitude);
 

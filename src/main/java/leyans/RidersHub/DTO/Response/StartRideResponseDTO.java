@@ -54,13 +54,7 @@ public class StartRideResponseDTO implements Serializable {
     }
 
 
-    public List<String> getParticipantUsernames() {
-        return participantUsernames;
-    }
 
-    public void setParticipantUsernames(List<String> participantUsernames) {
-        this.participantUsernames = participantUsernames;
-    }
 
     public String getRidesName() {
         return ridesName;
