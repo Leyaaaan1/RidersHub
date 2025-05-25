@@ -15,6 +15,9 @@ public class RiderLocation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "rider_username", referencedColumnName = "username", nullable = false)
+    private Rider username;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "started_ride_id", referencedColumnName = "id", nullable = false)
     private StartedRide startedRide;
@@ -22,22 +25,41 @@ public class RiderLocation {
     @Column(name = "location", columnDefinition = "geometry(Point,4326)", nullable = false)
     private Point location;
 
+    @Column(name = "distance_meters")
+    private double distanceMeters;
+
 
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
-    public RiderLocation(Integer id, StartedRide startedRide, Point location, LocalDateTime timestamp) {
+    public RiderLocation(Integer id, Rider username, double distanceMeters, StartedRide startedRide, Point location, LocalDateTime timestamp) {
         this.id = id;
+        this.username = username;
         this.startedRide = startedRide;
         this.location = location;
         this.timestamp = timestamp;
+        this.distanceMeters = distanceMeters;
     }
 
     public RiderLocation() {
 
     }
 
+    public Rider getUsername() {
+        return username;
+    }
 
+    public void setUsername(Rider username) {
+        this.username = username;
+    }
+
+    public double getDistanceMeters() {
+        return distanceMeters;
+    }
+
+    public void setDistanceMeters(double distanceMeters) {
+        this.distanceMeters = distanceMeters;
+    }
 
     public Integer getId() {
         return id;

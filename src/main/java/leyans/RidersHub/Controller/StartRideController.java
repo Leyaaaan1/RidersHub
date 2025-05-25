@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
+
 @RestController
 @RequestMapping("/rides")
 public class StartRideController {
@@ -22,7 +24,7 @@ public class StartRideController {
     }
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable("id") Integer id) {
+    public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable("id") Integer id) throws AccessDeniedException {
         StartRideResponseDTO started = startRideService.startRide(id);
         return ResponseEntity.ok(started);
     }
