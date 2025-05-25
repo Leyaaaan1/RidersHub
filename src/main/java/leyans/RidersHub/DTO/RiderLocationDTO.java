@@ -1,32 +1,23 @@
 package leyans.RidersHub.DTO;
 
-import leyans.RidersHub.model.Rider;
-
 import java.time.LocalDateTime;
 
-public class LocationUpdateRequestDTO {
+public class RiderLocationDTO {
+
     private Integer rideId;
     private double latitude;
     private double longitude;
     private double distanceMeters;
+    private LocalDateTime timestamp;
+    public RiderLocationDTO(Integer id, Integer rideId, double latitude, double longitude, double distanceMeters, LocalDateTime timestamp) {
 
-    private Rider initiator;
-
-
-    public LocationUpdateRequestDTO(Integer rideId, Rider initiator, double latitude, double longitude, double distanceMeters, LocalDateTime timestamp) {
         this.rideId = rideId;
-        this.initiator = initiator;
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceMeters = distanceMeters;
+        this.timestamp = timestamp;
     }
-
-    public Rider getInitiator() {
-        return initiator;
-    }
-
-    public void setInitiator(Rider initiator) {
-        this.initiator = initiator;
+    public RiderLocationDTO() {
     }
 
     public Integer getRideId() {
@@ -59,5 +50,13 @@ public class LocationUpdateRequestDTO {
 
     public void setDistanceMeters(double distanceMeters) {
         this.distanceMeters = distanceMeters;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

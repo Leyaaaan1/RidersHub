@@ -16,6 +16,10 @@ public class StartedRide {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "initiator_username", referencedColumnName = "username", nullable = false)
+    private Rider username;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rides_id", referencedColumnName = "ridesId", nullable = false)
     private Rides ride;
@@ -39,12 +43,21 @@ public class StartedRide {
     // Constructors
     public StartedRide() {}
 
-    public StartedRide(Rides ride, LocalDateTime startTime, Point location, List<Rider> participants) {
+    public StartedRide(Rides ride, LocalDateTime startTime, Point location, List<Rider> participants, Rider username) {
         this.ride = ride;
         this.startTime = startTime;
         this.location = location;
         this.participants = participants != null ? new ArrayList<>(participants) : new ArrayList<>();
+        this.username = username;
+    }
 
+
+    public Rider getUsername() {
+        return username;
+    }
+
+    public void setUsername(Rider username) {
+        this.username = username;
     }
 
     public Point getLocation() {
