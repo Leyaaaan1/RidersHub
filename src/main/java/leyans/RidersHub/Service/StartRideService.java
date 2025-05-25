@@ -3,6 +3,7 @@ package leyans.RidersHub.Service;
 
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
+import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
 import leyans.RidersHub.model.Rider;
@@ -14,9 +15,11 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,41 +28,53 @@ public class StartRideService {
 
     private final RidesRepository ridesRepository;
     private final StartedRideRepository startedRideRepository;
+
+    private final RiderRepository riderRepository;
     private final KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate;
 
     @Autowired
     public StartRideService(RidesRepository ridesRepository,
-                            StartedRideRepository startedRideRepository,
+                            StartedRideRepository startedRideRepository, RiderRepository riderRepository,
                             KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate) {
         this.ridesRepository = ridesRepository;
         this.startedRideRepository = startedRideRepository;
+        this.riderRepository = riderRepository;
         this.kafkaTemplate = kafkaTemplate;
     }
 
 
     @Transactional
-    public StartRideResponseDTO startRide(Integer rideId) {
+    public StartRideResponseDTO startRide(Integer rideId) throws AccessDeniedException {
+
+
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Rider initiator = riderRepository.findByUsername(username);
+
+        if (initiator == null) {
+            throw new AccessDeniedException("Rider not found with username: " + username);
+        }
 
         Rides ride = ridesRepository.findByIdWithParticipants(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride not found with id: " + rideId));
 
-//        GeometryFactory geometryFactory = new GeometryFactory();
-//        Point coordinates = geometryFactory.createPoint(new Coordinate(ride.getLongitude(), ride.getLatitude()));
-//        coordinates.setSRID(4326);
+
+
 
         double longitude = 0.0;
         double latitude = 0.0;
+
         if (ride.getLocation() != null) {
             longitude = ride.getLocation().getX();
             latitude = ride.getLocation().getY();
         }
 
-
         StartedRide started = new StartedRide(
                 ride,
                 LocalDateTime.now(),
                 ride.getLocation(),
-                ride.getParticipants()
+                ride.getParticipants(),
+                initiator
         );
 
         List<String> participantUsernames = ride.getParticipants().stream()
@@ -70,13 +85,13 @@ public class StartRideService {
 
         StartRideResponseDTO responseDTO = new StartRideResponseDTO(
                 ride.getRidesId(),
+                initiator,
                 ride.getRidesName(),
                 ride.getLocationName(),
                 participantUsernames,
                 longitude,
                 latitude,
-                started.getStartTime()
-        );
+                started.getStartTime());
 
         kafkaTemplate.send("ride-started", responseDTO);
         return responseDTO;
