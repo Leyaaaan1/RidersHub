@@ -49,6 +49,7 @@ public class StartRideService {
 
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
         Rider initiator = riderRepository.findByUsername(username);
 
         if (initiator == null) {
