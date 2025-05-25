@@ -20,15 +20,17 @@ public class HaversineDistance {
 
         double distance = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
 
-        System.out.println("📏 : " + distance + " meters");
-
-        if (distance > 100) {
+        if (distance < 100) {
+            System.out.println(" Distance moved is less than 100 meters (" + distance + "m). No update sent.");
+            return new DistanceResult(distance, false);
+        } else {
             prevLat = newLat;
             prevLon = newLon;
+            System.out.println(" Distance moved: " + distance + " meters. Sending update to Kafka.");
             return new DistanceResult(distance, true);
         }
-        return new DistanceResult(distance, false);
     }
+
 
     // Haversine formula
     public double calculateHaversineDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -42,21 +44,7 @@ public class HaversineDistance {
         return R * c;
     }
 
-    public static class DistanceResult {
-        private final double distance;
-        private final boolean shouldUpdate;
 
-        public DistanceResult(double distance, boolean shouldUpdate) {
-            this.distance = distance;
-            this.shouldUpdate = shouldUpdate;
-        }
-
-        public double getDistance() {
-            return distance;
-        }
-
-        public boolean shouldUpdate() {
-            return shouldUpdate;
-        }
+    public record DistanceResult(double distance, boolean shouldUpdate) {
     }
 }

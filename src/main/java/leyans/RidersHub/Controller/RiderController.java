@@ -2,7 +2,6 @@ package leyans.RidersHub.Controller;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
-import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
 import leyans.RidersHub.model.Rider;
@@ -18,14 +17,12 @@ public class RiderController {
 
     private final RiderService riderService;
     private final RidesService ridesService;
-    private final LocationService locationService;
 
 
     @Autowired
-    public RiderController(RiderService riderService, RidesService ridesService, LocationService locationService) {
+    public RiderController(RiderService riderService, RidesService ridesService) {
         this.riderService = riderService;
         this.ridesService = ridesService;
-        this.locationService = locationService;
     }
 
 
@@ -65,22 +62,14 @@ public class RiderController {
                 rideRequest.getDate(),
                 rideRequest.getLatitude(),
                 rideRequest.getLongitude(),
-                rideRequest.getEndingPoint()
+                rideRequest.getEndingPoint(),
+                rideRequest.getParticipants()
 
                 );
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/add-locations")
-    public ResponseEntity<LocationResponseDTO> createLocation(@RequestBody LocationRequest request) {
-        LocationResponseDTO savedLocation = locationService.saveLocation(
-                request.getUsername(),
-                request.getLocationName(),
-                request.getLatitude(),
-                request.getLongitude()
-        );
-        return ResponseEntity.ok(savedLocation);
-    }
+
 
     @PostMapping("/send")
     public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
