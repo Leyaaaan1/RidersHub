@@ -43,14 +43,22 @@ public class StartRideService {
         Rides ride = ridesRepository.findByIdWithParticipants(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride not found with id: " + rideId));
 
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Point coordinates = geometryFactory.createPoint(new Coordinate(ride.getLongitude(), ride.getLatitude()));
-        coordinates.setSRID(4326);
+//        GeometryFactory geometryFactory = new GeometryFactory();
+//        Point coordinates = geometryFactory.createPoint(new Coordinate(ride.getLongitude(), ride.getLatitude()));
+//        coordinates.setSRID(4326);
+
+        double longitude = 0.0;
+        double latitude = 0.0;
+        if (ride.getLocation() != null) {
+            longitude = ride.getLocation().getX();
+            latitude = ride.getLocation().getY();
+        }
+
 
         StartedRide started = new StartedRide(
                 ride,
                 LocalDateTime.now(),
-                coordinates,
+                ride.getLocation(),
                 ride.getParticipants()
         );
 
@@ -65,8 +73,8 @@ public class StartRideService {
                 ride.getRidesName(),
                 ride.getLocationName(),
                 participantUsernames,
-                ride.getLongitude(),
-                ride.getLatitude(),
+                longitude,
+                latitude,
                 started.getStartTime()
         );
 
