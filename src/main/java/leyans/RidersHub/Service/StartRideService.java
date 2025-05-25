@@ -1,6 +1,7 @@
 package leyans.RidersHub.Service;
 
 
+import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
@@ -38,6 +39,7 @@ public class StartRideService {
 
     @Transactional
     public StartRideResponseDTO startRide(Integer rideId) {
+
         Rides ride = ridesRepository.findByIdWithParticipants(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Ride not found with id: " + rideId));
 
@@ -52,17 +54,25 @@ public class StartRideService {
                 ride.getParticipants()
         );
 
+        List<String> participantUsernames = ride.getParticipants().stream()
+                .map(Rider::getUsername)
+                .toList();
+
         started = startedRideRepository.save(started);
 
-        return new StartRideResponseDTO(
+        StartRideResponseDTO responseDTO = new StartRideResponseDTO(
                 ride.getRidesId(),
                 ride.getRidesName(),
                 ride.getLocationName(),
-                ride.getParticipants(),
+                participantUsernames,
                 ride.getLongitude(),
                 ride.getLatitude(),
                 started.getStartTime()
         );
-    }
+
+        kafkaTemplate.send("ride-started", responseDTO);
+        return responseDTO;
 
 }
+}
+

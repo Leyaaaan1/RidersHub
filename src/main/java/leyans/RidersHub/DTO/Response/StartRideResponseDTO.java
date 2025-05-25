@@ -1,7 +1,6 @@
 package leyans.RidersHub.DTO.Response;
 
 import leyans.RidersHub.model.Rider;
-import org.locationtech.jts.geom.Point;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -15,16 +14,16 @@ public class StartRideResponseDTO implements Serializable {
     private double latitude;
     private double longitude;
     private LocalDateTime startTime;
-    private List<Rider> participants;
+
+    private List<String> participantUsernames;
 
 
-
-    public StartRideResponseDTO(Integer id, String ridesName, String locationName, List<Rider> participants, double longitude, double latitude, LocalDateTime startTime) {
+    public StartRideResponseDTO(Integer id, String ridesName, String locationName, List<String> participantUsernames, double longitude, double latitude, LocalDateTime startTime) {
         this.id = id;
         this.ridesName = ridesName;
         this.locationName = locationName;
         this.startTime = startTime;
-        this.participants = participants;
+        this.participantUsernames = participantUsernames;
         this.latitude = latitude;
         this.longitude = longitude;
 
@@ -54,14 +53,14 @@ public class StartRideResponseDTO implements Serializable {
         this.longitude = longitude;
     }
 
-    public List<Rider> getParticipants() {
-        return participants;
+
+    public List<String> getParticipantUsernames() {
+        return participantUsernames;
     }
 
-    public void setParticipants(List<Rider> participants) {
-        this.participants = participants;
+    public void setParticipantUsernames(List<String> participantUsernames) {
+        this.participantUsernames = participantUsernames;
     }
-
 
     public String getRidesName() {
         return ridesName;
