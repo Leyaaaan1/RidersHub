@@ -1,28 +1,67 @@
 package leyans.RidersHub.DTO.Response;
 
-import java.time.LocalDateTime;
+import leyans.RidersHub.model.Rider;
+import org.locationtech.jts.geom.Point;
 
-public class StartRideResponseDTO {
-    private Integer rideId;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class StartRideResponseDTO implements Serializable {
+    private Integer id;
     private String ridesName;
     private String locationName;
-    private LocalDateTime startTime;
 
-    public StartRideResponseDTO(Integer rideId, String ridesName, String locationName, LocalDateTime startTime) {
-        this.rideId = rideId;
+    private double latitude;
+    private double longitude;
+    private LocalDateTime startTime;
+    private List<Rider> participants;
+
+
+
+    public StartRideResponseDTO(Integer id, String ridesName, String locationName, List<Rider> participants, double longitude, double latitude, LocalDateTime startTime) {
+        this.id = id;
         this.ridesName = ridesName;
         this.locationName = locationName;
         this.startTime = startTime;
+        this.participants = participants;
+        this.latitude = latitude;
+        this.longitude = longitude;
+
     }
 
-    // Getters and setters
-    public Integer getRideId() {
-        return rideId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setRideId(Integer rideId) {
-        this.rideId = rideId;
+    public void setId(Integer id) {
+        this.id = id;
     }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public List<Rider> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<Rider> participants) {
+        this.participants = participants;
+    }
+
 
     public String getRidesName() {
         return ridesName;

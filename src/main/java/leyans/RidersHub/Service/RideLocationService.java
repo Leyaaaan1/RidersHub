@@ -6,6 +6,7 @@ import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
 import leyans.RidersHub.model.RiderLocation;
 import leyans.RidersHub.model.StartedRide;
+import org.locationtech.jts.geom.Coordinate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-
 @Service
 public class RideLocationService {
 
@@ -42,10 +42,14 @@ public class RideLocationService {
      */
     @Transactional
     public LocationUpdateResponseDTO updateLocation(Integer rideId, double latitude, double longitude) {
+       //find active ride by ID
         StartedRide started = startedRideRepo.findById(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + rideId));
 
-        Point userPoint = geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(longitude, latitude));
+
+
+       // Uses geometryFactory to create a geographical point from the coordinates
+        Point userPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         userPoint.setSRID(4326);
 
         RiderLocation loc = new RiderLocation();
@@ -54,12 +58,12 @@ public class RideLocationService {
         loc.setTimestamp(LocalDateTime.now());
         loc = locationRepo.save(loc);
 
-        // Delegate distance calculation to PostGIS for accuracy
         double distance = locationRepo.findDistanceMeters(loc.getId(), latitude, longitude);
 
         LocationUpdateResponseDTO response = new LocationUpdateResponseDTO(
                 rideId, latitude, longitude, distance
         );
+
         kafkaTemplate.send("rides-location", response);
         return response;
     }
