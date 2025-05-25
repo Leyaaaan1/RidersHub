@@ -59,6 +59,8 @@ public class RidesService {
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         coordinates.setSRID(4326);
 
+
+
         Rides newRides = new Rides();
         newRides.setLocationName(locationName);
         newRides.setRidesName(ridesName);
@@ -76,6 +78,9 @@ public class RidesService {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             newRides.setParticipants(participants);
+
+
+
         }
         try {
             newRides = ridesRepository.save(newRides);
@@ -88,6 +93,11 @@ public class RidesService {
             longitude = newRides.getLocation().getX();
 
         }
+
+        List<String> listUsername = newRides.getParticipants().stream()
+                .map(Rider::getUsername)
+                .toList();
+
         RideResponseDTO ridesDTO = new RideResponseDTO(
                 newRides.getLocationName(),
                 newRides.getRidesName(),
@@ -99,7 +109,7 @@ public class RidesService {
                 newRides.getDate(),
                 latitude,
                 longitude,
-                newRides.getParticipants()
+                listUsername
 
         );
 

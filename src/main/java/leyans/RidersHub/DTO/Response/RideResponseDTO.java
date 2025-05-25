@@ -18,12 +18,12 @@ public class RideResponseDTO {
     private LocalDateTime date;
     private double latitude;
     private double longitude;
-    List<Rider> participants;
+    List<String> participants;
 
 
     public RideResponseDTO(String locationName, String ridesName, Rider username, RiderType riderType,
                            Integer distance, String startingPoint, String endingPoint, LocalDateTime
-                                   date, double latitude, double longitude, List<Rider> participants) {
+                                   date, double latitude, double longitude, List<String> participants) {
         this.locationName = locationName;
         this.ridesName = ridesName;
         this.username = username.getUsername();
@@ -37,14 +37,14 @@ public class RideResponseDTO {
         this.participants = participants;
 
     }
-    public List<Rider> getParticipants() {
+
+    public List<String> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<Rider> participants) {
+    public void setParticipants(List<String> participants) {
         this.participants = participants;
     }
-
 
     public String getUsername() {
         return username;
