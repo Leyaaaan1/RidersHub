@@ -24,7 +24,6 @@ public class StartRideController {
     @PostMapping("/{id}/start")
     public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable("id") Integer id) {
         StartRideResponseDTO started = startRideService.startRide(id);
-        System.out.println("Started ride with ID: " + started.getParticipants() + " participants");
         return ResponseEntity.ok(started);
     }
 
