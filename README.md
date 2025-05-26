@@ -1,45 +1,44 @@
-A project-based learning website for motorcycle enthusiasts in Davao City, developed with Spring and PostgreSQL, by following Spring documentation
+# Motorcycle Enthusiasts Project - Davao City
 
-Overview
+A project-based learning website for motorcycle enthusiasts in Davao City, developed with Spring Boot and PostgreSQL, following Spring documentation and best practices.
 
-This project is a real-time location tracking system built with Spring Boot, Apache Kafka, and Haversine Formula. 
-It efficiently processes user location updates, determines movement significance, and publishes updates to Kafka for further processing.
+---
 
- Features
+## Overview
 
-Spring Web – REST API endpoints
+This project implements a real-time location tracking system using Spring Boot, Apache Kafka (version 3.9+ in KRaft mode), and spatial calculations via PostGIS and Hibernate Spatial. It efficiently processes user location updates, determines movement significance using Haversine formula, and publishes relevant updates to Kafka for downstream processing.
 
-Spring Kafka – Integration with Kafka for message publishing
+---
 
-Spring Boot DevTools – Fast reload during development
+## Features
 
-Spring Boot Actuator – Monitoring & health checks
+- **Spring Web** – REST API endpoints  
+- **Spring Kafka (3.9+)** – Kafka integration using KRaft mode (no Zookeeper)  
+- **Spring Boot DevTools** – Fast reload during development  
+- **Spring Security** – Role-based access control for different rider types  
+- **Spring Hibernate & Hibernate Spatial** – ORM with advanced spatial data support  
+- **Spring Boot WebSocket** – Real-time communication (in progress)
 
-Spring Security – Role-based access control for different rider types
+---
 
-Spring Hibernate & Hibernate-Spatial – Advanced ORM with spatial data support
+## Location Processing & Optimization
 
-Spring Boot WebSocket – Real-time communication
+- **GeometryFactory & Hibernate Spatial** – Use GeometryFactory to create spatial objects  
+- **Custom PostGIS Query with Haversine Formula** – Efficient distance calculation directly in PostgreSQL  
+- **Threshold-based updates** – Avoids sending Kafka messages for insignificant movement  
+- **Real-time tracking** – Sends updates only when movement exceeds threshold  
 
+---
 
-**Location Processing & Optimization**
+## Kafka Setup (KRaft mode, no Zookeeper)
 
-Haversine Formula – Calculates movement distance
+Since Kafka 3.3+, you can run Kafka without Zookeeper using KRaft mode. This project uses Kafka 3.9+.
 
-Threshold-based updates – Avoids unnecessary Kafka messages
+To start Kafka in KRaft mode:
 
-Real-time tracking – Only sends updates when movement is significant
+```bash
+# Format storage for Kafka controller (only needed once)
+bin/kafka-storage.sh format -t <uuid> -c config/kraft/server.properties
 
-**Spatial & Kafka Enhancements**
-
-GeoMesa-Kafka-Datastore – Advanced spatial data storage & querying
-
-org.locationtech.jts – Geometry processing & spatial calculations
-
-📡 Kafka Setup
-
-# Start Zookeeper
-bin/zookeeper-server-start.sh config/zookeeper.properties
-
-# Start Kafka Broker
-bin/kafka-server-start.sh config/server.properties
+# Start Kafka broker (no Zookeeper)
+bin/kafka-server-start.sh config/kraft/server.properties
