@@ -6,14 +6,14 @@ A project-based learning website for motorcycle enthusiasts in Davao City, devel
 
 ## Overview
 
-This project implements a real-time location tracking system using Spring Boot, Apache Kafka (version 3.9+ in KRaft mode), and spatial calculations via PostGIS and Hibernate Spatial. It efficiently processes user location updates, determines movement significance using Haversine formula, and publishes relevant updates to Kafka for downstream processing.
+This project implements a real-time location tracking system using Spring Boot, Apache Kafka (version 3.9+), and spatial calculations via PostGIS and Hibernate Spatial. It efficiently processes user location updates, determines movement significance using Haversine formula, and publishes relevant updates to Kafka for downstream processing.
 
 ---
 
 ## Features
 
 - **Spring Web** – REST API endpoints  
-- **Spring Kafka (3.9+)** – Kafka integration using KRaft mode (no Zookeeper)  
+- **Spring Kafka (3.9+)** – Kafka integration using KRaft mode
 - **Spring Boot DevTools** – Fast reload during development  
 - **Spring Security** – Role-based access control for different rider types  
 - **Spring Hibernate & Hibernate Spatial** – ORM with advanced spatial data support  
