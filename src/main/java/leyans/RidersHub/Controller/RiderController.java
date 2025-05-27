@@ -71,11 +71,6 @@ public class RiderController {
 
 
 
-    @PostMapping("/send")
-    public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
-        riderService.sendMessage(riderType, message);
-        return "Message sent to RiderType: " + riderType;
-    }
 
 
 }
