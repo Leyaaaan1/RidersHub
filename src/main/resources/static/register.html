@@ -19,7 +19,7 @@
             password: this.password.value,
             riderType: this.riderType.value
         };
-        const res = await fetch('/register', {
+        const res = await fetch('/riders/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)

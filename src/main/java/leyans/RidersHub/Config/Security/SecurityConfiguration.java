@@ -35,20 +35,20 @@ public class SecurityConfiguration {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/riders/rider-type").hasRole("CAR")
-                        .requestMatchers("/riders/all").hasRole("CAR")
-                        .requestMatchers("/riders/add").hasRole("CAR")
-                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/riders/login", "/riders/register").permitAll()
+                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add").hasRole("CAR")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(AbstractHttpConfigurer::disable) // ✅ disable form login explicitly
+                .httpBasic(AbstractHttpConfigurer::disable) // ✅ disable HTTP Basic too if you aren't using it
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return httpSecurity.build();
+        return http.build();
     }
 
     @Bean
