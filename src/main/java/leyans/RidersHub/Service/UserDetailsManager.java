@@ -23,6 +23,7 @@ public class UserDetailsManager implements org.springframework.security.core.use
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Rider rider = riderRepository.findByUsername(username);
 
+
         RiderType riderType = rider.getRiderType();
 
         String role = "ROLE_" + riderType.getRiderType().toUpperCase();
