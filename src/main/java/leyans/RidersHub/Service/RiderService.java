@@ -18,12 +18,9 @@ public class    RiderService {
 
     @Autowired
     private final RiderRepository riderRepository;
-
     @Autowired
     private final RiderTypeRepository riderTypeRepository;
 
-    @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
 
     public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository) {
         this.riderRepository = riderRepository;
@@ -50,13 +47,14 @@ public class    RiderService {
 
     }
 
-    public void sendMessage(String riderType, String message) {
 
+    public Rider registerRider(String username, String password, String riderType) {
+        Rider existingRider = riderRepository.findByUsername(username);
+        if (existingRider != null) {
+            throw new RuntimeException("Username already exists");
+        }
 
-        System.out.println("Sending message to topic: " + riderType);
-        kafkaTemplate.send(riderType, message);
-        System.out.println("Sent message: " + message + " to RiderType: " + riderType);
-
+        return addRider(username, password, true, riderType);
     }
 
 

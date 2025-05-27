@@ -1,0 +1,30 @@
+<form id="registerForm" method="POST" action="/register">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required /><br />
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required /><br />
+
+    <label for="riderType">Rider Type:</label>
+    <input type="text" id="riderType" name="riderType" required /><br />
+
+    <button type="submit">Register</button>
+</form>
+
+<script>
+    document.getElementById('registerForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const data = {
+            username: this.username.value,
+            password: this.password.value,
+            riderType: this.riderType.value
+        };
+        const res = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        alert(result.message || (res.ok ? 'Registration successful' : 'Registration failed'));
+    };
+</script>
