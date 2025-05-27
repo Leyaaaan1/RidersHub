@@ -1,24 +1,16 @@
 
 import React from 'react';
-import {
 
-  Text,
-  View,
-} from 'react-native';
+import {NavigationContainer} from "@react-navigation/native";
+import MainNavigator from "./React/navigation/MainNavigator";
 
 
 
-function App(): React.JSX.Element {
-
-
-
-  return (
-      <View>
-        <Text>Just a text with nothing style</Text>
-      </View>
-  );
+export default function App() {
+    return (
+        <NavigationContainer>
+            <MainNavigator />
+        </NavigationContainer>
+    );
 }
 
-
-
-export default App;

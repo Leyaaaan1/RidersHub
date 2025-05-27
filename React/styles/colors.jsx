@@ -1,12 +1,10 @@
 
 const colors = {
     // Theme Colors
-    primary: '#fbe9e9',      // tibetanRed300
+    primary: '#6f1c1c',      // tibetanRed300
     secondary: '#f3c2c2',    // tibetanRed500
-    background: '#6f1c1c',   // tibetanRed800
+    background: '#fbe9e9',   // tibetanRed800
     text: '#fbe9e9',         // tibetanRed50
-
-
     // Full Tibetan Red Palette
     tibetanRed50: '#fbe9e9',
     tibetanRed100: '#f3c2c2',
