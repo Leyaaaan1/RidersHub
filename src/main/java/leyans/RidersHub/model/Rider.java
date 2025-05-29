@@ -23,7 +23,7 @@ public class Rider {
     private Boolean enabled;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "rider_type", referencedColumnName = "rider_type", nullable = false)
+    @JoinColumn(name = "rider_type", referencedColumnName = "rider_type")
     private RiderType riderType;
 
     public Rider(Integer id, String username, String password, Boolean enabled, RiderType riderType) {

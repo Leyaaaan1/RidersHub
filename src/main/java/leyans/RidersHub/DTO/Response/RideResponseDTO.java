@@ -8,7 +8,6 @@ import java.util.List;
 
 public class RideResponseDTO {
 
-    private String username;
     private String ridesName;
     private String locationName;
     private String riderType;
@@ -21,12 +20,11 @@ public class RideResponseDTO {
     List<String> participants;
 
 
-    public RideResponseDTO(String locationName, String ridesName, Rider username, RiderType riderType,
+    public RideResponseDTO(String locationName, String ridesName, RiderType riderType,
                            Integer distance, String startingPoint, String endingPoint, LocalDateTime
                                    date, double latitude, double longitude, List<String> participants) {
         this.locationName = locationName;
         this.ridesName = ridesName;
-        this.username = username.getUsername();
         this.riderType = riderType.getRiderType();
         this.distance = distance;
         this.startingPoint = startingPoint;
@@ -46,13 +44,7 @@ public class RideResponseDTO {
         this.participants = participants;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getRidesName() {
         return ridesName;

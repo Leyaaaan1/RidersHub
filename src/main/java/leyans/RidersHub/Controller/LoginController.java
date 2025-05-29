@@ -28,6 +28,8 @@ public class LoginController {
     @Autowired
     private RiderService riderService;
 
+
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -48,14 +50,15 @@ public class LoginController {
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
+
         try {
-            Rider newRider = riderService.registerRider(
+            Rider registerRider = riderService.registerRider(
                     registerRequest.getUsername(),
                     registerRequest.getPassword(),
                     registerRequest.getRiderType()
             );
 
-            String token = jwtUtil.generateToken(newRider.getUsername());
+            String token = jwtUtil.generateToken(registerRider.getUsername());
             return ResponseEntity.ok(new RegisterResponse(token, "Registration successful"));
 
         } catch (RuntimeException e) {
