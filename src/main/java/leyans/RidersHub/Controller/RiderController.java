@@ -8,6 +8,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -25,24 +26,13 @@ public class RiderController {
         this.ridesService = ridesService;
     }
 
-
-    // add type of rider with the entities of rider type
     @PostMapping("/rider-type")
     public ResponseEntity<RiderType> addRiderType(@RequestBody RiderTypeRequest request) {
         RiderType riderType = riderService.addRiderType(request.getRiderType());
         return ResponseEntity.ok(riderType);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<Rider> addRider(@RequestBody RiderRequest request) {
 
-        Rider rider = riderService.addRider(
-                request.getUsername(),
-                request.getPassword(),
-                request.getEnabled(),
-                request.getRiderType());
-        return ResponseEntity.ok(rider);
-    }
 
     @GetMapping("/all")
     public ResponseEntity<List<Rider>> getAllRiders() {
@@ -52,8 +42,11 @@ public class RiderController {
 
     @PostMapping("/create-ride")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
         RideResponseDTO response = ridesService.createRide(
-                rideRequest.getUsername(),
+                username,
                 rideRequest.getRidesName(),
                 rideRequest.getLocationName(),
                 rideRequest.getRiderType(),
@@ -71,11 +64,6 @@ public class RiderController {
 
 
 
-    @PostMapping("/send")
-    public String sendMessage(@RequestParam String riderType, @RequestParam String message) {
-        riderService.sendMessage(riderType, message);
-        return "Message sent to RiderType: " + riderType;
-    }
 
 
 }

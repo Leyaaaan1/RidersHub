@@ -7,6 +7,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.RiderRepository;
 
@@ -18,16 +19,17 @@ public class    RiderService {
 
     @Autowired
     private final RiderRepository riderRepository;
-
     @Autowired
     private final RiderTypeRepository riderTypeRepository;
 
     @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
+    private final PasswordEncoder passwordEncoder;
 
-    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository) {
+
+    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, PasswordEncoder passwordEncoder) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public RiderType addRiderType(String riderTypeName) {
@@ -36,27 +38,22 @@ public class    RiderService {
         return riderTypeRepository.save(riderType);
     }
 
-    public Rider addRider(String username, String password, Boolean enabled, String riderType) {
+    public Rider registerRider(String username, String password, String riderType) {
+        Rider existingRider = riderRepository.findByUsername(username);
+        if (existingRider != null) {
+            throw new RuntimeException("Username already exists");
+        }
 
-        RiderType riderTypeName= riderTypeRepository.findByRiderType(riderType);
+        String encodedPassword = passwordEncoder.encode(password);
+        RiderType riderTypeName = riderTypeRepository.findByRiderType(riderType);
 
         Rider newRider = new Rider();
-
         newRider.setUsername(username);
-        newRider.setPassword(password);
-        newRider.setEnabled(enabled);
+        newRider.setPassword(encodedPassword);
+        newRider.setEnabled(true);
         newRider.setRiderType(riderTypeName);
+
         return riderRepository.save(newRider);
-
-    }
-
-    public void sendMessage(String riderType, String message) {
-
-
-        System.out.println("Sending message to topic: " + riderType);
-        kafkaTemplate.send(riderType, message);
-        System.out.println("Sent message: " + message + " to RiderType: " + riderType);
-
     }
 
 

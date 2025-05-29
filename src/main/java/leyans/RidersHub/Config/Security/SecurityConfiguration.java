@@ -1,6 +1,8 @@
 package leyans.RidersHub.Config.Security;
 
+import leyans.RidersHub.Config.JWT.JwtFilter;
 import leyans.RidersHub.Service.UserDetailsManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,9 +13,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 import static org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter.Directive.COOKIES;
@@ -21,35 +26,42 @@ import static org.springframework.security.web.header.writers.ClearSiteDataHeade
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
-                .logout(logout -> logout
-                        .addLogoutHandler(new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter(COOKIES))))
-                .sessionManagement(session -> session
-                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/riders/rider-type").hasRole("CAR")
-                        .requestMatchers("/riders/all").hasRole("CAR")
-                        .requestMatchers("/riders/add").hasRole("CAR").anyRequest().authenticated())
 
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults());
+    @Autowired
+    private final JwtFilter jwtFilter;
 
-        return httpSecurity.build();
+    public SecurityConfiguration(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
     }
+
+
     @Bean
-    public AuthenticationManager authenticationManager(
-            UserDetailsManager userDetailsManager) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsManager);
-        authenticationProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
-        return new ProviderManager(authenticationProvider);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/riders/login", "/riders/register").permitAll()
+                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add").hasRole("CAR")
+                        .anyRequest().authenticated()
+                )
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsManager userDetailsManager, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsManager);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return new ProviderManager(authenticationProvider);
     }
 }

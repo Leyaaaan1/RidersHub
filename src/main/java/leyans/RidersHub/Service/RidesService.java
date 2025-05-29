@@ -101,7 +101,6 @@ public class RidesService {
         RideResponseDTO ridesDTO = new RideResponseDTO(
                 newRides.getLocationName(),
                 newRides.getRidesName(),
-                newRides.getUsername(),
                 newRides.getRiderType(),
                 newRides.getDistance(),
                 newRides.getStartingPoint(),
