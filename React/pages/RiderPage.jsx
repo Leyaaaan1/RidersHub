@@ -9,12 +9,9 @@ const RiderPage = ({ route }) => {
     const { username } = route.params;
     return (
         <View style={utilities.container}>
-            {/* Nav Bar */}
             <View>
                 <Text style={utilities.titleText}>{username?.toUpperCase()}</Text>
-                <TouchableOpacity style={utilities.button}>
-                    {/* Empty button */}
-                </TouchableOpacity>
+
             </View>
             <View style={utilities.centeredContainer}>
                 <TouchableOpacity style={utilities.button}>
