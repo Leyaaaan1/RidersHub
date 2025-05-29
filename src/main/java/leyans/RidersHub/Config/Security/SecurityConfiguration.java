@@ -42,7 +42,9 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/riders/login", "/riders/register").permitAll()
-                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add").hasRole("CAR")
+                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add",
+                                "riders/current-rider-type").hasRole("CAR")
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

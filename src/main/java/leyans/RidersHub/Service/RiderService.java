@@ -38,6 +38,16 @@ public class    RiderService {
         return riderTypeRepository.save(riderType);
     }
 
+    public RiderType getCurrentUserRiderType(String username) {
+        Rider rider = riderRepository.findByUsername(username);
+        if (rider == null) {
+            throw new RuntimeException("User not found");
+        }
+        return rider.getRiderType();
+    }
+
+
+
     public Rider registerRider(String username, String password, String riderType) {
         Rider existingRider = riderRepository.findByUsername(username);
         if (existingRider != null) {

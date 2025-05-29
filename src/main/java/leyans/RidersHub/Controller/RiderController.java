@@ -22,6 +22,8 @@ public class RiderController {
 
     @Autowired
     public RiderController(RiderService riderService, RidesService ridesService) {
+
+
         this.riderService = riderService;
         this.ridesService = ridesService;
     }
@@ -29,6 +31,13 @@ public class RiderController {
     @PostMapping("/rider-type")
     public ResponseEntity<RiderType> addRiderType(@RequestBody RiderTypeRequest request) {
         RiderType riderType = riderService.addRiderType(request.getRiderType());
+        return ResponseEntity.ok(riderType);
+    }
+
+    @GetMapping("/current-rider-type")
+    public ResponseEntity<RiderType> getCurrentUserRiderType() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        RiderType riderType = riderService.getCurrentUserRiderType(username);
         return ResponseEntity.ok(riderType);
     }
 
