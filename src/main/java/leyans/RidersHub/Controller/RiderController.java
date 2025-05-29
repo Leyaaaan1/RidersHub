@@ -22,8 +22,6 @@ public class RiderController {
 
     @Autowired
     public RiderController(RiderService riderService, RidesService ridesService) {
-
-
         this.riderService = riderService;
         this.ridesService = ridesService;
     }
@@ -40,6 +38,7 @@ public class RiderController {
         RiderType riderType = riderService.getCurrentUserRiderType(username);
         return ResponseEntity.ok(riderType);
     }
+
 
 
 
@@ -65,7 +64,8 @@ public class RiderController {
                 rideRequest.getLatitude(),
                 rideRequest.getLongitude(),
                 rideRequest.getEndingPoint(),
-                rideRequest.getParticipants()
+                rideRequest.getParticipants(),
+                rideRequest.getDescription()
 
                 );
         return ResponseEntity.ok(response);

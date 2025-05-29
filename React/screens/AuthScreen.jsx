@@ -30,7 +30,7 @@ const AuthForm = ({
             placeholderTextColor={utilities.textBlack.color}
             value={password}
             onChangeText={setPassword}
-            style={[utilities.textBox, { height: 50, width: 250 }]}
+            style={[utilities.textBox, { height: 50, width: 250, color: utilities.textBlack.color }]}
             secureTextEntry
         />
         {!isLogin && (

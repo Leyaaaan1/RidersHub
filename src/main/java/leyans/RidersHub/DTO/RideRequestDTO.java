@@ -18,11 +18,13 @@ public class RideRequestDTO {
     private double latitude;
     private double longitude;
     private List<String> participants;
+    private String description;
 
 
-    public RideRequestDTO(String username, List<String> participants, String ridesName, String endingPoint, String locationName, String riderType, Integer distance, String startingPoint, LocalDateTime date, double latitude, double longitude) {
+    public RideRequestDTO(String username, List<String> participants, String description, String ridesName, String endingPoint, String locationName, String riderType, Integer distance, String startingPoint, LocalDateTime date, double latitude, double longitude) {
         this.username = username;
         this.ridesName = ridesName;
+        this.description = description;
         this.locationName = locationName;
         this.riderType = riderType;
         this.distance = distance;
@@ -36,6 +38,13 @@ public class RideRequestDTO {
 
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public List<String> getParticipants() {
         return participants;

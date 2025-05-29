@@ -43,8 +43,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/riders/login", "/riders/register").permitAll()
                         .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add",
-                                "riders/current-rider-type").hasRole("CAR")
-
+                                "/riders/rider-type/{username}", "/riders/current-rider-type").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

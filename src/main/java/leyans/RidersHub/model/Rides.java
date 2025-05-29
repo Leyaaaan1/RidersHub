@@ -29,28 +29,11 @@ public class Rides {
     private String ridesName;
 
 
+    @Lob
+    @Column(name = "description")
+    private String description;
 
-//    @Column(name = "latitude", nullable = false)
-//    private double latitude;  // Store latitude separately
-//
-//    @Column(name = "longitude", nullable = false)
-//    private double longitude; // Store longitude separately
 
-//    public double getLatitude() {
-//        return latitude;
-//    }
-//
-//    public void setLatitude(double latitude) {
-//        this.latitude = latitude;
-//    }
-//
-//    public double getLongitude() {
-//        return longitude;
-//    }
-//
-//    public void setLongitude(double longitude) {
-//        this.longitude = longitude;
-//    }
 
     @ManyToOne
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
@@ -62,6 +45,10 @@ public class Rides {
 
     @Column(name = "distance", nullable = false)
     private Integer distance;
+
+
+
+
 
     @ManyToMany
     @JoinTable(
@@ -89,7 +76,7 @@ public class Rides {
     public Rides() {
     }
 
-    public Rides(Integer ridesId, String locationName, Point location, String ridesName, double latitude, double longitude, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
+    public Rides(Integer ridesId, String locationName, Point location, String ridesName, String description, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
         this.ridesId = ridesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -100,8 +87,16 @@ public class Rides {
         this.endingPoint = endingPoint;
         this.startingPoint = startingPoint;
         this.date = date;
+        this.description = description;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Point getLocation() {
         return location;
