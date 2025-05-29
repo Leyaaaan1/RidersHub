@@ -1,7 +1,20 @@
 package leyans.RidersHub.DTO;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 public class RegisterRequest {
+
+    @NotBlank(message = "Username is required")
+    @Pattern(regexp = "^[a-zA-Z0-9]{3,}$",
+            message = "Username must be at least 3 characters and can contain only letters and numbers")
     private String username;
+
+    @NotBlank(message = "Password is required")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$",
+            message = "Password must be at least 6 characters and include both letters and numbers"
+    )
     private String password;
     private String riderType;
 
