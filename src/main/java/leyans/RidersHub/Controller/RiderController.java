@@ -48,7 +48,7 @@ public class RiderController {
         return ResponseEntity.ok(riders);
     }
 
-    @PostMapping("/create-ride")
+    @PostMapping("/create")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -68,6 +68,8 @@ public class RiderController {
                 rideRequest.getDescription()
 
                 );
+        System.out.println("Authenticated username: " + username);
+
         return ResponseEntity.ok(response);
     }
 
