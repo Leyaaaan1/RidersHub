@@ -20,17 +20,24 @@ const CreateRide = ({ route, navigation }) => {
 
         try {
             setLoading(true);
-            const response = await fetch('http://192.168.1.51:8080/rides/create', {
+            const response = await fetch('http://192.168.1.51:8080/riders/create', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    title,
-                    description,
-                    location,
+                    ridesName: title,
+                    locationName: location,
+                    riderType: "",
+                    distance: 0,
+                    startingPoint: location,
                     date: date.toISOString(),
+                    latitude: 0,
+                    longitude: 0,
+                    endingPoint: location,
+                    participants: 1,
+                    description: description
                 })
             });
 
@@ -48,6 +55,7 @@ const CreateRide = ({ route, navigation }) => {
             setLoading(false);
         }
     };
+
 
     return (
         <ScrollView contentContainerStyle={utilities.container}>
@@ -71,13 +79,17 @@ const CreateRide = ({ route, navigation }) => {
                     multiline
                 />
 
-                <Text style={utilities.label}>Location*</Text>
-                <TextInput
-                    style={utilities.textBox}
-                    value={location}
-                    onChangeText={setLocation}
-                    placeholder="Meeting point"
-                />
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+                    <Text style={utilities.label}>Location*</Text>
+                    <TextInput
+                        style={utilities.textBox}
+                        value={location}
+                        onChangeText={setLocation}
+                        placeholder="Meeting point"
+                    />
+                </View>
+
+
 
                 <Text style={utilities.label}>Date and Time*</Text>
 

@@ -42,8 +42,8 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/riders/login", "/riders/register").permitAll()
-                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add", "/riders/create",
-                                "/riders/rider-type/{username}", "/riders/current-rider-type").authenticated()
+                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add", "/riders/create"
+                                , "/riders/current-rider-type").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -52,6 +52,7 @@ public class SecurityConfiguration {
 
         return http.build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
