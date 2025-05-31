@@ -2,14 +2,18 @@ package leyans.RidersHub.Controller;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
+import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
+import leyans.RidersHub.Service.StartRideService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -18,12 +22,14 @@ public class RiderController {
 
     private final RiderService riderService;
     private final RidesService ridesService;
+    private final StartRideService startRideService;
 
 
     @Autowired
-    public RiderController(RiderService riderService, RidesService ridesService) {
+    public RiderController(RiderService riderService, RidesService ridesService, StartRideService startRideService) {
         this.riderService = riderService;
         this.ridesService = ridesService;
+        this.startRideService = startRideService;
     }
 
     @PostMapping("/rider-type")
@@ -31,6 +37,14 @@ public class RiderController {
         RiderType riderType = riderService.addRiderType(request.getRiderType());
         return ResponseEntity.ok(riderType);
     }
+
+    @GetMapping("/current-rider-type")
+    public ResponseEntity<RiderType> getCurrentUserRiderType() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        RiderType riderType = riderService.getCurrentUserRiderType(username);
+        return ResponseEntity.ok(riderType);
+    }
+
 
 
 
@@ -40,7 +54,7 @@ public class RiderController {
         return ResponseEntity.ok(riders);
     }
 
-    @PostMapping("/create-ride")
+    @PostMapping("/create")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -56,10 +70,23 @@ public class RiderController {
                 rideRequest.getLatitude(),
                 rideRequest.getLongitude(),
                 rideRequest.getEndingPoint(),
-                rideRequest.getParticipants()
+                rideRequest.getParticipants(),
+                rideRequest.getDescription()
 
                 );
+        System.out.println("Authenticated username: " + username);
+
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/start")
+    public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable("id") Integer id) throws AccessDeniedException {
+        // The service already extracts the username from the security context
+        // and includes it as the initiator in the response
+        StartRideResponseDTO started = startRideService.startRide(id);
+
+        // The initiator in the response represents both the creator and starter of the ride
+        return ResponseEntity.ok(started);
     }
 
 

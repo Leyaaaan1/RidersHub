@@ -42,9 +42,13 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/riders/login", "/riders/register").permitAll()
-                        .requestMatchers("/riders/rider-type", "/riders/all", "/riders/add").hasRole("CAR")
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers(
+                                "/rides/*/start",
+                                "/riders/rider-type", "/riders/all", "/riders/add", "/riders/create", "/riders/*/start",
+                                "/rides/**", "/riders/current-rider-type", "/locations/**"
+                        )
+                        .authenticated()
+                        .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

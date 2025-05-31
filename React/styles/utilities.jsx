@@ -10,6 +10,18 @@ const utilities = StyleSheet.create({
         backgroundColor: colors.background,
         padding: spacing.md,
     },
+
+    gradientContainer: {
+        flex: 1,
+        padding: spacing.md,
+    },
+
+    containerPrimary: {
+        flex: 1,
+        backgroundColor: colors.secondary,
+        padding: spacing.md,
+    },
+
     centeredContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -75,6 +87,15 @@ const utilities = StyleSheet.create({
         fontWeight: 'bold',
         color: colors.primary,
         marginBottom: spacing.md,
+    },
+    compactText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        lineHeight: 20,   // Small line height to remove space between lines
+        marginVertical: 0,
+        paddingVertical: 0,
+        color: colors.primary,
+
     },
     paragraph: {
         fontSize: 16,

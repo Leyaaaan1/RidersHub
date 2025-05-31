@@ -48,7 +48,8 @@ public class RidesService {
     public RideResponseDTO createRide(String username, String ridesName, String locationName,
                                       String riderType, Integer distance, String startingPoint,
                                       LocalDateTime date, double latitude, double longitude,
-                                      String endingPoint, List<String> participantUsernames) {
+                                      String endingPoint, List<String> participantUsernames,
+                                      String description) {
 
         Rider rider = riderRepository.findByUsername(username);
 
@@ -71,6 +72,7 @@ public class RidesService {
         newRides.setDate(date);
         newRides.setRiderType(newRiderType);
         newRides.setLocation(coordinates);
+        newRides.setDescription(description);
 
         if (participantUsernames != null && !participantUsernames.isEmpty()) {
             List<Rider> participants = participantUsernames.stream()
@@ -99,6 +101,7 @@ public class RidesService {
                 .toList();
 
         RideResponseDTO ridesDTO = new RideResponseDTO(
+
                 newRides.getLocationName(),
                 newRides.getRidesName(),
                 newRides.getRiderType(),
@@ -108,7 +111,8 @@ public class RidesService {
                 newRides.getDate(),
                 latitude,
                 longitude,
-                listUsername
+                listUsername,
+                newRides.getDescription()
 
         );
 

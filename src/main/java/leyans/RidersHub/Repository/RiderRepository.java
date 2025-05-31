@@ -11,6 +11,7 @@ public interface RiderRepository extends JpaRepository<Rider, Integer> {
 
     Rider findByUsername(String username);
 
+
     Optional<Rider> findByUsernameAfter(String username);
 
 

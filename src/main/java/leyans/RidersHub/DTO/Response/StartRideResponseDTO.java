@@ -15,12 +15,12 @@ public class StartRideResponseDTO implements Serializable {
     private double longitude;
     private LocalDateTime startTime;
 
-    private Rider initiator;
+    private String initiator;
 
     private List<String> participantUsernames;
 
 
-    public StartRideResponseDTO(Integer id, Rider initiator, String ridesName, String locationName, List<String> participantUsernames, double longitude, double latitude, LocalDateTime startTime) {
+    public StartRideResponseDTO(Integer id, String initiator, String ridesName, String locationName, List<String> participantUsernames, double longitude, double latitude, LocalDateTime startTime) {
         this.id = id;
         this.initiator = initiator;
         this.ridesName = ridesName;
@@ -32,11 +32,12 @@ public class StartRideResponseDTO implements Serializable {
 
     }
 
-    public Rider getInitiator() {
+
+    public String getInitiator() {
         return initiator;
     }
 
-    public void setInitiator(Rider initiator) {
+    public void setInitiator(String initiator) {
         this.initiator = initiator;
     }
 

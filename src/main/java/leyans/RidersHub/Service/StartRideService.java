@@ -1,6 +1,8 @@
 package leyans.RidersHub.Service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import leyans.RidersHub.DTO.ParticipantLocationDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Repository.RiderRepository;
@@ -14,6 +16,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class StartRideService {
@@ -32,14 +36,19 @@ public class StartRideService {
     private final RiderRepository riderRepository;
     private final KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate;
 
+    private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+
     @Autowired
     public StartRideService(RidesRepository ridesRepository,
                             StartedRideRepository startedRideRepository, RiderRepository riderRepository,
-                            KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate) {
+                            KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate, StringRedisTemplate stringRedisTemplate) {
         this.ridesRepository = ridesRepository;
         this.startedRideRepository = startedRideRepository;
         this.riderRepository = riderRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.stringRedisTemplate = stringRedisTemplate;
     }
 
 
@@ -47,9 +56,7 @@ public class StartRideService {
     public StartRideResponseDTO startRide(Integer rideId) throws AccessDeniedException {
 
 
-
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
         Rider initiator = riderRepository.findByUsername(username);
 
         if (initiator == null) {
@@ -60,6 +67,13 @@ public class StartRideService {
                 .orElseThrow(() -> new IllegalArgumentException("Ride not found with id: " + rideId));
 
 
+        if (ride.getUsername() == null || !ride.getUsername().getUsername().equals(initiator.getUsername())) {
+            throw new AccessDeniedException("Only the ride initiator can start this ride");
+        }
+
+        if (startedRideRepository.existsByRide(ride)) {
+            throw new IllegalStateException("Ride has already been started");
+        }
 
 
         double longitude = 0.0;
@@ -86,7 +100,7 @@ public class StartRideService {
 
         StartRideResponseDTO responseDTO = new StartRideResponseDTO(
                 ride.getRidesId(),
-                initiator,
+                initiator.getUsername(),
                 ride.getRidesName(),
                 ride.getLocationName(),
                 participantUsernames,
@@ -95,8 +109,21 @@ public class StartRideService {
                 started.getStartTime());
 
         kafkaTemplate.send("ride-started", responseDTO);
+
+        try {
+            String locationJson = objectMapper.writeValueAsString(responseDTO);
+            String redisKey = "ride_started:" + initiator.getUsername();
+            stringRedisTemplate.opsForValue().set(redisKey, locationJson, 3, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize location update", e);
+        }
+
+
         return responseDTO;
 
 }
+
+
+
 }
 

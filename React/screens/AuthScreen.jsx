@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import utilities from "../styles/utilities";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AuthForm = ({
                       isLogin,
@@ -29,7 +30,7 @@ const AuthForm = ({
             placeholderTextColor={utilities.textBlack.color}
             value={password}
             onChangeText={setPassword}
-            style={[utilities.textBox, { height: 50, width: 250 }]}
+            style={[utilities.textBox, { height: 50, width: 250, color: utilities.textBlack.color }]}
             secureTextEntry
         />
         {!isLogin && (
@@ -44,12 +45,7 @@ const AuthForm = ({
         <View>
             <TouchableOpacity
                 style={utilities.button}
-                onPress={async () => {
-                    const success = await handleAuth();
-                    if (isLogin && username && success) {
-                        navigation.navigate('RiderPage', { username });
-                    }
-                }}
+                onPress={handleAuth}
             >
                 <Text style={utilities.buttonText}>{isLogin ? 'Login' : 'Register'}</Text>
             </TouchableOpacity>
@@ -61,6 +57,7 @@ const AuthForm = ({
         </View>
     </View>
 );
+
 const AuthScreen = ({ navigation }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [username, setUsername] = useState('');
@@ -84,13 +81,28 @@ const AuthScreen = ({ navigation }) => {
             const result = await response.json();
 
             if (response.ok) {
+                // Save the token to AsyncStorage
+                if (result.token) {
+                    await AsyncStorage.setItem('userToken', result.token);
+                    await AsyncStorage.setItem('username', username);
+                    // You can store additional data in AsyncStorage as needed
+                }
+
                 Alert.alert(isLogin ? 'Login Successful' : 'Registration Successful');
+
+                if (isLogin && username) {
+                    navigation.navigate('RiderPage', {
+                        username: username,
+                        token: result.token,
+                    });
+                }
                 return true;
             } else {
                 Alert.alert('Error', result.message || 'Operation failed');
                 return false;
             }
         } catch (error) {
+            console.error(error);
             Alert.alert('Error', 'Please try again later.');
             return false;
         }
@@ -113,4 +125,5 @@ const AuthScreen = ({ navigation }) => {
         />
     );
 };
+
 export default AuthScreen;
