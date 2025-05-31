@@ -1,6 +1,7 @@
 package leyans.RidersHub.Service;
 
 
+import leyans.RidersHub.DTO.ParticipantLocationDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Repository.RiderRepository;
@@ -47,9 +48,7 @@ public class StartRideService {
     public StartRideResponseDTO startRide(Integer rideId) throws AccessDeniedException {
 
 
-
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
         Rider initiator = riderRepository.findByUsername(username);
 
         if (initiator == null) {
@@ -60,6 +59,13 @@ public class StartRideService {
                 .orElseThrow(() -> new IllegalArgumentException("Ride not found with id: " + rideId));
 
 
+        if (ride.getUsername() == null || !ride.getUsername().getUsername().equals(initiator.getUsername())) {
+            throw new AccessDeniedException("Only the ride initiator can start this ride");
+        }
+
+        if (startedRideRepository.existsByRide(ride)) {
+            throw new IllegalStateException("Ride has already been started");
+        }
 
 
         double longitude = 0.0;
@@ -86,7 +92,7 @@ public class StartRideService {
 
         StartRideResponseDTO responseDTO = new StartRideResponseDTO(
                 ride.getRidesId(),
-                initiator,
+                initiator.getUsername(),
                 ride.getRidesName(),
                 ride.getLocationName(),
                 participantUsernames,
@@ -95,8 +101,12 @@ public class StartRideService {
                 started.getStartTime());
 
         kafkaTemplate.send("ride-started", responseDTO);
+
         return responseDTO;
 
 }
+
+
+
 }
 
