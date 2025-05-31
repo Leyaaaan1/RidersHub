@@ -4,6 +4,7 @@ import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Service.RideLocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -47,6 +48,13 @@ public class RiderLocationController {
         // This already updates the authenticated user's location
         LocationUpdateRequestDTO response = rideLocationService.updateLocation(rideId, latitude, longitude);
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/test-auth")
+    public ResponseEntity<String> testAuth() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return ResponseEntity.ok("Authenticated as: " + username);
     }
 
     @GetMapping("/rider/{username}")

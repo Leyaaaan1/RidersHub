@@ -45,7 +45,7 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/rides/*/start",
                                 "/riders/rider-type", "/riders/all", "/riders/add", "/riders/create", "/riders/*/start",
-                                "/rides/**", "/riders/current-rider-type"
+                                "/rides/**", "/riders/current-rider-type", "/locations/**"
                         )
                         .authenticated()
                         .anyRequest().authenticated())
