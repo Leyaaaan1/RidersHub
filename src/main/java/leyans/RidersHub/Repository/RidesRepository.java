@@ -17,5 +17,14 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     @Query("SELECT r FROM Rides r LEFT JOIN FETCH r.participants WHERE r.ridesId = :rideId")
     Optional<Rides> findByIdWithParticipants(@Param("rideId") Integer rideId);
 
+    @Query("SELECT r.username FROM Rides r WHERE r.ridesId = :rideId")
+    Optional<Rider> findRiderByRideId(@Param("rideId") Integer rideId);
+
+    @Query("SELECT r FROM Rides r")
+    List<Rides> findAllRides();
+
+    @Query("SELECT r FROM Rides r WHERE r.username = :rider")
+    List<Rides> findRidesByRider(@Param("rider") Rider rider);
+
 
 }

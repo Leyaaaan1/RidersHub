@@ -37,6 +37,7 @@ public class RiderLocationController {
 //        }
 //    }
 
+    //use started ride id to update,
     @PostMapping("/update/{rideId}")
     public ResponseEntity<LocationUpdateRequestDTO> updateParticipantLocation(
             @PathVariable Integer rideId,
@@ -51,17 +52,17 @@ public class RiderLocationController {
     }
 
 
-    @GetMapping("/test-auth")
+    @GetMapping("/test/auth")
     public ResponseEntity<String> testAuth() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return ResponseEntity.ok("Authenticated as: " + username);
     }
 
-    @GetMapping("/rider/{username}")
-    public ResponseEntity<LocationUpdateRequestDTO> getRiderLocation(@PathVariable String username) {
-        LocationUpdateRequestDTO location = rideLocationService.getRiderLocation(username);
-        return ResponseEntity.ok(location);
-    }
+//    @GetMapping("/rider/{username}")
+//    public ResponseEntity<LocationUpdateRequestDTO> getRiderLocation(@PathVariable String username) {
+//        LocationUpdateRequestDTO location = rideLocationService.getRiderLocation(username);
+//        return ResponseEntity.ok(location);
+//    }
 }
 
    /* @PostMapping("/update/{rideId}/{username}")

@@ -86,13 +86,13 @@ public class RideLocationService {
                 loc.getTimestamp()
         );
 
-        try {
-            String locationJson = objectMapper.writeValueAsString(locationDTO);
-            String redisKey = "rider_location:" + rider.getUsername();
-            stringRedisTemplate.opsForValue().set(redisKey, locationJson, 3, TimeUnit.MINUTES);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to serialize location update", e);
-        }
+//        try {
+//            String locationJson = objectMapper.writeValueAsString(locationDTO);
+//            String redisKey = "rider_location:" + rider.getUsername();
+//            stringRedisTemplate.opsForValue().set(redisKey, locationJson, 3, TimeUnit.MINUTES);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to serialize location update", e);
+//        }
 
         // Send Kafka message
         kafkaTemplate.send("rider-locations", locationDTO);
@@ -102,21 +102,21 @@ public class RideLocationService {
 
 
 
-    public  LocationUpdateRequestDTO getRiderLocation(String username) {
-
-        String redisKey = "rider_location:" + username;
-        String locationJson = stringRedisTemplate.opsForValue().get(redisKey);
-
-        if (locationJson == null) {
-            throw new RuntimeException("No location found for rider: " + username);
-        }
-        try {
-            return objectMapper.readValue(locationJson, LocationUpdateRequestDTO.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to deserialize rider location", e);
-        }
-
-    }
+//    public  LocationUpdateRequestDTO getRiderLocation(String username) {
+//
+//        String redisKey = "rider_location:" + username;
+//        String locationJson = stringRedisTemplate.opsForValue().get(redisKey);
+//
+//        if (locationJson == null) {
+//            throw new RuntimeException("No location found for rider: " + username);
+//        }
+//        try {
+//            return objectMapper.readValue(locationJson, LocationUpdateRequestDTO.class);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to deserialize rider location", e);
+//        }
+//
+//    }
 
 
 
