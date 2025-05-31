@@ -21,7 +21,7 @@ public class StartRideController {
     public StartRideController(StartRideService rideService) {
         this.rideService = rideService;
     }
-
+    //use created ride id to start,
     @PostMapping("/{rideId}/start")
     public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable Integer rideId) {
         try {

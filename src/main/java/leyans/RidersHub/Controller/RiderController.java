@@ -22,14 +22,12 @@ public class RiderController {
 
     private final RiderService riderService;
     private final RidesService ridesService;
-    private final StartRideService startRideService;
 
 
     @Autowired
-    public RiderController(RiderService riderService, RidesService ridesService, StartRideService startRideService) {
+    public RiderController(RiderService riderService, RidesService ridesService) {
         this.riderService = riderService;
         this.ridesService = ridesService;
-        this.startRideService = startRideService;
     }
 
     @PostMapping("/rider-type")
@@ -79,15 +77,9 @@ public class RiderController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/start")
-    public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable("id") Integer id) throws AccessDeniedException {
-        // The service already extracts the username from the security context
-        // and includes it as the initiator in the response
-        StartRideResponseDTO started = startRideService.startRide(id);
 
-        // The initiator in the response represents both the creator and starter of the ride
-        return ResponseEntity.ok(started);
-    }
+
+
 
 
 
