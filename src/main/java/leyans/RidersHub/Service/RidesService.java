@@ -72,20 +72,14 @@ public class RidesService {
         String barangayName = nominatimService.getBarangayNameFromCoordinates(latitude, longitude);
         String resolvedLocationName = locationName;
         if (barangayName != null) {
-            Optional<PsgcData> psgcDataOpt = psgcDataRepository.findByNameIgnoreCase(barangayName);
-            resolvedLocationName = psgcDataOpt.map(PsgcData::getName).orElse(barangayName);
+            List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
+            resolvedLocationName = !psgcDataList.isEmpty() ? psgcDataList.get(0).getName() : barangayName;
         }
-
-
 
 
         Rides newRides = new Rides();
       //  newRides.setLocationName(locationName);
         newRides.setLocationName(resolvedLocationName);
-
-
-
-
 
         newRides.setRidesName(ridesName);
         newRides.setUsername(rider);

@@ -8,24 +8,35 @@ public class LocationUpdateRequestDTO {
     private Integer rideId;
     private double latitude;
     private double longitude;
+
+    private String locationName;
     private double distanceMeters;
 
-    private Rider initiator;
+    private String initiator;
 
 
-    public LocationUpdateRequestDTO(Integer rideId, Rider initiator, double latitude, double longitude, double distanceMeters, LocalDateTime timestamp) {
+    public LocationUpdateRequestDTO(Integer rideId, String initiator, double latitude, double longitude, String locationName, double distanceMeters, LocalDateTime timestamp) {
         this.rideId = rideId;
         this.initiator = initiator;
         this.latitude = latitude;
         this.longitude = longitude;
         this.distanceMeters = distanceMeters;
+        this.locationName = locationName;
     }
 
-    public Rider getInitiator() {
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+
+    public String getInitiator() {
         return initiator;
     }
 
-    public void setInitiator(Rider initiator) {
+    public void setInitiator(String initiator) {
         this.initiator = initiator;
     }
 
