@@ -69,7 +69,17 @@ const RiderPage = ({ route , navigation}) => {
             <View style={utilities.centeredContainer}>
                 <TouchableOpacity
                     style={utilities.button}
-                    onPress={() => navigation.navigate('CreateRide', { token, username })}
+                    onPress={() => {
+                        console.log("Token being passed:", token);
+                        if (!token) {
+                            Alert.alert('Error', 'Authentication token is missing');
+                            return;
+                        }
+                        navigation.navigate('CreateRide', {
+                            token: token,
+                            username: username
+                        });
+                    }}
                 >
                     <Text style={utilities.buttonText}>Create ride</Text>
                 </TouchableOpacity>

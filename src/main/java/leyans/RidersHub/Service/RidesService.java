@@ -77,15 +77,9 @@ public class RidesService {
         }
 
 
-
-
         Rides newRides = new Rides();
       //  newRides.setLocationName(locationName);
         newRides.setLocationName(resolvedLocationName);
-
-
-
-
 
         newRides.setRidesName(ridesName);
         newRides.setUsername(rider);
