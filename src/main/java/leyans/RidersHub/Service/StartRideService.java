@@ -119,34 +119,21 @@ public class StartRideService {
 
         return responseDTO;
 
-}
-
-    @Transactional
-    public Optional<Rides> getRideById(Integer rideId) {
-        return ridesRepository.findByIdWithParticipants(rideId);
     }
 
-    @Transactional
-    public List<Rides> getAllRides() {
-        return ridesRepository.findAll();
-    }
-
-    @Transactional
-    public List<Rides> getRidesByRider(String username) {
-        Rider rider = riderRepository.findByUsername(username);
-        if (rider == null) {
-            return List.of();
-        }
-        return ridesRepository.findRidesByRider(rider);
-    }
-
-    @Transactional
-    public Optional<Rider> getRiderByRideId(Integer rideId) {
-        return ridesRepository.findRiderByRideId(rideId);
-    }
-
-
-
-
+//    @Transactional
+//    public Optional<StartedRide> getStartedRideByRideId(Integer rideId) {
+//        return startedRideRepository.findByRideId(rideId);
+//    }
+//
+//    @Transactional
+//    public List<Rider> getParticipantsByStartedRideId(Integer startedRideId) {
+//        return startedRideRepository.findParticipantsByStartedRideId(startedRideId);
+//
+//    }
+//
+//    public void addParticipantToStartedRide(Integer startedRideId, String username) {
+//        startedRideRepository.addParticipantToStartedRide(startedRideId, username);
+//    }
 }
 
