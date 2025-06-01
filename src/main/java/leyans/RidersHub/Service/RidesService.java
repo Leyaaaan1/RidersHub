@@ -2,11 +2,12 @@ package leyans.RidersHub.Service;
 
 
 import jakarta.transaction.Transactional;
-import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
+import leyans.RidersHub.Repository.PsgcDataRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.model.PsgcData;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
@@ -17,9 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.net.http.HttpHeaders;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,14 +32,20 @@ public class RidesService {
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
 
+
+    @Autowired
+    private PsgcDataRepository psgcDataRepository;
+
+    @Autowired
+    private NominatimService nominatimService;
+
     @Autowired
     private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
-    @Autowired
 
 
 
     public RidesService(RiderRepository riderRepository,
-                        RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository,
+                        RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository ,
                         KafkaTemplate<Object, RideResponseDTO> kafkaTemplate) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
@@ -60,10 +69,24 @@ public class RidesService {
         Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         coordinates.setSRID(4326);
 
+        String barangayName = nominatimService.getBarangayNameFromCoordinates(latitude, longitude);
+        String resolvedLocationName = locationName;
+        if (barangayName != null) {
+            Optional<PsgcData> psgcDataOpt = psgcDataRepository.findByNameIgnoreCase(barangayName);
+            resolvedLocationName = psgcDataOpt.map(PsgcData::getName).orElse(barangayName);
+        }
+
+
 
 
         Rides newRides = new Rides();
-        newRides.setLocationName(locationName);
+      //  newRides.setLocationName(locationName);
+        newRides.setLocationName(resolvedLocationName);
+
+
+
+
+
         newRides.setRidesName(ridesName);
         newRides.setUsername(rider);
         newRides.setDistance(distance);
@@ -119,6 +142,9 @@ public class RidesService {
         kafkaTemplate.send("location", ridesDTO);
         return ridesDTO;
     }
+
+
+
 
 }
 

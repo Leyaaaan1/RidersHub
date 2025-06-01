@@ -37,22 +37,13 @@ public class StartRideController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @GetMapping("/{rideId}/search")
+    public ResponseEntity<String> searchRide(@PathVariable Integer rideId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        // This is just a placeholder for the actual search logic
+        // In a real application, you would implement the search logic here
+        return ResponseEntity.ok("Searching for ride with ID: " + rideId + " for user: " + username);
+    }
 }
 
-//    @GetMapping("/{rideId}/participants/locations")
-//    public ResponseEntity<List<ParticipantLocationDTO>> getParticipantLocations(@PathVariable("rideId") Integer rideId) {
-//        List<ParticipantLocationDTO> locations = rideLocationService.getParticipantLocations(rideId);
-//        return ResponseEntity.ok(locations);
-//    }
-//
-//
-//    @PostMapping("/{id}/riderName")
-//    public ResponseEntity<LocationUpdateRequestDTO> updateLocation(
-//            @PathVariable("id") Integer rideId,
-//            @RequestParam("latitude") double latitude,
-//            @RequestParam("longitude") double longitude) {
-//        LocationUpdateRequestDTO response = rideLocationService.updateLocation(
-//                rideId, latitude, longitude);
-//        return ResponseEntity.ok(response);
-//    }
-//}
