@@ -50,17 +50,17 @@ const utilities = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    mapContainer: {
-        height: 200,
-        marginTop: 10,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    // map: {
-    //     ...StyleSheet.absoluteFillObject,
-    // },
-
-
+    //     mapContainer: {
+//         height: 250,
+//         marginBottom: 16,
+//         borderRadius: 8,
+//         overflow: 'hidden',
+//         borderWidth: 1,
+//         borderColor: '#ddd',
+//     },
+//     map: {
+//         ...StyleSheet.absoluteFillObject,
+//     },
 
     // === Top Navbar ===
     navbar: {
@@ -111,18 +111,18 @@ const utilities = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 10,
     },
-    input: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        padding: 10,
-        marginBottom: 10,
-        borderRadius: 8,
-    },
+    // input: {
+    //     borderWidth: 1,
+    //     borderColor: "#ccc",
+    //     padding: 10,
+    //     marginBottom: 10,
+    //     borderRadius: 8,
+    // },
     label: {
         marginBottom: 5,
         fontWeight: "bold",
     },
-    button: {
+    buttonBack: {
         backgroundColor: "#007AFF",
         padding: 12,
         marginTop: 10,
@@ -133,11 +133,11 @@ const utilities = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-    map: {
-        width: "100%",
-        height: 200,
-        marginBottom: 10,
-    },
+    // map: {
+    //     width: "100%",
+    //     height: 200,
+    //     marginBottom: 10,
+    // },
     // === Center Content ===
     center: {
         flex: 1,
@@ -165,14 +165,13 @@ const utilities = StyleSheet.create({
         marginBottom: spacing.sm,
     },
 
-    // === Primary Button ===
-    // button: {
-    //     backgroundColor: colors.primary,
-    //     paddingVertical: spacing.sm,
-    //     paddingHorizontal: spacing.lg,
-    //     borderRadius: 8,
-    //     marginTop: spacing.md,
-    // },
+    button: {
+        backgroundColor: colors.primary,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.lg,
+        borderRadius: 8,
+        marginTop: spacing.md,
+    },
     // buttonText: {
     //     color: colors.white,
     //     fontSize: 16,
@@ -187,6 +186,67 @@ const utilities = StyleSheet.create({
         alignItems: 'center',
         borderTopWidth: 1,
         borderTopColor: colors.tibetanRed700,
+    },
+    //     },
+    searchingText: {
+        color: '#666',
+        marginBottom: 8,
+        fontStyle: 'italic',
+    },
+    searchResultsList: {
+        maxHeight: 200,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+    },
+    searchResultItem: {
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    searchResultName: {
+        fontWeight: 'bold',
+    },
+    searchResultAddress: {
+        fontSize: 12,
+        color: '#666',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        backgroundColor: '#fff',
+    },
+        mapInstructions: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        right: 10,
+        backgroundColor: 'rgba(255,255,255,0.8)',
+        padding: 8,
+        borderRadius: 4,
+        zIndex: 1,
+        textAlign: 'center',
+    },
+    coordinatesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+
+        mapContainer: {
+        height: 250,
+        marginBottom: 16,
+        borderRadius: 8,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    map: {
+        ...StyleSheet.absoluteFillObject,
     },
 });
 export default utilities;

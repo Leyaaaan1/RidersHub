@@ -3,9 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert, StyleSheet, FlatList } from 'react-native';
 import utilities from '../styles/utilities';
 import {Picker} from "@react-native-picker/picker";
-import MapView, { Marker } from 'react-native-maps';
 import { WebView } from 'react-native-webview';
-
+import getMapHTML from '../utils/mapHTML';
 const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
     const webViewRef = useRef(null);
@@ -59,7 +58,13 @@ const CreateRide = ({ route, navigation }) => {
             setLatitude(data.lat.toString());
             setLongitude(data.lng.toString());
 
-            // Try to get location name from coordinates (your existing reverse geocoding)
+            // Show coordinates immediately
+            console.log(`Selected location: ${data.lat}, ${data.lng}`);
+
+            // Set a temporary loading state for location name
+            setLocationName('Fetching location name...');
+
+            // Try to get location name from coordinates
             fetch(
                 `https://nominatim.openstreetmap.org/reverse?` +
                 `lat=${data.lat}&lon=${data.lng}&format=json&addressdetails=1`,
@@ -78,12 +83,19 @@ const CreateRide = ({ route, navigation }) => {
 
                         setLocationName(name);
                         setSearchQuery(data.display_name);
+
+                        // You could also automatically populate starting/ending point if they're empty
+                        if (!startingPoint.trim()) {
+                            setStartingPoint(name);
+                        }
                     }
                 })
-                .catch(error => console.error('Error reverse geocoding:', error));
+                .catch(error => {
+                    console.error('Error reverse geocoding:', error);
+                    setLocationName('Location name unavailable');
+                });
         }
     };
-
 
     const mapHTML = `
     <!DOCTYPE html>
@@ -101,13 +113,13 @@ const CreateRide = ({ route, navigation }) => {
         <div id="map"></div>
         <script>
             const map = L.map('map').setView([${parseFloat(latitude) || 7.0731}, ${parseFloat(longitude) || 125.6128}], 15);
-            
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
-            
+
             const marker = L.marker([${parseFloat(latitude) || 7.0731}, ${parseFloat(longitude) || 125.6128}]).addTo(map);
-            
+
             map.on('click', function(e) {
                 marker.setLatLng(e.latlng);
                 window.ReactNativeWebView.postMessage(JSON.stringify({
@@ -304,7 +316,7 @@ const CreateRide = ({ route, navigation }) => {
             Alert.alert(
                 'Success',
                 'Ride created successfully!',
-                [{ text: 'OK', onPress: () => navigation.navigate('RiderPage', { token }) }]
+                [{ text: 'OK', onPress: () => navigation.navigate('RiderPage', { token, username }) }]
             );
         } catch (err) {
             setError(err.message || 'An error occurred');
@@ -331,30 +343,30 @@ return (
 
         <Text style={utilities.label}>Location Search*</Text>
         <TextInput
-            style={styles.input}
+            style={utilities.input}
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder="Search for a location"
         />
 
         {isSearching && (
-            <Text style={styles.searchingText}>Searching...</Text>
+            <Text style={utilities.searchingText}>Searching...</Text>
         )}
 
         {searchResults.length > 0 && (
             <FlatList
                 data={searchResults}
                 keyExtractor={(item) => item.place_id.toString()}
-                style={styles.searchResultsList}
+                style={utilities.searchResultsList}
                 renderItem={({item}) => (
                     <TouchableOpacity
-                        style={styles.searchResultItem}
+                        style={utilities.searchResultItem}
                         onPress={() => handleLocationSelect(item)}
                     >
-                        <Text style={styles.searchResultName}>
+                        <Text style={utilities.searchResultName}>
                             {item.display_name.split(',')[0]}
                         </Text>
-                        <Text style={styles.searchResultAddress}>
+                        <Text style={utilities.searchResultAddress}>
                             {item.display_name}
                         </Text>
                     </TouchableOpacity>
@@ -363,14 +375,14 @@ return (
         )}
 
         {/* Map View */}
-        <View style={styles.mapContainer}>
-            <Text style={styles.mapInstructions}>
+        <View style={utilities.mapContainer}>
+            <Text style={utilities.mapInstructions}>
                 Tap on the map to select a location
             </Text>
             <WebView
                 ref={webViewRef}
-                source={{ html: mapHTML }}
-                style={styles.map}
+                source={{ html: getMapHTML(latitude, longitude) }}
+                style={utilities.map}
                 onMessage={handleWebViewMessage}
                 javaScriptEnabled={true}
             />
@@ -378,7 +390,7 @@ return (
 
         <Text style={utilities.label}>Selected Location</Text>
         <TextInput
-            style={styles.input}
+            style={utilities.input}
             value={locationName}
             onChangeText={setLocationName}
             placeholder="Location name will appear here"
@@ -387,16 +399,16 @@ return (
 
 
         <Text style={utilities.label}>Coordinates</Text>
-        <View style={styles.coordinatesContainer}>
+        <View style={utilities.coordinatesContainer}>
             <TextInput
-                style={[styles.input, {width: '48%'}]}
+                style={[utilities.input, {width: '48%'}]}
                 value={latitude}
                 onChangeText={setLatitude}
                 placeholder="Latitude"
                 keyboardType="numeric"
             />
             <TextInput
-                style={[styles.input, {width: '48%'}]}
+                style={[utilities.input, {width: '48%'}]}
                 value={longitude}
                 onChangeText={setLongitude}
                 placeholder="Longitude"
@@ -411,7 +423,7 @@ return (
                 selectedValue={riderType}
                 onValueChange={(itemValue) => setRiderType(itemValue)}
             >
-                <Picker.Item label="Car" value="CAR" />
+                <Picker.Item label="car" value="car" />
                 <Picker.Item label="Motorcycle" value="MOTORCYCLE" />
             </Picker>
         </View>
@@ -441,28 +453,12 @@ return (
             placeholder="Enter ending point"
         />
 
-        <Text style={utilities.label}>Coordinates</Text>
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <TextInput
-                style={[utilities.input, {width: '48%'}]}
-                value={latitude}
-                onChangeText={setLatitude}
-                placeholder="Latitude"
-                keyboardType="numeric"
-            />
-            <TextInput
-                style={[utilities.input, {width: '48%'}]}
-                value={longitude}
-                onChangeText={setLongitude}
-                placeholder="Longitude"
-                keyboardType="numeric"
-            />
-        </View>
+
 
         <Text style={utilities.label}>Participants</Text>
         <View>
             <TextInput
-                style={styles.input}
+                style={utilities.input}
                 value={participants}
                 onChangeText={setParticipants}
                 placeholder="Enter rider usernames (comma separated)"
@@ -485,7 +481,7 @@ return (
         />
 
         <TouchableOpacity
-            style={[utilities.button, styles.createButton]}
+            style={[utilities.button, utilities.button]}
             onPress={handleCreateRide}
             disabled={loading}
         >
@@ -497,81 +493,6 @@ return (
 );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        padding: 16,
-        paddingBottom: 50,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        backgroundColor: '#fff',
-    },
-    pickerContainer: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        marginBottom: 16,
-        backgroundColor: '#fff',
-    },
-    searchingText: {
-        color: '#666',
-        marginBottom: 8,
-        fontStyle: 'italic',
-    },
-    searchResultsList: {
-        maxHeight: 200,
-        marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-    },
-    searchResultItem: {
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    searchResultName: {
-        fontWeight: 'bold',
-    },
-    searchResultAddress: {
-        fontSize: 12,
-        color: '#666',
-    },
-    mapContainer: {
-        height: 250,
-        marginBottom: 16,
-        borderRadius: 8,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: '#ddd',
-    },
-    map: {
-        ...StyleSheet.absoluteFillObject,
-    },
-    mapInstructions: {
-        position: 'absolute',
-        top: 10,
-        left: 10,
-        right: 10,
-        backgroundColor: 'rgba(255,255,255,0.8)',
-        padding: 8,
-        borderRadius: 4,
-        zIndex: 1,
-        textAlign: 'center',
-    },
-    coordinatesContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    createButton: {
-        marginTop: 10,
-        marginBottom: 30,
-    }
-});
+
 
 export default CreateRide;
