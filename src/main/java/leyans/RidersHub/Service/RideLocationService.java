@@ -3,9 +3,11 @@ package leyans.RidersHub.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.DTO.RiderLocationDTO;
+import leyans.RidersHub.Repository.PsgcDataRepository;
 import leyans.RidersHub.Repository.RiderLocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
+import leyans.RidersHub.model.PsgcData;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderLocation;
 import leyans.RidersHub.model.StartedRide;
@@ -20,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -32,17 +36,19 @@ public class RideLocationService {
     private final RiderRepository riderRepository;
     private final KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate;
 
-    private final StringRedisTemplate stringRedisTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final PsgcDataRepository psgcDataRepository;
+    private final NominatimService nominatimService;
+
 
     @Autowired
     public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo, RiderRepository riderRepository, KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate, StringRedisTemplate stringRedisTemplate) {
+                               RiderLocationRepository locationRepo, RiderRepository riderRepository, KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate, PsgcDataRepository psgcDataRepository, NominatimService nominatimService) {
         this.startedRideRepo = startedRideRepo;
         this.locationRepo = locationRepo;
         this.riderRepository = riderRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.stringRedisTemplate = stringRedisTemplate;
+        this.psgcDataRepository = psgcDataRepository;
+        this.nominatimService = nominatimService;
     }
 
     /**
@@ -66,24 +72,47 @@ public class RideLocationService {
         Point userPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         userPoint.setSRID(4326);
 
+
+        String barangayName = nominatimService.getBarangayNameFromCoordinates(latitude, longitude);
+        String locationName = null;
+        if (barangayName != null) {
+            List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
+            locationName = psgcDataList.stream()
+                    .findFirst()
+                    .map(PsgcData::getName)
+                    .orElse(barangayName);
+        }
+
+
         Point startPoint = started.getLocation();
         double distanceMeters = locationRepo.getDistanceBetweenPoints(userPoint, startPoint);
+
+
+
+
 
         RiderLocation loc = new RiderLocation();
         loc.setStartedRide(started);
         loc.setUsername(rider);
         loc.setLocation(userPoint);
+
         loc.setTimestamp(LocalDateTime.now());
         loc.setDistanceMeters(distanceMeters);
+        if (locationName != null) {
+            loc.setLocationName(locationName);
+        }
         loc = locationRepo.save(loc);
+
 
         LocationUpdateRequestDTO locationDTO = new LocationUpdateRequestDTO(
                 rideId,
-                rider,
+                username,
                 latitude,
                 longitude,
+                locationName,
                 distanceMeters,
                 loc.getTimestamp()
+
         );
 
 //        try {

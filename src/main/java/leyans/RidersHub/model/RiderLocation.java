@@ -22,6 +22,10 @@ public class RiderLocation {
     @JoinColumn(name = "started_ride_id", referencedColumnName = "id", nullable = false)
     private StartedRide startedRide;
 
+
+    @Column(name = "locationName", nullable = false)
+    private String locationName;
+
     @Column(name = "location", columnDefinition = "geometry(Point,4326)", nullable = false)
     private Point location;
 
@@ -32,17 +36,26 @@ public class RiderLocation {
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
-    public RiderLocation(Integer id, Rider username, double distanceMeters, StartedRide startedRide, Point location, LocalDateTime timestamp) {
+    public RiderLocation(Integer id, Rider username, double distanceMeters, StartedRide startedRide, String locationName, Point location, LocalDateTime timestamp) {
         this.id = id;
         this.username = username;
         this.startedRide = startedRide;
         this.location = location;
         this.timestamp = timestamp;
         this.distanceMeters = distanceMeters;
+        this.locationName = locationName;
     }
 
     public RiderLocation() {
 
+    }
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
     public Rider getUsername() {

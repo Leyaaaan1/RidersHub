@@ -8,6 +8,6 @@ import java.util.Optional;
 
 public interface PsgcDataRepository extends JpaRepository<PsgcData, String> {
 
-    Optional<PsgcData> findByNameIgnoreCase(String name);
+    List<PsgcData> findByNameIgnoreCase(String name);
 
 }
