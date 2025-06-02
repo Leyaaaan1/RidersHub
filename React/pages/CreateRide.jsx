@@ -224,8 +224,25 @@ const CreateRide = ({ route, navigation }) => {
                     error={error}
                     rideName={rideName}
                     setRideName={setRideName}
+                    riderType={riderType}
+                    setRiderType={setRiderType}
+                    distance={distance}
+                    setDistance={setDistance}
+                    participants={participants}
+                    setParticipants={setParticipants}
+                    handleFetchAllRiders={handleFetchAllRiders}
+                    description={description}
+                    setDescription={setDescription}
+                    nextStep={nextStep}
+                />
+            )}
+
+            {currentStep === 2 && (
+                <RideStep2
                     isSearching={isSearching}
                     searchResults={searchResults}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
                     handleLocationSelect={handleLocationSelect}
                     webViewRef={webViewRef}
                     latitude={latitude}
@@ -233,12 +250,13 @@ const CreateRide = ({ route, navigation }) => {
                     handleMessage={handleMessage}
                     locationName={locationName}
                     setLocationName={setLocationName}
+                    prevStep={prevStep}
                     nextStep={nextStep}
                 />
             )}
 
-            {currentStep === 2 && (
-                <RideStep2
+            {currentStep === 3 && (
+                <RideStep3
                     mapMode={mapMode}
                     setMapMode={setMapMode}
                     isSearching={isSearching}
@@ -254,22 +272,6 @@ const CreateRide = ({ route, navigation }) => {
                     setStartingPoint={setStartingPoint}
                     endingPoint={endingPoint}
                     setEndingPoint={setEndingPoint}
-                    prevStep={prevStep}
-                    nextStep={nextStep}
-                />
-            )}
-
-            {currentStep === 3 && (
-                <RideStep3
-                    riderType={riderType}
-                    setRiderType={setRiderType}
-                    distance={distance}
-                    setDistance={setDistance}
-                    participants={participants}
-                    setParticipants={setParticipants}
-                    handleFetchAllRiders={handleFetchAllRiders}
-                    description={description}
-                    setDescription={setDescription}
                     prevStep={prevStep}
                     handleCreateRide={handleCreateRide}
                     loading={loading}

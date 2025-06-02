@@ -1,85 +1,94 @@
 // React/components/ride/RideStep3.jsx
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import utilities from '../../styles/utilities';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import { WebView } from 'react-native-webview';
+import getMapHTML from '../../utils/mapHTML';
 
 const RideStep3 = ({
-                       riderType, setRiderType, distance, setDistance,
-                       participants, setParticipants, handleFetchAllRiders,
-                       description, setDescription, prevStep, handleCreateRide, loading
+                       mapMode, setMapMode, isSearching, searchResults,
+                       handleLocationSelect, webViewRef,
+                       startingLatitude, startingLongitude, endingLatitude, endingLongitude,
+                       handleMessage, startingPoint, setStartingPoint,
+                       endingPoint, setEndingPoint, prevStep, handleCreateRide, loading
                    }) => {
     return (
         <View>
-            <Text style={utilities.title}>Step 3: Ride Details</Text>
+            <Text style={utilities.title}>Step 3: Starting & Ending Points</Text>
 
-            <Text style={utilities.label}>Rider Type</Text>
-            <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 10}}>
+            <View style={utilities.coordinatesContainer}>
                 <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'car' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('car')}
+                    style={[utilities.button, mapMode === 'starting' && utilities.selectedRiderType]}
+                    onPress={() => setMapMode('starting')}
                 >
-                    <FontAwesome name="car" size={24} color={riderType === 'car' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'car' ? '#fff' : '#333'}}>Car</Text>
+                    <Text style={utilities.buttonText}>Select Starting Point</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'motor' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('motor')}
+                    style={[utilities.button, mapMode === 'ending' && utilities.selectedRiderType]}
+                    onPress={() => setMapMode('ending')}
                 >
-                    <FontAwesome name="motorcycle" size={24} color={riderType === 'motor' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'motor' ? '#fff' : '#333'}}>Motorcycle</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'bike' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('bike')}
-                >
-                    <FontAwesome name="bicycle" size={24} color={riderType === 'bike' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'bike' ? '#fff' : '#333'}}>Bike</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('cafe Racers')}
-                >
-                    <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
+                    <Text style={utilities.buttonText}>Select Ending Point</Text>
                 </TouchableOpacity>
             </View>
 
-            <Text style={utilities.label}>Distance (m)</Text>
+            {isSearching && (
+                <Text style={utilities.searchingText}>Searching...</Text>
+            )}
+
+            {searchResults.length > 0 && (
+                <FlatList
+                    data={searchResults}
+                    keyExtractor={(item) => item.place_id.toString()}
+                    style={utilities.searchResultsList}
+                    renderItem={({item}) => (
+                        <TouchableOpacity
+                            style={utilities.searchResultItem}
+                            onPress={() => handleLocationSelect(item)}
+                        >
+                            <Text style={utilities.searchResultName}>
+                                {item.display_name.split(',')[0]}
+                            </Text>
+                            <Text style={utilities.searchResultAddress}>
+                                {item.display_name}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                />
+            )}
+
+            <View style={utilities.mapContainer}>
+                <Text style={utilities.mapInstructions}>
+                    {mapMode === 'starting' ? 'Tap on the map to select starting point' : 'Tap on the map to select ending point'}
+                </Text>
+                <WebView
+                    ref={webViewRef}
+                    source={{ html: getMapHTML(
+                            mapMode === 'starting' ? startingLatitude : endingLatitude,
+                            mapMode === 'starting' ? startingLongitude : endingLongitude
+                        ) }}
+                    style={utilities.map}
+                    onMessage={handleMessage}
+                    javaScriptEnabled={true}
+                />
+            </View>
+
+            <Text style={utilities.label}>Starting Point</Text>
             <TextInput
                 style={utilities.input}
-                value={distance}
-                onChangeText={setDistance}
-                placeholder="Enter distance in meters"
-                keyboardType="numeric"
+                value={startingPoint}
+                onChangeText={setStartingPoint}
+                placeholder="Starting point will appear here"
+                editable={true}
             />
 
-            <Text style={utilities.label}>Participants</Text>
-            <View>
-                <TextInput
-                    style={utilities.input}
-                    value={participants}
-                    onChangeText={setParticipants}
-                    placeholder="Enter rider usernames (comma separated)"
-                />
-                <TouchableOpacity
-                    style={[utilities.button, {marginTop: 5}]}
-                    onPress={handleFetchAllRiders}
-                >
-                    <Text style={[utilities.buttonText, {fontSize: 14}]}>View Available Riders</Text>
-                </TouchableOpacity>
-            </View>
-
-            <Text style={utilities.label}>Description</Text>
+            <Text style={utilities.label}>Ending Point</Text>
             <TextInput
-                style={[utilities.input, {height: 100, textAlignVertical: 'top'}]}
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Enter ride description"
-                multiline
+                style={utilities.input}
+                value={endingPoint}
+                onChangeText={setEndingPoint}
+                placeholder="Ending point will appear here"
+                editable={true}
             />
 
             <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}}>
@@ -93,7 +102,7 @@ const RideStep3 = ({
                 <TouchableOpacity
                     style={utilities.button}
                     onPress={handleCreateRide}
-                    disabled={loading}
+                    disabled={loading || !startingPoint.trim() || !endingPoint.trim()}
                 >
                     <Text style={utilities.buttonText}>
                         {loading ? 'Creating...' : 'Create Ride'}
