@@ -13,27 +13,28 @@ const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
     const webViewRef = useRef(null);
 
-    // Form state setup
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [currentStep, setCurrentStep] = useState(1);
 
-    // Common form state
     const [rideName, setRideName] = useState('');
     const [locationName, setLocationName] = useState('');
     const [riderType, setRiderType] = useState('CAR');
     const [distance, setDistance] = useState('');
-    const [startingPoint, setStartingPoint] = useState('');
-    const [endingPoint, setEndingPoint] = useState('');
+    const [date, setDate] = useState(new Date());
     const [latitude, setLatitude] = useState('7.0731');
     const [longitude, setLongitude] = useState('125.6128');
-    const [startingLatitude, setStartingLatitude] = useState('7.0731');
-    const [startingLongitude, setStartingLongitude] = useState('125.6128');
-    const [endingLatitude, setEndingLatitude] = useState('7.0731');
-    const [endingLongitude, setEndingLongitude] = useState('125.6128');
+
     const [participants, setParticipants] = useState('');
     const [description, setDescription] = useState('');
-    const [date, setDate] = useState(new Date());
+
+    const [startingPoint, setStartingPoint] = useState('');
+    const [startingLatitude, setStartingLatitude] = useState('7.0731');
+    const [startingLongitude, setStartingLongitude] = useState('125.6128');
+
+    const [endingPoint, setEndingPoint] = useState('');
+    const [endingLatitude, setEndingLatitude] = useState('7.0731');
+    const [endingLongitude, setEndingLongitude] = useState('125.6128');
 
     // Search state
     const [searchQuery, setSearchQuery] = useState('');
@@ -177,13 +178,17 @@ const CreateRide = ({ route, navigation }) => {
         const rideData = {
             ridesName: rideName,
             locationName: locationName,
-            riderType: riderType || 'car',
+            riderType: riderType || 'CAR',  // Make sure to use uppercase as in your backend
             distance: parseFloat(distance),
-            startingPoint: startingPoint,
             date: date.toISOString(),
             latitude: parseFloat(latitude) || 0,
             longitude: parseFloat(longitude) || 0,
-            endingPoint: endingPoint,
+            startLat: parseFloat(startingLatitude) || 0,  // Add these fields
+            startLng: parseFloat(startingLongitude) || 0, // that match your backend
+            endLat: parseFloat(endingLatitude) || 0,      // controller parameter names
+            endLng: parseFloat(endingLongitude) || 0,     //
+            startingPoint: startingPoint,                 // Keep these for UI display
+            endingPoint: endingPoint,                     // purposes
             participants: participantsArray,
             description: description
         };
