@@ -63,13 +63,15 @@ public class RiderController {
                 rideRequest.getLocationName(),
                 rideRequest.getRiderType(),
                 rideRequest.getDistance(),
-                rideRequest.getStartingPoint(),
                 rideRequest.getDate(),
                 rideRequest.getLatitude(),
                 rideRequest.getLongitude(),
-                rideRequest.getEndingPoint(),
                 rideRequest.getParticipants(),
-                rideRequest.getDescription()
+                rideRequest.getDescription(),
+                rideRequest.getStartLat(),
+                rideRequest.getStartLng(),
+                rideRequest.getEndLat(),
+                rideRequest.getEndLng()
 
                 );
         System.out.println("Authenticated username: " + username);

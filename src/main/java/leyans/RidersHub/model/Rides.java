@@ -19,21 +19,15 @@ public class Rides {
     @Column(name = "ridesId", nullable  = false)
     private Integer ridesId;
 
-
-
     @Column(name = "locationName", nullable = false)
     private String locationName;
-
 
     @Column(name = "ridesName", nullable = false)
     private String ridesName;
 
-
     @Lob
     @Column(name = "description")
     private String description;
-
-
 
     @ManyToOne
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
@@ -46,10 +40,6 @@ public class Rides {
     @Column(name = "distance", nullable = false)
     private Integer distance;
 
-
-
-
-
     @ManyToMany
     @JoinTable(
             name = "ride_participants",
@@ -59,12 +49,17 @@ public class Rides {
     private List<Rider> participants = new ArrayList<>();
 
 
+    @Column(name = "startingLocation", columnDefinition = "geometry(Point,4326)")
+    private Point startingLocation;
+    @Column(name = "endingLocation", columnDefinition = "geometry(Point,4326)")
+    private Point endingLocation;
 
-    @Column(name = "endingPoint", nullable = false)
-    private String endingPoint;
 
-    @Column(name = "startingPoint", nullable = false)
-    private String startingPoint;
+    @Column(name = "startingPointName", nullable = false)
+    private String startingPointName;
+
+    @Column(name = "endingPointName", nullable = false)
+    private String endingPointName;
 
     @Column(name = "ride_date", nullable = false)
     private LocalDateTime date;
@@ -76,7 +71,7 @@ public class Rides {
     public Rides() {
     }
 
-    public Rides(Integer ridesId, String locationName, Point location, String ridesName, String description, Rider username, RiderType riderType, Integer distance, String endingPoint, String startingPoint, LocalDateTime date) {
+    public Rides(Integer ridesId, String locationName, String startingPointName, String endingPointName, Point location, Point startingLocation, Point endingLocation, String ridesName, String description, Rider username, RiderType riderType, Integer distance, LocalDateTime date) {
         this.ridesId = ridesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -84,11 +79,49 @@ public class Rides {
         this.username = username;
         this.riderType = riderType;
         this.distance = distance;
-        this.endingPoint = endingPoint;
-        this.startingPoint = startingPoint;
+
         this.date = date;
         this.description = description;
+        this.startingLocation = startingLocation;
+        this.endingLocation = endingLocation;
+        this.startingPointName = startingPointName;
+        this.endingPointName = endingPointName;
+
+
     }
+
+    public String getStartingPointName() {
+        return startingPointName;
+    }
+
+    public void setStartingPointName(String startingPointName) {
+        this.startingPointName = startingPointName;
+    }
+
+    public String getEndingPointName() {
+        return endingPointName;
+    }
+
+    public void setEndingPointName(String endingPointName) {
+        this.endingPointName = endingPointName;
+    }
+
+    public Point getStartingLocation() {
+        return startingLocation;
+    }
+
+    public void setStartingLocation(Point startingLocation) {
+        this.startingLocation = startingLocation;
+    }
+
+    public Point getEndingLocation() {
+        return endingLocation;
+    }
+
+    public void setEndingLocation(Point endingLocation) {
+        this.endingLocation = endingLocation;
+    }
+
 
     public String getDescription() {
         return description;
@@ -127,14 +160,6 @@ public class Rides {
 
     public void setRidesId(Integer ridesId) {
         this.ridesId = ridesId;
-    }
-
-    public String getEndingPoint() {
-        return endingPoint;
-    }
-
-    public void setEndingPoint(String endingPoint) {
-        this.endingPoint = endingPoint;
     }
 
 
@@ -180,13 +205,7 @@ public class Rides {
         this.distance = distance;
     }
 
-    public String getStartingPoint() {
-        return startingPoint;
-    }
 
-    public void setStartingPoint(String startingPoint) {
-        this.startingPoint = startingPoint;
-    }
 
     public LocalDateTime getDate() {
         return date;

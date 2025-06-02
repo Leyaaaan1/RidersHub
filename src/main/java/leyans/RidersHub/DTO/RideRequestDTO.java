@@ -12,30 +12,91 @@ public class RideRequestDTO {
     private String locationName;
     private String riderType;
     private Integer distance;
-    private String startingPoint;
-    private String endingPoint;
+
     private LocalDateTime date;
     private double latitude;
     private double longitude;
     private List<String> participants;
     private String description;
+    String startingPointName;
+    double startLat;
+    double startLng;
+    String endingPointName;
+    double endLat;
+    double endLng;
 
-
-    public RideRequestDTO(String username, List<String> participants, String description, String ridesName, String endingPoint, String locationName, String riderType, Integer distance, String startingPoint, LocalDateTime date, double latitude, double longitude) {
+    public RideRequestDTO(String username, List<String> participants, String description,
+                          String ridesName, String locationName,
+                          String riderType, Integer distance,
+                          LocalDateTime date, double latitude, double longitude,
+                          String startingPointName, double startLat,double startLng,
+            String endingPointName, double endLat, double endLng) {
         this.username = username;
         this.ridesName = ridesName;
         this.description = description;
         this.locationName = locationName;
         this.riderType = riderType;
         this.distance = distance;
-        this.startingPoint = startingPoint;
         this.date = date;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.endingPoint = endingPoint;
         this.participants = participants;
+        this.startingPointName = startingPointName;
+        this.startLat = startLat;
+        this.startLng = startLng;
+        this.endingPointName = endingPointName;
+        this.endLat = endLat;
+        this.endLng = endLng;
 
 
+    }
+
+    public String getStartingPointName() {
+        return startingPointName;
+    }
+
+    public void setStartingPointName(String startingPointName) {
+        this.startingPointName = startingPointName;
+    }
+
+    public double getStartLat() {
+        return startLat;
+    }
+
+    public void setStartLat(double startLat) {
+        this.startLat = startLat;
+    }
+
+    public double getStartLng() {
+        return startLng;
+    }
+
+    public void setStartLng(double startLng) {
+        this.startLng = startLng;
+    }
+
+    public String getEndingPointName() {
+        return endingPointName;
+    }
+
+    public void setEndingPointName(String endingPointName) {
+        this.endingPointName = endingPointName;
+    }
+
+    public double getEndLat() {
+        return endLat;
+    }
+
+    public void setEndLat(double endLat) {
+        this.endLat = endLat;
+    }
+
+    public double getEndLng() {
+        return endLng;
+    }
+
+    public void setEndLng(double endLng) {
+        this.endLng = endLng;
     }
 
     public String getDescription() {
@@ -55,13 +116,6 @@ public class RideRequestDTO {
     }
 
 
-    public String getEndingPoint() {
-        return endingPoint;
-    }
-
-    public void setEndingPoint(String endingPoint) {
-        this.endingPoint = endingPoint;
-    }
 
     public String getUsername() {
         return username;
@@ -103,13 +157,6 @@ public class RideRequestDTO {
         this.distance = distance;
     }
 
-    public String getStartingPoint() {
-        return startingPoint;
-    }
-
-    public void setStartingPoint(String startingPoint) {
-        this.startingPoint = startingPoint;
-    }
 
     public LocalDateTime getDate() {
         return date;
@@ -134,4 +181,6 @@ public class RideRequestDTO {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
+
 }

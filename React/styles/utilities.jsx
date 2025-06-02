@@ -16,6 +16,32 @@ const utilities = StyleSheet.create({
         padding: spacing.md,
     },
 
+    riderTypeOption: {
+        width: '25%',
+        height: 80,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+        padding: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 1,
+        elevation: 2,
+    },
+
+    selectedRiderType: {
+        backgroundColor: colors.primary,
+        borderColor: '#2980b9',
+        borderWidth: 1,
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 3,
+    },
+
+
     containerPrimary: {
         flex: 1,
         backgroundColor: colors.secondary,
@@ -111,13 +137,7 @@ const utilities = StyleSheet.create({
         fontWeight: "bold",
         marginBottom: 10,
     },
-    // input: {
-    //     borderWidth: 1,
-    //     borderColor: "#ccc",
-    //     padding: 10,
-    //     marginBottom: 10,
-    //     borderRadius: 8,
-    // },
+
     label: {
         marginBottom: 5,
         fontWeight: "bold",
@@ -238,7 +258,7 @@ const utilities = StyleSheet.create({
     },
 
         mapContainer: {
-        height: 250,
+        height: 600,
         marginBottom: 16,
         borderRadius: 8,
         overflow: 'hidden',
