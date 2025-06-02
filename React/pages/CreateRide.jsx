@@ -40,6 +40,11 @@ const CreateRide = ({ route, navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+
+    const [riderSearchQuery, setRiderSearchQuery] = useState('');
+    const [searchedRiders, setSearchedRiders] = useState([]);
+    const [isRiderSearching, setIsRiderSearching] = useState(false);
+
     const [mapMode, setMapMode] = useState('location');
     const [mapRegion, setMapRegion] = useState({
         latitude: 7.0731,
@@ -138,16 +143,26 @@ const CreateRide = ({ route, navigation }) => {
     };
 
     // Fetch all riders helper
-    const handleFetchAllRiders = () => {
+    const handleSearchRiders = (query) => {
+        setIsRiderSearching(true);
         fetchAllRiders(token)
             .then(riders => {
-                Alert.alert(
-                    'Available Riders',
-                    riders.map(rider => rider.username).join(', '),
-                    [{ text: 'OK' }]
-                );
+                // Filter riders based on search query
+                const filteredRiders = query
+                    ? riders.filter(rider =>
+                        rider.username.toLowerCase().includes(query.toLowerCase()))
+                    : riders;
+
+                setSearchedRiders(filteredRiders);
+
+                // If there are filtered results, update participants field
+                if (filteredRiders.length > 0) {
+                    const riderNames = filteredRiders.map(rider => rider.username);
+                    setParticipants(riderNames.join(', '));
+                }
             })
-            .catch(() => Alert.alert('Error', 'Failed to fetch riders'));
+            .catch(() => Alert.alert('Error', 'Failed to fetch riders'))
+            .finally(() => setIsRiderSearching(false));
     };
 
     // Create ride handler
@@ -230,7 +245,11 @@ const CreateRide = ({ route, navigation }) => {
                     setDistance={setDistance}
                     participants={participants}
                     setParticipants={setParticipants}
-                    handleFetchAllRiders={handleFetchAllRiders}
+                    handleSearchRiders={handleSearchRiders}
+                    riderSearchQuery={riderSearchQuery}
+                    setRiderSearchQuery={setRiderSearchQuery}
+                    searchedRiders={searchedRiders}
+                    isRiderSearching={isRiderSearching}
                     description={description}
                     setDescription={setDescription}
                     nextStep={nextStep}

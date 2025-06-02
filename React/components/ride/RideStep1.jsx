@@ -1,30 +1,28 @@
 // React/components/ride/RideStep1.jsx
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import utilities from '../../styles/utilities';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-
+import colors from "../../styles/colors";
 const RideStep1 = ({
                        error, rideName, setRideName, riderType, setRiderType, distance, setDistance,
-                       participants, setParticipants, handleFetchAllRiders,
-                       description, setDescription, nextStep
+                       participants, setParticipants, handleSearchRiders, riderSearchQuery, setRiderSearchQuery,
+                       searchedRiders, isRiderSearching, description, setDescription, nextStep
                    }) => {
     return (
         <View>
-            <Text style={utilities.title}>Step 1: Ride Details</Text>
+            <Text style={utilities.title}>RIDE DETAILS</Text>
 
             {error ? <Text style={{color: 'red', marginBottom: 10}}>{error}</Text> : null}
 
-            <Text style={utilities.label}>Ride Name</Text>
             <TextInput
-                style={utilities.input}
+                style={utilities.inputCenter}
                 value={rideName}
                 onChangeText={setRideName}
                 placeholder="Enter ride name"
-                placeholderTextColor="#999"
+                placeholderTextColor="#6f1c1c"
             />
 
-            <Text style={utilities.label}>Rider Type</Text>
             <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 10}}>
                 <TouchableOpacity
                     style={[utilities.riderTypeOption, riderType === 'car' && utilities.selectedRiderType]}
@@ -70,18 +68,43 @@ const RideStep1 = ({
 
             <Text style={utilities.label}>Participants</Text>
             <View>
+
                 <TextInput
                     style={utilities.input}
-                    value={participants}
-                    onChangeText={setParticipants}
-                    placeholder="Enter rider usernames (comma separated)"
+                    value={riderSearchQuery}
+                    onChangeText={(text) => {
+                        setRiderSearchQuery(text);
+                        handleSearchRiders(text);
+                    }}
+                    placeholder="Search for riders"
                 />
-                <TouchableOpacity
-                    style={[utilities.button, {marginTop: 5}]}
-                    onPress={handleFetchAllRiders}
-                >
-                    <Text style={[utilities.buttonText, {fontSize: 14}]}>View Available Riders</Text>
-                </TouchableOpacity>
+
+                {isRiderSearching && (
+                    <ActivityIndicator size="small" color={colors.primary} style={{marginVertical: 10}} />
+                )}
+
+                {searchedRiders.length > 0 && (
+                    <View style={utilities.searchResultsList}>
+                        <FlatList
+                            data={searchedRiders}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={utilities.searchResultItem}
+                                    onPress={() => {
+                                        setParticipants(participants ?
+                                            `${participants}, ${item.username}` :
+                                            item.username);
+                                        setRiderSearchQuery('');
+                                        setSearchedRiders([]);
+                                    }}
+                                >
+                                    <Text style={utilities.searchResultName}>{item.username}</Text>
+                                </TouchableOpacity>
+                            )}
+                        />
+                    </View>
+                )}
             </View>
 
             <Text style={utilities.label}>Description</Text>
