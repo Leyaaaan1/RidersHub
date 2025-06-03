@@ -72,7 +72,7 @@ const RideStep1 = ({
                 </TouchableOpacity>
             </View>
 
-            <Text style={utilities.label}>Distance (m)</Text>
+            <Text style={utilities.label}>Distance (km)</Text>
             <TextInput
                 style={utilities.input}
                 value={distance}
@@ -98,13 +98,11 @@ const RideStep1 = ({
                 )}
 
                 {/* Search results */}
-                {searchedRiders.length > 0 && (
-                    <FlatList
-                        data={searchedRiders}
-                        keyExtractor={(item) => item.id.toString()}
-                        style={utilities.searchResultsList}
-                        renderItem={({item}) => (
+                {searchedRiders.length > 0 && riderSearchQuery.trim() !== '' && (
+                    <View style={utilities.searchResultsList}>
+                        {searchedRiders.map(item => (
                             <TouchableOpacity
+                                key={item.id.toString()}
                                 style={utilities.searchResultItem}
                                 onPress={() => {
                                     try {
@@ -115,7 +113,7 @@ const RideStep1 = ({
                                                 item.username);
                                         }
                                         setRiderSearchQuery('');
-                                        // Don't call setSearchedRiders directly - use empty function if it fails
+                                        handleSearchRiders(''); // Clear search results when a rider is selected
                                     } catch (error) {
                                         console.error('Error selecting participant:', error);
                                     }
@@ -123,10 +121,9 @@ const RideStep1 = ({
                             >
                                 <Text style={utilities.searchResultName}>{item.username}</Text>
                             </TouchableOpacity>
-                        )}
-                    />
+                        ))}
+                    </View>
                 )}
-
                 {/* Selected participants */}
                 {participants && (
                     <View style={{marginTop: 10}}>
@@ -163,20 +160,29 @@ const RideStep1 = ({
 
             <Text style={utilities.label}>Description</Text>
             <TextInput
-                style={[utilities.input, {height: 100, textAlignVertical: 'top'}]}
-                value={description}
+                style={[utilities.input, {
+                    height: 200,
+                    textAlignVertical: 'top',
+                    fontSize: 16,
+                    paddingHorizontal: 15,
+                    paddingVertical: 12
+                }]}                value={description}
                 onChangeText={setDescription}
                 placeholder="Enter ride description"
                 multiline
             />
 
-            <TouchableOpacity
-                style={utilities.button}
-                onPress={nextStep}
-                disabled={!rideName.trim()}
-            >
-                <Text style={utilities.buttonText}>Next</Text>
-            </TouchableOpacity>
+
+            <View style={[utilities.bottomAreaContainerLeft, {
+            }]}>
+                <TouchableOpacity
+                    style={utilities.button}
+                    onPress={nextStep}
+                    disabled={!rideName.trim()}
+                >
+                    <Text style={utilities.buttonText}>Next</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };

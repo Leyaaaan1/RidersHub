@@ -11,10 +11,55 @@ const utilities = StyleSheet.create({
     //     padding: spacing.md,
     // },
 
+    container: {
+        flexGrow: 1,
+        backgroundColor: "#fff",
+        padding: 2,
+
+    },
+
     gradientContainer: {
         flex: 1,
         padding: spacing.md,
     },
+
+
+    containerPrimary: {
+        flex: 1,
+        backgroundColor: colors.secondary,
+        padding: spacing.md,
+    },
+
+    centeredContainer: {
+
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+        padding: spacing.md,
+    },
+    bottomAreaContainer: {
+        borderTopWidth: 1,
+        borderTopColor: colors.tibetanRed700,
+
+    },
+
+    bottomAreaContainerLeft: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 'auto',
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        left: 20
+    },
+
+
+    locationContainer: {
+        marginBottom: 20,
+    },
+
+
 
     riderTypeOption: {
         minWidth: 80,
@@ -44,29 +89,6 @@ const utilities = StyleSheet.create({
     },
 
 
-    containerPrimary: {
-        flex: 1,
-        backgroundColor: colors.secondary,
-        padding: spacing.md,
-    },
-
-    centeredContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: colors.background,
-        padding: spacing.md,
-    },
-    bottomAreaContainer: {
-        padding: spacing.md,
-        backgroundColor: colors.background,
-        borderTopWidth: 1,
-        borderTopColor: colors.tibetanRed700,
-    },
-
-    locationContainer: {
-        marginBottom: 20,
-    },
     searchResults: {
         maxHeight: 200,
         borderWidth: 1,
@@ -89,7 +111,12 @@ const utilities = StyleSheet.create({
 //     map: {
 //         ...StyleSheet.absoluteFillObject,
 //     },
-
+    textBox: {
+        padding: spacing.sm,
+        backgroundColor: colors.white,
+        fontSize: 16,
+        marginBottom: spacing.md,
+    },
     // === Top Navbar ===
     navbar: {
         height: 56,
@@ -99,12 +126,7 @@ const utilities = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.tibetanRed700,
     },
-    textBox: {
-        padding: spacing.sm,
-        backgroundColor: colors.white,
-        fontSize: 16,
-        marginBottom: spacing.md,
-    },
+
     navbarTextWhite: {
         color: colors.white,
         fontSize: 20,
@@ -129,11 +151,7 @@ const utilities = StyleSheet.create({
         // Use for black text
     },
 
-    container: {
-        flexGrow: 1,
-        backgroundColor: "#fff",
-        padding: 10,
-    },
+
     title: {
         fontSize: 24,
         fontWeight: "bold",
@@ -255,16 +273,17 @@ const utilities = StyleSheet.create({
         alignSelf: 'center',
         width: '80%', // Added to prevent full width while centered
     },
-        mapInstructions: {
+    mapInstructions: {
         position: 'absolute',
         top: 10,
-        left: 10,
-        right: 10,
-        backgroundColor: 'rgba(255,255,255,0.8)',
+        left: 50,    // Increased from 10 to 50
+        right: 30,   // Increased from 10 to 50
         padding: 8,
-        borderRadius: 4,
+        borderRadius: 1,
         zIndex: 1,
         textAlign: 'center',
+        backgroundColor: colors.primary,
+        color: colors.white,
     },
     coordinatesContainer: {
         flexDirection: 'row',
@@ -273,7 +292,7 @@ const utilities = StyleSheet.create({
     },
 
         mapContainer: {
-        height: 600,
+        height: 510,
         marginBottom: 16,
         borderRadius: 8,
         overflow: 'hidden',
@@ -282,6 +301,51 @@ const utilities = StyleSheet.create({
     },
     map: {
         ...StyleSheet.absoluteFillObject,
+    },
+
+    progressIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 15,
+    },
+    progressStep: {
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 15,
+        alignItems: 'center',
+    },
+    progressConnector: {
+        height: 3,
+        width: 40,
+    },
+    progressText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    smallText: {
+        fontSize: 12,
+        color: '#fff',
+        marginTop: 3,
+    },
+
+    tabButton: {
+        padding: 10,
+        borderRadius: 5,
+        backgroundColor: '#f0f0f0',
+        flex: 1,
+        marginHorizontal: 5,
+        alignItems: 'center',
+    },
+    activeTab: {
+        backgroundColor: '#2196F3',
+    },
+    tabButtonText: {
+        fontWeight: 'bold',
+    },
+    activeInput: {
+        borderColor: '#2196F3',
+        borderWidth: 2,
     },
 });
 export default utilities;

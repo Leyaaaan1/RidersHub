@@ -1,9 +1,10 @@
 // React/components/ride/RideStep3.jsx
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import utilities from '../../styles/utilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
+import colors from '../../styles/colors';
 
 const RideStep3 = ({
                        mapMode, setMapMode, isSearching, searchResults,
@@ -13,23 +14,31 @@ const RideStep3 = ({
                        endingPoint, setEndingPoint, prevStep, handleCreateRide, loading
                    }) => {
     return (
-        <View>
-            <Text style={utilities.title}>Step 3: Starting & Ending Points</Text>
+        <View style={utilities.container}>
+            {/*<Text style={utilities.title}>*/}
+            {/*    {mapMode === 'starting' ? 'SELECT STARTING POINT' : 'SELECT ENDING POINT'}*/}
+            {/*</Text>*/}
 
-            <View style={utilities.coordinatesContainer}>
-                <TouchableOpacity
-                    style={[utilities.button, mapMode === 'starting' && utilities.selectedRiderType]}
-                    onPress={() => setMapMode('starting')}
-                >
-                    <Text style={utilities.buttonText}>Select Starting Point</Text>
-                </TouchableOpacity>
+            <View style={utilities.progressIndicator}>
+                <View style={[
+                    utilities.progressStep,
+                    startingPoint ? {backgroundColor: '#4CAF50'} :
+                        (mapMode === 'starting' ? {backgroundColor: colors.primary} : {backgroundColor: '#ccc'})
+                ]}>
+                    <Text style={utilities.progressText}>Starting Point</Text>
+                    {startingPoint ? <Text style={utilities.smallText}>✓ Selected</Text> : null}
+                </View>
 
-                <TouchableOpacity
-                    style={[utilities.button, mapMode === 'ending' && utilities.selectedRiderType]}
-                    onPress={() => setMapMode('ending')}
-                >
-                    <Text style={utilities.buttonText}>Select Ending Point</Text>
-                </TouchableOpacity>
+                <View style={[utilities.progressConnector, startingPoint ? {backgroundColor: '#4CAF50'} : {backgroundColor: '#ccc'}]} />
+
+                <View style={[
+                    utilities.progressStep,
+                    endingPoint ? {backgroundColor: '#4CAF50'} :
+                        (mapMode === 'ending' ? {backgroundColor: colors.primary} : {backgroundColor: '#ccc'})
+                ]}>
+                    <Text style={utilities.progressText}>Ending Point</Text>
+                    {endingPoint ? <Text style={utilities.smallText}>✓ Selected</Text> : null}
+                </View>
             </View>
 
             {isSearching && (
@@ -37,12 +46,10 @@ const RideStep3 = ({
             )}
 
             {searchResults.length > 0 && (
-                <FlatList
-                    data={searchResults}
-                    keyExtractor={(item) => item.place_id.toString()}
-                    style={utilities.searchResultsList}
-                    renderItem={({item}) => (
+                <View style={utilities.searchResultsList}>
+                    {searchResults.map(item => (
                         <TouchableOpacity
+                            key={item.place_id.toString()}
                             style={utilities.searchResultItem}
                             onPress={() => handleLocationSelect(item)}
                         >
@@ -53,13 +60,18 @@ const RideStep3 = ({
                                 {item.display_name}
                             </Text>
                         </TouchableOpacity>
-                    )}
-                />
+                    ))}
+                </View>
             )}
 
-            <View style={utilities.mapContainer}>
-                <Text style={utilities.mapInstructions}>
-                    {mapMode === 'starting' ? 'Tap on the map to select starting point' : 'Tap on the map to select ending point'}
+            <View style={[utilities.mapContainer, {borderWidth: 2, borderColor: '#4CAF50'}]}>
+                <Text style={[
+                    utilities.mapInstructions,
+                    {backgroundColor: mapMode === 'starting' ? colors.primary : colors.primary}
+                ]}>
+                    <Text>
+                        {mapMode === 'starting' ? 'Tap on the map to select starting point' : 'Tap on the map to select ending point'}
+                    </Text>
                 </Text>
                 <WebView
                     ref={webViewRef}
@@ -67,7 +79,7 @@ const RideStep3 = ({
                             mapMode === 'starting' ? startingLatitude : endingLatitude,
                             mapMode === 'starting' ? startingLongitude : endingLongitude
                         ) }}
-                    style={utilities.map}
+                    style={[utilities.map, {borderWidth: 1, borderColor: '#4CAF50'}]}
                     onMessage={handleMessage}
                     javaScriptEnabled={true}
                 />
@@ -75,7 +87,7 @@ const RideStep3 = ({
 
             <Text style={utilities.label}>Starting Point</Text>
             <TextInput
-                style={utilities.input}
+                style={[utilities.input, mapMode === 'starting' ? utilities.activeInput : {}]}
                 value={startingPoint}
                 onChangeText={setStartingPoint}
                 placeholder="Starting point will appear here"
@@ -84,7 +96,7 @@ const RideStep3 = ({
 
             <Text style={utilities.label}>Ending Point</Text>
             <TextInput
-                style={utilities.input}
+                style={[utilities.input, mapMode === 'ending' ? utilities.activeInput : {}]}
                 value={endingPoint}
                 onChangeText={setEndingPoint}
                 placeholder="Ending point will appear here"

@@ -28,7 +28,7 @@ const CreateRide = ({ route, navigation }) => {
     const [participants, setParticipants] = useState('');
     const [description, setDescription] = useState('');
 
-    const [startingPoint, setStartingPoint] = useState('');
+    const [startingPoint, setStartingPoint] = useState(locationName);
     const [startingLatitude, setStartingLatitude] = useState('7.0731');
     const [startingLongitude, setStartingLongitude] = useState('125.6128');
 
@@ -48,7 +48,7 @@ const CreateRide = ({ route, navigation }) => {
 
 
 
-    const [mapMode, setMapMode] = useState('location');
+    const [mapMode, setMapMode] = useState('starting');
     const [mapRegion, setMapRegion] = useState({
         latitude: 7.0731,
         longitude: 125.6128,
@@ -73,7 +73,6 @@ const CreateRide = ({ route, navigation }) => {
                 })
                 .catch(error => {
                     console.error('Error searching riders:', error);
-                    // Always set empty array on error to prevent undefined
                     setSearchedRiders([]);
                     Alert.alert('Error', `Failed to search riders: ${error.message || 'Unknown error'}`);
                 })
@@ -105,11 +104,13 @@ const CreateRide = ({ route, navigation }) => {
     };
 
     useEffect(() => {
-        if (webViewRef.current) {
-            updateMapLocation();
+        // Set the appropriate mapMode based on which step we're on
+        if (currentStep === 2) {
+            setMapMode('location');
+        } else if (currentStep === 3) {
+            setMapMode('starting');
         }
-    }, [latitude, longitude, startingLatitude, startingLongitude, endingLatitude, endingLongitude, mapMode]);
-
+    }, [currentStep]);
     const handleMessage = (event) => {
         handleWebViewMessage(event, {
             mapMode,
@@ -161,6 +162,9 @@ const CreateRide = ({ route, navigation }) => {
             setStartingLatitude(lat.toString());
             setStartingLongitude(lon.toString());
             setStartingPoint(location.display_name.split(',')[0]);
+
+            // Automatically switch to ending point mode after selecting starting point
+            setMapMode('ending');
         } else if (mapMode === 'ending') {
             setEndingLatitude(lat.toString());
             setEndingLongitude(lon.toString());
@@ -176,8 +180,6 @@ const CreateRide = ({ route, navigation }) => {
             longitudeDelta: 0.01,
         });
     };
-
-
 
     // Create ride handler
     const handleCreateRide = async () => {
