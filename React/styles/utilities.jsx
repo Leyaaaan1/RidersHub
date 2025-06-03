@@ -17,14 +17,16 @@ const utilities = StyleSheet.create({
     },
 
     riderTypeOption: {
-        width: '25%',
-        height: 80,
+        minWidth: 80,
+        flexGrow: 1,
+        flexBasis: '22%',  // Slightly less than 25% to account for margins
         backgroundColor: '#f0f0f0',
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 10,
-        padding: 10,
+        marginHorizontal: 5,
+        padding: 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
@@ -136,6 +138,8 @@ const utilities = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 10,
+        textAlign: "center",
+        color: colors.primary,
     },
 
     label: {
@@ -234,11 +238,22 @@ const utilities = StyleSheet.create({
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: colors.primary,
         borderRadius: 8,
         padding: 12,
         marginBottom: 16,
         backgroundColor: '#fff',
+    },
+    inputCenter: {
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        backgroundColor: '#fff',
+        // textAlign: 'center',
+        alignSelf: 'center',
+        width: '80%', // Added to prevent full width while centered
     },
         mapInstructions: {
         position: 'absolute',

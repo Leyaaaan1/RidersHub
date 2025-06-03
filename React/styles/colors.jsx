@@ -16,7 +16,6 @@ const colors = {
     tibetanRed700: '#8c2323',
     tibetanRed800: '#6f1c1c',
     tibetanRed900: '#4f1414',
-
     white: '#ffffff',
     black: '#000000',
 };

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import utilities from '../styles/utilities';
 import { WebView } from 'react-native-webview';
-import { searchLocation, fetchAllRiders, createRide } from '../services/rideService';
+import {searchLocation, createRide, searchRiders} from '../services/rideService';
 import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
@@ -40,6 +40,14 @@ const CreateRide = ({ route, navigation }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+
+    const [riderSearchQuery, setRiderSearchQuery] = useState('');
+    const [searchedRiders, setSearchedRiders] = useState([]);
+    const [isRiderSearching, setIsRiderSearching] = useState(false);
+
+
+
+
     const [mapMode, setMapMode] = useState('location');
     const [mapRegion, setMapRegion] = useState({
         latitude: 7.0731,
@@ -47,6 +55,35 @@ const CreateRide = ({ route, navigation }) => {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
     });
+
+
+    const handleSearchRiders = (query) => {
+        if (query.trim().length >= 2) {
+            setIsRiderSearching(true);
+            searchRiders(token, query)
+                .then(data => {
+                    console.log('Search data received:', data);
+                    // Check if data is valid before setting state
+                    if (Array.isArray(data)) {
+                        setSearchedRiders(data);
+                    } else {
+                        console.warn('Received invalid data format:', data);
+                        setSearchedRiders([]);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching riders:', error);
+                    // Always set empty array on error to prevent undefined
+                    setSearchedRiders([]);
+                    Alert.alert('Error', `Failed to search riders: ${error.message || 'Unknown error'}`);
+                })
+                .finally(() => {
+                    setIsRiderSearching(false);
+                });
+        } else {
+            setSearchedRiders([]);
+        }
+    };
 
     const updateMapLocation = () => {
         let lat, lon;
@@ -109,6 +146,9 @@ const CreateRide = ({ route, navigation }) => {
         return () => clearTimeout(delayedSearch);
     }, [searchQuery]);
 
+
+
+
     const handleLocationSelect = (location) => {
         const lat = parseFloat(location.lat);
         const lon = parseFloat(location.lon);
@@ -137,18 +177,7 @@ const CreateRide = ({ route, navigation }) => {
         });
     };
 
-    // Fetch all riders helper
-    const handleFetchAllRiders = () => {
-        fetchAllRiders(token)
-            .then(riders => {
-                Alert.alert(
-                    'Available Riders',
-                    riders.map(rider => rider.username).join(', '),
-                    [{ text: 'OK' }]
-                );
-            })
-            .catch(() => Alert.alert('Error', 'Failed to fetch riders'));
-    };
+
 
     // Create ride handler
     const handleCreateRide = async () => {
@@ -224,8 +253,29 @@ const CreateRide = ({ route, navigation }) => {
                     error={error}
                     rideName={rideName}
                     setRideName={setRideName}
+                    riderType={riderType}
+                    setRiderType={setRiderType}
+                    distance={distance}
+                    setDistance={setDistance}
+                    participants={participants}
+                    setParticipants={setParticipants}
+                    riderSearchQuery={riderSearchQuery}
+                    setRiderSearchQuery={setRiderSearchQuery}
+                    searchedRiders={searchedRiders}
+                    isRiderSearching={isRiderSearching}
+                    handleSearchRiders={handleSearchRiders}
+                    description={description}
+                    setDescription={setDescription}
+                    nextStep={nextStep}
+                />
+            )}
+
+            {currentStep === 2 && (
+                <RideStep2
                     isSearching={isSearching}
                     searchResults={searchResults}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
                     handleLocationSelect={handleLocationSelect}
                     webViewRef={webViewRef}
                     latitude={latitude}
@@ -233,12 +283,13 @@ const CreateRide = ({ route, navigation }) => {
                     handleMessage={handleMessage}
                     locationName={locationName}
                     setLocationName={setLocationName}
+                    prevStep={prevStep}
                     nextStep={nextStep}
                 />
             )}
 
-            {currentStep === 2 && (
-                <RideStep2
+            {currentStep === 3 && (
+                <RideStep3
                     mapMode={mapMode}
                     setMapMode={setMapMode}
                     isSearching={isSearching}
@@ -254,22 +305,6 @@ const CreateRide = ({ route, navigation }) => {
                     setStartingPoint={setStartingPoint}
                     endingPoint={endingPoint}
                     setEndingPoint={setEndingPoint}
-                    prevStep={prevStep}
-                    nextStep={nextStep}
-                />
-            )}
-
-            {currentStep === 3 && (
-                <RideStep3
-                    riderType={riderType}
-                    setRiderType={setRiderType}
-                    distance={distance}
-                    setDistance={setDistance}
-                    participants={participants}
-                    setParticipants={setParticipants}
-                    handleFetchAllRiders={handleFetchAllRiders}
-                    description={description}
-                    setDescription={setDescription}
                     prevStep={prevStep}
                     handleCreateRide={handleCreateRide}
                     loading={loading}

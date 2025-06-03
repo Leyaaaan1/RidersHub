@@ -10,6 +10,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,6 +81,20 @@ public class RiderController {
     }
 
 
+    @GetMapping("/search")
+
+    public ResponseEntity<List<Rider>> searchRiders(@RequestParam(required = false) String username) {
+        if (username != null && !username.trim().isEmpty()) {
+            Rider rider = riderService.findRiderByUsername(username);
+            if (rider == null) {
+                return ResponseEntity.ok(List.of());
+            }
+            return ResponseEntity.ok(List.of(rider));
+        }
+
+        List<Rider> riders = riderService.getAllRiders();
+        return ResponseEntity.ok(riders);
+    }
 
 
 
