@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import utilities from '../styles/utilities';
 import { WebView } from 'react-native-webview';
-import { searchLocation, fetchAllRiders, createRide } from '../services/rideService';
+import {searchLocation, createRide, searchRiders} from '../services/rideService';
 import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
@@ -45,6 +45,9 @@ const CreateRide = ({ route, navigation }) => {
     const [searchedRiders, setSearchedRiders] = useState([]);
     const [isRiderSearching, setIsRiderSearching] = useState(false);
 
+
+
+
     const [mapMode, setMapMode] = useState('location');
     const [mapRegion, setMapRegion] = useState({
         latitude: 7.0731,
@@ -52,6 +55,35 @@ const CreateRide = ({ route, navigation }) => {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
     });
+
+
+    const handleSearchRiders = (query) => {
+        if (query.trim().length >= 2) {
+            setIsRiderSearching(true);
+            searchRiders(token, query)
+                .then(data => {
+                    console.log('Search data received:', data);
+                    // Check if data is valid before setting state
+                    if (Array.isArray(data)) {
+                        setSearchedRiders(data);
+                    } else {
+                        console.warn('Received invalid data format:', data);
+                        setSearchedRiders([]);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching riders:', error);
+                    // Always set empty array on error to prevent undefined
+                    setSearchedRiders([]);
+                    Alert.alert('Error', `Failed to search riders: ${error.message || 'Unknown error'}`);
+                })
+                .finally(() => {
+                    setIsRiderSearching(false);
+                });
+        } else {
+            setSearchedRiders([]);
+        }
+    };
 
     const updateMapLocation = () => {
         let lat, lon;
@@ -114,6 +146,9 @@ const CreateRide = ({ route, navigation }) => {
         return () => clearTimeout(delayedSearch);
     }, [searchQuery]);
 
+
+
+
     const handleLocationSelect = (location) => {
         const lat = parseFloat(location.lat);
         const lon = parseFloat(location.lon);
@@ -142,28 +177,7 @@ const CreateRide = ({ route, navigation }) => {
         });
     };
 
-    // Fetch all riders helper
-    const handleSearchRiders = (query) => {
-        setIsRiderSearching(true);
-        fetchAllRiders(token)
-            .then(riders => {
-                // Filter riders based on search query
-                const filteredRiders = query
-                    ? riders.filter(rider =>
-                        rider.username.toLowerCase().includes(query.toLowerCase()))
-                    : riders;
 
-                setSearchedRiders(filteredRiders);
-
-                // If there are filtered results, update participants field
-                if (filteredRiders.length > 0) {
-                    const riderNames = filteredRiders.map(rider => rider.username);
-                    setParticipants(riderNames.join(', '));
-                }
-            })
-            .catch(() => Alert.alert('Error', 'Failed to fetch riders'))
-            .finally(() => setIsRiderSearching(false));
-    };
 
     // Create ride handler
     const handleCreateRide = async () => {
@@ -245,11 +259,11 @@ const CreateRide = ({ route, navigation }) => {
                     setDistance={setDistance}
                     participants={participants}
                     setParticipants={setParticipants}
-                    handleSearchRiders={handleSearchRiders}
                     riderSearchQuery={riderSearchQuery}
                     setRiderSearchQuery={setRiderSearchQuery}
                     searchedRiders={searchedRiders}
                     isRiderSearching={isRiderSearching}
+                    handleSearchRiders={handleSearchRiders}
                     description={description}
                     setDescription={setDescription}
                     nextStep={nextStep}

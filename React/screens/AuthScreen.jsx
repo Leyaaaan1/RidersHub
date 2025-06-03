@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import utilities from "../styles/utilities";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginUser, registerUser } from '../services/authService';
 
 const AuthForm = ({
                       isLogin,
@@ -64,28 +65,18 @@ const AuthScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [riderType, setRiderType] = useState('');
 
+// Then replace the handleAuth function with:
     const handleAuth = async () => {
-        const url = isLogin
-            ? 'http://192.168.1.51:8080/riders/login'
-            : 'http://192.168.1.51:8080/riders/register';
-        const body = isLogin
-            ? { username, password }
-            : { username, password, riderType };
-
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            const result = await response.json();
+            const result = isLogin
+                ? await loginUser(username, password)
+                : await registerUser(username, password, riderType);
 
-            if (response.ok) {
+            if (result.success) {
                 // Save the token to AsyncStorage
-                if (result.token) {
-                    await AsyncStorage.setItem('userToken', result.token);
+                if (result.data.token) {
+                    await AsyncStorage.setItem('userToken', result.data.token);
                     await AsyncStorage.setItem('username', username);
-                    // You can store additional data in AsyncStorage as needed
                 }
 
                 Alert.alert(isLogin ? 'Login Successful' : 'Registration Successful');
@@ -93,7 +84,7 @@ const AuthScreen = ({ navigation }) => {
                 if (isLogin && username) {
                     navigation.navigate('RiderPage', {
                         username: username,
-                        token: result.token,
+                        token: result.data.token,
                     });
                 }
                 return true;
@@ -107,7 +98,6 @@ const AuthScreen = ({ navigation }) => {
             return false;
         }
     };
-
     const toggleMode = () => setIsLogin((prev) => !prev);
 
     return (

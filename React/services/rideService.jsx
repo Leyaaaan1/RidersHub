@@ -1,7 +1,5 @@
-// React/services/rideService.js
 const API_BASE_URL = 'http://192.168.1.51:8080';
-
-// Search for locations using OpenStreetMap
+console.log('Using API URL:', API_BASE_URL);
 export const searchLocation = async (query) => {
     const response = await fetch(
         `https://nominatim.openstreetmap.org/search?` +
@@ -34,21 +32,7 @@ export const reverseGeocode = async (lat, lon) => {
 };
 
 // Fetch all riders
-export const fetchAllRiders = async (token) => {
-    const response = await fetch(`${API_BASE_URL}/riders/all`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    });
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch riders');
-    }
-
-    return await response.json();
-};
 
 // Create a new ride
 export const createRide = async (token, rideData) => {
@@ -69,3 +53,58 @@ export const createRide = async (token, rideData) => {
 
     return result;
 };
+export const searchRiders = async (token, username = '') => {
+    const url = username.trim()
+        ? `${API_BASE_URL}/riders/search?username=${encodeURIComponent(username)}`
+        : `${API_BASE_URL}/riders/search`;
+
+    console.log('Searching riders with URL:', url);
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const responseText = await response.text();
+        console.log('Response status:', response.status);
+        console.log('Response text:', responseText);
+
+        if (!response.ok) {
+            throw new Error(`Failed to search riders: ${response.status} ${responseText}`);
+        }
+
+        return JSON.parse(responseText);
+    } catch (error) {
+        console.error('Network error details:', error);
+        throw error;
+    }
+};
+
+
+export const getCurrentRiderType = async (token) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/riders/current-rider-type`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            const errorData = await response.json();
+            return { success: false, message: errorData.message };
+        }
+    } catch (error) {
+        console.error('API error:', error);
+        return { success: false, message: 'Network error occurred' };
+    }
+};
+

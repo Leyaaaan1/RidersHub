@@ -4,6 +4,9 @@ import {View, Text, TouchableOpacity, Alert} from "react-native";
 import utilities from "../styles/utilities";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
+import {getCurrentRiderType} from '../services/rideService';
+
+
 
 
 const RiderPage = ({ route , navigation}) => {
@@ -15,26 +18,17 @@ const RiderPage = ({ route , navigation}) => {
 
     useEffect(() => {
         fetchCurrentRiderType();
-    }, []);
-
+    }, [token]);
 
     const fetchCurrentRiderType = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://192.168.1.51:8080/riders/current-rider-type', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const result = await getCurrentRiderType(token);
 
-            if (response.ok) {
-                const data = await response.json();
-                setRiderType(data);
+            if (result.success) {
+                setRiderType(result.data);
             } else {
-                const errorData = await response.json();
-                Alert.alert('Error', errorData.message || 'Failed to fetch rider type');
+                Alert.alert('Error', result.message || 'Failed to fetch rider type');
             }
         } catch (error) {
             console.error('Error fetching rider type:', error);
@@ -43,6 +37,7 @@ const RiderPage = ({ route , navigation}) => {
             setLoading(false);
         }
     };
+
 
     return (
 
@@ -99,11 +94,11 @@ const RiderPage = ({ route , navigation}) => {
             </View>
 
             {/* User Details Container */}
-            <View style={utilities.bottomAreaContainer}>
-                <TouchableOpacity style={utilities.button}>
-                    <Text style={utilities.buttonText}>Action</Text>
-                </TouchableOpacity>
-            </View>
+            {/*<View style={utilities.bottomAreaContainer}>*/}
+            {/*    <TouchableOpacity style={utilities.button}>*/}
+            {/*        <Text style={utilities.buttonText}>Action</Text>*/}
+            {/*    </TouchableOpacity>*/}
+            {/*</View>*/}
         </View>
     );
 };
