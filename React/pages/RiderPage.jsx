@@ -18,6 +18,7 @@ const RiderPage = ({ route , navigation}) => {
 
     useEffect(() => {
         fetchCurrentRiderType();
+
     }, [token]);
 
     const fetchCurrentRiderType = async () => {
@@ -42,63 +43,67 @@ const RiderPage = ({ route , navigation}) => {
     return (
 
         <View style={utilities.container}>
-                <View style={{ flexDirection: "row", alignItems: "center", padding: 10 }}>
-                    {/* Left icon bar (empty) */}
-                    <View style={{ width: 30 }} />
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 10 }}>
+                {/* Username and Rider Type - Left aligned */}
+                <View style={{ flex: 1 }}>
+                    <Text style={utilities.compactText}>{username?.toUpperCase()}</Text>
+                    {loading ? (
+                        <Text style={utilities.compactText}>Loading...</Text>
+                    ) : (
+                        <Text style={utilities.compactText}>{riderType?.riderType || 'Not set'}</Text>
+                    )}
+                </View>
 
-                    {/* Username and Rider Type */}
-                    <View style={{ flex: 1 }}>
-                        <Text style={utilities.compactText}>{username?.toUpperCase()}</Text>
-                        {loading ? (
-                            <Text style={utilities.compactText}>Loading...</Text>
-                        ) : (
-                            <Text style={utilities.compactText}>{riderType?.riderType || 'Not set'}</Text>
-                        )}
-                    </View>
+                {/* Create ride button - Centered */}
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                    <TouchableOpacity
+                        style={utilities.button}
+                        onPress={() => {
+                            console.log("Token being passed:", token);
+                            if (!token) {
+                                Alert.alert('Error', 'Authentication token is missing');
+                                return;
+                            }
+                            navigation.navigate('CreateRide', {
+                                token: token,
+                                username: username
+                            });
+                        }}
+                    >
+                        <Text style={utilities.buttonText}>+ Ride</Text>
+                    </TouchableOpacity>
+                </View>
 
-                    {/* Gear icon */}
+                {/* Settings icon - Right aligned */}
+                <View style={{ flex: 1, alignItems: 'flex-end' }}>
                     <TouchableOpacity onPress={() => {}}>
                         <FontAwesome name="gear" size={28} color="black" />
                     </TouchableOpacity>
                 </View>
-            <View style={utilities.centeredContainer}>
-                <TouchableOpacity
-                    style={utilities.button}
-                    onPress={() => {
-                        console.log("Token being passed:", token);
-                        if (!token) {
-                            Alert.alert('Error', 'Authentication token is missing');
-                            return;
-                        }
-                        navigation.navigate('CreateRide', {
-                            token: token,
-                            username: username
-                        });
-                    }}
-                >
-                    <Text style={utilities.buttonText}>Create ride</Text>
-                </TouchableOpacity>
             </View>
 
             <View style={utilities.centeredContainer}>
-                <TouchableOpacity style={utilities.button}>
-                    <Text style={utilities.buttonText}>Action</Text>
-                </TouchableOpacity>
-            </View>
+
+                </View>
+
+                <View style={utilities.centeredContainer}>
+                    <TouchableOpacity style={utilities.button}>
+                        <Text style={utilities.buttonText}>Action</Text>
+                    </TouchableOpacity>
+                </View>
 
 
-            <View style={utilities.centeredContainer}>
-                <TouchableOpacity style={utilities.button}>
-                    <Text style={utilities.buttonText}>Action</Text>
-                </TouchableOpacity>
-            </View>
+                <View style={utilities.centeredContainer}>
+                    <TouchableOpacity style={utilities.button}>
+                        <Text style={utilities.buttonText}>Action</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {/* User Details Container */}
-            {/*<View style={utilities.bottomAreaContainer}>*/}
-            {/*    <TouchableOpacity style={utilities.button}>*/}
-            {/*        <Text style={utilities.buttonText}>Action</Text>*/}
-            {/*    </TouchableOpacity>*/}
-            {/*</View>*/}
+                <View style={utilities.bottomAreaContainer}>
+                    <TouchableOpacity style={utilities.button}>
+                        <Text style={utilities.buttonText}>Action</Text>
+                    </TouchableOpacity>
+                </View>
         </View>
     );
 };

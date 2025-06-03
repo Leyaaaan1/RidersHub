@@ -1,9 +1,10 @@
 // React/components/ride/RideStep2.jsx
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, FlatList, ScrollView} from 'react-native';
 import utilities from '../../styles/utilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
+import colors from "../../styles/colors";
 
 const RideStep2 = ({
                        isSearching, searchResults, searchQuery, setSearchQuery,
@@ -11,14 +12,22 @@ const RideStep2 = ({
                        handleMessage, locationName, setLocationName, prevStep, nextStep
                    }) => {
     return (
-        <View>
-            <Text style={utilities.title}>Step 2: Ride Location</Text>
+        <View style={utilities.container}>
 
-            <Text style={utilities.label}>Search Location</Text>
+            <Text style={utilities.title}>RIDE LOCATION</Text>
+            {/*<TextInput*/}
+            {/*    value={searchQuery}*/}
+            {/*    onChangeText={setSearchQuery}*/}
+            {/*    placeholder="Search for a location"*/}
+            {/*    placeholderTextColor="#999"*/}
+            {/*/>*/}
+
             <TextInput
                 style={utilities.input}
                 value={searchQuery}
-                onChangeText={setSearchQuery}
+                onChangeText={(text) => {
+                    setSearchQuery(text);
+                }}
                 placeholder="Search for a location"
                 placeholderTextColor="#999"
             />
@@ -28,13 +37,14 @@ const RideStep2 = ({
             )}
 
             {searchResults.length > 0 && (
-                <FlatList
-                    data={searchResults}
-                    keyExtractor={(item) => item.place_id.toString()}
+                <ScrollView
                     style={utilities.searchResultsList}
-                    renderItem={({item}) => (
+                    nestedScrollEnabled={true}
+                >
+                    {searchResults.map((item) => (
                         <TouchableOpacity
-                            style={utilities.searchResultItem}
+                            key={item.place_id.toString()}
+                            style={utilities.resultItem}
                             onPress={() => handleLocationSelect(item)}
                         >
                             <Text style={utilities.searchResultName}>
@@ -44,14 +54,11 @@ const RideStep2 = ({
                                 {item.display_name}
                             </Text>
                         </TouchableOpacity>
-                    )}
-                />
+                    ))}
+                </ScrollView>
             )}
 
             <View style={utilities.mapContainer}>
-                <Text style={utilities.mapInstructions}>
-                    Tap on the map to select the ride location
-                </Text>
                 <WebView
                     ref={webViewRef}
                     source={{ html: getMapHTML(latitude, longitude) }}
@@ -59,6 +66,9 @@ const RideStep2 = ({
                     onMessage={handleMessage}
                     javaScriptEnabled={true}
                 />
+                <Text style={[utilities.mapInstructions, {backgroundColor: colors.primary}]}>
+                    Tap on the map to select the ride location
+                </Text>
             </View>
 
             <Text style={utilities.label}>Selected Location</Text>
@@ -70,7 +80,7 @@ const RideStep2 = ({
                 editable={false}
             />
 
-            <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}}>
+            <View style={[utilities.bottomAreaContainerLeft, {flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}]}>
                 <TouchableOpacity
                     style={utilities.button}
                     onPress={prevStep}
