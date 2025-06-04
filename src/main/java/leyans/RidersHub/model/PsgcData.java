@@ -8,13 +8,13 @@ import org.locationtech.jts.geom.Geometry;
 public class PsgcData {
 
     @Id
-    @Column(name = "psgc_code", length = 10)
+    @Column(name = "psgc_code", length = 12)
     private String psgcCode;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "correspondence_code", length = 9)
+    @Column(name = "correspondence_code", length = 12)
     private String correspondenceCode;
 
     @Column(name = "geographic_level")

@@ -155,17 +155,17 @@ const RideStep1 = ({
                 {/* Search results */}
                 {searchedRiders.length > 0 && riderSearchQuery.trim() !== '' && (
                     <View style={utilities.searchResultsList}>
-                        {searchedRiders.map(item => (
+                        {searchedRiders.map((username, index) => (
                             <TouchableOpacity
-                                key={item.id.toString()}
+                                key={index}
                                 style={utilities.searchResultItem}
                                 onPress={() => {
                                     try {
                                         const participantsList = participants ? participants.split(',').map(p => p.trim()) : [];
-                                        if (!participantsList.includes(item.username)) {
+                                        if (!participantsList.includes(username)) {
                                             setParticipants(participants ?
-                                                `${participants}, ${item.username}` :
-                                                item.username);
+                                                `${participants}, ${username}` :
+                                                username);
                                         }
                                         setRiderSearchQuery('');
                                         handleSearchRiders(''); // Clear search results when a rider is selected
@@ -174,11 +174,12 @@ const RideStep1 = ({
                                     }
                                 }}
                             >
-                                <Text style={utilities.searchResultName}>{item.username}</Text>
+                                <Text style={utilities.searchResultName}>{username}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
                 )}
+
                 {/* Selected participants */}
                 {participants && (
                     <View style={{marginTop: 10}}>
@@ -211,7 +212,6 @@ const RideStep1 = ({
                     </View>
                 )}
             </View>
-
 
             <Text style={utilities.label}>Description</Text>
             <TextInput

@@ -56,8 +56,8 @@ public class RiderController {
 
 
     @PostMapping("/create")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
-
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RideResponseDTO response = ridesService.createRide(
@@ -77,16 +77,14 @@ public class RiderController {
                 rideRequest.getEndLng()
         );
         System.out.println("Authenticated username: " + username);
-
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/search")
-    public ResponseEntity<List<String>> searchRiders(@RequestParam String username) {
-        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ResponseEntity<List<String>> searchRiders(@RequestParam(value = "username", required = false) String searchTerm) {
 
-        List<String> usernames = riderService.findUsernamesContaining(username);
+        String searchUsername = searchTerm != null ? searchTerm : "None";
+        List<String> usernames = riderService.findUsernamesContaining(searchUsername);
         return ResponseEntity.ok(usernames);
     }
 

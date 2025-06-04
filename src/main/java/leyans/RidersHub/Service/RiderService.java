@@ -2,19 +2,16 @@ package leyans.RidersHub.Service;
 
 
 import jakarta.transaction.Transactional;
+import leyans.RidersHub.DTO.RiderDTO;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.RiderRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -76,10 +73,12 @@ public class    RiderService {
 
     }
 
-    public String getUsernameById(String id) {
-        return riderRepository.findUsernameById(id);
+    public List<String> findUsernamesContaining(String username) {
+        List<RiderDTO> riders = riderRepository.searchByUsername(username);
+        return riders.stream()
+                .map(RiderDTO::getUsername)
+                .collect(Collectors.toList());
     }
-
 
 
 }

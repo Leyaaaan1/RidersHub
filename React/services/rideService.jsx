@@ -54,9 +54,7 @@ export const createRide = async (token, rideData) => {
     return result;
 };
 export const searchRiders = async (token, username = '') => {
-    const url = username.trim()
-        ? `${API_BASE_URL}/riders/search?username=${encodeURIComponent(username)}`
-        : `${API_BASE_URL}/riders/search`;
+    const url = `${API_BASE_URL}/riders/search${username.trim() ? `?username=${encodeURIComponent(username.trim())}` : ''}`;
 
     console.log('Searching riders with URL:', url);
 
@@ -69,21 +67,17 @@ export const searchRiders = async (token, username = '') => {
             }
         });
 
-        const responseText = await response.text();
-        console.log('Response status:', response.status);
-        console.log('Response text:', responseText);
-
         if (!response.ok) {
-            throw new Error(`Failed to search riders: ${response.status} ${responseText}`);
+            const errorText = await response.text();
+            throw new Error(`Failed to search riders: ${response.status} ${errorText}`);
         }
 
-        return JSON.parse(responseText);
+        return await response.json();
     } catch (error) {
         console.error('Network error details:', error);
         throw error;
     }
 };
-
 
 export const getCurrentRiderType = async (token) => {
     try {
