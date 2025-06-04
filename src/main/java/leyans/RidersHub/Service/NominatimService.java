@@ -8,6 +8,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.util.UriUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -40,5 +45,25 @@ public class NominatimService {
         }
 
         return null;
+    }
+
+    public List<Map<String, Object>> searchLocation(String query) {
+        String url = "https://nominatim.openstreetmap.org/search?" +
+                "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8) +
+                "&countrycodes=ph&format=json&limit=5&addressdetails=1";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("User-Agent", "SpringBootApp");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<List> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, List.class);
+            return response.getBody();
+        } catch (Exception e) {
+            System.err.println("Nominatim Search Error: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 }
