@@ -1,16 +1,27 @@
 import os
 import pandas as pd
+import gdown
 from sqlalchemy import create_engine, text
 
-# PostgreSQL credentials
-# here
-# pass and user
-# Path to your CSV file
-csv_path = r'C:\Users\leyan\Downloads\psgc.csv'
 
-# Read CSV
+# === credentials
+PG_USER = ''
+PG_PASSWORD = ''
+PG_HOST = ''
+PG_PORT = ''
+PG_DB = ''
+
+file_id = '1ECWKKyaYWm-UygvQI9ReO3vuEsMPce7d'
+download_url = f'https://drive.google.com/uc?id={file_id}'
+csv_path = 'psgc.csv'
+
+
+if not os.path.exists(csv_path):
+    print("📥 Downloading CSV from Google Drive...")
+    gdown.download(download_url, csv_path, quiet=False)
+
 df = pd.read_csv(csv_path, encoding='ISO-8859-1')
-# Rename columns to match DB schema
+
 df = df.rename(columns={
     '10-digit PSGC': 'psgc_code',
     'Name': 'name',
@@ -18,14 +29,11 @@ df = df.rename(columns={
     'Geographic Level': 'geographic_level'
 })
 
-# Ensure code columns are strings
 df['psgc_code'] = df['psgc_code'].astype(str)
 df['correspondence_code'] = df['correspondence_code'].astype(str)
 
-# Create PostgreSQL engine
 engine = create_engine(f'postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}')
 
-# SQL to create the table
 create_table_query = """
 CREATE TABLE IF NOT EXISTS psgc_data (
     psgc_code VARCHAR(10) PRIMARY KEY,
@@ -35,11 +43,15 @@ CREATE TABLE IF NOT EXISTS psgc_data (
 );
 """
 
-# Create table
 with engine.connect() as conn:
-    conn.execute(text(create_table_query))  # ✅ wrap with text()
+    conn.execute(text(create_table_query))
 
-# Insert DataFrame into the table
 df.to_sql('psgc_data', engine, if_exists='replace', index=False)
 
-print("✅ CSV data imported successfully to PostgreSQL!")
+print(" CSV data imported to PostgreSQL!")
+
+if os.path.exists(csv_path):
+    os.remove(csv_path)
+    print(" csv file deleted after import.")
+else:
+    print("⚠not found for deletion.")

@@ -12,7 +12,6 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderLocation;
 import leyans.RidersHub.model.StartedRide;
 import org.locationtech.jts.geom.Coordinate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
