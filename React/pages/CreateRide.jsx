@@ -8,6 +8,7 @@ import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
 import { handleWebViewMessage } from '../utils/mapUtils';
+import RideStep4 from "../components/ride/RideStep4";
 
 const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
@@ -104,7 +105,6 @@ const CreateRide = ({ route, navigation }) => {
     };
 
     useEffect(() => {
-        // Set the appropriate mapMode based on which step we're on
         if (currentStep === 2) {
             setMapMode('location');
         } else if (currentStep === 3) {
@@ -122,6 +122,7 @@ const CreateRide = ({ route, navigation }) => {
             setEndingLongitude,
             setLocationName,
             setStartingPoint,
+            setDate,
             setEndingPoint,
             setSearchQuery
         });
@@ -163,7 +164,6 @@ const CreateRide = ({ route, navigation }) => {
             setStartingLongitude(lon.toString());
             setStartingPoint(location.display_name.split(',')[0]);
 
-            // Automatically switch to ending point mode after selecting starting point
             setMapMode('ending');
         } else if (mapMode === 'ending') {
             setEndingLatitude(lat.toString());
@@ -198,6 +198,12 @@ const CreateRide = ({ route, navigation }) => {
         }
         if (!distance || isNaN(parseFloat(distance))) {
             setError('Please enter a valid distance');
+            return;
+        }
+
+        const now = new Date();
+        if (date < now) {
+            setError('Ride date must be in the future');
             return;
         }
 
@@ -241,7 +247,7 @@ const CreateRide = ({ route, navigation }) => {
 
     // Step navigation
     const nextStep = () => {
-        if (currentStep < 3) setCurrentStep(currentStep + 1);
+        if (currentStep < 4) setCurrentStep(currentStep + 1);
     };
 
     const prevStep = () => {
@@ -268,6 +274,8 @@ const CreateRide = ({ route, navigation }) => {
                     handleSearchRiders={handleSearchRiders}
                     description={description}
                     setDescription={setDescription}
+                    setDate={setDate}
+                    date={date}
                     nextStep={nextStep}
                 />
             )}
@@ -307,6 +315,22 @@ const CreateRide = ({ route, navigation }) => {
                     setStartingPoint={setStartingPoint}
                     endingPoint={endingPoint}
                     setEndingPoint={setEndingPoint}
+                    prevStep={prevStep}
+                    nextStep={nextStep}
+                />
+            )}
+
+            {currentStep === 4 && (
+                <RideStep4
+                    rideName={rideName}
+                    locationName={locationName}
+                    riderType={riderType}
+                    distance={distance}
+                    date={date}
+                    startingPoint={startingPoint}
+                    endingPoint={endingPoint}
+                    participants={participants}
+                    description={description}
                     prevStep={prevStep}
                     handleCreateRide={handleCreateRide}
                     loading={loading}

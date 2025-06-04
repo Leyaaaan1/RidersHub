@@ -38,6 +38,9 @@ public class Rider {
     public Rider() {
 
     }
+    public interface RiderUsernameProjection {
+        String getUsername();
+    }
 
     public Integer getId() {
         return id;

@@ -1,4 +1,5 @@
 package leyans.RidersHub.Controller;
+import jakarta.validation.Valid;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
@@ -53,6 +54,7 @@ public class RiderController {
         return ResponseEntity.ok(riders);
     }
 
+
     @PostMapping("/create")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
 
@@ -73,8 +75,7 @@ public class RiderController {
                 rideRequest.getStartLng(),
                 rideRequest.getEndLat(),
                 rideRequest.getEndLng()
-
-                );
+        );
         System.out.println("Authenticated username: " + username);
 
         return ResponseEntity.ok(response);
@@ -82,18 +83,11 @@ public class RiderController {
 
 
     @GetMapping("/search")
+    public ResponseEntity<List<String>> searchRiders(@RequestParam String username) {
+        String currentUser = SecurityContextHolder.getContext().getAuthentication().getName();
 
-    public ResponseEntity<List<Rider>> searchRiders(@RequestParam(required = false) String username) {
-        if (username != null && !username.trim().isEmpty()) {
-            Rider rider = riderService.findRiderByUsername(username);
-            if (rider == null) {
-                return ResponseEntity.ok(List.of());
-            }
-            return ResponseEntity.ok(List.of(rider));
-        }
-
-        List<Rider> riders = riderService.getAllRiders();
-        return ResponseEntity.ok(riders);
+        List<String> usernames = riderService.findUsernamesContaining(username);
+        return ResponseEntity.ok(usernames);
     }
 
 

@@ -58,6 +58,17 @@ const RideStep2 = ({
                 </ScrollView>
             )}
 
+            {locationName && locationName.trim() && (
+                <>
+                    <Text style={utilities.label}>Selected Location</Text>
+                    <View style={[utilities.input, {paddingVertical: 14}]}>
+                        <Text>
+                            {locationName}
+                        </Text>
+                    </View>
+                </>
+            )}
+
             <View style={utilities.mapContainer}>
                 <WebView
                     ref={webViewRef}
@@ -71,14 +82,6 @@ const RideStep2 = ({
                 </Text>
             </View>
 
-            <Text style={utilities.label}>Selected Location</Text>
-            <TextInput
-                style={utilities.input}
-                value={locationName}
-                onChangeText={setLocationName}
-                placeholder="Location name will appear here"
-                editable={false}
-            />
 
             <View style={[utilities.bottomAreaContainerLeft, {flexDirection: 'row', justifyContent: 'space-between', marginTop: 10}]}>
                 <TouchableOpacity

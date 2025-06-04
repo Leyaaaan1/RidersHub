@@ -76,10 +76,9 @@ public class    RiderService {
 
     }
 
-    public Rider findRiderByUsername(String username) {
-        return riderRepository.findByUsername(username);
+    public String getUsernameById(String id) {
+        return riderRepository.findUsernameById(id);
     }
-
 
 
 

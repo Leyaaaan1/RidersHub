@@ -31,30 +31,29 @@ public class RidesService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
     private final RiderTypeRepository riderTypeRepository;
-
-
-    @Autowired
-    private PsgcDataRepository psgcDataRepository;
-
-    @Autowired
-    private NominatimService nominatimService;
-
-    @Autowired
     private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
+    private final PsgcDataRepository psgcDataRepository;
+    private final NominatimService nominatimService;
 
+    private final GeometryFactory geometryFactory = new GeometryFactory();
 
-
+    @Autowired
     public RidesService(RiderRepository riderRepository,
-                        RiderTypeRepository riderTypeRepository, RidesRepository ridesRepository ,
-                        KafkaTemplate<Object, RideResponseDTO> kafkaTemplate) {
+                        RiderTypeRepository riderTypeRepository,
+                        RidesRepository ridesRepository,
+                        KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
+                        PsgcDataRepository psgcDataRepository,
+                        NominatimService nominatimService) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.ridesRepository = ridesRepository;
         this.kafkaTemplate = kafkaTemplate;
+        this.psgcDataRepository = psgcDataRepository;
+        this.nominatimService = nominatimService;
     }
 
     @Transactional
-    public RideResponseDTO createRide(String username,
+    public RideResponseDTO createRide(String creatorUsername,
                                       String ridesName,
                                       String locationName,
                                       String riderType,
@@ -67,131 +66,107 @@ public class RidesService {
                                       double startLatitude,
                                       double startLongitude,
                                       double endLatitude,
-                                      double endLongitude
-                                     ) {
+                                      double endLongitude) {
 
+        Rider creator = getRiderByUsername(creatorUsername);
+        RiderType rideType = getRiderTypeByName(riderType);
 
+        Point rideLocation = createPoint(longitude, latitude);
+        Point startPoint = createPoint(startLongitude, startLatitude);
+        Point endPoint = createPoint(endLongitude, endLatitude);
 
-        Rider rider = riderRepository.findByUsername(username);
+        String resolvedLocationName = resolveBarangayName(locationName, latitude, longitude);
+        String startLocationName = resolveBarangayName(null, startLatitude, startLongitude);
+        String endLocationName = resolveBarangayName(null, endLatitude, endLongitude);
 
-        RiderType newRiderType = riderTypeRepository.findByRiderType(riderType);
+        List<Rider> participants = resolveParticipants(participantUsernames);
 
-        GeometryFactory geometryFactory = new GeometryFactory();
+        Rides newRide = new Rides();
+        newRide.setRidesName(ridesName);
+        newRide.setLocationName(resolvedLocationName);
+        newRide.setDescription(description);
+        newRide.setRiderType(rideType);
+        newRide.setUsername(creator);
+        newRide.setDistance(distance);
+        newRide.setParticipants(participants);
+        newRide.setStartingLocation(startPoint);
+        newRide.setEndingLocation(endPoint);
+        newRide.setStartingPointName(startLocationName);
+        newRide.setEndingPointName(endLocationName);
+        newRide.setDate(date);
+        newRide.setLocation(rideLocation);
 
-        Point coordinates = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-        coordinates.setSRID(4326);
-
-        String barangayName = nominatimService.getBarangayNameFromCoordinates(latitude, longitude);
-        String resolvedLocationName = locationName;
-        if (barangayName != null) {
-            List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
-            resolvedLocationName = !psgcDataList.isEmpty() ? psgcDataList.get(0).getName() : barangayName;
-        }
-
-        String startLocationName = nominatimService.getBarangayNameFromCoordinates(startLatitude, startLongitude);
-        String endLocationName = nominatimService.getBarangayNameFromCoordinates(endLatitude, endLongitude);
-
-        if (startLocationName == null) {
-            startLocationName = "Lat: " + startLatitude + ", Lng: " + startLongitude;
-        }
-        if (endLocationName == null) {
-            endLocationName = "Lat: " + endLatitude + ", Lng: " + endLongitude;
-        }
-
-
-        Point startPoint = geometryFactory.createPoint(new Coordinate(startLongitude, startLatitude));
-        Point endPoint = geometryFactory.createPoint(new Coordinate(endLongitude, endLatitude));
-        startPoint.setSRID(4326);
-        endPoint.setSRID(4326);
-
-
-
-        Rides newRides = new Rides();
-      //  newRides.setLocationName(locationName);
-        newRides.setLocationName(resolvedLocationName);
-        newRides.setRidesName(ridesName);
-        newRides.setDescription(description);
-        newRides.setRiderType(newRiderType);
-        newRides.setUsername(rider);
-        newRides.setDistance(distance);
-
-
-        if (participantUsernames != null && !participantUsernames.isEmpty()) {
-            List<Rider> participants = participantUsernames.stream()
-                    .map(riderRepository::findByUsername)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-            newRides.setParticipants(participants);
-
-
-        newRides.setStartingPointName(startLocationName);
-        newRides.setEndingPointName(endLocationName);
-
-        newRides.setStartingLocation(startPoint);
-        newRides.setEndingLocation(endPoint);
-        newRides.setDate(date);
-        newRides.setLocation(coordinates);
-
-
-
-
-
-
-        }
         try {
-            newRides = ridesRepository.save(newRides);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+            newRide = ridesRepository.save(newRide);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to save ride: " + ex.getMessage(), ex);
         }
 
-        if (newRides.getLocation() != null) {
-            latitude = newRides.getLocation().getY();
-            longitude = newRides.getLocation().getX();
+        RideResponseDTO response = mapToResponseDTO(newRide);
+        kafkaTemplate.send("location", response);
+        return response;
+    }
 
+    private Rider getRiderByUsername(String username) {
+        Rider rider = riderRepository.findByUsername(username);
+        if (rider == null) {
+            throw new IllegalArgumentException("Rider not found: " + username);
         }
+        return rider;
+    }
 
-
-        if (newRides.getStartingLocation() != null) {
-            startLatitude = newRides.getStartingLocation().getY();
-            startLongitude = newRides.getStartingLocation().getX();
+    private RiderType getRiderTypeByName(String typeName) {
+        RiderType type = riderTypeRepository.findByRiderType(typeName);
+        if (type == null) {
+            throw new IllegalArgumentException("RiderType not found: " + typeName);
         }
-
-        if (newRides.getEndingLocation() != null) {
-            endLatitude = newRides.getEndingLocation().getY();
-            endLongitude = newRides.getEndingLocation().getX();
-        }
-
-        List<String> listUsername = newRides.getParticipants().stream()
-                .map(Rider::getUsername)
-                .toList();
-
-        RideResponseDTO ridesDTO = new RideResponseDTO(
-
-                newRides.getRidesName(),
-                newRides.getLocationName(),
-                newRides.getRiderType(),
-                newRides.getDistance(),
-                newRides.getDate(),
-                latitude,
-                longitude,
-                listUsername,
-                newRides.getDescription(),
-                newRides.getStartingPointName(),
-                startLatitude,
-                startLongitude,
-                newRides.getEndingPointName(),
-                endLatitude,
-                endLongitude
-        );
-
-        kafkaTemplate.send("location", ridesDTO);
-        return ridesDTO;
+        return type;
     }
 
 
+    private List<Rider> resolveParticipants(List<String> usernames) {
+        if (usernames == null) return List.of();
+        return usernames.stream()
+                .map(riderRepository::findByUsername)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
+    private String resolveBarangayName(String fallback, double lat, double lon) {
+        String barangay = nominatimService.getBarangayNameFromCoordinates(lat, lon);
+        if (barangay == null) {
+            return fallback != null ? fallback : "Lat: " + lat + ", Lng: " + lon;
+        }
+        return psgcDataRepository.findByNameIgnoreCase(barangay)
+                .stream()
+                .findFirst()
+                .map(PsgcData::getName)
+                .orElse(barangay);
+    }
+
+    private Point createPoint(double longitude, double latitude) {
+        Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+        point.setSRID(4326);
+        return point;
+    }
+
+    private RideResponseDTO mapToResponseDTO(Rides ride) {
+        return new RideResponseDTO(
+                ride.getRidesName(),
+                ride.getLocationName(),
+                ride.getRiderType(),
+                ride.getDistance(),
+                ride.getDate(),
+                ride.getLocation().getY(),
+                ride.getLocation().getX(),
+                ride.getParticipants().stream().map(Rider::getUsername).toList(),
+                ride.getDescription(),
+                ride.getStartingPointName(),
+                ride.getStartingLocation().getY(),
+                ride.getStartingLocation().getX(),
+                ride.getEndingPointName(),
+                ride.getEndingLocation().getY(),
+                ride.getEndingLocation().getX()
+        );
+    }
 }
-
-
-
-
