@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.RiderRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,6 +80,32 @@ public class    RiderService {
                 .map(RiderDTO::getUsername)
                 .collect(Collectors.toList());
     }
+
+    public List<Rider> addRiderParticipants(List<String> usernames) {
+        if (usernames == null) return List.of();
+        return usernames.stream()
+                .map(riderRepository::findByUsername)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+
+    public Rider getRiderByUsername(String username) {
+        Rider rider = riderRepository.findByUsername(username);
+        if (rider == null) {
+            throw new IllegalArgumentException("Rider not found: " + username);
+        }
+        return rider;
+    }
+
+    public RiderType getRiderTypeByName(String typeName) {
+        RiderType type = riderTypeRepository.findByRiderType(typeName);
+        if (type == null) {
+            throw new IllegalArgumentException("RiderType not found: " + typeName);
+        }
+        return type;
+    }
+
 
 
 }
