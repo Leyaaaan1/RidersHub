@@ -1,4 +1,5 @@
 package leyans.RidersHub.Controller;
+import jakarta.validation.Valid;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
@@ -47,15 +48,10 @@ public class RiderController {
 
 
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Rider>> getAllRiders() {
-        List<Rider> riders = riderService.getAllRiders();
-        return ResponseEntity.ok(riders);
-    }
 
     @PostMapping("/create")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
-
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RideResponseDTO response = ridesService.createRide(
@@ -65,35 +61,25 @@ public class RiderController {
                 rideRequest.getRiderType(),
                 rideRequest.getDistance(),
                 rideRequest.getDate(),
-                rideRequest.getLatitude(),
-                rideRequest.getLongitude(),
                 rideRequest.getParticipants(),
                 rideRequest.getDescription(),
+                rideRequest.getLatitude(),
+                rideRequest.getLongitude(),
                 rideRequest.getStartLat(),
                 rideRequest.getStartLng(),
                 rideRequest.getEndLat(),
                 rideRequest.getEndLng()
-
-                );
+        );
         System.out.println("Authenticated username: " + username);
-
         return ResponseEntity.ok(response);
     }
 
-
     @GetMapping("/search")
+    public ResponseEntity<List<String>> searchRiders(@RequestParam(value = "username", required = false) String searchTerm) {
 
-    public ResponseEntity<List<Rider>> searchRiders(@RequestParam(required = false) String username) {
-        if (username != null && !username.trim().isEmpty()) {
-            Rider rider = riderService.findRiderByUsername(username);
-            if (rider == null) {
-                return ResponseEntity.ok(List.of());
-            }
-            return ResponseEntity.ok(List.of(rider));
-        }
-
-        List<Rider> riders = riderService.getAllRiders();
-        return ResponseEntity.ok(riders);
+        String searchUsername = searchTerm != null ? searchTerm : "None";
+        List<String> usernames = riderService.findUsernamesContaining(searchUsername);
+        return ResponseEntity.ok(usernames);
     }
 
 

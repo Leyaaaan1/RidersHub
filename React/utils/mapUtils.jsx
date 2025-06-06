@@ -30,6 +30,7 @@ export const handleWebViewMessage = async (event, state) => {
         // Get location name from coordinates
         try {
             const geoData = await reverseGeocode(data.lat, data.lng);
+            console.log("GeoData received:", geoData);
 
             if (geoData && geoData.display_name) {
                 const name = geoData.address?.suburb ||
@@ -38,26 +39,23 @@ export const handleWebViewMessage = async (event, state) => {
                     geoData.address?.city ||
                     geoData.display_name.split(',')[0];
 
+                console.log("Resolved name:", name, "for mapMode:", mapMode);
+
                 if (mapMode === 'location') {
                     setLocationName(name);
                     setSearchQuery(geoData.display_name);
                 } else if (mapMode === 'starting') {
                     setStartingPoint(name);
-                    setSearchQuery(geoData.display_name);  // Add this line
+                    setSearchQuery(geoData.display_name);
                 } else if (mapMode === 'ending') {
                     setEndingPoint(name);
-                    setSearchQuery(geoData.display_name);  // Add this line
+                    setSearchQuery(geoData.display_name);
                 }
+            } else {
+                console.warn("GeoData did not contain a display_name.");
             }
         } catch (error) {
             console.error('Error reverse geocoding:', error);
-            if (mapMode === 'location') {
-                setLocationName('Location name unavailable');
-            } else if (mapMode === 'starting') {
-                setStartingPoint('Location name unavailable');
-            } else if (mapMode === 'ending') {
-                setEndingPoint('Location name unavailable');
-            }
         }
     }
 };

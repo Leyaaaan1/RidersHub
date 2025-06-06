@@ -90,6 +90,7 @@ public class StartRideService {
                 initiator
         );
 
+
         List<String> participantUsernames = ride.getParticipants().stream()
                 .map(Rider::getUsername)
                 .toList();
@@ -107,33 +108,13 @@ public class StartRideService {
                 started.getStartTime());
 
         kafkaTemplate.send("ride-started", responseDTO);
-//
-//        try {
-//            String locationJson = objectMapper.writeValueAsString(responseDTO);
-//            String redisKey = "ride_started:" + initiator.getUsername();
-//            stringRedisTemplate.opsForValue().set(redisKey, locationJson, 3, TimeUnit.MINUTES);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to serialize location update", e);
-//        }
-
 
         return responseDTO;
 
     }
 
-//    @Transactional
-//    public Optional<StartedRide> getStartedRideByRideId(Integer rideId) {
-//        return startedRideRepository.findByRideId(rideId);
-//    }
-//
-//    @Transactional
-//    public List<Rider> getParticipantsByStartedRideId(Integer startedRideId) {
-//        return startedRideRepository.findParticipantsByStartedRideId(startedRideId);
-//
-//    }
-//
-//    public void addParticipantToStartedRide(Integer startedRideId, String username) {
-//        startedRideRepository.addParticipantToStartedRide(startedRideId, username);
-//    }
+
 }
+
+
 

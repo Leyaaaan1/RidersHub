@@ -1,35 +1,29 @@
 const API_BASE_URL = 'http://192.168.1.51:8080';
 console.log('Using API URL:', API_BASE_URL);
+
 export const searchLocation = async (query) => {
-    const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?` +
-        `q=${encodeURIComponent(query)}&` +
-        `countrycodes=ph&` +
-        `format=json&` +
-        `limit=5&` +
-        `addressdetails=1`,
-        {
-            headers: {
-                'User-Agent': 'RidersHub/1.0'
-            }
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch location');
         }
-    );
-
-    return await response.json();
+        return await response.json();
+    } catch (error) {
+        console.error('searchLocation error:', error);
+        throw error;
+    }
 };
-
-// Reverse geocode to get location name
 export const reverseGeocode = async (lat, lon) => {
-    const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?` +
-        `lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
-        {
-            headers: { 'User-Agent': 'RidersHub/1.0' }
-        }
-    );
-
-    return await response.json();
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        return await response.json();
+    } catch (err) {
+        console.error("Reverse geocode fetch failed:", err);
+        return null;
+    }
 };
+
+// Fe
 
 // Fetch all riders
 
@@ -54,9 +48,7 @@ export const createRide = async (token, rideData) => {
     return result;
 };
 export const searchRiders = async (token, username = '') => {
-    const url = username.trim()
-        ? `${API_BASE_URL}/riders/search?username=${encodeURIComponent(username)}`
-        : `${API_BASE_URL}/riders/search`;
+    const url = `${API_BASE_URL}/riders/search${username.trim() ? `?username=${encodeURIComponent(username.trim())}` : ''}`;
 
     console.log('Searching riders with URL:', url);
 
@@ -69,21 +61,17 @@ export const searchRiders = async (token, username = '') => {
             }
         });
 
-        const responseText = await response.text();
-        console.log('Response status:', response.status);
-        console.log('Response text:', responseText);
-
         if (!response.ok) {
-            throw new Error(`Failed to search riders: ${response.status} ${responseText}`);
+            const errorText = await response.text();
+            throw new Error(`Failed to search riders: ${response.status} ${errorText}`);
         }
 
-        return JSON.parse(responseText);
+        return await response.json();
     } catch (error) {
         console.error('Network error details:', error);
         throw error;
     }
 };
-
 
 export const getCurrentRiderType = async (token) => {
     try {

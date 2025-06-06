@@ -2,19 +2,17 @@ package leyans.RidersHub.Service;
 
 
 import jakarta.transaction.Transactional;
+import leyans.RidersHub.DTO.RiderDTO;
 import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.RiderRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -58,8 +56,7 @@ public class    RiderService {
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        RiderType riderTypeName = riderTypeRepository.findByRiderType(riderType);
-
+        RiderType riderTypeName = getRiderTypeByName(riderType);
         Rider newRider = new Rider();
         newRider.setUsername(username);
         newRider.setPassword(encodedPassword);
@@ -69,17 +66,36 @@ public class    RiderService {
         return riderRepository.save(newRider);
     }
 
-
-    public List<Rider> getAllRiders() {
-        return riderRepository.findAll();
-
-
+    public List<String> findUsernamesContaining(String username) {
+        List<RiderDTO> riders = riderRepository.searchByUsername(username);
+        return riders.stream()
+                .map(RiderDTO::getUsername)
+                .collect(Collectors.toList());
     }
 
-    public Rider findRiderByUsername(String username) {
-        return riderRepository.findByUsername(username);
+    public List<Rider> addRiderParticipants(List<String> usernames) {
+        if (usernames == null) return List.of();
+        return usernames.stream()
+                .map(riderRepository::findByUsername)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
+    public Rider getRiderByUsername(String username) {
+        Rider rider = riderRepository.findByUsername(username);
+        if (rider == null) {
+            throw new IllegalArgumentException("Rider not found: " + username);
+        }
+        return rider;
+    }
+
+    public RiderType getRiderTypeByName(String typeName) {
+        RiderType type = riderTypeRepository.findByRiderType(typeName);
+        if (type == null) {
+            throw new IllegalArgumentException("RiderType not found: " + typeName);
+        }
+        return type;
+    }
 
 
 

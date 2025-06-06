@@ -1,28 +1,21 @@
-
 import { StyleSheet } from 'react-native';
 import colors from './colors';
 import spacing from './spacing';
 
+// === StyleSheet Definitions ===
 const utilities = StyleSheet.create({
-    // === Main container ===
-    // container: {
-    //     flex: 1,
-    //     backgroundColor: colors.background,
-    //     padding: spacing.md,
-    // },
 
+    // === Containers ===
     container: {
         flexGrow: 1,
         backgroundColor: "#fff",
         padding: 2,
-
     },
 
     gradientContainer: {
         flex: 1,
         padding: spacing.md,
     },
-
 
     containerPrimary: {
         flex: 1,
@@ -31,17 +24,16 @@ const utilities = StyleSheet.create({
     },
 
     centeredContainer: {
-
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: colors.background,
         padding: spacing.md,
     },
+
     bottomAreaContainer: {
         borderTopWidth: 1,
         borderTopColor: colors.tibetanRed700,
-
     },
 
     bottomAreaContainerLeft: {
@@ -54,17 +46,15 @@ const utilities = StyleSheet.create({
         left: 20
     },
 
-
     locationContainer: {
         marginBottom: 20,
     },
 
-
-
+    // === Rider Type Option Styles ===
     riderTypeOption: {
         minWidth: 80,
         flexGrow: 1,
-        flexBasis: '22%',  // Slightly less than 25% to account for margins
+        flexBasis: '22%',
         backgroundColor: '#f0f0f0',
         borderRadius: 8,
         alignItems: 'center',
@@ -88,36 +78,54 @@ const utilities = StyleSheet.create({
         elevation: 3,
     },
 
-
+    // === Search Results ===
     searchResults: {
         maxHeight: 200,
         borderWidth: 1,
         borderColor: '#ddd',
         marginTop: 5,
     },
+
     resultItem: {
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    //     mapContainer: {
-//         height: 250,
-//         marginBottom: 16,
-//         borderRadius: 8,
-//         overflow: 'hidden',
-//         borderWidth: 1,
-//         borderColor: '#ddd',
-//     },
-//     map: {
-//         ...StyleSheet.absoluteFillObject,
-//     },
+
+    // === Text Input and Box ===
     textBox: {
         padding: spacing.sm,
         backgroundColor: colors.white,
         fontSize: 16,
         marginBottom: spacing.md,
     },
-    // === Top Navbar ===
+
+    input: {
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        backgroundColor: '#fff',
+    },
+
+    inputCenter: {
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        backgroundColor: '#fff',
+        alignSelf: 'center',
+        width: '80%',
+    },
+
+    activeInput: {
+        borderColor: '#2196F3',
+        borderWidth: 2,
+    },
+
+    // === Navbar ===
     navbar: {
         height: 56,
         backgroundColor: colors.primary,
@@ -132,25 +140,25 @@ const utilities = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
     },
+
     navbarTextDark: {
         color: colors.black,
         fontSize: 20,
         fontWeight: 'bold',
     },
 
+    // === Text Styles ===
     textWhite: {
         color: colors.white,
         fontSize: 20,
         fontWeight: 'bold',
-        // Use for white text
     },
+
     textBlack: {
         color: colors.black,
         fontSize: 20,
         fontWeight: 'bold',
-        // Use for black text
     },
-
 
     title: {
         fontSize: 24,
@@ -160,53 +168,40 @@ const utilities = StyleSheet.create({
         color: colors.primary,
     },
 
-    label: {
-        marginBottom: 5,
-        fontWeight: "bold",
-    },
-    buttonBack: {
-        backgroundColor: "#007AFF",
-        padding: 12,
-        marginTop: 10,
-        borderRadius: 8,
-        alignItems: "center",
-    },
-    buttonText: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
-    // map: {
-    //     width: "100%",
-    //     height: 200,
-    //     marginBottom: 10,
-    // },
-    // === Center Content ===
-    center: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     titleText: {
         fontSize: 24,
         fontWeight: 'bold',
         color: colors.primary,
         marginBottom: spacing.md,
     },
-    compactText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        lineHeight: 20,   // Small line height to remove space between lines
-        marginVertical: 0,
-        paddingVertical: 0,
-        color: colors.primary,
 
+    label: {
+        marginBottom: 5,
+        fontWeight: "bold",
     },
+
     paragraph: {
         fontSize: 16,
         color: colors.text,
         marginBottom: spacing.sm,
     },
 
+    compactText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        lineHeight: 20,
+        marginVertical: 0,
+        paddingVertical: 0,
+        color: colors.primary,
+    },
+
+    smallText: {
+        fontSize: 12,
+        color: '#fff',
+        marginTop: 3,
+    },
+
+    // === Buttons ===
     button: {
         backgroundColor: colors.primary,
         paddingVertical: spacing.sm,
@@ -214,13 +209,21 @@ const utilities = StyleSheet.create({
         borderRadius: 8,
         marginTop: spacing.md,
     },
-    // buttonText: {
-    //     color: colors.white,
-    //     fontSize: 16,
-    //     textAlign: 'center',
-    // },
 
-    // === Bottom Bar (e.g., Bottom Navigation or Buttons) ===
+    buttonBack: {
+        backgroundColor: "#007AFF",
+        padding: 12,
+        marginTop: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+
+    buttonText: {
+        color: "#fff",
+        fontWeight: "bold",
+    },
+
+    // === Bottom Bar ===
     bottomBar: {
         height: 56,
         backgroundColor: colors.primary,
@@ -229,12 +232,21 @@ const utilities = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: colors.tibetanRed700,
     },
-    //     },
+
+    // === Centering Layouts ===
+    center: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    // === Search Section ===
     searchingText: {
         color: '#666',
         marginBottom: 8,
         fontStyle: 'italic',
     },
+
     searchResultsList: {
         maxHeight: 200,
         marginBottom: 16,
@@ -242,42 +254,28 @@ const utilities = StyleSheet.create({
         borderColor: '#ddd',
         borderRadius: 8,
     },
+
     searchResultItem: {
         padding: 12,
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
+
     searchResultName: {
         fontWeight: 'bold',
     },
+
     searchResultAddress: {
         fontSize: 12,
         color: '#666',
     },
-    input: {
-        borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        backgroundColor: '#fff',
-    },
-    inputCenter: {
-        borderWidth: 1,
-        borderColor: colors.primary,
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 16,
-        backgroundColor: '#fff',
-        // textAlign: 'center',
-        alignSelf: 'center',
-        width: '80%', // Added to prevent full width while centered
-    },
+
+    // === Map & Geolocation ===
     mapInstructions: {
         position: 'absolute',
         top: 10,
-        left: 50,    // Increased from 10 to 50
-        right: 30,   // Increased from 10 to 50
+        left: 50,
+        right: 30,
         padding: 8,
         borderRadius: 1,
         zIndex: 1,
@@ -285,13 +283,14 @@ const utilities = StyleSheet.create({
         backgroundColor: colors.primary,
         color: colors.white,
     },
+
     coordinatesContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 16,
     },
 
-        mapContainer: {
+    mapContainer: {
         height: 510,
         marginBottom: 16,
         borderRadius: 8,
@@ -299,36 +298,52 @@ const utilities = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ddd',
     },
+
     map: {
         ...StyleSheet.absoluteFillObject,
     },
 
+    // === Progress Indicators ===
     progressIndicator: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         marginVertical: 15,
     },
+
     progressStep: {
         paddingVertical: 8,
         paddingHorizontal: 12,
         borderRadius: 15,
         alignItems: 'center',
     },
+
     progressConnector: {
         height: 3,
         width: 40,
     },
+
     progressText: {
         color: '#fff',
         fontWeight: 'bold',
     },
-    smallText: {
-        fontSize: 12,
-        color: '#fff',
-        marginTop: 3,
+
+    // === Form Styles ===
+    formGroup: {
+        marginBottom: spacing.md,
+        paddingVertical: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
     },
 
+    value: {
+        fontSize: 16,
+        color: colors.text,
+        marginTop: 4,
+        paddingLeft: spacing.sm,
+    },
+
+    // === Tabs ===
     tabButton: {
         padding: 10,
         borderRadius: 5,
@@ -337,15 +352,14 @@ const utilities = StyleSheet.create({
         marginHorizontal: 5,
         alignItems: 'center',
     },
+
     activeTab: {
         backgroundColor: '#2196F3',
     },
+
     tabButtonText: {
         fontWeight: 'bold',
     },
-    activeInput: {
-        borderColor: '#2196F3',
-        borderWidth: 2,
-    },
 });
+
 export default utilities;

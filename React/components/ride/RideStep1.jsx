@@ -1,14 +1,43 @@
-// React/components/ride/RideStep1.jsx
 import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import utilities from '../../styles/utilities';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import colors from "../../styles/colors";
+import DatePicker from 'react-native-date-picker';
+
 const RideStep1 = ({
                        error, rideName, setRideName, riderType, setRiderType, distance, setDistance,
                        participants, setParticipants, description, riderSearchQuery, setRiderSearchQuery,
-                       searchedRiders, isRiderSearching, handleSearchRiders, setDescription, nextStep
+                       searchedRiders, date, setDate, isRiderSearching, handleSearchRiders, setDescription, nextStep
                    }) => {
+
+
+    const [datePickerOpen, setDatePickerOpen] = useState(false);
+    const [dateError, setDateError] = useState('');
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const handleDateConfirm = (selectedDate) => {
+        if (selectedDate < today) {
+            setDateError('Please select a future date');
+            return;
+        }
+        setDateError('');
+        setDate(selectedDate);
+        setDatePickerOpen(false);
+    };
+
+    const formatDate = (date) => {
+        if (!date) return '';
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 
     return (
         <View style={utilities.container}>
@@ -72,14 +101,40 @@ const RideStep1 = ({
                 </TouchableOpacity>
             </View>
 
-            <Text style={utilities.label}>Distance (km)</Text>
-            <TextInput
-                style={utilities.input}
-                value={distance}
-                onChangeText={setDistance}
-                placeholder="Enter distance in meters"
-                keyboardType="numeric"
-            />
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 1, marginRight: 5}}>
+                    <Text style={utilities.label}>Distance (km)</Text>
+                    <TextInput
+                        style={utilities.input}
+                        value={distance}
+                        onChangeText={setDistance}
+                        placeholder="Enter distance in km"
+                        keyboardType="numeric"
+                    />
+                </View>
+                <View style={{flex: 1, marginLeft: 5}}>
+                    <Text style={utilities.label}>Date</Text>
+                    <TouchableOpacity
+                        style={[utilities.input, dateError ? {borderColor: 'red'} : {}]}
+                        onPress={() => setDatePickerOpen(true)}
+                    >
+                        <Text style={dateError ? {color: 'red'} : {}}>
+                            {formatDate(date) || "Select date"}
+                        </Text>
+                    </TouchableOpacity>
+                    {dateError ? <Text style={{color: 'red', fontSize: 12}}>{dateError}</Text> : null}
+
+                    <DatePicker
+                        modal
+                        open={datePickerOpen}
+                        date={date || new Date()}
+                        minimumDate={today}
+                        onConfirm={handleDateConfirm}
+                        onCancel={() => setDatePickerOpen(false)}
+                        mode="datetime"
+                    />
+                </View>
+            </View>
 
             <Text style={utilities.label}>Participants</Text>
             <View>
@@ -100,17 +155,17 @@ const RideStep1 = ({
                 {/* Search results */}
                 {searchedRiders.length > 0 && riderSearchQuery.trim() !== '' && (
                     <View style={utilities.searchResultsList}>
-                        {searchedRiders.map(item => (
+                        {searchedRiders.map((username, index) => (
                             <TouchableOpacity
-                                key={item.id.toString()}
+                                key={index}
                                 style={utilities.searchResultItem}
                                 onPress={() => {
                                     try {
                                         const participantsList = participants ? participants.split(',').map(p => p.trim()) : [];
-                                        if (!participantsList.includes(item.username)) {
+                                        if (!participantsList.includes(username)) {
                                             setParticipants(participants ?
-                                                `${participants}, ${item.username}` :
-                                                item.username);
+                                                `${participants}, ${username}` :
+                                                username);
                                         }
                                         setRiderSearchQuery('');
                                         handleSearchRiders(''); // Clear search results when a rider is selected
@@ -119,11 +174,12 @@ const RideStep1 = ({
                                     }
                                 }}
                             >
-                                <Text style={utilities.searchResultName}>{item.username}</Text>
+                                <Text style={utilities.searchResultName}>{username}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
                 )}
+
                 {/* Selected participants */}
                 {participants && (
                     <View style={{marginTop: 10}}>
@@ -156,7 +212,6 @@ const RideStep1 = ({
                     </View>
                 )}
             </View>
-
 
             <Text style={utilities.label}>Description</Text>
             <TextInput

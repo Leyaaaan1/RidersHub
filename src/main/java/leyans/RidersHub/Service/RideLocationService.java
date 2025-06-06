@@ -39,16 +39,19 @@ public class RideLocationService {
     private final PsgcDataRepository psgcDataRepository;
     private final NominatimService nominatimService;
 
+    private final LocationService locationService;
+
 
     @Autowired
     public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo, RiderRepository riderRepository, KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate, PsgcDataRepository psgcDataRepository, NominatimService nominatimService) {
+                               RiderLocationRepository locationRepo, RiderRepository riderRepository, KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate, PsgcDataRepository psgcDataRepository, NominatimService nominatimService, LocationService locationService) {
         this.startedRideRepo = startedRideRepo;
         this.locationRepo = locationRepo;
         this.riderRepository = riderRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.psgcDataRepository = psgcDataRepository;
         this.nominatimService = nominatimService;
+        this.locationService = locationService;
     }
 
     /**
@@ -69,11 +72,10 @@ public class RideLocationService {
 
 
         //Current location of the rider
-        Point userPoint = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-        userPoint.setSRID(4326);
+        Point userPoint = locationService.createPoint(longitude, latitude);
 
 
-        String barangayName = nominatimService.getBarangayNameFromCoordinates(latitude, longitude);
+        String barangayName = locationService.resolveBarangayName(null, latitude, longitude);
         String locationName = null;
         if (barangayName != null) {
             List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
@@ -81,14 +83,14 @@ public class RideLocationService {
                     .findFirst()
                     .map(PsgcData::getName)
                     .orElse(barangayName);
-        }
 
+            //If the barangay exists in the PSGC (Philippine Standard Geographic Code) database, it uses the standardized/official name
+            //If the barangay isn't in the database, it defaults to using the original detected name
+            //If no barangay was detected at all (null), the locationName remains null
+        }
 
         Point startPoint = started.getLocation();
         double distanceMeters = locationRepo.getDistanceBetweenPoints(userPoint, startPoint);
-
-
-
 
 
         RiderLocation loc = new RiderLocation();

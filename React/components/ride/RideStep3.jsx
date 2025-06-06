@@ -11,13 +11,12 @@ const RideStep3 = ({
                        handleLocationSelect, webViewRef,
                        startingLatitude, startingLongitude, endingLatitude, endingLongitude,
                        handleMessage, startingPoint, setStartingPoint,
-                       endingPoint, setEndingPoint, prevStep, handleCreateRide, loading
+                       endingPoint, setEndingPoint, prevStep, loading, nextStep,
+                       handleCreateRide
                    }) => {
     return (
         <View style={utilities.container}>
-            {/*<Text style={utilities.title}>*/}
-            {/*    {mapMode === 'starting' ? 'SELECT STARTING POINT' : 'SELECT ENDING POINT'}*/}
-            {/*</Text>*/}
+
 
             <View style={utilities.progressIndicator}>
                 <View style={[
@@ -112,13 +111,14 @@ const RideStep3 = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={utilities.button}
-                    onPress={handleCreateRide}
-                    disabled={loading || !startingPoint.trim() || !endingPoint.trim()}
+                    style={[utilities.button, {backgroundColor: '#4CAF50'}]}
+                    onPress={() => {
+                        handleCreateRide();
+                        nextStep();
+                    }}
+                    disabled={!startingPoint || !endingPoint || loading}
                 >
-                    <Text style={utilities.buttonText}>
-                        {loading ? 'Creating...' : 'Create Ride'}
-                    </Text>
+                    <Text style={utilities.buttonText}>{loading ? 'Saving...' : 'Save & Review'}</Text>
                 </TouchableOpacity>
             </View>
         </View>
