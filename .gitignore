@@ -71,6 +71,7 @@ local.properties
 !debug.keystore
 .kotlin/
 .env
+.env.react
 # node.js
 #
 node_modules/

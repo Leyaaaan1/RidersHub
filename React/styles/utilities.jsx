@@ -360,6 +360,25 @@ const utilities = StyleSheet.create({
     tabButtonText: {
         fontWeight: 'bold',
     },
+
+    // === Image container===
+
+    imageContainer: {
+        marginVertical: 10,
+        alignItems: 'center',
+    },
+    mapboxImage: {
+        width: '100%',
+        height: 200, // Adjust as needed
+        borderRadius: 8,
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+    },
+
 });
 
 export default utilities;

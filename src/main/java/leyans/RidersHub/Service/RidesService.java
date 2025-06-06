@@ -3,14 +3,12 @@ package leyans.RidersHub.Service;
 
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
-import leyans.RidersHub.Repository.PsgcDataRepository;
-import leyans.RidersHub.Repository.RiderRepository;
-import leyans.RidersHub.Repository.RiderTypeRepository;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.Service.MapBox.MapImageService;
+import leyans.RidersHub.Service.MapBox.MapboxService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,8 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class RidesService {
@@ -33,22 +29,31 @@ public class RidesService {
 
     private final RiderService riderService;
 
+    private final MapImageService mapImageService;
+    private final MapboxService mapboxService;
+
 
     @Autowired
     public RidesService(RidesRepository ridesRepository,
                         KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
-                        LocationService locationService, RiderService riderService) {
+                        LocationService locationService, RiderService riderService, MapImageService mapImageService, MapboxService mapboxService) {
 
         this.ridesRepository = ridesRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.riderService = riderService;
         this.locationService = locationService;
+        this.mapImageService = mapImageService;
+        this.mapboxService = mapboxService;
     }
 
     @Transactional
     public RideResponseDTO createRide(String creatorUsername, String ridesName, String locationName, String riderType, Integer distance, LocalDateTime date,
                                       List<String> participantUsernames, String description,
-                                      double latitude, double longitude, double startLatitude, double startLongitude, double endLatitude, double endLongitude) {
+                                      double latitude, double longitude, double startLatitude,
+                                      double startLongitude, double endLatitude, double endLongitude, String mapImageUrl) {
+
+        String imageUrl = mapboxService.getStaticMapImageUrl(longitude, latitude);
+
 
 
         Rider creator = riderService.getRiderByUsername(creatorUsername);
@@ -77,6 +82,7 @@ public class RidesService {
         newRide.setEndingPointName(endLocationName);
         newRide.setDate(date);
         newRide.setLocation(rideLocation);
+        newRide.setMapImageUrl(imageUrl);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -105,7 +111,8 @@ public class RidesService {
                 ride.getStartingLocation().getX(),
                 ride.getEndingPointName(),
                 ride.getEndingLocation().getY(),
-                ride.getEndingLocation().getX()
+                ride.getEndingLocation().getX(),
+                ride.getMapImageUrl()
         );
     }
 }

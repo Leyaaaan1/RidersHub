@@ -68,7 +68,8 @@ public class RiderController {
                 rideRequest.getStartLat(),
                 rideRequest.getStartLng(),
                 rideRequest.getEndLat(),
-                rideRequest.getEndLng()
+                rideRequest.getEndLng(),
+                rideRequest.getMapImageUrl()
         );
         System.out.println("Authenticated username: " + username);
         return ResponseEntity.ok(response);

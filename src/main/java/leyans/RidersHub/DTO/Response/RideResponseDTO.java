@@ -1,5 +1,6 @@
 package leyans.RidersHub.DTO.Response;
 
+import jakarta.persistence.Column;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 
@@ -24,13 +25,18 @@ public class RideResponseDTO {
     double endLat;
     double endLng;
 
+    private String mapImageUrl;
+
 
 
     public RideResponseDTO(String locationName, String ridesName, RiderType riderType,
                            Integer distance, LocalDateTime
                                    date, double latitude, double longitude, List<String> participants, String description,
                            String startingPointName, double startLat, double startLng,
-                           String endingPointName, double endLat, double endLng) {
+                           String endingPointName, double endLat, double endLng,
+                            String mapImageUrl
+
+    ) {
 
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -48,12 +54,19 @@ public class RideResponseDTO {
         this.endingPointName = endingPointName;
         this.endLat = endLat;
         this.endLng = endLng;
+        this.mapImageUrl = mapImageUrl;
 
 
     }
 
 
+    public String getMapImageUrl() {
+        return mapImageUrl;
+    }
 
+    public void setMapImageUrl(String mapImageUrl) {
+        this.mapImageUrl = mapImageUrl;
+    }
 
     public String getStartingPointName() {
         return startingPointName;

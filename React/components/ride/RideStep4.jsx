@@ -1,10 +1,11 @@
 // React/components/ride/RideStep4.jsx
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Image} from 'react-native';
 import utilities from '../../styles/utilities';
 import rideUtilities from '../../styles/rideUtilities';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+
 import WaveLine from '../../styles/waveLineComponent';
 const RideStep4 = ({
                        rideName,
@@ -20,6 +21,7 @@ const RideStep4 = ({
                        handleCreateRide,
     token,
     username,
+                       mapboxImageUrl,
                        loading,
                    }) => {
 
@@ -40,6 +42,7 @@ const RideStep4 = ({
             navigation.navigate('RiderPage', { token, username });
         });
     };
+    const [imageLoading, setImageLoading] = useState(true);
 
     return (
             <View style={rideUtilities.formGroup}>
@@ -78,6 +81,7 @@ const RideStep4 = ({
                             </View>
                         </View>
                 </View>
+
 
 
                 <View style={[
@@ -135,8 +139,35 @@ const RideStep4 = ({
                 </View>
                 </View>
 
+                <View>
+                    {mapboxImageUrl && (
+                        <View style={utilities.imageContainer}>
+                            <Text style={utilities.label}>Location Map</Text>
+                            {imageLoading && (
+                                <ActivityIndicator
+                                    size="large"
+                                    color="#0000ff"
+                                    style={{position: 'absolute', top: '50%', left: '50%', transform: [{translateX: -10}, {translateY: -10}], zIndex: 1}}
+                                />
+                            )}
+                            <Image
+                                source={{ uri: mapboxImageUrl }}
+                                style={utilities.mapboxImage}
+                                resizeMode="cover"
+                                onLoadStart={() => setImageLoading(true)}
+                                onLoadEnd={() => setImageLoading(false)}
+                                onError={(error) => {
+                                    console.log('Image load error:', error);
+                                    setImageLoading(false);
+                                }}
+                            />
+                        </View>
+                    )}
+                </View>
 
-                    {participants && (
+
+
+                {participants && (
                         <View style={utilities.formGroup}>
                             <Text style={utilities.label}>Participants:</Text>
                             <Text style={utilities.compactText}>{participants}</Text>

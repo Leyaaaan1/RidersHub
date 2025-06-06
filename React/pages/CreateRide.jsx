@@ -47,6 +47,8 @@ const CreateRide = ({ route, navigation }) => {
     const [searchedRiders, setSearchedRiders] = useState([]);
     const [isRiderSearching, setIsRiderSearching] = useState(false);
 
+    const [mapboxImageUrl, setMapboxImageUrl] = useState('');
+
 
 
 
@@ -125,7 +127,8 @@ const CreateRide = ({ route, navigation }) => {
             setStartingPoint,
             setDate,
             setEndingPoint,
-            setSearchQuery
+            setSearchQuery,
+            setMapboxImageUrl,
         });
     };
 
@@ -264,7 +267,9 @@ const CreateRide = ({ route, navigation }) => {
             startingPoint: startingPoint,                 // Keep these for UI display
             endingPoint: endingPoint,                     // purposes
             participants: participantsArray,
-            description: description
+            description: description,
+            mapboxImageUrl: mapboxImageUrl
+
         };
 
         createRide(token, rideData)
@@ -329,6 +334,7 @@ const CreateRide = ({ route, navigation }) => {
                     setLocationName={setLocationName}
                     prevStep={prevStep}
                     nextStep={nextStep}
+                    setMapboxImageUrl={setMapboxImageUrl}
                 />
             )}
 
@@ -370,6 +376,7 @@ const CreateRide = ({ route, navigation }) => {
                     prevStep={prevStep}
                     handleCreateRide={handleCreateRide}
                     loading={loading}
+                    mapboxImageUrl={mapboxImageUrl}
                     token={token}
                     username={username}
                 />
