@@ -11,7 +11,8 @@ const RideStep3 = ({
                        handleLocationSelect, webViewRef,
                        startingLatitude, startingLongitude, endingLatitude, endingLongitude,
                        handleMessage, startingPoint, setStartingPoint,
-                       endingPoint, setEndingPoint, prevStep, loading, nextStep
+                       endingPoint, setEndingPoint, prevStep, loading, nextStep,
+                       handleCreateRide
                    }) => {
     return (
         <View style={utilities.container}>
@@ -110,11 +111,14 @@ const RideStep3 = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[utilities.button, !startingPoint || !endingPoint ? utilities.button : {}]}
-                    onPress={nextStep}
-                    disabled={!startingPoint || !endingPoint}
+                    style={[utilities.button, {backgroundColor: '#4CAF50'}]}
+                    onPress={() => {
+                        handleCreateRide();
+                        nextStep();
+                    }}
+                    disabled={!startingPoint || !endingPoint || loading}
                 >
-                    <Text style={utilities.buttonText}>{loading ? 'Loading...' : 'Next'}</Text>
+                    <Text style={utilities.buttonText}>{loading ? 'Saving...' : 'Save & Review'}</Text>
                 </TouchableOpacity>
             </View>
         </View>

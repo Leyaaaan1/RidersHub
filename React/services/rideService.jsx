@@ -1,35 +1,5 @@
 const API_BASE_URL = 'http://192.168.1.51:8080';
 console.log('Using API URL:', API_BASE_URL);
-// export const searchLocation = async (query) => {
-//     const response = await fetch(
-//         `https://nominatim.openstreetmap.org/search?` +
-//         `q=${encodeURIComponent(query)}&` +
-//         `countrycodes=ph&` +
-//         `format=json&` +
-//         `limit=5&` +
-//         `addressdetails=1`,
-//         {
-//             headers: {
-//                 'User-Agent': 'RidersHub/1.0'
-//             }
-//         }
-//     );
-//
-//     return await response.json();
-// };
-//
-// // Reverse geocode to get location name
-// export const reverseGeocode = async (lat, lon) => {
-//     const response = await fetch(
-//         `https://nominatim.openstreetmap.org/reverse?` +
-//         `lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
-//         {
-//             headers: { 'User-Agent': 'RidersHub/1.0' }
-//         }
-//     );
-//
-//     return await response.json();
-// };
 
 export const searchLocation = async (query) => {
     try {

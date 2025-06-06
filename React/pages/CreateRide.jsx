@@ -34,8 +34,8 @@ const CreateRide = ({ route, navigation }) => {
     const [startingLongitude, setStartingLongitude] = useState('125.6128');
 
     const [endingPoint, setEndingPoint] = useState('');
-    const [endingLatitude, setEndingLatitude] = useState('7.0731');
-    const [endingLongitude, setEndingLongitude] = useState('125.6128');
+    const [endingLatitude, setEndingLatitude] = useState(startingLatitude);
+    const [endingLongitude, setEndingLongitude] = useState(startingLongitude);
 
     // Search state
     const [searchQuery, setSearchQuery] = useState('');
@@ -94,8 +94,8 @@ const CreateRide = ({ route, navigation }) => {
             lat = parseFloat(startingLatitude) || 7.0731;
             lon = parseFloat(startingLongitude) || 125.6128;
         } else if (mapMode === 'ending') {
-            lat = parseFloat(endingLatitude) || 7.0731;
-            lon = parseFloat(endingLongitude) || 125.6128;
+            lat = parseFloat(endingLatitude) || parseFloat(startingLatitude) || 7.0731;
+            lon = parseFloat(endingLongitude) || parseFloat(startingLongitude) || 125.6128;
         }
 
         webViewRef.current?.injectJavaScript(`
@@ -168,7 +168,8 @@ const CreateRide = ({ route, navigation }) => {
         } else if (mapMode === 'ending') {
             setEndingLatitude(lat.toString());
             setEndingLongitude(lon.toString());
-            setEndingPoint(location.display_name.split(',')[0]);
+            setEndingPoint(location.display_name.split(',')[0] || startingPoint);
+
         }
 
         setSearchQuery(location.display_name);
@@ -232,11 +233,7 @@ const CreateRide = ({ route, navigation }) => {
 
         createRide(token, rideData)
             .then(() => {
-                Alert.alert(
-                    'Success',
-                    'Ride created successfully!',
-                    [{ text: 'OK', onPress: () => navigation.navigate('RiderPage', { token, username }) }]
-                );
+                console.log('Success: Ride created successfully!'); navigation.navigate('RiderPage', { token, username });
             })
             .catch(err => {
                 setError(err.message || 'An error occurred');
@@ -317,6 +314,8 @@ const CreateRide = ({ route, navigation }) => {
                     setEndingPoint={setEndingPoint}
                     prevStep={prevStep}
                     nextStep={nextStep}
+                    handleCreateRide={handleCreateRide}
+                    loading={loading}
                 />
             )}
 

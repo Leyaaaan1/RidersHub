@@ -25,8 +25,7 @@ import java.util.stream.Collectors;
 public class RidesService {
 
     private final RidesRepository ridesRepository;
-    private final RiderRepository riderRepository;
-    private final RiderTypeRepository riderTypeRepository;
+
     private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
 
     @Autowired
@@ -34,16 +33,12 @@ public class RidesService {
 
     private final RiderService riderService;
 
-    private final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Autowired
-    public RidesService(RiderRepository riderRepository,
-                        RiderTypeRepository riderTypeRepository,
-                        RidesRepository ridesRepository,
+    public RidesService(RidesRepository ridesRepository,
                         KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
                         LocationService locationService, RiderService riderService) {
-        this.riderRepository = riderRepository;
-        this.riderTypeRepository = riderTypeRepository;
+
         this.ridesRepository = ridesRepository;
         this.kafkaTemplate = kafkaTemplate;
         this.riderService = riderService;
@@ -90,7 +85,7 @@ public class RidesService {
         }
 
         RideResponseDTO response = mapToResponseDTO(newRide);
-        kafkaTemplate.send("location", response);
+       kafkaTemplate.send("location", response);
         return response;
     }
 
