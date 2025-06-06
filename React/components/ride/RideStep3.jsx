@@ -118,7 +118,7 @@ const RideStep3 = ({
                     }}
                     disabled={!startingPoint || !endingPoint || loading}
                 >
-                    <Text style={utilities.buttonText}>{loading ? 'Saving...' : 'Save & Review'}</Text>
+                    <Text style={utilities.buttonText}>{loading ? 'Saving...' : 'Review'}</Text>
                 </TouchableOpacity>
             </View>
         </View>

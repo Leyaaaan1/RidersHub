@@ -6,6 +6,8 @@ const colors = {
     background: '#fbe9e9',   // tibetanRed800
     text: '#fbe9e9',         // tibetanRed50
     // Full Tibetan Red Palette
+
+    //possible for text 50 when using primary color
     tibetanRed50: '#fbe9e9',
     tibetanRed100: '#f3c2c2',
     tibetanRed200: '#e89898',
@@ -18,6 +20,12 @@ const colors = {
     tibetanRed900: '#4f1414',
     white: '#ffffff',
     black: '#000000',
+
+
+
+
 };
+
+
 
 export default colors;

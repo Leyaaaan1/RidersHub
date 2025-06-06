@@ -24,13 +24,16 @@ public class RideRequestDTO {
     String endingPointName;
     double endLat;
     double endLng;
+    private String mapImageUrl;
+
 
     public RideRequestDTO(String username, List<String> participants, String description,
                           String ridesName, String locationName,
                           String riderType, Integer distance,
                           LocalDateTime date, double latitude, double longitude,
                           String startingPointName, double startLat,double startLng,
-            String endingPointName, double endLat, double endLng) {
+            String endingPointName, double endLat, double endLng,
+                          String mapImageUrl) {
         this.username = username;
         this.ridesName = ridesName;
         this.description = description;
@@ -47,8 +50,17 @@ public class RideRequestDTO {
         this.endingPointName = endingPointName;
         this.endLat = endLat;
         this.endLng = endLng;
+        this.mapImageUrl = mapImageUrl;
 
 
+    }
+
+    public String getMapImageUrl() {
+        return mapImageUrl;
+    }
+
+    public void setMapImageUrl(String mapImageUrl) {
+        this.mapImageUrl = mapImageUrl;
     }
 
     public String getStartingPointName() {

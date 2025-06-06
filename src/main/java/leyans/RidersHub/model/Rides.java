@@ -67,11 +67,17 @@ public class Rides {
     @Column(name = "location", columnDefinition = "geometry(Point,4326)")
     private Point location;
 
+    @Column(name = "map_image_url")
+    private String mapImageUrl;
 
     public Rides() {
     }
 
-    public Rides(Integer ridesId, String locationName, String startingPointName, String endingPointName, Point location, Point startingLocation, Point endingLocation, String ridesName, String description, Rider username, RiderType riderType, Integer distance, LocalDateTime date) {
+    public Rides(Integer ridesId, String locationName, String startingPointName,
+                 String endingPointName, Point location, Point startingLocation,
+                 Point endingLocation, String ridesName, String description,
+                 Rider username, RiderType riderType, Integer distance, LocalDateTime date,
+                 String mapImageUrl) {
         this.ridesId = ridesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -86,8 +92,16 @@ public class Rides {
         this.endingLocation = endingLocation;
         this.startingPointName = startingPointName;
         this.endingPointName = endingPointName;
+        this.mapImageUrl = mapImageUrl;
 
+    }
 
+    public String getMapImageUrl() {
+        return mapImageUrl;
+    }
+
+    public void setMapImageUrl(String mapImageUrl) {
+        this.mapImageUrl = mapImageUrl;
     }
 
     public String getStartingPointName() {
