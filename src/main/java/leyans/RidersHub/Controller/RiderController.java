@@ -48,12 +48,6 @@ public class RiderController {
 
 
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Rider>> getAllRiders() {
-        List<Rider> riders = riderService.getAllRiders();
-        return ResponseEntity.ok(riders);
-    }
-
 
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")

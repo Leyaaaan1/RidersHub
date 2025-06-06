@@ -56,8 +56,7 @@ public class    RiderService {
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        RiderType riderTypeName = riderTypeRepository.findByRiderType(riderType);
-
+        RiderType riderTypeName = getRiderTypeByName(riderType);
         Rider newRider = new Rider();
         newRider.setUsername(username);
         newRider.setPassword(encodedPassword);
@@ -65,13 +64,6 @@ public class    RiderService {
         newRider.setRiderType(riderTypeName);
 
         return riderRepository.save(newRider);
-    }
-
-
-    public List<Rider> getAllRiders() {
-        return riderRepository.findAll();
-
-
     }
 
     public List<String> findUsernamesContaining(String username) {
@@ -88,7 +80,6 @@ public class    RiderService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
-
 
     public Rider getRiderByUsername(String username) {
         Rider rider = riderRepository.findByUsername(username);
