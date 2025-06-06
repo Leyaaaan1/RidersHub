@@ -25,9 +25,7 @@ const RideStep2 = ({
             <TextInput
                 style={utilities.input}
                 value={searchQuery}
-                onChangeText={(text) => {
-                    setSearchQuery(text);
-                }}
+                onChangeText={setSearchQuery}  // This will call handleSearchQueryChange
                 placeholder="Search for a location"
                 placeholderTextColor="#999"
             />

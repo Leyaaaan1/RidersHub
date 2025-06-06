@@ -25,6 +25,7 @@ const CreateRide = ({ route, navigation }) => {
     const [date, setDate] = useState(new Date());
     const [latitude, setLatitude] = useState('7.0731');
     const [longitude, setLongitude] = useState('125.6128');
+    const [locationSelected, setLocationSelected] = useState(false);
 
     const [participants, setParticipants] = useState('');
     const [description, setDescription] = useState('');
@@ -131,7 +132,7 @@ const CreateRide = ({ route, navigation }) => {
     // Debounce search
     useEffect(() => {
         const delayedSearch = setTimeout(() => {
-            if (searchQuery.trim() && searchQuery.length >= 3) {
+            if (searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
                 setIsSearching(true);
                 searchLocation(searchQuery)
                     .then(data => setSearchResults(data))
@@ -155,6 +156,9 @@ const CreateRide = ({ route, navigation }) => {
         const lat = parseFloat(location.lat);
         const lon = parseFloat(location.lon);
 
+        // Set location selected flag
+        setLocationSelected(true);
+
         if (mapMode === 'location') {
             setLatitude(lat.toString());
             setLongitude(lon.toString());
@@ -163,13 +167,11 @@ const CreateRide = ({ route, navigation }) => {
             setStartingLatitude(lat.toString());
             setStartingLongitude(lon.toString());
             setStartingPoint(location.display_name.split(',')[0]);
-
             setMapMode('ending');
         } else if (mapMode === 'ending') {
             setEndingLatitude(lat.toString());
             setEndingLongitude(lon.toString());
             setEndingPoint(location.display_name.split(',')[0] || startingPoint);
-
         }
 
         setSearchQuery(location.display_name);
@@ -182,9 +184,43 @@ const CreateRide = ({ route, navigation }) => {
         });
     };
 
-    // Create ride handler
+// Modify the search useEffect to respect the selection flag
+    useEffect(() => {
+        const delayedSearch = setTimeout(() => {
+            // Only search if not manually selected and query is valid
+            if (!locationSelected && searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
+                setIsSearching(true);
+                searchLocation(searchQuery)
+                    .then(data => setSearchResults(data))
+                    .catch(error => {
+                        console.error('Error searching location:', error);
+                        Alert.alert('Error', 'Failed to search locations');
+                    })
+                    .finally(() => setIsSearching(false));
+            } else {
+                setSearchResults([]);
+            }
+        }, 500);
+
+        return () => clearTimeout(delayedSearch);
+    }, [searchQuery, locationSelected]);;
+
+// Also add this effect to reset the flag when user manually types
+    useEffect(() => {
+        // Add a handler for TextInput's onChangeText
+        const handleSearchQueryChange = (text) => {
+            setSearchQuery(text);
+            // If user is typing, they're not using a selected location anymore
+            if (locationSelected) {
+                setLocationSelected(false);
+            }
+        };
+
+        // Export this function for use in RideStep2
+        return handleSearchQueryChange;
+    }, [locationSelected]);
+
     const handleCreateRide = async () => {
-        // Form validation
         if (!rideName.trim()) {
             setError('Ride name is required');
             return;
@@ -233,7 +269,8 @@ const CreateRide = ({ route, navigation }) => {
 
         createRide(token, rideData)
             .then(() => {
-                console.log('Success: Ride created successfully!'); navigation.navigate('RiderPage', { token, username });
+                console.log('Success: Ride created successfully!');
+
             })
             .catch(err => {
                 setError(err.message || 'An error occurred');
@@ -333,6 +370,8 @@ const CreateRide = ({ route, navigation }) => {
                     prevStep={prevStep}
                     handleCreateRide={handleCreateRide}
                     loading={loading}
+                    token={token}
+                    username={username}
                 />
             )}
         </ScrollView>
