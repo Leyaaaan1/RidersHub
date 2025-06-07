@@ -137,7 +137,7 @@ public class RidesService {
 
     @Transactional
     public RideResponseDTO findRideByGeneratedId(Integer generatedRidesId) {
-        Rides ride = ridesRepository.findByGeneratedRidesIdWithDetails(generatedRidesId)
+        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
                 .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
         return mapToResponseDTO(ride);
     }

@@ -11,7 +11,10 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "event_rides")
+@Table(name = "event_rides",
+        indexes = {
+                @Index(name = "idx_generated_rides_id", columnList = "generatedRidesId")
+        })
 public class Rides {
 
     @Id
@@ -19,7 +22,7 @@ public class Rides {
     @Column(name = "ridesId", nullable  = false)
     private Integer ridesId;
 
-    @Column(name = "generatedRidesId", nullable  = false)
+    @Column(name = "generatedRidesId", nullable = false, unique = true)
     private Integer generatedRidesId;
 
 

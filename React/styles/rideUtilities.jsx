@@ -85,9 +85,12 @@ const rideUtilities = StyleSheet.create({
         backgroundColor: colors.primary,
         borderColor: '#e89898',
         borderWidth: 1,
+        borderRadius: 8,
         shadowOpacity: 0.3,
         shadowRadius: 2,
         elevation: 3,
+        padding: spacing.sm,
+
     },
 
     centeredContainer: {

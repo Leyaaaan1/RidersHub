@@ -126,17 +126,20 @@ export const getRideDetails = async (generatedRidesId, token) => {
         });
 
         if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(`Failed to fetch ride details: ${errorData}`);
+            if (response.status === 404) {
+                throw new Error('No ride found');
+            }
+            const errorText = await response.text();
+            console.log(`Error fetching ride details: ${response.status} ${errorText}`);
+            throw new Error(`Failed to fetch ride details: ${errorText}`);
         }
 
         return await response.json();
     } catch (error) {
-        console.error('Error fetching ride details:', error);
+        console.log('Failed to get ride details:', error);
         throw error;
     }
 };
-
 
 
 
