@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import { fetchRideMapImage } from '../../services/rideService';
 import WaveLine from '../../styles/waveLineComponent';
-
+import colors from '../../styles/colors';
 
 
 const RideStep4 = ({
@@ -76,49 +76,61 @@ const RideStep4 = ({
 
     return (
             <View style={rideUtilities.formGroup}>
-                <Text style={rideUtilities.title}>RIDE DETAILS</Text>
                 <View style={[
                     rideUtilities.topContainer,
                     rideUtilities.middleContainer,
                     {width: 'auto', paddingHorizontal: 15}
                 ]}>
-                    <View style={{flexDirection: 'column', alignItems: 'center'}}>
-                        <Text style={[rideUtilities.title, {color: '#db6e6e', marginBottom: 8}]}>
-                            {rideName.toUpperCase()}
-                        </Text>
+                    <Text style={[rideUtilities.title, {color: '#db6e6e', marginBottom: 8}]}>
+                        {rideName.toUpperCase()}
 
-                        <Text style={rideUtilities.detailText}>{distance} km</Text>
+                    </Text>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
 
-                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                            {riderType === 'car' && <FontAwesome name="car" size={24} color="#fff" style={{marginRight: 8}} />}
-                            {riderType === 'motor' && <FontAwesome name="motorcycle" size={24} color="#fff" style={{marginRight: 8}} />}
-                            {riderType === 'bike' && <FontAwesome name="bicycle" size={24} color="#fff" style={{marginRight: 8}} />}
-                            {riderType === 'cafe Racers' && <FontAwesome name="rocket" size={24} color="#fff" style={{marginRight: 8}} />}
-                        </View>
-                        <View style={rideUtilities.formGroup}>
-                            <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
-                        </View>
-                    </View>
-                    <View style={[
-                        rideUtilities.topContainer,
-                        rideUtilities.middleContainer,
-                        {width: 'auto', paddingHorizontal: 15, marginBottom: 10}
-                    ]}>
-                        <View style={{flexDirection: 'column', alignItems: 'center'}}>
+                        {/* Left Column */}
+                        <View style={{flex: 1, alignItems: 'flex-start'}}>
+                            <Text style={rideUtilities.detailText}>Rider: {username} </Text>
+                            <Text style={rideUtilities.detailText}>{distance} km</Text>
                             <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                 <FontAwesome name="map-marker" size={24} color="#fff" style={{marginRight: 8}} />
-                                <Text style={rideUtilities.detailText}>{locationName}</Text>
+                                <Text style={rideUtilities.detailText}>{locationName} </Text>
                             </View>
                         </View>
-                </View>
+
+                        {/* Right Column */}
+                        <View style={{flex: 1, alignItems: 'flex-end'}}>
+                            <View style={{alignItems: 'center'}}>
+                                {riderType === 'car' && <FontAwesome name="car" size={24} color="#fff" />}
+                                {riderType === 'motor' && <FontAwesome name="motorcycle" size={24} color="#fff" />}
+                                {riderType === 'bike' && <FontAwesome name="bicycle" size={24} color="#fff" />}
+                                {riderType === 'cafe Racers' && <FontAwesome name="rocket" size={24} color="#fff" />}
+                            </View>
+                            <View style={[rideUtilities.formGroup, {alignItems: 'center', marginTop: 8}]}>
+                                <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
+                            </View>
+                        </View>
+                    </View>
 
 
 
-                <View style={[
-                    rideUtilities.topContainer,
-                    rideUtilities.middleContainer,
-                    {width: 'auto', paddingHorizontal: 15, marginBottom: 10}
-                ]}>
+                                    <View style={{width: '100%', alignItems: 'center'}}>
+                                        {imageLoading ? (
+                                            <ActivityIndicator size="large" color="#4CAF50" />
+                                        ) : mapImage ? (
+                                            <Image
+                                                source={{uri: mapImage}}
+                                                style={{width: '100%', height: 200, borderRadius: 8}}
+                                                onLoadStart={() => console.log("Starting to load image:", mapImage)}
+                                                onLoadEnd={() => console.log("Image load completed")}
+                                                onError={(e) => console.error("Image loading error:", e.nativeEvent.error)}
+                                                resizeMode="cover"
+                                            />
+                                        ) : (
+                                            <Text style={{color: '#fff'}}>No map available</Text>
+                                        )}
+                                    </View>
+
+
                     <View style={{flexDirection: 'column', alignItems: 'center', paddingVertical: 10}}>
                         {/* Starting Point */}
                         <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 5}}>
@@ -139,14 +151,14 @@ const RideStep4 = ({
                         <View style={{
                             flexDirection: 'row',
                             alignItems: 'center',
-                            marginVertical: 15,
+                            marginVertical: 2,
                             justifyContent: 'center'
                         }}>
                             <WaveLine color="#4CAF50" />
                             <FontAwesome
                                 name="long-arrow-right"
                                 size={20}
-                                color="#4CAF50"
+                                color="#f44336"
                                 style={{marginLeft: 8}}
                             />
                         </View>
@@ -167,47 +179,26 @@ const RideStep4 = ({
                         </View>
                     </View>
                 </View>
-                </View>
 
 
-                <View style={[
-                    rideUtilities.topContainer,
-                    rideUtilities.middleContainer,
-                    {width: 'auto', paddingHorizontal: 15, marginBottom: 10}
-                ]}>
-                    <View style={{alignItems: 'center', width: '100%'}}>
-                        {imageLoading ? (
-                            <ActivityIndicator size="large" color="#4CAF50" />
-                        ) : mapImage ? (
-                            <Image
-                                source={{uri: mapImage}}
-                                style={{width: '100%', height: 200, borderRadius: 8}}
-                                onLoadStart={() => console.log("Starting to load image:", mapImage)}
-                                onLoadEnd={() => console.log("Image load completed")}
-                                onError={(e) => console.error("Image loading error:", e.nativeEvent.error)}
-                                resizeMode="cover"
-                            />
-                        ) : (
-                            <Text style={{color: '#fff'}}>No map available</Text>
-                        )}
+                {description && (
+                    <View style={[
+                        rideUtilities.topContainer,
+                        rideUtilities.middleContainer,
+                        {width: 'auto', paddingHorizontal: 15, marginBottom: 10}
+                    ]}>
+                        <View style={rideUtilities.formGroup}>
+                            <Text style={[rideUtilities.label, {color: '#fff', fontSize: 20}]}>Description:</Text>
+                            <Text style={rideUtilities.detailText}>{description}</Text>
+                        </View>
                     </View>
-
-                </View>
-
-
+                )}
                 {participants && (
-                        <View style={utilities.formGroup}>
-                            <Text style={utilities.label}>Participants:</Text>
-                            <Text style={utilities.compactText}>{participants}</Text>
-                        </View>
-                    )}
-
-                    {description && (
-                        <View style={utilities.formGroup}>
-                            <Text style={utilities.label}>Description:</Text>
-                            <Text style={utilities.compactText}>{description}</Text>
-                        </View>
-                    )}
+                    <View style={utilities.formGroup}>
+                        <Text style={utilities.label}>Participants:</Text>
+                        <Text style={utilities.compactText}>{participants}</Text>
+                    </View>
+                )}
 
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                         <TouchableOpacity
@@ -222,7 +213,7 @@ const RideStep4 = ({
                             <Text style={utilities.buttonText}>Close</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+            </View>
     );
 };
 

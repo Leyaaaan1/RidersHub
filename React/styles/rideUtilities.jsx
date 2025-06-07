@@ -28,9 +28,15 @@ const rideUtilities = StyleSheet.create({
 
     container: {
         flexGrow: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.white,
         padding: 2,
     },
+
+    label: {
+        marginBottom: 5,
+        fontWeight: "bold",
+    },
+
 
 // Add this style to apply to each column item
     columnItem: {

@@ -208,18 +208,14 @@ const CreateRide = ({ route, navigation }) => {
         return () => clearTimeout(delayedSearch);
     }, [searchQuery, locationSelected]);;
 
-// Also add this effect to reset the flag when user manually types
     useEffect(() => {
-        // Add a handler for TextInput's onChangeText
         const handleSearchQueryChange = (text) => {
             setSearchQuery(text);
-            // If user is typing, they're not using a selected location anymore
             if (locationSelected) {
                 setLocationSelected(false);
             }
         };
 
-        // Export this function for use in RideStep2
         return handleSearchQueryChange;
     }, [locationSelected]);
 
@@ -281,7 +277,6 @@ const CreateRide = ({ route, navigation }) => {
             if (result && result.generatedRidesId) {
                 setgeneratedRidesId(result.generatedRidesId);
                 console.log('Ride ID set:', result.generatedRidesId);
-                // Only proceed to next step after we have the ride ID
                 setCurrentStep(4);
             } else {
                 console.error('API returned success but no ride ID:', result);
