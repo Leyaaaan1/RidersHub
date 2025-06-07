@@ -1,12 +1,11 @@
 package leyans.RidersHub.DTO;
 
-import leyans.RidersHub.model.Rider;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class RideRequestDTO {
 
+    private Integer generatedRidesId;
     private String username;
     private String ridesName;
     private String locationName;
@@ -27,13 +26,14 @@ public class RideRequestDTO {
     private String mapImageUrl;
 
 
-    public RideRequestDTO(String username, List<String> participants, String description,
+    public RideRequestDTO(Integer generatedRidesId, String username, List<String> participants, String description,
                           String ridesName, String locationName,
                           String riderType, Integer distance,
                           LocalDateTime date, double latitude, double longitude,
                           String startingPointName, double startLat,double startLng,
             String endingPointName, double endLat, double endLng,
                           String mapImageUrl) {
+        this.generatedRidesId = generatedRidesId;
         this.username = username;
         this.ridesName = ridesName;
         this.description = description;
@@ -53,6 +53,14 @@ public class RideRequestDTO {
         this.mapImageUrl = mapImageUrl;
 
 
+    }
+
+    public Integer getGeneratedRidesId() {
+        return generatedRidesId;
+    }
+
+    public void setGeneratedRidesId(Integer generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
     }
 
     public String getMapImageUrl() {

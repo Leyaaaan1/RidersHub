@@ -21,7 +21,6 @@ public class MapboxService {
                 + lon + "," + lat + ")/" + lon + "," + lat
                 + ",14/600x300?access_token=" + mapboxToken;
 
-        // Process image upload here directly
         return mapImageService.uploadMapImage(mapboxUrl);
     }
 }

@@ -49,7 +49,7 @@ const CreateRide = ({ route, navigation }) => {
 
     const [mapboxImageUrl, setMapboxImageUrl] = useState('');
 
-
+    const [generatedRidesId, setgeneratedRidesId] = useState(null);
 
 
     const [mapMode, setMapMode] = useState('starting');
@@ -270,18 +270,31 @@ const CreateRide = ({ route, navigation }) => {
             description: description,
             mapboxImageUrl: mapboxImageUrl
 
+
+
         };
 
-        createRide(token, rideData)
-            .then(() => {
-                console.log('Success: Ride created successfully!');
+        try {
+            const result = await createRide(token, rideData);
+            console.log('Ride creation response:', result);
 
-            })
-            .catch(err => {
-                setError(err.message || 'An error occurred');
-                Alert.alert('Error', err.message || 'Failed to create ride');
-            })
-            .finally(() => setLoading(false));
+            if (result && result.generatedRidesId) {
+                setgeneratedRidesId(result.generatedRidesId);
+                console.log('Ride ID set:', result.generatedRidesId);
+                // Only proceed to next step after we have the ride ID
+                setCurrentStep(4);
+            } else {
+                console.error('API returned success but no ride ID:', result);
+                setError('Created ride but no ID was returned. Please try again.');
+                Alert.alert('Warning', 'Ride was created but ID is missing');
+            }
+        } catch (err) {
+            console.error('Ride creation error:', err);
+            setError(err.message || 'An error occurred');
+            Alert.alert('Error', err.message || 'Failed to create ride');
+        } finally {
+            setLoading(false);
+        }
     };
 
     // Step navigation
@@ -374,11 +387,11 @@ const CreateRide = ({ route, navigation }) => {
                     participants={participants}
                     description={description}
                     prevStep={prevStep}
-                    handleCreateRide={handleCreateRide}
                     loading={loading}
-                    mapboxImageUrl={mapboxImageUrl}
                     token={token}
+                    generatedRidesId={generatedRidesId}
                     username={username}
+
                 />
             )}
         </ScrollView>

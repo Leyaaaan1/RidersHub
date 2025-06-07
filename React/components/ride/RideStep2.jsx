@@ -10,16 +10,12 @@ import colors from "../../styles/colors";
 const RideStep2 = ({
                        isSearching, searchResults, searchQuery, setSearchQuery,
                        handleLocationSelect, webViewRef, latitude, longitude,
-                       handleMessage, locationName, setLocationName, prevStep, nextStep, setMapboxImageUrl
+                       handleMessage, locationName, setLocationName,
+                       prevStep, nextStep, setMapboxImageUrl
                    }) => {
 
-    const MAPBOX_TOKEN = "sample";
-    useEffect(() => {
-        if (latitude && longitude && locationName) {
-            const url = `https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-marker+ff0000(${longitude},${latitude})/${longitude},${latitude},14/600x300?access_token=${MAPBOX_TOKEN}`;
-            setMapboxImageUrl(url);
-        }
-    }, [latitude, longitude, locationName]);
+
+
 
 
     return (

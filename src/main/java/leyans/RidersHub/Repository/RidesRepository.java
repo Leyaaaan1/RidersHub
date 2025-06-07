@@ -21,8 +21,10 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     Optional<Rides> findByIdWithParticipants(@Param("rideId") Integer rideId);
 
 
-    @Query("SELECT r FROM Rides r WHERE r.ridesId = :ridesId")
-    Optional<Rides> findByRidesId(@Param("ridesId") Integer ridesId);
+    @Query("SELECT r FROM Rides r WHERE r.generatedRidesId = :generatedRidesId")
+    Optional<Rides> findByGenerateid(@Param("generatedRidesId") Integer generatedRidesId);
+    @Query("SELECT r FROM Rides r WHERE r.ridesName = :ridesName")
+    Optional<Rides> findByRidesName(@Param("ridesName") String ridesName);
 
     @Query("SELECT p FROM Rides r JOIN r.participants p WHERE r.ridesId = :rideId")
     List<Rider> findParticipantsByRideId(@Param("rideId") Integer rideId);
