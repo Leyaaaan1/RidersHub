@@ -9,6 +9,9 @@ import java.util.List;
 
 public class RideResponseDTO {
 
+
+    private Integer generatedRidesId;
+
     private String ridesName;
     private String locationName;
     private String riderType;
@@ -29,15 +32,16 @@ public class RideResponseDTO {
 
 
 
-    public RideResponseDTO(String locationName, String ridesName, RiderType riderType,
+
+    public RideResponseDTO(Integer generatedRidesId , String locationName, String ridesName, RiderType riderType,
                            Integer distance, LocalDateTime
                                    date, double latitude, double longitude, List<String> participants, String description,
                            String startingPointName, double startLat, double startLng,
                            String endingPointName, double endLat, double endLng,
-                            String mapImageUrl
+                           String mapImageUrl
 
     ) {
-
+        this.generatedRidesId = generatedRidesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
         this.riderType = riderType.getRiderType();
@@ -59,6 +63,13 @@ public class RideResponseDTO {
 
     }
 
+    public Integer getGeneratedRidesId() {
+        return generatedRidesId;
+    }
+
+    public void setGeneratedRidesId(Integer generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
+    }
 
     public String getMapImageUrl() {
         return mapImageUrl;

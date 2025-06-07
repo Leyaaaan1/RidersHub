@@ -96,3 +96,32 @@ export const getCurrentRiderType = async (token) => {
     }
 };
 
+
+
+export const fetchRideMapImage = async (generatedRidesId, token) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/riders/${generatedRidesId}/map-image`, {
+            headers: token ? {
+                'Authorization': `Bearer ${token}`
+            } : {}
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch map image');
+        }
+
+        const imageUrl = await response.text();
+        console.log("Map image URL fetched from backend:", imageUrl);
+        return imageUrl;
+    } catch (error) {
+        console.error("Error fetching ride map image:", error);
+        throw error;
+    }
+};
+
+
+
+
+
+
+

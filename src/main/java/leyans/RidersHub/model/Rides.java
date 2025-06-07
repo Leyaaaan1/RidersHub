@@ -19,6 +19,10 @@ public class Rides {
     @Column(name = "ridesId", nullable  = false)
     private Integer ridesId;
 
+    @Column(name = "generatedRidesId", nullable  = false)
+    private Integer generatedRidesId;
+
+
     @Column(name = "locationName", nullable = false)
     private String locationName;
 
@@ -73,12 +77,12 @@ public class Rides {
     public Rides() {
     }
 
-    public Rides(Integer ridesId, String locationName, String startingPointName,
+    public Rides(Integer generatedRidesId, String locationName, String startingPointName,
                  String endingPointName, Point location, Point startingLocation,
                  Point endingLocation, String ridesName, String description,
                  Rider username, RiderType riderType, Integer distance, LocalDateTime date,
                  String mapImageUrl) {
-        this.ridesId = ridesId;
+        this.generatedRidesId = generatedRidesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
         this.location = location;
@@ -94,6 +98,14 @@ public class Rides {
         this.endingPointName = endingPointName;
         this.mapImageUrl = mapImageUrl;
 
+    }
+
+    public Integer getGeneratedRidesId() {
+        return generatedRidesId;
+    }
+
+    public void setGeneratedRidesId(Integer generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
     }
 
     public String getMapImageUrl() {

@@ -1,13 +1,17 @@
 // React/components/ride/RideStep4.jsx
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Image} from 'react-native';
 import utilities from '../../styles/utilities';
 import rideUtilities from '../../styles/rideUtilities';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-
+import { fetchRideMapImage } from '../../services/rideService';
 import WaveLine from '../../styles/waveLineComponent';
+
+
+
 const RideStep4 = ({
+                       generatedRidesId,
                        rideName,
                        locationName,
                        riderType,
@@ -18,10 +22,8 @@ const RideStep4 = ({
                        participants,
                        description,
                        prevStep,
-                       handleCreateRide,
     token,
     username,
-                       mapboxImageUrl,
                        loading,
                    }) => {
 
@@ -38,11 +40,39 @@ const RideStep4 = ({
     };
     const navigation = useNavigation();
     const handleSubmit = () => {
-        handleCreateRide().then(() => {
-            navigation.navigate('RiderPage', { token, username });
-        });
+        // Just navigate back to RiderPage without creating the ride again
+        navigation.navigate('RiderPage', { token, username });
     };
-    const [imageLoading, setImageLoading] = useState(true);
+
+
+    const [mapImage, setMapImage] = useState(null);
+    const [imageLoading, setImageLoading] = useState(false);
+
+    useEffect(() => {
+        const getMapImage = async () => {
+            console.log("useEffect running with rideId:", generatedRidesId);
+
+            if (!generatedRidesId) {
+                console.log("No ride ID available yet");
+                return;
+            }
+
+            try {
+                console.log("Fetching map image for ride ID:", generatedRidesId);
+                setImageLoading(true);
+                const imageUrl = await fetchRideMapImage(generatedRidesId, token);
+                console.log("Successfully fetched map image URL:", imageUrl);
+                setMapImage(imageUrl);
+            } catch (error) {
+                console.error("Failed to load map image:", error);
+            } finally {
+                setImageLoading(false);
+            }
+        };
+
+        getMapImage();
+    }, [generatedRidesId, token]);
+
 
     return (
             <View style={rideUtilities.formGroup}>
@@ -139,32 +169,30 @@ const RideStep4 = ({
                 </View>
                 </View>
 
-                <View>
-                    {mapboxImageUrl && (
-                        <View style={utilities.imageContainer}>
-                            <Text style={utilities.label}>Location Map</Text>
-                            {imageLoading && (
-                                <ActivityIndicator
-                                    size="large"
-                                    color="#0000ff"
-                                    style={{position: 'absolute', top: '50%', left: '50%', transform: [{translateX: -10}, {translateY: -10}], zIndex: 1}}
-                                />
-                            )}
-                            <Image
-                                source={{ uri: mapboxImageUrl }}
-                                style={utilities.mapboxImage}
-                                resizeMode="cover"
-                                onLoadStart={() => setImageLoading(true)}
-                                onLoadEnd={() => setImageLoading(false)}
-                                onError={(error) => {
-                                    console.log('Image load error:', error);
-                                    setImageLoading(false);
-                                }}
-                            />
-                        </View>
-                    )}
-                </View>
 
+                <View style={[
+                    rideUtilities.topContainer,
+                    rideUtilities.middleContainer,
+                    {width: 'auto', paddingHorizontal: 15, marginBottom: 10}
+                ]}>
+                    <View style={{alignItems: 'center', width: '100%'}}>
+                        {imageLoading ? (
+                            <ActivityIndicator size="large" color="#4CAF50" />
+                        ) : mapImage ? (
+                            <Image
+                                source={{uri: mapImage}}
+                                style={{width: '100%', height: 200, borderRadius: 8}}
+                                onLoadStart={() => console.log("Starting to load image:", mapImage)}
+                                onLoadEnd={() => console.log("Image load completed")}
+                                onError={(e) => console.error("Image loading error:", e.nativeEvent.error)}
+                                resizeMode="cover"
+                            />
+                        ) : (
+                            <Text style={{color: '#fff'}}>No map available</Text>
+                        )}
+                    </View>
+
+                </View>
 
 
                 {participants && (

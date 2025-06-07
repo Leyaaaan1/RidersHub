@@ -1,6 +1,7 @@
 package leyans.RidersHub.Service;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.Repository.RidesRepository;
@@ -47,7 +48,7 @@ public class RidesService {
     }
 
     @Transactional
-    public RideResponseDTO createRide(String creatorUsername, String ridesName, String locationName, String riderType, Integer distance, LocalDateTime date,
+    public RideResponseDTO createRide( Integer generatedRidesId, String creatorUsername, String ridesName, String locationName, String riderType, Integer distance, LocalDateTime date,
                                       List<String> participantUsernames, String description,
                                       double latitude, double longitude, double startLatitude,
                                       double startLongitude, double endLatitude, double endLongitude, String mapImageUrl) {
@@ -69,6 +70,14 @@ public class RidesService {
 
 
         Rides newRide = new Rides();
+        if (generatedRidesId == null) {
+            int randomFourDigitNumber = 1000 + (int)(Math.random() * 9000); // Generates number between 1000-9999
+            newRide.setGeneratedRidesId(randomFourDigitNumber);
+        } else {
+            newRide.setGeneratedRidesId(generatedRidesId);
+        }
+
+        newRide.setRidesName(ridesName);
         newRide.setRidesName(ridesName);
         newRide.setLocationName(resolvedLocationName);
         newRide.setDescription(description);
@@ -97,6 +106,8 @@ public class RidesService {
 
     private RideResponseDTO mapToResponseDTO(Rides ride) {
         return new RideResponseDTO(
+
+                ride.getGeneratedRidesId(),
                 ride.getRidesName(),
                 ride.getLocationName(),
                 ride.getRiderType(),
@@ -114,5 +125,13 @@ public class RidesService {
                 ride.getEndingLocation().getX(),
                 ride.getMapImageUrl()
         );
+    }
+
+
+    @Transactional
+    public String getRideMapImageUrlById(Integer generatedRidesId) {
+        Rides ride = ridesRepository.findByGenerateid(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+        return ride.getMapImageUrl();
     }
 }

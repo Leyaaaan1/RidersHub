@@ -363,14 +363,14 @@ const utilities = StyleSheet.create({
 
     // === Image container===
 
-    imageContainer: {
-        marginVertical: 10,
-        alignItems: 'center',
-    },
     mapboxImage: {
         width: '100%',
-        height: 200, // Adjust as needed
+        height: 250,
         borderRadius: 8,
+    },
+    imageContainer: {
+        marginVertical: 10,
+        padding: 10,
     },
     loadingText: {
         marginTop: 10,

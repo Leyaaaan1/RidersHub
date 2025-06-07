@@ -1,4 +1,5 @@
 package leyans.RidersHub.Controller;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
@@ -10,6 +11,7 @@ import leyans.RidersHub.Service.StartRideService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,15 +48,13 @@ public class RiderController {
     }
 
 
-
-
-
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RideResponseDTO response = ridesService.createRide(
+                rideRequest.getGeneratedRidesId(),
                 username,
                 rideRequest.getRidesName(),
                 rideRequest.getLocationName(),
@@ -84,9 +84,17 @@ public class RiderController {
     }
 
 
-
-
-
-
-
-}
+    @GetMapping("/{generatedRidesId}/map-image")
+    public ResponseEntity<String> getRideMapImage(@PathVariable Integer generatedRidesId) {
+        try {
+            String mapImageUrl = ridesService.getRideMapImageUrlById(generatedRidesId);
+            return ResponseEntity.ok(mapImageUrl);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving map image: " + e.getMessage());
+        }
+    }
+    }

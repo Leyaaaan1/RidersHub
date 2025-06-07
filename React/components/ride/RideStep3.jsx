@@ -14,6 +14,19 @@ const RideStep3 = ({
                        endingPoint, setEndingPoint, prevStep, loading, nextStep,
                        handleCreateRide
                    }) => {
+
+    const handleCreateAndNext = async () => {
+        try {
+            // Wait for the ride to be created successfully
+            await handleCreateRide();
+            // Only move to next step if ride creation was successful
+            nextStep();
+        } catch (error) {
+            console.error('Error creating ride:', error);
+            // Don't proceed to next step if there was an error
+        }
+    };
+
     return (
         <View style={utilities.container}>
 
@@ -112,13 +125,10 @@ const RideStep3 = ({
 
                 <TouchableOpacity
                     style={[utilities.button, {backgroundColor: '#4CAF50'}]}
-                    onPress={() => {
-                        handleCreateRide();
-                        nextStep();
-                    }}
+                    onPress={handleCreateAndNext}
                     disabled={!startingPoint || !endingPoint || loading}
                 >
-                    <Text style={utilities.buttonText}>{loading ? 'Saving...' : 'Review'}</Text>
+                    <Text style={utilities.buttonText}>{loading ? 'Creating Ride...' : 'Create & Review'}</Text>
                 </TouchableOpacity>
             </View>
         </View>
