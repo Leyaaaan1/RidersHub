@@ -28,9 +28,15 @@ const rideUtilities = StyleSheet.create({
 
     container: {
         flexGrow: 1,
-        backgroundColor: colors.background,
+        backgroundColor: colors.white,
         padding: 2,
     },
+
+    label: {
+        marginBottom: 5,
+        fontWeight: "bold",
+    },
+
 
 // Add this style to apply to each column item
     columnItem: {
@@ -79,9 +85,12 @@ const rideUtilities = StyleSheet.create({
         backgroundColor: colors.primary,
         borderColor: '#e89898',
         borderWidth: 1,
+        borderRadius: 8,
         shadowOpacity: 0.3,
         shadowRadius: 2,
         elevation: 3,
+        padding: spacing.sm,
+
     },
 
     centeredContainer: {
