@@ -51,6 +51,8 @@ const CreateRide = ({ route, navigation }) => {
 
     const [generatedRidesId, setgeneratedRidesId] = useState(null);
 
+    const [showRideModal, setShowRideModal] = useState(false);
+
 
     const [mapMode, setMapMode] = useState('starting');
     const [mapRegion, setMapRegion] = useState({
@@ -277,7 +279,7 @@ const CreateRide = ({ route, navigation }) => {
             if (result && result.generatedRidesId) {
                 setgeneratedRidesId(result.generatedRidesId);
                 console.log('Ride ID set:', result.generatedRidesId);
-                setCurrentStep(4);
+                setShowRideModal(true);
             } else {
                 console.error('API returned success but no ride ID:', result);
                 setError('Created ride but no ID was returned. Please try again.');
@@ -299,6 +301,15 @@ const CreateRide = ({ route, navigation }) => {
 
     const prevStep = () => {
         if (currentStep > 1) setCurrentStep(currentStep - 1);
+    };
+
+    const handleModalClose = () => {
+        setShowRideModal(false);
+    };
+
+    const handleModalBack = () => {
+        setShowRideModal(false);
+        setCurrentStep(3);
     };
 
     return (
@@ -372,6 +383,8 @@ const CreateRide = ({ route, navigation }) => {
 
             {currentStep === 4 && (
                 <RideStep4
+                    visible={showRideModal}
+                    onClose={handleModalClose}
                     rideName={rideName}
                     locationName={locationName}
                     riderType={riderType}
@@ -381,7 +394,7 @@ const CreateRide = ({ route, navigation }) => {
                     endingPoint={endingPoint}
                     participants={participants}
                     description={description}
-                    prevStep={prevStep}
+                    prevStep={handleModalBack}
                     loading={loading}
                     token={token}
                     generatedRidesId={generatedRidesId}

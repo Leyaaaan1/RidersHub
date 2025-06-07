@@ -97,4 +97,20 @@ public class RiderController {
                     .body("Error retrieving map image: " + e.getMessage());
         }
     }
+
+    @GetMapping("/{generatedRidesId}")
+    public ResponseEntity<?> getRideDetailsByGeneratedId(@PathVariable Integer generatedRidesId) {
+        try {
+            RideResponseDTO ride = ridesService.findRideByGeneratedId(generatedRidesId);
+            return ResponseEntity.ok(ride);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Ride not found: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving ride details: " + e.getMessage());
+        }
     }
+
+}

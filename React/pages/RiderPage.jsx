@@ -84,26 +84,25 @@ const RiderPage = ({ route , navigation}) => {
 
             <View style={utilities.centeredContainer}>
 
-                </View>
-
-                <View style={utilities.centeredContainer}>
-                    <TouchableOpacity style={utilities.button}>
-                        <Text style={utilities.buttonText}>Action</Text>
-                    </TouchableOpacity>
-                </View>
+                    <View style={utilities.centeredContainer}>
+                        <TouchableOpacity style={utilities.button}>
+                            <Text style={utilities.buttonText}>Action</Text>
+                        </TouchableOpacity>
+                    </View>
 
 
-                <View style={utilities.centeredContainer}>
-                    <TouchableOpacity style={utilities.button}>
-                        <Text style={utilities.buttonText}>Action</Text>
-                    </TouchableOpacity>
-                </View>
+                    <View style={utilities.centeredContainer}>
+                        <TouchableOpacity style={utilities.button}>
+                            <Text style={utilities.buttonText}>Action</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={utilities.bottomAreaContainer}>
-                    <TouchableOpacity style={utilities.button}>
-                        <Text style={utilities.buttonText}>Action</Text>
-                    </TouchableOpacity>
-                </View>
+                    <View style={utilities.bottomAreaContainer}>
+                        <TouchableOpacity style={utilities.button}>
+                            <Text style={utilities.buttonText}>Action</Text>
+                        </TouchableOpacity>
+                    </View>
+            </View>
         </View>
     );
 };

@@ -23,12 +23,7 @@ export const reverseGeocode = async (lat, lon) => {
     }
 };
 
-// Fe
 
-// Fetch all riders
-
-
-// Create a new ride
 export const createRide = async (token, rideData) => {
     const response = await fetch(`${API_BASE_URL}/riders/create`, {
         method: 'POST',
@@ -120,7 +115,27 @@ export const fetchRideMapImage = async (generatedRidesId, token) => {
 };
 
 
+export const getRideDetails = async (generatedRidesId, token) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/riders/${generatedRidesId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
+        if (!response.ok) {
+            const errorData = await response.text();
+            throw new Error(`Failed to fetch ride details: ${errorData}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching ride details:', error);
+        throw error;
+    }
+};
 
 
 
