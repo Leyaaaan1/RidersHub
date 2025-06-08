@@ -1,6 +1,8 @@
 package leyans.RidersHub.Service;
 
 import leyans.RidersHub.Repository.PsgcDataRepository;
+import leyans.RidersHub.Repository.RiderLocationRepository;
+import leyans.RidersHub.Service.MapService.NominatimService;
 import leyans.RidersHub.model.PsgcData;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -15,9 +17,14 @@ public class LocationService {
     private final PsgcDataRepository psgcDataRepository;
     private final NominatimService nominatimService;
 
-    public LocationService(PsgcDataRepository psgcDataRepository, NominatimService nominatimService) {
+    private final RiderLocationRepository riderLocationRepository;
+
+
+    public LocationService(PsgcDataRepository psgcDataRepository, NominatimService nominatimService, RiderLocationRepository riderLocationRepository) {
         this.psgcDataRepository = psgcDataRepository;
         this.nominatimService = nominatimService;
+        this.riderLocationRepository = riderLocationRepository;
+
     }
 
     public Point createPoint(double longitude, double latitude) {
@@ -40,6 +47,13 @@ public class LocationService {
                 .map(PsgcData::getName)
                 .orElse(barangay);
     }
+
+
+    public int calculateDistance(Point startPoint, Point endPoint) {
+        double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
+        return (int) Math.round(distanceInMeters / 1000);
+    }
+
 
 
 

@@ -1,4 +1,4 @@
-package leyans.RidersHub.Service.MapBox;
+package leyans.RidersHub.Service.MapService.MapBox;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

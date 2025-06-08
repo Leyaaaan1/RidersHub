@@ -7,6 +7,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {getCurrentRiderType, getRideDetails} from '../services/rideService';
 import RideStep4 from "../components/ride/RideStep4";
+import colors from "../styles/colors";
 
 
 
@@ -168,11 +169,84 @@ const RiderPage = ({ route , navigation}) => {
                     </View>
                     {searchError ? <Text style={riderPageUtils.errorText}>{searchError}</Text> : null}
                 </View>
-
-
             </View>
 
-            {foundRide && (
+            {/*<View style={utilities.centeredContainer}>*/}
+            {/*    <View style={{width: '100%', marginTop: 10, alignItems: 'center'}}>*/}
+            {/*        <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: '#333'}}>Recent Rides</Text>*/}
+
+            {/*        <View style={{*/}
+            {/*            borderWidth: 1,*/}
+            {/*            borderColor: colors.secondary,*/}
+            {/*            borderRadius: 8,*/}
+            {/*            width: '100%',*/}
+            {/*            overflow: 'hidden'*/}
+            {/*        }}>*/}
+            {/*             Header */}
+            {/*            <View style={{*/}
+            {/*                flexDirection: 'row',*/}
+            {/*                backgroundColor: 'rgba(76, 175, 80, 0.3)',*/}
+            {/*                padding: 10,*/}
+            {/*                borderBottomWidth: 1,*/}
+            {/*                borderBottomColor: colors.secondary*/}
+            {/*            }}>*/}
+            {/*                <Text style={{flex: 2, fontWeight: 'bold', color: '#333'}}>Ride Name</Text>*/}
+            {/*                <Text style={{flex: 1, fontWeight: 'bold', color: '#333'}}>Date</Text>*/}
+            {/*                <Text style={{flex: 1, fontWeight: 'bold', color: '#333'}}>ID</Text>*/}
+            {/*            </View>*/}
+
+            {/*             Empty state message */}
+            {/*            {(!foundRides || foundRides.length === 0) && (*/}
+            {/*                <View style={{padding: 15, alignItems: 'center'}}>*/}
+            {/*                    <Text style={{color: '#666'}}>No rides found</Text>*/}
+            {/*                </View>*/}
+            {/*            )}*/}
+
+            {/*             Ride items - limited to 6 */}
+            {/*            {foundRides && foundRides.slice(0, 6).map((ride, index) => (*/}
+            {/*                <TouchableOpacity*/}
+            {/*                    key={index}*/}
+            {/*                    style={{*/}
+            {/*                        flexDirection: 'row',*/}
+            {/*                        padding: 12,*/}
+            {/*                        borderBottomWidth: index < Math.min(foundRides.length, 6) - 1 ? 1 : 0,*/}
+            {/*                        borderBottomColor: 'rgba(0, 0, 0, 0.1)',*/}
+            {/*                        backgroundColor: index % 2 === 0 ? 'rgba(76, 175, 80, 0.05)' : 'transparent'*/}
+            {/*                    }}*/}
+            {/*                    onPress={() => {*/}
+            {/*                        setSearchId(ride.generatedRidesId.toString());*/}
+            {/*                    }}*/}
+            {/*                >*/}
+            {/*                    <Text style={{flex: 2, color: '#333'}} numberOfLines={1}>{ride.ridesName}</Text>*/}
+            {/*                    <Text style={{flex: 1, color: '#666'}} numberOfLines={1}>*/}
+            {/*                        {new Date(ride.date).toLocaleDateString()}*/}
+            {/*                    </Text>*/}
+            {/*                    <Text style={{flex: 1, color: '#666'}}>{ride.generatedRidesId}</Text>*/}
+            {/*                </TouchableOpacity>*/}
+            {/*            ))}*/}
+            {/*        </View>*/}
+
+            {/*         View All button - only show if there are rides */}
+            {/*        {foundRides && foundRides.length > 0 && (*/}
+            {/*            <TouchableOpacity*/}
+            {/*                style={{*/}
+            {/*                    marginTop: 10,*/}
+            {/*                    padding: 8,*/}
+            {/*                    backgroundColor: colors.primary,*/}
+            {/*                    borderRadius: 5,*/}
+            {/*                    alignSelf: 'flex-end'*/}
+            {/*                }}*/}
+            {/*                onPress={() => {*/}
+            {/*                    // Navigate to all rides view*/}
+            {/*                }}*/}
+            {/*            >*/}
+            {/*                <Text style={{color: '#fff'}}>View All</Text>*/}
+            {/*            </TouchableOpacity>*/}
+            {/*        )}*/}
+            {/*    </View>*/}
+            {/*</View>*/}
+
+                {foundRide && (
                 <RideStep4
                     visible={showRideModal}
                     onClose={() => setShowRideModal(false)}
@@ -182,8 +256,8 @@ const RiderPage = ({ route , navigation}) => {
                     riderType={foundRide.riderType}
                     distance={foundRide.distance}
                     date={foundRide.date}
-                    startingPoint={foundRide.startingPointName}  // Changed to match API response field
-                    endingPoint={foundRide.endingPointName}      // Changed to match API response field
+                    startingPoint={foundRide.startingPointName}
+                    endingPoint={foundRide.endingPointName}
                     participants={foundRide.participants}
                     description={foundRide.description}
                     token={token}

@@ -1,6 +1,6 @@
 package leyans.RidersHub.Controller;
 
-import leyans.RidersHub.Service.NominatimService;
+import leyans.RidersHub.Service.MapService.NominatimService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

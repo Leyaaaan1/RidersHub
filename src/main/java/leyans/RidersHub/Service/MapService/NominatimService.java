@@ -1,6 +1,9 @@
-package leyans.RidersHub.Service;
+package leyans.RidersHub.Service.MapService;
 
 
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,55 +22,48 @@ import java.util.Map;
 @Component
 public class NominatimService {
     private final RestTemplate restTemplate;
-    private final Object lock = new Object();
-    private long lastRequestTime = 0;
-    private static final long MIN_REQUEST_INTERVAL = 1000; // 1 sec per request
+    private final Bucket bucket;
 
     public NominatimService() {
         this.restTemplate = new RestTemplate();
+
+        Bandwidth limit = Bandwidth.classic(1, Refill.greedy(1, Duration.ofSeconds(1)));
+        this.bucket = Bucket.builder().addLimit(limit).build();
+
     }
 
     private void enforceRateLimit() {
-        synchronized (lock) {
-            long currentTime = System.currentTimeMillis();
-            long timeSinceLastRequest = currentTime - lastRequestTime;
-
-            if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-                try {
-                    Thread.sleep(MIN_REQUEST_INTERVAL - timeSinceLastRequest);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-
-            lastRequestTime = System.currentTimeMillis();
+        try {
+            bucket.asBlocking().consume(1);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            System.err.println("Rate limiting wait was interrupted: " + e.getMessage());
         }
     }
 
+//    First search consumes the only token in the bucket
+//    When you immediately try to search again, the bucket is empty
+//    Your code calls bucket.asBlocking().consume(1) which blocks the thread
+//    The thread waits until a full second has passed since the first request
+//    Once the token is refilled (after 1 second), the second search proceeds
     public String getBarangayNameFromCoordinates(double lat, double lon) {
-        return getBarangayNameFromCoordinates(lat, lon, 1);
-    }
-
-    public String getBarangayNameFromCoordinates(double lat, double lon, int limit) {
         enforceRateLimit();
-
-        if (limit <= 0 || limit > 10) {
-            limit = 1;
-        }
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
-                "&zoom=18&addressdetails=1&limit=" + limit +
+                "&zoom=18&addressdetails=1" +
                 "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept-Language", "en");
-        headers.set("User-Agent", "RidersHub/1.0");
+        headers.set("User-Agent", "RidersHub/1.0 (your_email@example.com)");
+
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             Map<String, Object> body = response.getBody();
+
             if (body != null && body.containsKey("address")) {
                 Map<String, String> address = (Map<String, String>) body.get("address");
 
@@ -75,37 +72,35 @@ public class NominatimService {
                                 address.getOrDefault("suburb", null)));
             }
         } catch (Exception e) {
-            System.err.println("Nominatim Error: " + e.getMessage());
+            System.err.println("Nominatim Reverse Error: " + e.getMessage());
         }
 
         return null;
     }
 
+
+
+
+
     public List<Map<String, Object>> searchLocation(String query) {
-        return searchLocation(query, 1);
+        return searchLocation(query, 5);
     }
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {
         enforceRateLimit();
 
-        if (limit <= 0 || limit > 50) {
-            limit = 5;
-        }
-
-        String url = "https://nominatim.openstreetmap.org/search?"
-                + "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8)
-                + "&countrycodes=ph&format=json&limit="
-                + limit + "&addressdetails=1"
-                + "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
+        String url = "https://nominatim.openstreetmap.org/search?" +
+                "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8) +
+                "&countrycodes=ph&format=json&limit=" + limit +
+                "&addressdetails=1&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "RidersHub/1.0");
+        headers.set("User-Agent", "RidersHub/1.0 (your_email@example.com)");
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<List> response = restTemplate.exchange(
-                    url, HttpMethod.GET, entity, List.class);
+            ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, entity, List.class);
             return response.getBody();
         } catch (Exception e) {
             System.err.println("Nominatim Search Error: " + e.getMessage());

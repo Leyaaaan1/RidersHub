@@ -11,6 +11,7 @@ import leyans.RidersHub.Service.StartRideService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -111,6 +112,13 @@ public class RiderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error retrieving ride details: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/rides")
+    public Page<RideResponseDTO> getRides(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        return ridesService.getRidesWithPagination(page, size);
     }
 
 }
