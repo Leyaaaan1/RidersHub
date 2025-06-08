@@ -40,11 +40,12 @@ public class Rides {
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     private Rider username;
 
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rider_type", referencedColumnName = "rider_type", nullable = false)
     private RiderType riderType;
 
-    @Column(name = "distance", nullable = false)
+    @Column(name = "distance")
     private Integer distance;
 
     @ManyToMany

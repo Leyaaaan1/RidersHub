@@ -1,18 +1,15 @@
 package leyans.RidersHub.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
-import leyans.RidersHub.DTO.RiderLocationDTO;
 import leyans.RidersHub.Repository.PsgcDataRepository;
 import leyans.RidersHub.Repository.RiderLocationRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
+import leyans.RidersHub.Service.MapService.NominatimService;
 import leyans.RidersHub.model.PsgcData;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderLocation;
 import leyans.RidersHub.model.StartedRide;
-import org.locationtech.jts.geom.Coordinate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class RideLocationService {

@@ -10,7 +10,8 @@ import RideStep3 from '../components/ride/RideStep3';
 import { handleWebViewMessage } from '../utils/mapUtils';
 import RideStep4 from "../components/ride/RideStep4";
 
-const CreateRide = ({ route, navigation }) => {
+const
+    CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
     const webViewRef = useRef(null);
 
@@ -21,7 +22,6 @@ const CreateRide = ({ route, navigation }) => {
     const [rideName, setRideName] = useState('');
     const [locationName, setLocationName] = useState('');
     const [riderType, setRiderType] = useState('CAR');
-    const [distance, setDistance] = useState('');
     const [date, setDate] = useState(new Date());
     const [latitude, setLatitude] = useState('7.0731');
     const [longitude, setLongitude] = useState('125.6128');
@@ -234,10 +234,7 @@ const CreateRide = ({ route, navigation }) => {
             setError('Ending point is required');
             return;
         }
-        if (!distance || isNaN(parseFloat(distance))) {
-            setError('Please enter a valid distance');
-            return;
-        }
+
 
         const now = new Date();
         if (date < now) {
@@ -254,7 +251,6 @@ const CreateRide = ({ route, navigation }) => {
             ridesName: rideName,
             locationName: locationName,
             riderType: riderType || 'CAR',  // Make sure to use uppercase as in your backend
-            distance: parseFloat(distance),
             date: date.toISOString(),
             latitude: parseFloat(latitude) || 0,
             longitude: parseFloat(longitude) || 0,
@@ -305,6 +301,8 @@ const CreateRide = ({ route, navigation }) => {
 
     const handleModalClose = () => {
         setShowRideModal(false);
+        navigation.navigate('RiderPage', { token, username });
+
     };
 
     const handleModalBack = () => {
@@ -321,8 +319,7 @@ const CreateRide = ({ route, navigation }) => {
                     setRideName={setRideName}
                     riderType={riderType}
                     setRiderType={setRiderType}
-                    distance={distance}
-                    setDistance={setDistance}
+
                     participants={participants}
                     setParticipants={setParticipants}
                     riderSearchQuery={riderSearchQuery}
@@ -388,7 +385,6 @@ const CreateRide = ({ route, navigation }) => {
                     rideName={rideName}
                     locationName={locationName}
                     riderType={riderType}
-                    distance={distance}
                     date={date}
                     startingPoint={startingPoint}
                     endingPoint={endingPoint}

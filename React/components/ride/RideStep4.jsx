@@ -5,7 +5,7 @@ import utilities from '../../styles/utilities';
 import rideUtilities from '../../styles/rideUtilities';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { fetchRideMapImage } from '../../services/rideService';
+import {fetchRideMapImage, getRideDetails} from '../../services/rideService';
 import WaveLine from '../../styles/waveLineComponent';
 import colors from '../../styles/colors';
 
@@ -15,15 +15,11 @@ const RideStep4 = ({
                        rideName,
                        locationName,
                        riderType,
-                       distance,
                        date,
                        startingPoint,
                        endingPoint,
                        participants,
-                       description,
-                       prevStep,
-    token,
-    username,
+                       description, token, username,
                        visible,
                        onClose,
                        loading,
@@ -49,6 +45,7 @@ const RideStep4 = ({
 
     const [mapImage, setMapImage] = useState(null);
     const [imageLoading, setImageLoading] = useState(false);
+    const [distanceState, setDistance] = useState("--");
 
     useEffect(() => {
         const getMapImage = async () => {
@@ -66,7 +63,12 @@ const RideStep4 = ({
                 console.log("Successfully fetched map image URL:", imageUrl);
                 setMapImage(imageUrl);
             } catch (error) {
-                console.error("Failed to load map image:", error);
+                console.error("Failed to load map image:", error.message || error);
+                // Add more detailed error logging
+                if (error.response) {
+                    console.error("Response data:", error.response.data);
+                    console.error("Response status:", error.response.status);
+                }
             } finally {
                 setImageLoading(false);
             }
@@ -75,7 +77,39 @@ const RideStep4 = ({
         getMapImage();
     }, [generatedRidesId, token, visible]);
 
+    useEffect(() => {
+        if (!generatedRidesId || !token) {
+            console.log("Missing required data for ride details:", { generatedRidesId, token });
+            return;
+        }
 
+        console.log("Fetching ride details for ID:", generatedRidesId);
+        setImageLoading(true);
+
+        getRideDetails(generatedRidesId, token)
+            .then(rideDetails => {
+                console.log("Full ride details response:", rideDetails);
+                if (rideDetails && typeof rideDetails.distance !== 'undefined') {
+                    console.log("Ride distance from backend:", rideDetails.distance);
+                    setDistance(rideDetails.distance);
+                } else {
+                    console.warn("No distance found in ride details:", rideDetails);
+                    setDistance("N/A");
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching ride details:', error.message || error);
+                // Add more detailed error logging
+                if (error.response) {
+                    console.error("Response data:", error.response.data);
+                    console.error("Response status:", error.response.status);
+                }
+                setDistance("Error");
+            })
+            .finally(() => {
+                setImageLoading(false);
+            });
+    }, [generatedRidesId, token]);
     return (
         <Modal
             visible={visible}
@@ -111,14 +145,17 @@ const RideStep4 = ({
                                 {width: 'auto', paddingHorizontal: 15}
                             ]}>
 
-                                <Text style={[rideUtilities.title, {color: '#db6e6e', marginBottom: 8,  textDecorationLine: 'underline'}]}>
+                                <Text style={[rideUtilities.title, {color: '#db6e6e', marginBottom: 2, textDecorationLine: 'underline'}]}>
                                     {rideName.toUpperCase()}
+                                </Text>
+                                <Text style={{ color: '#fff', fontSize: 12, marginTop: 0, opacity: 0.7 }}>
+                                    ID: {generatedRidesId}
                                 </Text>
                                 <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
                                     {/* Left Column */}
                                     <View style={{flex: 1, alignItems: 'flex-start'}}>
-                                        <Text style={rideUtilities.detailText}>Rider: {username} </Text>
-                                        <Text style={rideUtilities.detailText}>{distance} km</Text>
+                                        <Text style={rideUtilities.detailText}>Owner: {username} </Text>
+                                        <Text style={rideUtilities.detailText}>{distanceState} km</Text>
                                         <View style={{flexDirection: 'row', alignItems: 'center'}}>
                                             <FontAwesome name="map-marker" size={24} color="#fff" style={{marginRight: 8}} />
                                             <Text style={rideUtilities.detailText}>{locationName} </Text>
@@ -211,15 +248,51 @@ const RideStep4 = ({
                                             <Text style={[rideUtilities.detailText, {textAlign: 'justify'}]}>{description}</Text>
                                         </View>
                                     )}
-
+                                </View>
                                     {participants && (
-                                        <View style={utilities.formGroup}>
-                                            <Text style={rideUtilities.label}>Participants:</Text>
-                                            <Text style={rideUtilities.detailText}>{participants}</Text>
+                                        <View style={{width: '100%', marginTop: 10, alignItems: 'flex-start'}}>
+                                            <View style={{
+                                                borderWidth: 1,
+                                                borderColor: colors.secondary,
+                                                borderRadius: 8,
+                                                marginTop: 5,
+                                                width: '100%',
+                                                overflow: 'hidden'
+                                            }}>
+                                                {/* Header */}
+                                                <View style={{
+                                                    flexDirection: 'row',
+                                                    backgroundColor: 'rgba(76, 175, 80, 0.3)',
+                                                    padding: 8,
+                                                    borderBottomWidth: 1,
+                                                    borderBottomColor: colors.secondary
+                                                }}>
+                                                    <Text style={{flex: 0.8, color: '#fff', fontWeight: 'bold', textAlign: 'left'}}>Rider</Text>
+                                                </View>
+
+                                                {/* Participant rows */}
+                                                {Array.isArray(participants) ?
+                                                    participants.map((participant, index) => (
+                                                        <View key={index} style={{
+                                                            flexDirection: 'row',
+                                                            padding: 8,
+                                                            borderBottomWidth: index < participants.length - 1 ? 1 : 0,
+                                                            borderBottomColor: 'rgba(255, 255, 255, 0.2)',
+                                                            backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent'
+                                                        }}>
+                                                            <Text style={{flex: 0.2, color: '#fff', textAlign: 'left', paddingLeft: 5}}>{index + 1}</Text>
+                                                            <Text style={{flex: 0.8, color: '#fff', textAlign: 'left'}}>{typeof participant === 'object' ? participant.username : participant}</Text>
+                                                        </View>
+                                                    )) :
+                                                    <View style={{padding: 8, width: '100%'}}>
+                                                        <Text style={{color: '#fff', textAlign: 'left'}}>{participants}</Text>
+                                                    </View>
+                                                }
+                                            </View>
                                         </View>
                                     )}
                                 </View>
-                            </View>
+
                         </View>
                     </ScrollView>
                 </View>

@@ -1,10 +1,10 @@
 package leyans.RidersHub.Repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
 import leyans.RidersHub.DTO.RiderDTO;
 import leyans.RidersHub.model.Rider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

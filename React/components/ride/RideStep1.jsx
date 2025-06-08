@@ -6,7 +6,7 @@ import colors from "../../styles/colors";
 import DatePicker from 'react-native-date-picker';
 
 const RideStep1 = ({
-                       error, rideName, setRideName, riderType, setRiderType, distance, setDistance,
+                       error, rideName, setRideName, riderType, setRiderType,
                        participants, setParticipants, description, riderSearchQuery, setRiderSearchQuery,
                        searchedRiders, date, setDate, isRiderSearching, handleSearchRiders, setDescription, nextStep
                    }) => {
@@ -102,16 +102,7 @@ const RideStep1 = ({
             </View>
 
             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View style={{flex: 1, marginRight: 5}}>
-                    <Text style={utilities.label}>Distance (km)</Text>
-                    <TextInput
-                        style={utilities.input}
-                        value={distance}
-                        onChangeText={setDistance}
-                        placeholder="Enter distance in km"
-                        keyboardType="numeric"
-                    />
-                </View>
+
                 <View style={{flex: 1, marginLeft: 5}}>
                     <Text style={utilities.label}>Date</Text>
                     <TouchableOpacity
