@@ -141,5 +141,30 @@ export const getRideDetails = async (generatedRidesId, token) => {
     }
 };
 
+export const fetchRides = async (token, page = 0, size = 5) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/riders/rides?page=${page}&size=${size}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Error fetching rides: ${response.status} ${errorText}`);
+            throw new Error(`Failed to fetch rides: ${errorText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to fetch rides:', error);
+        throw error;
+    }
+};
+
+
+
 
 

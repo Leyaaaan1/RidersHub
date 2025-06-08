@@ -8,19 +8,25 @@ const utilities = StyleSheet.create({
     // === Containers ===
     container: {
         flexGrow: 1,
-        backgroundColor: "#fff",
+        backgroundColor: colors.white,
         padding: 2,
     },
-
-    gradientContainer: {
-        flex: 1,
-        padding: spacing.md,
-    },
-
-    containerPrimary: {
-        flex: 1,
-        backgroundColor: colors.secondary,
-        padding: spacing.md,
+    navbarContainer: {
+        position: 'absolute',
+        top: -5,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: colors.primary,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.tibetanRed700,
+        borderRadius: 8,
+        height: 70,
+        paddingVertical: 12,
+        paddingHorizontal: 15,
     },
 
     centeredContainer: {
@@ -30,6 +36,18 @@ const utilities = StyleSheet.create({
         backgroundColor: colors.background,
         padding: spacing.md,
     },
+
+
+
+
+    listContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'left',
+        backgroundColor: colors.background,
+        padding: spacing.md,
+    },
+
 
     bottomAreaContainer: {
         borderTopWidth: 1,
@@ -50,6 +68,22 @@ const utilities = StyleSheet.create({
         marginBottom: 20,
     },
 
+    fullScreenContainer: {
+        top: 90,
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    },
+    searchSection: {
+        alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: 10,
+    },
+    ridesListContainer: {
+        flex: 1,
+        width: '100%',
+        marginTop: 10,
+    },
     // === Rider Type Option Styles ===
     riderTypeOption: {
         minWidth: 80,
@@ -171,7 +205,7 @@ const utilities = StyleSheet.create({
     titleText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: colors.primary,
+        color: colors.white,
         marginBottom: spacing.md,
     },
 
@@ -195,6 +229,7 @@ const utilities = StyleSheet.create({
         color: colors.primary,
     },
 
+
     smallText: {
         fontSize: 12,
         color: '#fff',
@@ -209,6 +244,14 @@ const utilities = StyleSheet.create({
         borderRadius: 8,
         marginTop: spacing.md,
     },
+
+    buttonWhite: {
+        backgroundColor: colors.white,
+        paddingVertical: spacing.sm,
+        paddingHorizontal: spacing.lg,
+        borderRadius: 8,
+    },
+
 
     buttonBack: {
         backgroundColor: "#007AFF",
