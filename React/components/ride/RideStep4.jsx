@@ -11,12 +11,10 @@ import colors from '../../styles/colors';
 
 
 const RideStep4 = (props) => {
-    // Extract props either from route params (when navigated to) or from direct props (when called programmatically)
     const navigation = useNavigation();
     const route = props.route || {};
     const routeParams = route.params || {};
 
-    // Use route params if available, otherwise use props directly
     const {
         generatedRidesId = props.generatedRidesId || routeParams.generatedRidesId,
         rideName = props.rideName || routeParams.rideName,

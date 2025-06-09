@@ -1,8 +1,9 @@
 
 import React, {useEffect, useState} from "react";
-import {View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert, StatusBar} from 'react-native';
 import utilities from "../styles/utilities";
 import riderPageUtils from "../styles/riderPageUtils";
+import colors from "../styles/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {getCurrentRiderType, getRideDetails} from '../services/rideService';
@@ -56,18 +57,30 @@ const RiderPage = ({ route , navigation}) => {
         try {
             setSearchLoading(true);
             setSearchError('');
-            setFoundRide(null);
 
             const rideDetails = await getRideDetails(parseInt(searchId), token);
-            setFoundRide(rideDetails);
-            setShowRideModal(true);
+
+            // Navigate to RideStep4 as a page instead of showing modal
+            navigation.navigate('RideStep4', {
+                generatedRidesId: rideDetails.generatedRidesId,
+                rideName: rideDetails.ridesName,
+                locationName: rideDetails.locationName,
+                riderType: rideDetails.riderType,
+                distance: rideDetails.distance,
+                date: rideDetails.date,
+                startingPoint: rideDetails.startingPointName,
+                endingPoint: rideDetails.endingPointName,
+                participants: rideDetails.participants,
+                description: rideDetails.description,
+                token: token,
+                username: username
+            });
         } catch (error) {
             setSearchError(error.message || 'Failed to find ride');
         } finally {
             setSearchLoading(false);
         }
     };
-
     useEffect(() => {
         fetchCurrentRiderType();
 
@@ -95,75 +108,76 @@ const RiderPage = ({ route , navigation}) => {
     return (
 
         <View style={utilities.container}>
+            <StatusBar
+                backgroundColor={colors.primary}
+                barStyle="light-content"
+                translucent={false}
+            />
             <View style={utilities.navbarContainer}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 5 }}>
-                <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                    <Text style={[utilities.textWhite, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
-                    {loading ? (
-                        <Text style={utilities.textWhite}>Loading...</Text>
-                    ) : (
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <FontAwesome
-                                name={
-                                    riderType?.riderType === 'car' ? 'car' :
-                                        riderType?.riderType === 'motor' || riderType?.riderType === 'Motorcycle' ? 'motorcycle' :
-                                            riderType?.riderType === 'bike' || riderType?.riderType === 'Bicycle' ? 'bicycle' :
-                                                riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 5 }}>
+                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                        <Text style={[utilities.textWhite, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
+                        {loading ? (
+                            <Text style={utilities.textWhite}>Loading...</Text>
+                        ) : (
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <FontAwesome
+                                    name={
+                                        riderType?.riderType === 'car' ? 'car' :
+                                            riderType?.riderType === 'motor' || riderType?.riderType === 'Motorcycle' ? 'motorcycle' :
+                                                riderType?.riderType === 'bike' || riderType?.riderType === 'Bicycle' ? 'bicycle' :
+                                                    riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
+                                    }
+                                    size={16}
+                                    color="#fff"
+                                    style={{ marginRight: 5 }}
+                                />
+                            </View>
+                        )}
+                    </View>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity
+                            style={utilities.buttonWhite}
+                            onPress={() => {
+                                console.log("Token being passed:", token);
+                                if (!token) {
+                                    Alert.alert('Error', 'Authentication token is missing');
+                                    return;
                                 }
-                                size={16}
-                                color="#fff"
-                                style={{ marginRight: 5 }}
-                            />
-                        </View>
-                    )}
-                </View>
+                                navigation.navigate('CreateRide', {
+                                    token: token,
+                                    username: username
+                                });
+                            }}
+                        >
+                            <Text stle={utilities.title}> + Ride</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity
-                        style={utilities.buttonWhite}
-                        onPress={() => {
-                            console.log("Token being passed:", token);
-                            if (!token) {
-                                Alert.alert('Error', 'Authentication token is missing');
-                                return;
-                            }
-                            navigation.navigate('CreateRide', {
-                                token: token,
-                                username: username
-                            });
-                        }}
-                    >
-                        <Text stle={utilities.title}> + Ride</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* Right: Settings Icon */}
-                <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                    <TouchableOpacity onPress={() => {}}>
-                        <FontAwesome name="gear" size={18} color="black" />
-                    </TouchableOpacity>
+                    {/* Right: Settings Icon */}
+                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                        <TouchableOpacity onPress={() => {}}>
+                            <FontAwesome name="gear" size={18} color="black" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-            </View>
 
-            <View style={utilities.fullScreenContainer}>
+            <View style={utilities.centeredContainer}>
                 <View style={utilities.searchSection}>
                     <View style={riderPageUtils.searchInputContainer}>
                         <TextInput
                             style={riderPageUtils.searchInput}
                             placeholder="Ride ID"
                             placeholderTextColor="#999"
-                            value={searchId}
                             onChangeText={(text) => {
-                                // Only allow numeric input
                                 const numericText = text.replace(/[^0-9]/g, '');
                                 setSearchId(numericText);
 
-                                // Auto-trigger search when exactly 4 digits are entered
                                 if (numericText.length === 4) {
                                     setDebouncedSearchId(numericText);
                                 } else {
-                                    // Clear any previous search results/errors if input length changes
                                     setSearchError('');
                                     setFoundRide(null);
                                 }
@@ -185,28 +199,27 @@ const RiderPage = ({ route , navigation}) => {
                     </View>
                     {searchError ? <Text style={riderPageUtils.errorText}>{searchError}</Text> : null}
                     {searchId.length > 0 && searchId.length < 4 && (
-                        <Text style={riderPageUtils.infoText}>Please enter 4 digits</Text>
+                        <Text style={riderPageUtils.detailText}>Please enter 4 digits</Text>
                     )}
-                </View>
-
-                <View style={utilities.ridesListContainer}>
-                    <RidesList
-                        token={token}
-                        onRideSelect={(ride) => {
-                            setFoundRide(ride);
-                            setShowRideModal(true);
-                        }}
-                    />
                 </View>
             </View>
 
+            <View style={utilities.ridesListContainer}>
+                <RidesList
+                    token={token}
+                    onRideSelect={(ride) => {
+                        setFoundRide(ride);
+                        setShowRideModal(true);
+                    }}
+                />
+            </View>
 
 
 
             <RidesList
                 token={token}
                 onRideSelect={(ride) => {
-                    // Navigate to RideStep4 page with ride details instead of showing modal
+                    // Navigate to RideStep4 as a page instead of showing modal
                     navigation.navigate('RideStep4', {
                         generatedRidesId: ride.generatedRidesId,
                         rideName: ride.ridesName,

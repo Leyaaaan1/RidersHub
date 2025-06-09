@@ -24,7 +24,6 @@ const riderPageUtils = StyleSheet.create({
         flexDirection: 'row',
         width: '60%',
         alignItems: 'center',
-        justifyContent: 'space-between',
         backgroundColor: 'transparent'
     },
     searchInput: {
