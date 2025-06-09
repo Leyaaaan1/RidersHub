@@ -80,7 +80,7 @@ const RiderPage = ({ route , navigation}) => {
         };
 
         return (
-            <View style={{ padding: 10, backgroundColor: '#f9f9f9', borderRadius: 5 }}>
+            <View style={{ padding: 5, backgroundColor: '#f9f9f9', borderRadius: 5 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                         style={{

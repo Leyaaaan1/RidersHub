@@ -113,37 +113,47 @@ const RideStep4 = (props) => {
     }, [generatedRidesId, token]);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-            <TouchableOpacity
-                style={{
-                    position: 'absolute',
-                    left: 10,
-                    top: 20,
-                    zIndex: 10,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    padding: 10
-                }}
-                onPress={handleBack}
-            >
-                <FontAwesome name="arrow-left" size={20} color="#fff" />
-                <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
-            </TouchableOpacity>
+        <View style={utilities.containerWhite}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.primary }}>
+            <View style={utilities.navbarContainer}>
+                <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}
+                    onPress={handleBack}
+                >
+                    <FontAwesome name="arrow-left" size={20} color="#fff" />
+                    <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
+                </TouchableOpacity>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                    <Text style={[rideUtilities.title, { color: colors.background , marginBottom: 0, flexDirection: 'row', alignItems: 'center' }]}>
+                        {rideName?.toUpperCase()}
+                        <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 10 }}>
+                            {generatedRidesId}
+                        </Text>
+                    </Text>
+                </View>
+                <View>
+                    <TouchableOpacity>
+                        <View>
+                            <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
+                                Join Ride
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 20, paddingTop: 50 }}>
-                <View style={rideUtilities.formGroup}>
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                style={{ flex: 1 }}
+            >
+                <View style={[rideUtilities.formGroup, { flex: 1 }]}>
                     <View style={[
                         rideUtilities.topContainer,
                         rideUtilities.middleContainer,
-                        {width: 'auto', paddingHorizontal: 15}
+                        { width: 'auto', paddingHorizontal: 15, flex: 1 }
                     ]}>
 
-                        <Text style={[rideUtilities.title, {color: '#db6e6e', marginBottom: 2, textDecorationLine: 'underline'}]}>
-                            {rideName?.toUpperCase()}
-                        </Text>
-                        <Text style={{ color: '#fff', fontSize: 12, marginTop: 0, opacity: 0.7 }}>
-                            ID: {generatedRidesId}
-                        </Text>
+
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
                             {/* Left Column */}
                             <View style={{flex: 1, alignItems: 'flex-start'}}>
@@ -285,6 +295,7 @@ const RideStep4 = (props) => {
                 </View>
             </ScrollView>
         </SafeAreaView>
+        </View>
     );
 };
 

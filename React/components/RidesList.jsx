@@ -74,27 +74,55 @@ const RidesList = ({
         <TouchableWithoutFeedback
             onPress={() => onRideSelect && onRideSelect(item)}
         >
+
+
             <View style={{
                 backgroundColor: colors.primary,
-                padding: 15,
-                borderRadius: 8,
+                padding: 25,
+                borderRadius: 12,
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.2,
-                shadowRadius: 2,
-                elevation: 2,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+                elevation: 4,
+                alignItems: 'center',
             }}>
+                <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center' }]}>{item.locationName.toUpperCase()}</Text>
+                <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text
-                        style={[utilities.titleText, { fontSize: 30, flexShrink: 1, flexWrap: 'wrap' }]}
+                        style={[utilities.titleText, { fontSize: 25, flexShrink: 1, flexWrap: 'wrap' }]}
                     >
                         {item.ridesName}
                     </Text>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'flex-start' }}>
+                    <View style={{ justifyContent: 'flex-start', alignItems: 'flex-end' }}>
+                        <FontAwesome
+                            name="map-marker"
+                            size={24}
+                            color={colors.background}
+                            style={{  marginRight: 5, marginTop: -15 }}
+                        />
+                    </View>
+                </View>
+                <Text style={[utilities.smallText, { color: '#fff', fontWeight: 'bold', fontSize: 15, marginTop: 5, textAlign: 'center' }]}>
+                    {item.startingPointName} <FontAwesome name="arrow-right" size={16} color="#fff" /> {item.endingPointName}
+                </Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'flex-start' }}>
                     {/* Left Side */}
                     <View style={{ flex: 1, paddingRight: 10 }}>
-                        <Text style={[utilities.titleText, { fontSize: 16 }]}>{item.locationName}</Text>
-                        <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
-                        <Text style={[utilities.smallText, { color: '#ddd', marginBottom: 6 }]}>{item.date}</Text>
+
+
+                        <Text style={[utilities.smallText, { color: '#ddd', marginBottom: 6 }]}>
+                            {item.date ? new Date(item.date).toLocaleString('en-US', {
+                                month: 'long',
+                                day: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            }) : ''}
+                        </Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <FontAwesome
                                 name={
@@ -116,6 +144,7 @@ const RidesList = ({
                     {/* Right Side (Location) */}
 
                 </View>
+
 
                 {/* Map image (unchanged size) */}
                 {item.mapImageUrl && (
