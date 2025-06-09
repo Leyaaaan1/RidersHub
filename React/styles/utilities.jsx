@@ -9,7 +9,6 @@ const utilities = StyleSheet.create({
     container: {
         flexGrow: 1,
         backgroundColor: colors.white,
-        padding: 2,
     },
     navbarContainer: {
         position: 'absolute',
@@ -20,9 +19,8 @@ const utilities = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        // backgroundColor: colors.primary,
         backgroundColor: colors.primary,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.tibetanRed700,
         borderRadius: 8,
         height: 70,
         paddingVertical: 12,
@@ -70,11 +68,7 @@ const utilities = StyleSheet.create({
     searchSection: {
         alignItems: 'center',
     },
-    ridesListContainer: {
-        flex: 1,
-        width: '100%',
-        marginTop: 10,
-    },
+
     // === Rider Type Option Styles ===
     riderTypeOption: {
         minWidth: 80,

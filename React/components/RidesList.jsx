@@ -1,6 +1,6 @@
 // React/components/RidesList.jsx
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, TouchableWithoutFeedback} from 'react-native';
 import { fetchRides } from '../services/rideService';
 import utilities from "../styles/utilities";
 import colors from "../styles/colors";
@@ -70,8 +70,11 @@ const RidesList = ({
     };
 
     const renderRideItem = ({ item }) => (
-        <TouchableOpacity
-            style={{
+
+        <TouchableWithoutFeedback
+            onPress={() => onRideSelect && onRideSelect(item)}
+        >
+            <View style={{
                 backgroundColor: colors.primary,
                 padding: 15,
                 borderRadius: 8,
@@ -80,62 +83,64 @@ const RidesList = ({
                 shadowOpacity: 0.2,
                 shadowRadius: 2,
                 elevation: 2,
-            }}
-            onPress={() => onRideSelect && onRideSelect(item)}
-        >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'flex-start' }}>
-                {/* Left Side */}
-                <View style={{ flex: 1, paddingRight: 10 }}>
-                    <Text style={[utilities.titleText, { fontSize: 16 }]}>{item.ridesName}</Text>
-                    <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
-                    <Text style={[utilities.smallText, { color: '#ddd', marginBottom: 6 }]}>{item.date}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <FontAwesome
-                            name={
-                                item.riderType === 'car' ? 'car' :
-                                    item.riderType === 'motor' || item.riderType === 'Motorcycle' ? 'motorcycle' :
-                                        item.riderType === 'bike' || item.riderType === 'Bicycle' ? 'bicycle' :
-                                            item.riderType === 'cafe Racers' ? 'rocket' : 'user'
-                            }
-                            size={14}
-                            color="#fff"
-                            style={{ marginRight: 5 }}
-                        />
-                        <Text style={[utilities.smallText, { fontSize: 12 }]}>
-                            {item.distance} km
-                        </Text>
+            }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'flex-start' }}>
+                    {/* Left Side */}
+                    <View style={{ flex: 1, paddingRight: 10 }}>
+                        <Text style={[utilities.titleText, { fontSize: 16 }]}>{item.ridesName}</Text>
+                        <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
+                        <Text style={[utilities.smallText, { color: '#ddd', marginBottom: 6 }]}>{item.date}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <FontAwesome
+                                name={
+                                    item.riderType === 'car' ? 'car' :
+                                        item.riderType === 'motor' || item.riderType === 'Motorcycle' ? 'motorcycle' :
+                                            item.riderType === 'bike' || item.riderType === 'Bicycle' ? 'bicycle' :
+                                                item.riderType === 'cafe Racers' ? 'rocket' : 'user'
+                                }
+                                size={14}
+                                color="#fff"
+                                style={{ marginRight: 5 }}
+                            />
+                            <Text style={[utilities.smallText, { fontSize: 12 }]}>
+                                {item.distance} km
+                            </Text>
+                        </View>
                     </View>
 
+                    {/* Right Side (Location) */}
+                    <View style={{ maxWidth: '50%', flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                        <FontAwesome
+                            name="map-marker"
+                            size={30}
+                            color="#fff"
+                            style={{ marginRight: 5, marginTop: 4 }}
+                        />
+                        <Text
+                            style={[utilities.titleText, { fontSize: 30, flexShrink: 1, flexWrap: 'wrap' }]}
+                        >
+                            {item.locationName}
+                        </Text>
+                    </View>
                 </View>
 
-
-                {/* Right Side (Location) */}
-                <View style={{ maxWidth: '50%', flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                    <FontAwesome
-                        name="map-marker"
-                        size={30}
-                        color="#fff"
-                        style={{ marginRight: 5, marginTop: 4 }}
+                {/* Map image (unchanged size) */}
+                {item.mapImageUrl && (
+                    <Image
+                        source={{ uri: item.mapImageUrl }}
+                        style={{ width: '100%', height: 200, borderRadius: 6, marginTop: 8 }}
+                        resizeMode="cover"
                     />
-                    <Text
-                        style={[utilities.titleText, { fontSize: 30, flexShrink: 1, flexWrap: 'wrap' }]}
-                    >
-                        {item.locationName}
-                    </Text>
-                </View>
+                )}
+                {item.description && (
+                    <View style={{ marginTop: 10, padding: 5 }}>
+                        <Text style={[utilities.smallText, { color: '#ddd', lineHeight: 18 }]}>
+                            {item.description}
+                        </Text>
+                    </View>
+                )}
             </View>
-
-
-
-            {/* Map image (unchanged size) */}
-            {item.mapImageUrl && (
-                <Image
-                    source={{ uri: item.mapImageUrl }}
-                    style={{ width: '100%', height: 400, borderRadius: 6, marginTop: 8 }}
-                    resizeMode="cover"
-                />
-            )}
-        </TouchableOpacity>
+        </TouchableWithoutFeedback>
     );
     const renderFooter = () => {
         if (!loading || refreshing) return null;
@@ -181,7 +186,7 @@ const RidesList = ({
                     onEndReachedThreshold={0.5}
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
-                    contentContainerStyle={{ padding: 10 }}
+                    contentContainerStyle={{ paddingVertical: 15, paddingHorizontal: 0 }}
                     ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
 
                 />
