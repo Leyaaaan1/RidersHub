@@ -84,10 +84,15 @@ const RidesList = ({
                 shadowRadius: 2,
                 elevation: 2,
             }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'flex-start' }}>
+                    <Text
+                        style={[utilities.titleText, { fontSize: 30, flexShrink: 1, flexWrap: 'wrap' }]}
+                    >
+                        {item.ridesName}
+                    </Text>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10, alignItems: 'flex-start' }}>
                     {/* Left Side */}
                     <View style={{ flex: 1, paddingRight: 10 }}>
-                        <Text style={[utilities.titleText, { fontSize: 16 }]}>{item.ridesName}</Text>
+                        <Text style={[utilities.titleText, { fontSize: 16 }]}>{item.locationName}</Text>
                         <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
                         <Text style={[utilities.smallText, { color: '#ddd', marginBottom: 6 }]}>{item.date}</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -109,19 +114,7 @@ const RidesList = ({
                     </View>
 
                     {/* Right Side (Location) */}
-                    <View style={{ maxWidth: '50%', flexDirection: 'row', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-                        <FontAwesome
-                            name="map-marker"
-                            size={30}
-                            color="#fff"
-                            style={{ marginRight: 5, marginTop: 4 }}
-                        />
-                        <Text
-                            style={[utilities.titleText, { fontSize: 30, flexShrink: 1, flexWrap: 'wrap' }]}
-                        >
-                            {item.locationName}
-                        </Text>
-                    </View>
+
                 </View>
 
                 {/* Map image (unchanged size) */}

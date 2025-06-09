@@ -5,10 +5,8 @@ import utilities from "../styles/utilities";
 import riderPageUtils from "../styles/riderPageUtils";
 import colors from "../styles/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { ScrollView, Keyboard } from 'react-native';
 
 import {getCurrentRiderType, getRideDetails} from '../services/rideService';
-import RideStep4 from "../components/ride/RideStep4";
 import RidesList from '../components/RidesList';
 
 
@@ -21,60 +19,11 @@ const RiderPage = ({ route , navigation}) => {
     const [loading, setLoading] = useState(true);
 
 
-    const [searchId, setSearchId] = useState('');
-    const [searchLoading, setSearchLoading] = useState(false);
-    const [searchError, setSearchError] = useState('');
-    const [foundRide, setFoundRide] = useState(null);
-    const [showRideModal, setShowRideModal] = useState(false);
-
-
-
-
-
-
 
     useEffect(() => {
         fetchCurrentRiderType();
     }, [token]);
 
-    const handleSearch = async () => {
-        Keyboard.dismiss(); // Hide keyboard
-
-        if (searchId.length !== 4) {
-            setSearchError('Please enter a valid 4-digit ride ID');
-            return;
-        }
-
-        try {
-            setSearchLoading(true);
-            setSearchError('');
-
-            const rideDetails = await getRideDetails(parseInt(searchId), token);
-
-            navigation.navigate('RideStep4', {
-                generatedRidesId: rideDetails.generatedRidesId,
-                rideName: rideDetails.ridesName,
-                locationName: rideDetails.locationName,
-                riderType: rideDetails.riderType,
-                distance: rideDetails.distance,
-                date: rideDetails.date,
-                startingPoint: rideDetails.startingPointName,
-                endingPoint: rideDetails.endingPointName,
-                participants: rideDetails.participants,
-                description: rideDetails.description,
-                token,
-                username
-            });
-        } catch (error) {
-            setSearchError(error.message || 'Failed to find ride');
-        } finally {
-            setSearchLoading(false);
-        }
-    };
-    useEffect(() => {
-        fetchCurrentRiderType();
-
-    }, [token]);
 
     const fetchCurrentRiderType = async () => {
         try {
@@ -93,45 +42,80 @@ const RiderPage = ({ route , navigation}) => {
             setLoading(false);
         }
     };
-
     const SearchHeader = () => {
-        return (
-            <View style={utilities.searchSection}>
-                <View style={riderPageUtils.searchInputContainer}>
-                    <TextInput
-                        style={riderPageUtils.searchInput}
-                        placeholder="Ride ID"
-                        placeholderTextColor="#999"
-                        onChangeText={(text) => {
-                            const numericText = text.replace(/[^0-9]/g, '');
-                            setSearchId(numericText);
+        const [searchId, setSearchId] = useState('');
+        const [loading, setLoading] = useState(false);
+        const [error, setError] = useState('');
 
-                            // Only clear errors, don't auto-trigger search
-                            if (numericText.length !== 4) {
-                                setSearchError('');
-                                setFoundRide(null);
-                            }
+        const handleSearch = async () => {
+            if (!searchId.trim()) {
+                setError('Please enter a ride ID');
+                return;
+            }
+
+            setLoading(true);
+            setError('');
+
+            try {
+                const ride = await getRideDetails(searchId.trim(), token);
+                navigation.navigate('RideStep4', {
+                    generatedRidesId: ride.generatedRidesId,
+                    rideName: ride.ridesName,
+                    locationName: ride.locationName,
+                    riderType: ride.riderType,
+                    distance: ride.distance,
+                    date: ride.date,
+                    startingPoint: ride.startingPointName,
+                    endingPoint: ride.endingPointName,
+                    participants: ride.participants,
+                    description: ride.description,
+                    token: token,
+                    username: username
+                });
+            } catch (error) {
+                setError(error.message || 'Failed to find ride');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        return (
+            <View style={{ padding: 10, backgroundColor: '#f9f9f9', borderRadius: 5 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                        style={{
+                            flex: 1,
+                            borderWidth: 1,
+                            borderColor: colors.primary,
+                            borderRadius: 5,
+                            padding: 10,
+                            marginRight: 10,
+                            color: '#333'
                         }}
-                        keyboardType="numeric"
-                        maxLength={4}
+                        placeholder="Search by Ride ID"
+                        placeholderTextColor="#999"
                         value={searchId}
+                        onChangeText={setSearchId}
                     />
                     <TouchableOpacity
-                        style={riderPageUtils.searchButton}
                         onPress={handleSearch}
-                        disabled={searchLoading || searchId.length !== 4}
+                        disabled={loading}
+                        style={{
+                            backgroundColor: colors.primary,
+                            padding: 10,
+                            borderRadius: 5,
+                        }}
                     >
-                        {searchLoading ? (
+                        {loading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Text style={utilities.buttonText}>Search</Text>
+                            <FontAwesome name="search" size={18} color="#fff" />
                         )}
                     </TouchableOpacity>
                 </View>
-                {searchError ? <Text style={riderPageUtils.errorText}>{searchError}</Text> : null}
-                {searchId.length > 0 && searchId.length < 4 && (
-                    <Text style={riderPageUtils.detailText}>Please enter 4 digits</Text>
-                )}
+                {error ? (
+                    <Text style={{ color: 'red', marginTop: 5 }}>{error}</Text>
+                ) : null}
             </View>
         );
     };
@@ -166,7 +150,19 @@ const RiderPage = ({ route , navigation}) => {
 
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <TouchableOpacity
-                            style={utilities.buttonWhite}
+                            style={[
+                                {
+                                    borderStyle: 'dashed',
+                                    borderWidth: 1,
+                                    borderColor: colors.white,
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    minWidth: 80, // Add minimum width
+                                    height: 40,   // Add fixed height
+                                }
+                            ]}
                             onPress={() => {
                                 if (!token) {
                                     Alert.alert('Error', 'Authentication token is missing');
@@ -175,7 +171,7 @@ const RiderPage = ({ route , navigation}) => {
                                 navigation.navigate('CreateRide', { token, username });
                             }}
                         >
-                            <Text style={utilities.title}> + Ride</Text>
+                            <Text style={[utilities.smallText, { color: colors.white, textAlign: 'center' }]}>Create</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -191,7 +187,11 @@ const RiderPage = ({ route , navigation}) => {
             <View style={riderPageUtils.contentContainer}>
                 <RidesList
                     token={token}
-                    headerComponent={<SearchHeader />}
+                    headerComponent={
+                        <View style={{ marginBottom: 15 }}>
+                            <SearchHeader />
+                        </View>
+                    }
                     onRideSelect={(ride) => {
                         navigation.navigate('RideStep4', {
                             generatedRidesId: ride.generatedRidesId,
