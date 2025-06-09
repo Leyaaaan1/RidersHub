@@ -15,6 +15,10 @@ const riderPageUtils = StyleSheet.create({
         shadowRadius: 3,
         elevation: 2
     },
+    contentContainer: {
+        flex: 1,
+        marginTop: 75,
+    },
     searchLabel: {
         fontSize: 18,
         fontWeight: 'bold',
@@ -24,7 +28,6 @@ const riderPageUtils = StyleSheet.create({
         flexDirection: 'row',
         width: '60%',
         alignItems: 'center',
-        justifyContent: 'space-between',
         backgroundColor: 'transparent'
     },
     searchInput: {
@@ -45,6 +48,21 @@ const riderPageUtils = StyleSheet.create({
         alignItems: 'center',
         borderRadius: 5
     },
+    errorText: {
+        color: 'red',
+        marginTop: 5,
+        fontSize: 12
+    },
+    detailText: {
+        color: '#666',
+        marginTop: 5,
+        fontSize: 12
+    },
+    ridesListContainer: {
+        flex: 1,
+        marginTop: 10,
+        paddingHorizontal: 15
+    }
 });
 
 export default riderPageUtils;

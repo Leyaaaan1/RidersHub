@@ -10,8 +10,7 @@ import RideStep3 from '../components/ride/RideStep3';
 import { handleWebViewMessage } from '../utils/mapUtils';
 import RideStep4 from "../components/ride/RideStep4";
 
-const
-    CreateRide = ({ route, navigation }) => {
+const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
     const webViewRef = useRef(null);
 
@@ -251,6 +250,7 @@ const
             ridesName: rideName,
             locationName: locationName,
             riderType: riderType || 'CAR',  // Make sure to use uppercase as in your backend
+            // distance: parseFloat(distance),
             date: date.toISOString(),
             latitude: parseFloat(latitude) || 0,
             longitude: parseFloat(longitude) || 0,
@@ -275,7 +275,21 @@ const
             if (result && result.generatedRidesId) {
                 setgeneratedRidesId(result.generatedRidesId);
                 console.log('Ride ID set:', result.generatedRidesId);
-                setShowRideModal(true);
+
+                // Navigate to RideStep4 instead of showing modal
+                navigation.navigate('RideStep4', {
+                    generatedRidesId: result.generatedRidesId,
+                    rideName: rideName,
+                    locationName: locationName,
+                    riderType: riderType,
+                    date: date,
+                    startingPoint: startingPoint,
+                    endingPoint: endingPoint,
+                    participants: participants,
+                    description: description,
+                    token: token,
+                    username: username
+                });
             } else {
                 console.error('API returned success but no ride ID:', result);
                 setError('Created ride but no ID was returned. Please try again.');
@@ -301,8 +315,6 @@ const
 
     const handleModalClose = () => {
         setShowRideModal(false);
-        navigation.navigate('RiderPage', { token, username });
-
     };
 
     const handleModalBack = () => {
