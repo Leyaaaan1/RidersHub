@@ -362,7 +362,7 @@ const CreateRide = ({ route, navigation }) => {
                     setLocationName={setLocationName}
                     prevStep={prevStep}
                     nextStep={nextStep}
-                    setMapboxImageUrl={setMapboxImageUrl}
+                    // setMapboxImageUrl={setMapboxImageUrl}
                 />
             )}
 
