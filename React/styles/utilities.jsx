@@ -12,25 +12,20 @@ const utilities = StyleSheet.create({
     },
     containerWhite: {
         flexGrow: 1,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.black,
+        padding: spacing.sm,
     },
     navbarContainer: {
         position: 'absolute',
         top: -2,
-        left: 0,
-        right: 0,
-        zIndex: 100,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        // backgroundColor: colors.primary,
         backgroundColor: colors.primary,
-        borderRadius: 8,
-        height: 70,
+        height: 58,
         paddingVertical: 12,
         paddingHorizontal: 15,
     },
-    navbarContainerWhite: {
+    navbarContainerPrimary: {
         position: 'absolute',
         top: -2,
         left: 0,
@@ -39,8 +34,7 @@ const utilities = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        // backgroundColor: colors.primary,
-        backgroundColor: colors.white,
+         backgroundColor: colors.primary,
         borderRadius: 8,
         height: 70,
         paddingVertical: 12,
@@ -213,6 +207,13 @@ const utilities = StyleSheet.create({
         color: colors.white,
         marginBottom: spacing.md,
     },
+    titleTextBlack: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: colors.black,
+        marginBottom: spacing.md,
+    },
+
 
     label: {
         marginBottom: 5,
@@ -240,7 +241,11 @@ const utilities = StyleSheet.create({
         color: '#fff',
         marginTop: 3,
     },
-
+    smallTextBlack: {
+        fontSize: 12,
+        color: '#000',
+        marginTop: 3,
+    },
     // === Buttons ===
     button: {
         backgroundColor: colors.primary,
@@ -425,6 +430,36 @@ const utilities = StyleSheet.create({
         fontSize: 14,
         color: '#666',
         textAlign: 'center',
+    },
+    oblongImageContainer: {
+        width: '100%',
+        height: 120,
+        alignItems: 'left',
+        justifyContent: 'center',
+        position: 'relative',
+        marginBottom: 8,
+    },
+    oblongImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        backgroundColor: colors.white,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    oblongPointerCurve: {
+        position: 'absolute',
+        bottom: -12,
+        left: '50%',
+        marginLeft: -16,
+        width: 32,
+        height: 16,
+
     },
 
 });

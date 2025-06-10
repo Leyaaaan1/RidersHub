@@ -18,6 +18,7 @@ const riderPageUtils = StyleSheet.create({
     contentContainer: {
         flex: 1,
         marginTop: 75,
+        backgroundColor: '#000',
     },
     searchLabel: {
         fontSize: 18,

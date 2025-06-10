@@ -33,7 +33,6 @@ const rideUtilities = StyleSheet.create({
     },
 
     label: {
-        marginBottom: 5,
         fontWeight: "bold",
     },
 
@@ -47,7 +46,7 @@ const rideUtilities = StyleSheet.create({
     detailText: {
         fontSize: 14,
         fontWeight: '500',
-        color: colors.tibetanRed50 || '#333',
+        color: colors.white
     },
 
     title: {
@@ -75,7 +74,7 @@ const rideUtilities = StyleSheet.create({
     },
 
     middleContainer: {
-        backgroundColor: colors.primary,
+        backgroundColor: colors.white,
         borderColor: '#e89898',
         borderWidth: 1,
         borderRadius: 8,

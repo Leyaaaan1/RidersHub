@@ -80,7 +80,7 @@ const RiderPage = ({ route , navigation}) => {
         };
 
         return (
-            <View style={{ padding: 5, backgroundColor: '#f9f9f9', borderRadius: 5 }}>
+            <View style={{ padding: 5, backgroundColor: '#000', borderRadius: 5 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                         style={{
@@ -96,6 +96,7 @@ const RiderPage = ({ route , navigation}) => {
                         placeholderTextColor="#999"
                         value={searchId}
                         onChangeText={setSearchId}
+                        keyboardType="numeric"
                     />
                     <TouchableOpacity
                         onPress={handleSearch}
@@ -124,13 +125,12 @@ const RiderPage = ({ route , navigation}) => {
         <View style={utilities.container}>
             <StatusBar backgroundColor={colors.primary} barStyle="light-content" translucent={false} />
 
-            {/* Navbar */}
             <View style={utilities.navbarContainer}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 5 }}>
                     <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                        <Text style={[utilities.textWhite, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
+                        <Text style={[utilities.textBlack, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
                         {loading ? (
-                            <Text style={utilities.textWhite}>Loading...</Text>
+                            <Text style={utilities.textBlack}>Loading...</Text>
                         ) : (
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <FontAwesome
@@ -141,7 +141,7 @@ const RiderPage = ({ route , navigation}) => {
                                                     riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
                                     }
                                     size={16}
-                                    color="#fff"
+                                    color="#000"
                                     style={{ marginRight: 5 }}
                                 />
                             </View>
@@ -154,7 +154,7 @@ const RiderPage = ({ route , navigation}) => {
                                 {
                                     borderStyle: 'dashed',
                                     borderWidth: 1,
-                                    borderColor: colors.white,
+                                    borderColor: colors.black,
                                     padding: 10,
                                     borderRadius: 5,
                                     alignItems: 'center',
@@ -171,7 +171,7 @@ const RiderPage = ({ route , navigation}) => {
                                 navigation.navigate('CreateRide', { token, username });
                             }}
                         >
-                            <Text style={[utilities.smallText, { color: colors.white, textAlign: 'center' }]}>Create</Text>
+                            <Text style={[utilities.smallTextBlack, { color: colors.black, textAlign: 'center' }]}>Create</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -188,9 +188,7 @@ const RiderPage = ({ route , navigation}) => {
                 <RidesList
                     token={token}
                     headerComponent={
-                        <View style={{ marginBottom: 15 }}>
                             <SearchHeader />
-                        </View>
                     }
                     onRideSelect={(ride) => {
                         navigation.navigate('RideStep4', {
@@ -209,6 +207,8 @@ const RiderPage = ({ route , navigation}) => {
                         });
                     }}
                 />
+                showsVerticalScrollIndicator={false}
+
             </View>
         </View>
     );};

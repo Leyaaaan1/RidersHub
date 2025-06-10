@@ -77,18 +77,18 @@ const RidesList = ({
 
 
             <View style={{
-                backgroundColor: colors.primary,
+                backgroundColor: colors.black,
                 padding: 25,
                 borderRadius: 12,
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 4,
-                elevation: 4,
-                alignItems: 'center',
+                shadowOffset: { width: 0,  },
+                borderBottomWidth: 2,
+                borderLeftWidth: 0,
+                borderRightWidth: 0,
+                borderColor: '#fff',
             }}>
-                <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center' }]}>{item.locationName.toUpperCase()}</Text>
-                <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
+                <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center', marginBottom: 0, paddingBottom: 0 }]}>{item.locationName.toUpperCase()}</Text>
+                <Text style={[utilities.smallText, { marginTop: -8 } ]}>ID: {item.generatedRidesId}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text
                         style={[utilities.titleText, { fontSize: 25, flexShrink: 1, flexWrap: 'wrap' }]}
@@ -99,12 +99,12 @@ const RidesList = ({
                         <FontAwesome
                             name="map-marker"
                             size={24}
-                            color={colors.background}
+                            color={colors.white}
                             style={{  marginRight: 5, marginTop: -15 }}
                         />
                     </View>
                 </View>
-                <Text style={[utilities.smallText, { color: '#fff', fontWeight: 'bold', fontSize: 15, marginTop: 5, textAlign: 'center' }]}>
+                <Text style={[utilities.smallText, { fontWeight: 'bold', fontSize: 15, marginTop: 5, textAlign: 'center' }]}>
                     {item.startingPointName} <FontAwesome name="arrow-right" size={16} color="#fff" /> {item.endingPointName}
                 </Text>
 
@@ -113,7 +113,7 @@ const RidesList = ({
                     <View style={{ flex: 1, paddingRight: 10 }}>
 
 
-                        <Text style={[utilities.smallText, { color: '#ddd', marginBottom: 6 }]}>
+                        <Text style={[utilities.smallText, { marginBottom: 6 }]}>
                             {item.date ? new Date(item.date).toLocaleString('en-US', {
                                 month: 'long',
                                 day: '2-digit',
@@ -150,13 +150,13 @@ const RidesList = ({
                 {item.mapImageUrl && (
                     <Image
                         source={{ uri: item.mapImageUrl }}
-                        style={{ width: '100%', height: 200, borderRadius: 6, marginTop: 8 }}
+                        style={{ width: '100%', height: 200, borderRadius: 6, marginTop: 8, borderWidth: 2, borderColor: colors.primary }}
                         resizeMode="cover"
                     />
                 )}
                 {item.description && (
                     <View style={{ marginTop: 10, padding: 5 }}>
-                        <Text style={[utilities.smallText, { color: '#ddd', lineHeight: 18 }]}>
+                        <Text style={[utilities.smallText, { lineHeight: 18 }]}>
                             {item.description}
                         </Text>
                     </View>
