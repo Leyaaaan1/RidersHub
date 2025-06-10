@@ -12,25 +12,20 @@ const utilities = StyleSheet.create({
     },
     containerWhite: {
         flexGrow: 1,
-        backgroundColor: colors.primary,
+        backgroundColor: colors.black,
+        padding: spacing.sm,
     },
     navbarContainer: {
         position: 'absolute',
         top: -2,
-        left: 0,
-        right: 0,
-        zIndex: 100,
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        // backgroundColor: colors.primary,
         backgroundColor: colors.primary,
-        borderRadius: 8,
-        height: 70,
+        height: 58,
         paddingVertical: 12,
         paddingHorizontal: 15,
     },
-    navbarContainerWhite: {
+    navbarContainerPrimary: {
         position: 'absolute',
         top: -2,
         left: 0,
@@ -39,8 +34,7 @@ const utilities = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        // backgroundColor: colors.primary,
-        backgroundColor: colors.white,
+         backgroundColor: colors.primary,
         borderRadius: 8,
         height: 70,
         paddingVertical: 12,
@@ -213,6 +207,13 @@ const utilities = StyleSheet.create({
         color: colors.white,
         marginBottom: spacing.md,
     },
+    titleTextBlack: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: colors.black,
+        marginBottom: spacing.md,
+    },
+
 
     label: {
         marginBottom: 5,
@@ -240,7 +241,11 @@ const utilities = StyleSheet.create({
         color: '#fff',
         marginTop: 3,
     },
-
+    smallTextBlack: {
+        fontSize: 12,
+        color: '#000',
+        marginTop: 3,
+    },
     // === Buttons ===
     button: {
         backgroundColor: colors.primary,

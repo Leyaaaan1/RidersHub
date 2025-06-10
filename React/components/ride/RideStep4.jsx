@@ -1,6 +1,16 @@
 // React/components/ride/RideStep4.jsx
 import React, {useEffect, useState} from 'react';
-import {View, Text, TouchableOpacity, ScrollView, ActivityIndicator, Image, Modal, SafeAreaView} from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    ScrollView,
+    ActivityIndicator,
+    Image,
+    Modal,
+    SafeAreaView,
+    StatusBar
+} from 'react-native';
 import utilities from '../../styles/utilities';
 import rideUtilities from '../../styles/rideUtilities';
 import { useNavigation } from '@react-navigation/native';
@@ -8,7 +18,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import {fetchRideMapImage, getRideDetails} from '../../services/rideService';
 import WaveLine from '../../styles/waveLineComponent';
 import colors from '../../styles/colors';
-
+import MapImageSwapper from "../../styles/MapImageSwapper";
 
 const RideStep4 = (props) => {
     const navigation = useNavigation();
@@ -32,14 +42,15 @@ const RideStep4 = (props) => {
 
     const formatDate = (date) => {
         if (!date) return 'Not specified';
-        return date instanceof Date ?
-            date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : date.toString();
+        const d = date instanceof Date ? date : new Date(date);
+        if (isNaN(d.getTime())) return date.toString();
+        const options = { month: 'long', day: '2-digit', year: 'numeric' };
+        const datePart = d.toLocaleDateString('en-US', options);
+        let hours = d.getHours();
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${datePart} ${hours}:${minutes}${ampm}`;
     };
 
     const handleBack = () => {
@@ -124,8 +135,10 @@ const RideStep4 = (props) => {
 
     return (
         <View style={utilities.containerWhite}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.primary }}>
-            <View style={utilities.navbarContainer}>
+            <StatusBar backgroundColor={colors.black} barStyle="light-content" translucent={false} />
+
+            <SafeAreaView style={{ flex: 1, backgroundColor: colors.black }}>
+            <View style={utilities.navbarContainerPrimary}>
                 <TouchableOpacity
                     style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}
                     onPress={handleBack}
@@ -137,7 +150,7 @@ const RideStep4 = (props) => {
                         style={[
                             rideUtilities.title,
                             {
-                                color: colors.background,
+                                color: colors.white ,
                                 marginBottom: 0,
                                 flexDirection: 'row',
                                 alignItems: 'center',
@@ -172,7 +185,7 @@ const RideStep4 = (props) => {
                 style={{ flex: 1 }}
                 showsVerticalScrollIndicator={false}
             >
-                <View style={[utilities.centeredContainer, { padding: 15, backgroundColor: colors.primary }]}>
+                <View style={[utilities.centeredContainer, { padding: 5, backgroundColor: colors.black }]}>
                     {/*<View style={[*/}
                     {/*    rideUtilities.topContainer,*/}
                     {/*    rideUtilities.middleContainer,*/}
@@ -180,85 +193,88 @@ const RideStep4 = (props) => {
                     {/*]}>*/}
 
 
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
-                            {/* Left Column */}
-                            <View style={{flex: 1, alignItems: 'flex-start'}}>
-                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                    <FontAwesome name="map-marker" size={18} color="#fff" style={{ marginRight: 6 }} />
-                                    <Text style={[rideUtilities.detailText, { fontSize: 30 }]}>{rideName} </Text>
-                                </View>
-                                <Text style={rideUtilities.detailText}>Owner: {username} </Text>
-                                <Text style={rideUtilities.detailText}>{distanceState} km</Text>
-
-                            </View>
-
-                            {/* Right Column */}
-                            <View style={{flex: 1, alignItems: 'flex-end'}}>
-                                <View style={{alignItems: 'center'}}>
-                                    {riderType === 'car' && <FontAwesome name="car" size={24} color="#fff" />}
-                                    {riderType === 'motor' && <FontAwesome name="motorcycle" size={24} color="#fff" />}
-                                    {riderType === 'bike' && <FontAwesome name="bicycle" size={24} color="#fff" />}
-                                    {riderType === 'cafe Racers' && <FontAwesome name="rocket" size={24} color="#fff" />}
-                                </View>
-                                <View style={[rideUtilities.formGroup, {alignItems: 'center', marginTop: 8}]}>
-                                    <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
-                                </View>
-                            </View>
+                    <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>
+                        <Text
+                            style={[
+                                rideUtilities.detailText,
+                                { fontSize: 30, textAlign: 'center', width: '100%', textDecorationLine: 'underline' }
+                            ]}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {rideName}
+                        </Text>
+                        <Text style={{ color: '#fff', fontSize: 14, marginTop: 2 }}>Location</Text>
+                        <View style={[rideUtilities.formGroup, { alignItems: 'center', marginTop: 8 }]}>
+                            <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
                         </View>
 
                         <View style={{width: '100%', alignItems: 'center'}}>
                             {imageLoading ? (
-                                <ActivityIndicator size="large" color="#4CAF50" />
+                                <ActivityIndicator size="large" color="#fff" />
                             ) : mapImage ? (
                                 <Image
-                                    source={{uri: mapImage}}
-                                    style={{width: '100%', height: 200, borderRadius: 8}}
+                                    source={{ uri: mapImage }}
+                                    style={{
+                                        width: '100%',
+                                        height: 200,
+                                        borderRadius: 8,
+                                        borderWidth: 2,
+                                        borderColor: colors.primary,
+                                        marginTop: 20
+                                    }}
                                     resizeMode="cover"
                                 />
                             ) : (
                                 <Text style={{color: '#fff'}}>No map available</Text>
                             )}
                         </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', width: '100%', marginTop: 10 }}>
-                        {/* Starting Point Column */}
-                        <View style={{ flex: 1, alignItems: 'flex-start', paddingHorizontal: 8 }}>
-                            <Text style={[utilities.label, { color: '#fff', fontSize: 12, textAlign: 'left' }]}>Starting Point:</Text>
-                            <Text style={[utilities.compactText, { color: '#fff', textAlign: 'left' }]}>{startingPoint}</Text>
-                            {startMapImage ? (
-                                <Image
-                                    source={{ uri: startMapImage }}
-                                    style={[utilities.oblongImage, { width: 200, height: 100 }]}
-                                />
-                            ) : (
-                                <Text style={{ color: '#fff', textAlign: 'center' }}>No start map available</Text>
-                            )}
-
+                    </View>
+                    <View style={{ flexDirection: 'row', width: '100%' }}>
+                        {/* Left Column */}
+                        <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                            <Text style={rideUtilities.detailText}>Owner: {username} </Text>
+                            <Text style={rideUtilities.detailText}>{distanceState} km</Text>
                         </View>
+                        {/* Right Column */}
+                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                            <View style={{ alignItems: 'center' }}>
+                                {riderType === 'car' && <FontAwesome name="car" size={24} color="#fff" />}
+                                {riderType === 'motor' && <FontAwesome name="motorcycle" size={24} color="#fff" />}
+                                {riderType === 'bike' && <FontAwesome name="bicycle" size={24} color="#fff" />}
+                                {riderType === 'cafe Racers' && <FontAwesome name="rocket" size={24} color="#fff" />}
+                            </View>
 
-                        {/* Ending Point Column */}
-                        <View style={{ flex: 1, alignItems: 'flex-end', paddingHorizontal: 8 }}>
-
-                            {endMapImage ? (
-                                <Image
-                                    source={{ uri: endMapImage }}
-                                    style={[utilities.oblongImage, { width: 200, height: 100 }]}
-
-                                />
-                            ) : (
-                                <Text style={{ color: '#fff', textAlign: 'center' }}>No end map available</Text>
-                            )}
-                            <Text style={[utilities.label, { color: '#fff', fontSize: 12, textAlign: 'right' }]}>Ending Point:</Text>
-                            <Text style={[utilities.compactText, { color: '#fff', textAlign: 'right' }]}>{endingPoint}</Text>
                         </View>
                     </View>
+
+
+
+
+                        {/* Ending Point Column */}
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', width: '100%', marginTop: 10 }}>
+                        {startMapImage || endMapImage ? (
+                            <MapImageSwapper
+                                startImage={startMapImage}
+                                endImage={endMapImage}
+                                startPoint={startingPoint}
+                                endPoint={endingPoint}
+                                imageStyle={[utilities.oblongImage, { width: 300, height: 250 }]}
+                                BorderColor={colors.primary}
+                            />
+                        ) : (
+                            <Text style={{ color: '#fff', textAlign: 'center', width: '100%' }}>No start or end map available</Text>
+                        )}
+                    </View>
+                            {/*<Text style={[utilities.label, { color: '#000', fontSize: 12, textAlign: 'right' }]}>Ending Point:</Text>*/}
+                            {/*<Text style={[utilities.compactText, { color: '#000', textAlign: 'right' }]}>{endingPoint}</Text>*/}
+                        {/*</View>*/}
+                    {/*</View>*/}
                     {description && (
-                        <View style={[
-                            rideUtilities.middleContainer,
-                            {width: 'auto', marginTop: 10}
-                        ]}>
-                            <Text style={[rideUtilities.label, {color: '#fff', fontSize: 20}]}>Description:</Text>
-                            <Text style={[rideUtilities.detailText, {textAlign: 'justify'}]}>{description}</Text>
+                        <View style={{ marginTop: 10, padding: 5 }}>
+                            <Text style={[utilities.smallText, { lineHeight: 18 }]}>
+                                {description}
+                            </Text>
                         </View>
                     )}
                         {participants && (
