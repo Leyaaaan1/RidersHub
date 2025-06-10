@@ -54,9 +54,12 @@ public class RidesService {
     public RideResponseDTO createRide( Integer generatedRidesId, String creatorUsername, String ridesName, String locationName, String riderType, Integer distance, LocalDateTime date,
                                       List<String> participantUsernames, String description,
                                       double latitude, double longitude, double startLatitude,
-                                      double startLongitude, double endLatitude, double endLongitude, String mapImageUrl) {
+                                      double startLongitude, double endLatitude, double endLongitude, String mapImageUrl,
+                                       String magImageStartingLocation, String magImageEndingLocation) {
 
         String imageUrl = mapboxService.getStaticMapImageUrl(longitude, latitude);
+        String startImageUrl = mapboxService.getStaticMapImageUrl(startLongitude, startLatitude);
+        String endImageUrl = mapboxService.getStaticMapImageUrl(endLongitude, endLatitude);
 
 
 
@@ -97,6 +100,8 @@ public class RidesService {
         newRide.setDate(date);
         newRide.setLocation(rideLocation);
         newRide.setMapImageUrl(imageUrl);
+        newRide.setMagImageStartingLocation(startImageUrl);
+        newRide.setMagImageEndingLocation(endImageUrl);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -128,7 +133,9 @@ public class RidesService {
                 ride.getEndingPointName(),
                 ride.getEndingLocation().getY(),
                 ride.getEndingLocation().getX(),
-                ride.getMapImageUrl()
+                ride.getMapImageUrl(), 
+                ride.getMagImageStartingLocation(), 
+                ride.getMagImageEndingLocation()
         );
     }
 

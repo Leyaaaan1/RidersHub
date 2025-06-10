@@ -50,13 +50,6 @@ const rideUtilities = StyleSheet.create({
         color: colors.tibetanRed50 || '#333',
     },
 
-    formGroup: {
-        marginBottom: spacing.md,
-        paddingVertical: spacing.sm,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-
     title: {
         fontSize: 24,
         fontWeight: "bold",

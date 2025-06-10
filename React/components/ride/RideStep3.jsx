@@ -15,6 +15,8 @@ const RideStep3 = ({
                        handleCreateRide
                    }) => {
 
+
+
     const handleCreateAndNext = async () => {
         try {
             // Wait for the ride to be created successfully

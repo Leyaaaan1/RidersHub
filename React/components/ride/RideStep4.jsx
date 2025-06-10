@@ -47,6 +47,9 @@ const RideStep4 = (props) => {
     };
 
     const [mapImage, setMapImage] = useState(null);
+    const [startMapImage, setStartMapImage] = useState(null);
+    const [endMapImage, setEndMapImage] = useState(null);
+
     const [imageLoading, setImageLoading] = useState(false);
     const [distanceState, setDistance] = useState(distance || "--");
 
@@ -90,6 +93,13 @@ const RideStep4 = (props) => {
 
         getRideDetails(generatedRidesId, token)
             .then(rideDetails => {
+                if (rideDetails.magImageStartingLocation) {
+                    setStartMapImage(rideDetails.magImageStartingLocation);
+                }
+                if (rideDetails.magImageEndingLocation) {
+                    setEndMapImage(rideDetails.magImageEndingLocation);
+                }
+
                 console.log("Full ride details response:", rideDetails);
                 if (rideDetails && typeof rideDetails.distance !== 'undefined') {
                     console.log("Ride distance from backend:", rideDetails.distance);
@@ -123,12 +133,28 @@ const RideStep4 = (props) => {
                     <FontAwesome name="arrow-left" size={20} color="#fff" />
                     <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
                 </TouchableOpacity>
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                    <Text style={[rideUtilities.title, { color: colors.background , marginBottom: 0, flexDirection: 'row', alignItems: 'center' }]}>
-                        {rideName?.toUpperCase()}
-                        <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 10 }}>
-                            {generatedRidesId}
-                        </Text>
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text
+                        style={[
+                            rideUtilities.title,
+                            {
+                                color: colors.background,
+                                marginBottom: 0,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                textAlign: 'center',
+                                width: '100%',
+                            }
+                        ]}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.7}
+                    >
+                        {locationName?.toUpperCase()}
+                    </Text>
+                    <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 10, textAlign: 'center', width: '100%' }}>
+                        {generatedRidesId}
                     </Text>
                 </View>
                 <View>
@@ -146,23 +172,24 @@ const RideStep4 = (props) => {
                 contentContainerStyle={{ flexGrow: 1 }}
                 style={{ flex: 1 }}
             >
-                <View style={[rideUtilities.formGroup, { flex: 1 }]}>
-                    <View style={[
-                        rideUtilities.topContainer,
-                        rideUtilities.middleContainer,
-                        { width: 'auto', paddingHorizontal: 15, flex: 1 }
-                    ]}>
+                <View style={[utilities.centeredContainer, { padding: 15, backgroundColor: colors.primary }]}>
+                    {/*<View style={[*/}
+                    {/*    rideUtilities.topContainer,*/}
+                    {/*    rideUtilities.middleContainer,*/}
+                    {/*    { width: 'auto', paddingHorizontal: 15, flex: 1 }*/}
+                    {/*]}>*/}
 
 
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', width: '100%'}}>
                             {/* Left Column */}
                             <View style={{flex: 1, alignItems: 'flex-start'}}>
+                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                                    <FontAwesome name="map-marker" size={18} color="#fff" style={{ marginRight: 6 }} />
+                                    <Text style={[rideUtilities.detailText, { fontSize: 30 }]}>{rideName} </Text>
+                                </View>
                                 <Text style={rideUtilities.detailText}>Owner: {username} </Text>
                                 <Text style={rideUtilities.detailText}>{distanceState} km</Text>
-                                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                                    <FontAwesome name="map-marker" size={24} color="#fff" style={{marginRight: 8}} />
-                                    <Text style={rideUtilities.detailText}>{locationName} </Text>
-                                </View>
+
                             </View>
 
                             {/* Right Column */}
@@ -207,7 +234,13 @@ const RideStep4 = (props) => {
                                     <Text style={[utilities.label, {color: '#fff', fontSize: 12}]}>Starting Point:</Text>
                                     <Text style={[utilities.compactText, {color: '#fff'}]}>{startingPoint}</Text>
                                 </View>
+
                             </View>
+                            {startMapImage ? (
+                                <Image source={{uri: startMapImage}} style={{width: '100%', height: 120, borderRadius: 8, marginBottom: 8}} resizeMode="cover" />
+                            ) : (
+                                <Text style={{color: '#fff'}}>No start map available</Text>
+                            )}
 
                             {/* Wave Line with FontAwesome Arrow */}
                             <View style={{
@@ -238,7 +271,13 @@ const RideStep4 = (props) => {
                                     <Text style={[utilities.label, {color: '#fff', fontSize: 12, textAlign: 'right'}]}>Destination:</Text>
                                     <Text style={[utilities.compactText, {color: '#fff', textAlign: 'right'}]}>{endingPoint}</Text>
                                 </View>
+
                             </View>
+                            {endMapImage ? (
+                                <Image source={{uri: endMapImage}} style={{width: '100%', height: 120, borderRadius: 8}} resizeMode="cover" />
+                            ) : (
+                                <Text style={{color: '#fff'}}>No end map available</Text>
+                            )}
                             {description && (
                                 <View style={[
                                     rideUtilities.middleContainer,
@@ -267,7 +306,7 @@ const RideStep4 = (props) => {
                                         borderBottomWidth: 1,
                                         borderBottomColor: colors.secondary
                                     }}>
-                                        <Text style={{flex: 0.8, color: '#fff', fontWeight: 'bold', textAlign: 'left'}}>Rider</Text>
+                                        <Text style={{flex: 0.8, color: '#fff', fontWeight: 'bold', textAlign: 'left'}}>Riders</Text>
                                     </View>
 
                                     {/* Participant rows */}
@@ -291,7 +330,6 @@ const RideStep4 = (props) => {
                                 </View>
                             </View>
                         )}
-                    </View>
                 </View>
             </ScrollView>
         </SafeAreaView>
