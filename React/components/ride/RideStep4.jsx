@@ -130,7 +130,6 @@ const RideStep4 = (props) => {
                     style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}
                     onPress={handleBack}
                 >
-                    <FontAwesome name="arrow-left" size={20} color="#fff" />
                     <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
                 </TouchableOpacity>
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -171,6 +170,7 @@ const RideStep4 = (props) => {
             <ScrollView
                 contentContainerStyle={{ flexGrow: 1 }}
                 style={{ flex: 1 }}
+                showsVerticalScrollIndicator={false}
             >
                 <View style={[utilities.centeredContainer, { padding: 15, backgroundColor: colors.primary }]}>
                     {/*<View style={[*/}
@@ -220,74 +220,47 @@ const RideStep4 = (props) => {
                             )}
                         </View>
 
-                        <View style={{flexDirection: 'column', alignItems: 'center', paddingVertical: 10}}>
-                            {/* Starting Point */}
-                            <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 5}}>
-                                <View style={{
-                                    width: 12,
-                                    height: 12,
-                                    borderRadius: 6,
-                                    backgroundColor: '#4CAF50',
-                                    marginRight: 8
-                                }} />
-                                <View style={{flex: 1}}>
-                                    <Text style={[utilities.label, {color: '#fff', fontSize: 12}]}>Starting Point:</Text>
-                                    <Text style={[utilities.compactText, {color: '#fff'}]}>{startingPoint}</Text>
-                                </View>
-
-                            </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', width: '100%', marginTop: 10 }}>
+                        {/* Starting Point Column */}
+                        <View style={{ flex: 1, alignItems: 'flex-start', paddingHorizontal: 8 }}>
+                            <Text style={[utilities.label, { color: '#fff', fontSize: 12, textAlign: 'left' }]}>Starting Point:</Text>
+                            <Text style={[utilities.compactText, { color: '#fff', textAlign: 'left' }]}>{startingPoint}</Text>
                             {startMapImage ? (
-                                <Image source={{uri: startMapImage}} style={{width: '100%', height: 120, borderRadius: 8, marginBottom: 8}} resizeMode="cover" />
-                            ) : (
-                                <Text style={{color: '#fff'}}>No start map available</Text>
-                            )}
-
-                            {/* Wave Line with FontAwesome Arrow */}
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                marginVertical: 2,
-                                justifyContent: 'center'
-                            }}>
-                                <WaveLine color="#4CAF50" />
-                                <FontAwesome
-                                    name="long-arrow-right"
-                                    size={20}
-                                    color="#f44336"
-                                    style={{marginLeft: 8}}
+                                <Image
+                                    source={{ uri: startMapImage }}
+                                    style={[utilities.oblongImage, { width: 200, height: 100 }]}
                                 />
-                            </View>
-
-                            {/* Ending Point */}
-                            <View style={{flexDirection: 'row-reverse', alignItems: 'center', marginTop: 5, marginBottom: 15, justifyContent: 'flex-start'}}>
-                                <View style={{
-                                    width: 12,
-                                    height: 12,
-                                    borderRadius: 6,
-                                    backgroundColor: '#f44336',
-                                    marginLeft: 5
-                                }} />
-                                <View style={{flex: 1, alignItems: 'flex-end'}}>
-                                    <Text style={[utilities.label, {color: '#fff', fontSize: 12, textAlign: 'right'}]}>Destination:</Text>
-                                    <Text style={[utilities.compactText, {color: '#fff', textAlign: 'right'}]}>{endingPoint}</Text>
-                                </View>
-
-                            </View>
-                            {endMapImage ? (
-                                <Image source={{uri: endMapImage}} style={{width: '100%', height: 120, borderRadius: 8}} resizeMode="cover" />
                             ) : (
-                                <Text style={{color: '#fff'}}>No end map available</Text>
+                                <Text style={{ color: '#fff', textAlign: 'center' }}>No start map available</Text>
                             )}
-                            {description && (
-                                <View style={[
-                                    rideUtilities.middleContainer,
-                                    {width: 'auto', marginTop: 10}
-                                ]}>
-                                    <Text style={[rideUtilities.label, {color: '#fff', fontSize: 20}]}>Description:</Text>
-                                    <Text style={[rideUtilities.detailText, {textAlign: 'justify'}]}>{description}</Text>
-                                </View>
-                            )}
+
                         </View>
+
+                        {/* Ending Point Column */}
+                        <View style={{ flex: 1, alignItems: 'flex-end', paddingHorizontal: 8 }}>
+
+                            {endMapImage ? (
+                                <Image
+                                    source={{ uri: endMapImage }}
+                                    style={[utilities.oblongImage, { width: 200, height: 100 }]}
+
+                                />
+                            ) : (
+                                <Text style={{ color: '#fff', textAlign: 'center' }}>No end map available</Text>
+                            )}
+                            <Text style={[utilities.label, { color: '#fff', fontSize: 12, textAlign: 'right' }]}>Ending Point:</Text>
+                            <Text style={[utilities.compactText, { color: '#fff', textAlign: 'right' }]}>{endingPoint}</Text>
+                        </View>
+                    </View>
+                    {description && (
+                        <View style={[
+                            rideUtilities.middleContainer,
+                            {width: 'auto', marginTop: 10}
+                        ]}>
+                            <Text style={[rideUtilities.label, {color: '#fff', fontSize: 20}]}>Description:</Text>
+                            <Text style={[rideUtilities.detailText, {textAlign: 'justify'}]}>{description}</Text>
+                        </View>
+                    )}
                         {participants && (
                             <View style={{width: '100%', marginTop: 10, alignItems: 'flex-start'}}>
                                 <View style={{

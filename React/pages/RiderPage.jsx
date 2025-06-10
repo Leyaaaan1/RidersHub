@@ -96,6 +96,7 @@ const RiderPage = ({ route , navigation}) => {
                         placeholderTextColor="#999"
                         value={searchId}
                         onChangeText={setSearchId}
+                        keyboardType="numeric"
                     />
                     <TouchableOpacity
                         onPress={handleSearch}
@@ -209,6 +210,8 @@ const RiderPage = ({ route , navigation}) => {
                         });
                     }}
                 />
+                showsVerticalScrollIndicator={false}
+
             </View>
         </View>
     );};

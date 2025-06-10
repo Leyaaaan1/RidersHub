@@ -426,6 +426,36 @@ const utilities = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
     },
+    oblongImageContainer: {
+        width: '100%',
+        height: 120,
+        alignItems: 'left',
+        justifyContent: 'center',
+        position: 'relative',
+        marginBottom: 8,
+    },
+    oblongImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        backgroundColor: colors.white,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    oblongPointerCurve: {
+        position: 'absolute',
+        bottom: -12,
+        left: '50%',
+        marginLeft: -16,
+        width: 32,
+        height: 16,
+
+    },
 
 });
 

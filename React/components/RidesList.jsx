@@ -87,8 +87,8 @@ const RidesList = ({
                 elevation: 4,
                 alignItems: 'center',
             }}>
-                <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center' }]}>{item.locationName.toUpperCase()}</Text>
-                <Text style={utilities.smallText}>ID: {item.generatedRidesId}</Text>
+                <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center', marginBottom: 0, paddingBottom: 0 }]}>{item.locationName.toUpperCase()}</Text>
+                <Text style={[utilities.smallText, { marginTop: -8 } ]}>ID: {item.generatedRidesId}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text
                         style={[utilities.titleText, { fontSize: 25, flexShrink: 1, flexWrap: 'wrap' }]}
