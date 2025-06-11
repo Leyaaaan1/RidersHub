@@ -12,7 +12,7 @@ const MapImageSwapper = ({ startImage, endImage, startPoint, endPoint, imageStyl
     const otherLabel = showStart ? 'Destination' : 'Starting Point';
 
     return (
-        <View style={{ width: '100%', alignItems: 'center', borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#fff' , padding: 10}}>
+        <View style={{ width: '100%', alignItems: 'center' }}>
         <Text style={{ color: '#fff', fontSize: 12 }}>{currentLabel}:</Text>
             <Text style={{ color: '#fff', fontSize: 30 }}>{currentPoint}</Text>
 

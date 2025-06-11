@@ -77,7 +77,7 @@ const RidesList = ({
 
 
             <View style={{
-                backgroundColor: colors.black,
+                backgroundColor: "#3a3636",
                 padding: 25,
                 borderRadius: 12,
                 shadowColor: '#000',
@@ -85,7 +85,6 @@ const RidesList = ({
                 borderBottomWidth: 2,
                 borderLeftWidth: 0,
                 borderRightWidth: 0,
-                borderColor: '#fff',
             }}>
                 <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center', marginBottom: 0, paddingBottom: 0 }]}>{item.locationName.toUpperCase()}</Text>
                 <Text style={[utilities.smallText, { marginTop: -8 } ]}>ID: {item.generatedRidesId}</Text>
@@ -213,7 +212,9 @@ const RidesList = ({
 
                 />
             )}
+
         </View>
+
     );
 };
 

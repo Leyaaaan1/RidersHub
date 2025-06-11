@@ -8,6 +8,8 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {getCurrentRiderType, getRideDetails} from '../services/rideService';
 import RidesList from '../components/RidesList';
+import SearchHeader from "../components/SearchHeader";
+import rideUtilities from "../styles/rideUtilities";
 
 
 
@@ -42,95 +44,16 @@ const RiderPage = ({ route , navigation}) => {
             setLoading(false);
         }
     };
-    const SearchHeader = () => {
-        const [searchId, setSearchId] = useState('');
-        const [loading, setLoading] = useState(false);
-        const [error, setError] = useState('');
-
-        const handleSearch = async () => {
-            if (!searchId.trim()) {
-                setError('Please enter a ride ID');
-                return;
-            }
-
-            setLoading(true);
-            setError('');
-
-            try {
-                const ride = await getRideDetails(searchId.trim(), token);
-                navigation.navigate('RideStep4', {
-                    generatedRidesId: ride.generatedRidesId,
-                    rideName: ride.ridesName,
-                    locationName: ride.locationName,
-                    riderType: ride.riderType,
-                    distance: ride.distance,
-                    date: ride.date,
-                    startingPoint: ride.startingPointName,
-                    endingPoint: ride.endingPointName,
-                    participants: ride.participants,
-                    description: ride.description,
-                    token: token,
-                    username: username
-                });
-            } catch (error) {
-                setError(error.message || 'Failed to find ride');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        return (
-            <View style={{ padding: 5, backgroundColor: '#000', borderRadius: 5 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput
-                        style={{
-                            flex: 1,
-                            borderWidth: 1,
-                            borderColor: colors.primary,
-                            borderRadius: 5,
-                            padding: 10,
-                            marginRight: 10,
-                            color: '#333'
-                        }}
-                        placeholder="Search by Ride ID"
-                        placeholderTextColor="#999"
-                        value={searchId}
-                        onChangeText={setSearchId}
-                        keyboardType="numeric"
-                    />
-                    <TouchableOpacity
-                        onPress={handleSearch}
-                        disabled={loading}
-                        style={{
-                            backgroundColor: colors.primary,
-                            padding: 10,
-                            borderRadius: 5,
-                        }}
-                    >
-                        {loading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <FontAwesome name="search" size={18} color="#fff" />
-                        )}
-                    </TouchableOpacity>
-                </View>
-                {error ? (
-                    <Text style={{ color: 'red', marginTop: 5 }}>{error}</Text>
-                ) : null}
-            </View>
-        );
-    };
 
     return (
-        <View style={utilities.container}>
-            <StatusBar backgroundColor={colors.primary} barStyle="light-content" translucent={false} />
+        <View style={utilities.containerWhite}>
 
-            <View style={utilities.navbarContainer}>
+            <View style={[utilities.navbarContainerPrimary, { paddingVertical: 12, paddingHorizontal: 20 }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 5 }}>
                     <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                        <Text style={[utilities.textBlack, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
+                        <Text style={[utilities.textWhite, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
                         {loading ? (
-                            <Text style={utilities.textBlack}>Loading...</Text>
+                            <Text style={utilities.textWhite}>Loading...</Text>
                         ) : (
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <FontAwesome
@@ -141,7 +64,7 @@ const RiderPage = ({ route , navigation}) => {
                                                     riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
                                     }
                                     size={16}
-                                    color="#000"
+                                    color="#fff"
                                     style={{ marginRight: 5 }}
                                 />
                             </View>
@@ -154,7 +77,7 @@ const RiderPage = ({ route , navigation}) => {
                                 {
                                     borderStyle: 'dashed',
                                     borderWidth: 1,
-                                    borderColor: colors.black,
+                                    borderColor: colors.white,
                                     padding: 10,
                                     borderRadius: 5,
                                     alignItems: 'center',
@@ -171,25 +94,32 @@ const RiderPage = ({ route , navigation}) => {
                                 navigation.navigate('CreateRide', { token, username });
                             }}
                         >
-                            <Text style={[utilities.smallTextBlack, { color: colors.black, textAlign: 'center' }]}>Create</Text>
+                            <Text style={[utilities.smallTextBlack, { color: colors.white, textAlign: 'center' }]}>Create</Text>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{ flex: 1, alignItems: 'flex-end' }}>
                         <TouchableOpacity onPress={() => {}}>
-                            <FontAwesome name="gear" size={18} color="black" />
+                            <FontAwesome name="gear" size={18} color="white" />
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
+            <View style={{ marginTop: 10,  borderRadius: 6 }}>
 
-            {/* Scrollable content */}
+            <SearchHeader
+                    token={token}
+                    username={username}
+                    navigation={navigation}
+
+                />
+            </View>
+
+
             <View style={riderPageUtils.contentContainer}>
                 <RidesList
                     token={token}
-                    headerComponent={
-                            <SearchHeader />
-                    }
+
                     onRideSelect={(ride) => {
                         navigation.navigate('RideStep4', {
                             generatedRidesId: ride.generatedRidesId,
@@ -209,6 +139,13 @@ const RiderPage = ({ route , navigation}) => {
                 />
                 showsVerticalScrollIndicator={false}
 
+            </View>
+            <View style={rideUtilities.customBottomContainer}>
+                <Text style={rideUtilities.customBottomText}>
+                    Ride Summary
+                </Text>
+                <Text style={rideUtilities.customBottomSubText}>
+                </Text>
             </View>
         </View>
     );};

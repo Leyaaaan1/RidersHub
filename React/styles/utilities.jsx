@@ -8,25 +8,24 @@ const utilities = StyleSheet.create({
     // === Containers ===
     container: {
         flexGrow: 1,
-        backgroundColor: colors.white,
+        backgroundColor: "#885c5c"
     },
     containerWhite: {
         flexGrow: 1,
-        backgroundColor: colors.black,
-        padding: spacing.sm,
+        backgroundColor: "#1e1d1d",
     },
     navbarContainer: {
         position: 'absolute',
-        top: -2,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.primary,
-        height: 58,
+        backgroundColor: '#3e1616',
+        height: 70,
         paddingVertical: 12,
         paddingHorizontal: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#2a0e0e',
     },
     navbarContainerPrimary: {
-        position: 'absolute',
         top: -2,
         left: 0,
         right: 0,
@@ -42,7 +41,13 @@ const utilities = StyleSheet.create({
     },
 
     centeredContainer: {
-        marginTop: 60,
+        marginTop: 6,
+        backgroundColor: "#3a3636",
+
+    },
+    centeredContainerPlain: {
+        backgroundColor: "#3a3636",
+
     },
 
     listContainer: {
