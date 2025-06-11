@@ -191,7 +191,7 @@ const RideStep4 = (props) => {
 
                 showsVerticalScrollIndicator={false}
             >
-                <View style={{ backgroundColor: "#3a3636", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
+                <View style={{ backgroundColor: "#151515", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
 
 
                     <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>

@@ -14,6 +14,11 @@ const utilities = StyleSheet.create({
         flexGrow: 1,
          backgroundColor: "#000000",
     },
+    containerWhiteCreate: {
+        flexGrow: 1,
+        backgroundColor: "#3a3636",
+        padding: spacing.md,
+    },
     navbarContainer: {
         position: 'absolute',
         flexDirection: 'row',
@@ -301,23 +306,24 @@ const utilities = StyleSheet.create({
         maxHeight: 200,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: '#fff',
         borderRadius: 8,
     },
 
     searchResultItem: {
         padding: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: '#fff',
     },
 
     searchResultName: {
         fontWeight: 'bold',
+        color: colors.white,
     },
 
     searchResultAddress: {
         fontSize: 12,
-        color: '#666',
+        color: '#fff',
     },
 
     // === Map & Geolocation ===
