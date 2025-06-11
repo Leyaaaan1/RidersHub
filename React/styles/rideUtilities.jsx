@@ -93,6 +93,57 @@ const rideUtilities = StyleSheet.create({
         padding: spacing.md,
     },
 
+    customBottomContainer: {
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+
+    },
+
+    customBottomText: {
+        color: colors.white,
+        fontSize: 16,
+        fontWeight: '600',
+        textAlign: 'center',
+        marginBottom: 5,
+    },
+
+    customBottomSubText: {
+        color: colors.white,
+        fontSize: 12,
+        opacity: 0.8,
+        textAlign: 'center',
+    },
+
+    // Alternative style - more compact
+    compactBottomContainer: {
+        backgroundColor: 'rgba(42, 14, 14, 0.9)',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        marginBottom: 5,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255, 255, 255, 0.1)',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    // Another alternative - notification style
+    notificationContainer: {
+        backgroundColor: '#2a5d31',
+        paddingVertical: 12,
+        paddingHorizontal: 18,
+        marginHorizontal: 15,
+        marginVertical: 5,
+        borderRadius: 8,
+        borderLeftWidth: 4,
+        borderLeftColor: '#4caf50',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 
 
 

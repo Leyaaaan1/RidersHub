@@ -19,7 +19,7 @@ import {fetchRideMapImage, getRideDetails} from '../../services/rideService';
 import WaveLine from '../../styles/waveLineComponent';
 import colors from '../../styles/colors';
 import MapImageSwapper from "../../styles/MapImageSwapper";
-
+import ParticipantListModal from '../ParticipantListModal';
 const RideStep4 = (props) => {
     const navigation = useNavigation();
     const route = props.route || {};
@@ -64,6 +64,7 @@ const RideStep4 = (props) => {
     const [imageLoading, setImageLoading] = useState(false);
     const [distanceState, setDistance] = useState(distance || "--");
 
+    const [showParticipantsModal, setShowParticipantsModal] = useState(false);
     useEffect(() => {
         const getMapImage = async () => {
             console.log("useEffect running with rideId:", generatedRidesId);
@@ -134,23 +135,27 @@ const RideStep4 = (props) => {
     }, [generatedRidesId, token]);
 
     return (
-        <View style={utilities.containerWhite}>
+        <View style={[utilities.containerWhite, { flex: 1 }]}>
             <StatusBar backgroundColor={colors.black} barStyle="light-content" translucent={false} />
 
-            <SafeAreaView style={{ flex: 1, backgroundColor: colors.black }}>
-            <View style={utilities.navbarContainerPrimary}>
-                <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', padding: 10 }}
-                    onPress={handleBack}
-                >
-                    <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
-                </TouchableOpacity>
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 10,  backgroundColor: "#000000"}}>
+                {/* Back button - left */}
+                <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                    <TouchableOpacity
+                        style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}
+                        onPress={handleBack}
+                    >
+                        <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
+                    </TouchableOpacity>
+                </View>
+                {/* Name and ID - center */}
+                <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
                     <Text
                         style={[
                             rideUtilities.title,
                             {
-                                color: colors.white ,
+                                color: colors.white,
                                 marginBottom: 0,
                                 flexDirection: 'row',
                                 alignItems: 'center',
@@ -165,11 +170,12 @@ const RideStep4 = (props) => {
                     >
                         {locationName?.toUpperCase()}
                     </Text>
-                    <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 10, textAlign: 'center', width: '100%' }}>
+                    <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 0, textAlign: 'center', width: '100%' }}>
                         {generatedRidesId}
                     </Text>
                 </View>
-                <View>
+                {/* Join Ride - right */}
+                <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: 10 }}>
                     <TouchableOpacity>
                         <View>
                             <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
@@ -180,17 +186,12 @@ const RideStep4 = (props) => {
                 </View>
             </View>
 
+
             <ScrollView
-                contentContainerStyle={{ flexGrow: 1 }}
-                style={{ flex: 1 }}
+
                 showsVerticalScrollIndicator={false}
             >
-                <View style={[utilities.centeredContainer, { padding: 5, backgroundColor: colors.black }]}>
-                    {/*<View style={[*/}
-                    {/*    rideUtilities.topContainer,*/}
-                    {/*    rideUtilities.middleContainer,*/}
-                    {/*    { width: 'auto', paddingHorizontal: 15, flex: 1 }*/}
-                    {/*]}>*/}
+                <View style={{ backgroundColor: "#151515", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
 
 
                     <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>
@@ -220,7 +221,6 @@ const RideStep4 = (props) => {
                                         height: 200,
                                         borderRadius: 8,
                                         borderWidth: 2,
-                                        borderColor: colors.primary,
                                         marginTop: 20
                                     }}
                                     resizeMode="cover"
@@ -247,11 +247,9 @@ const RideStep4 = (props) => {
 
                         </View>
                     </View>
+                </View>
 
 
-
-
-                        {/* Ending Point Column */}
                     <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', width: '100%', marginTop: 10 }}>
                         {startMapImage || endMapImage ? (
                             <MapImageSwapper
@@ -260,7 +258,6 @@ const RideStep4 = (props) => {
                                 startPoint={startingPoint}
                                 endPoint={endingPoint}
                                 imageStyle={[utilities.oblongImage, { width: 300, height: 250 }]}
-                                BorderColor={colors.primary}
                             />
                         ) : (
                             <Text style={{ color: '#fff', textAlign: 'center', width: '100%' }}>No start or end map available</Text>
@@ -270,6 +267,9 @@ const RideStep4 = (props) => {
                             {/*<Text style={[utilities.compactText, { color: '#000', textAlign: 'right' }]}>{endingPoint}</Text>*/}
                         {/*</View>*/}
                     {/*</View>*/}
+                <View style={{ padding: 10 }}>
+
+
                     {description && (
                         <View style={{ marginTop: 10, padding: 5 }}>
                             <Text style={[utilities.smallText, { lineHeight: 18 }]}>
@@ -277,52 +277,74 @@ const RideStep4 = (props) => {
                             </Text>
                         </View>
                     )}
-                        {participants && (
-                            <View style={{width: '100%', marginTop: 10, alignItems: 'flex-start'}}>
-                                <View style={{
-                                    borderWidth: 1,
-                                    borderColor: colors.secondary,
-                                    borderRadius: 8,
-                                    marginTop: 5,
-                                    width: '100%',
-                                    overflow: 'hidden'
-                                }}>
-                                    {/* Header */}
-                                    <View style={{
-                                        flexDirection: 'row',
-                                        backgroundColor: 'rgba(76, 175, 80, 0.3)',
-                                        padding: 8,
-                                        borderBottomWidth: 1,
-                                        borderBottomColor: colors.secondary
-                                    }}>
-                                        <Text style={{flex: 0.8, color: '#fff', fontWeight: 'bold', textAlign: 'left'}}>Riders</Text>
-                                    </View>
+                </View>
+                <View>
 
-                                    {/* Participant rows */}
-                                    {Array.isArray(participants) ?
-                                        participants.map((participant, index) => (
-                                            <View key={index} style={{
-                                                flexDirection: 'row',
-                                                padding: 8,
-                                                borderBottomWidth: index < participants.length - 1 ? 1 : 0,
-                                                borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-                                                backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent'
-                                            }}>
-                                                <Text style={{flex: 0.2, color: '#fff', textAlign: 'left', paddingLeft: 5}}>{index + 1}</Text>
-                                                <Text style={{flex: 0.8, color: '#fff', textAlign: 'left'}}>{typeof participant === 'object' ? participant.username : participant}</Text>
-                                            </View>
-                                        )) :
-                                        <View style={{padding: 8, width: '100%'}}>
-                                            <Text style={{color: '#fff', textAlign: 'left'}}>{participants}</Text>
-                                        </View>
-                                    }
-                                </View>
-                            </View>
-                        )}
+
+                {/*{participants && (*/}
+                {/*            <View style={{width: '100%', marginTop: 10, alignItems: 'flex-start'}}>*/}
+                {/*                <View style={{*/}
+                {/*                    borderWidth: 1,*/}
+                {/*                    borderColor: colors.secondary,*/}
+                {/*                    borderRadius: 8,*/}
+                {/*                    marginTop: 5,*/}
+                {/*                    width: '100%',*/}
+                {/*                    overflow: 'hidden'*/}
+                {/*                }}>*/}
+                {/*                    /!* Header *!/*/}
+                {/*                    <View style={{*/}
+                {/*                        flexDirection: 'row',*/}
+                {/*                        backgroundColor: 'rgba(76, 175, 80, 0.3)',*/}
+                {/*                        padding: 8,*/}
+                {/*                        borderBottomWidth: 1,*/}
+                {/*                        borderBottomColor: colors.secondary*/}
+                {/*                    }}>*/}
+                {/*                        <Text style={{flex: 0.8, color: '#fff', fontWeight: 'bold', textAlign: 'left'}}>Riders</Text>*/}
+                {/*                    </View>*/}
+
+                {/*                    /!* Participant rows *!/*/}
+                {/*                    {Array.isArray(participants) ?*/}
+                {/*                        participants.map((participant, index) => (*/}
+                {/*                            <View key={index} style={{*/}
+                {/*                                flexDirection: 'row',*/}
+                {/*                                padding: 8,*/}
+                {/*                                borderBottomWidth: index < participants.length - 1 ? 1 : 0,*/}
+                {/*                                borderBottomColor: 'rgba(255, 255, 255, 0.2)',*/}
+                {/*                                backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent'*/}
+                {/*                            }}>*/}
+                {/*                                <Text style={{flex: 0.2, color: '#fff', textAlign: 'left', paddingLeft: 5}}>{index + 1}</Text>*/}
+                {/*                                <Text style={{flex: 0.8, color: '#fff', textAlign: 'left'}}>{typeof participant === 'object' ? participant.username : participant}</Text>*/}
+                {/*                            </View>*/}
+                {/*                        )) :*/}
+                {/*                        <View style={{padding: 8, width: '100%'}}>*/}
+                {/*                            <Text style={{color: '#fff', textAlign: 'left'}}>{participants}</Text>*/}
+                {/*                        </View>*/}
+                {/*                    }*/}
+                {/*                </View>*/}
+                {/*            </View>*/}
+                {/*        )}*/}
                 </View>
             </ScrollView>
-        </SafeAreaView>
+            <View style={rideUtilities.customBottomContainer}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => setShowParticipantsModal(true)}>
+                            <Text style={rideUtilities.customBottomText}>Participants</Text>
+                        </TouchableOpacity>
+                        <ParticipantListModal
+                            visible={showParticipantsModal}
+                            onClose={() => setShowParticipantsModal(false)}
+                            participants={participants}
+                        />
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={rideUtilities.customBottomText}>Column 2</Text>
+                    </View>
+                </View>
+            </View>
+
         </View>
+
     );
 };
 

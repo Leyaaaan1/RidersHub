@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, ScrollView} from 'react-native';
 import utilities from '../../styles/utilities';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import colors from "../../styles/colors";
@@ -28,208 +28,280 @@ const RideStep1 = ({
         setDatePickerOpen(false);
     };
 
-    const formatDate = (date) => {
-        if (!date) return '';
-        return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+
 
     return (
-        <View style={utilities.container}>
-            <Text style={utilities.title}>RIDE DETAILS</Text>
+            <View style={utilities.containerWhite}>
+                <View style={[utilities.navbarContainerPrimary, { alignItems: 'center', justifyContent: 'space-between', flexDirection: 'row' }]}>
+                    <Text style={utilities.textWhite}>RIDE DETAILS</Text>
 
-            {error ? <Text style={{color: 'red', marginBottom: 10}}>{error}</Text> : null}
-
-            <TextInput
-                style={utilities.inputCenter}
-                value={rideName}
-                onChangeText={setRideName}
-                placeholder="Enter ride name"
-                placeholderTextColor="#6f1c1c"
-            />
-
-            <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 10}}>
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'car' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('car')}
-                >
-                    <FontAwesome name="car" size={24} color={riderType === 'car' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'car' ? '#fff' : '#333'}}>Car</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'motor' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('motor')}
-                >
-                    <FontAwesome name="motorcycle" size={24} color={riderType === 'motor' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'motor' ? '#fff' : '#333'}}>Motorcycle</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'bike' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('bike')}
-                >
-                    <FontAwesome name="bicycle" size={24} color={riderType === 'bike' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'bike' ? '#fff' : '#333'}}>Bike</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('cafe Racers')}
-                >
-                    <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('cafe Racers')}
-                >
-                    <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('cafe Racers')}
-                >
-                    <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-
-                <View style={{flex: 1, marginLeft: 5}}>
-                    <Text style={utilities.label}>Date</Text>
                     <TouchableOpacity
-                        style={[utilities.input, dateError ? {borderColor: 'red'} : {}]}
-                        onPress={() => setDatePickerOpen(true)}
+                        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}
+                        onPress={nextStep}
                     >
-                        <Text style={dateError ? {color: 'red'} : {}}>
-                            {formatDate(date) || "Select date"}
-                        </Text>
+                        <Text style={utilities.buttonText}>Next</Text>
+                        <FontAwesome name="arrow-right" size={20} color="#fff" style={{ marginLeft: 8 }} />
                     </TouchableOpacity>
-                    {dateError ? <Text style={{color: 'red', fontSize: 12}}>{dateError}</Text> : null}
 
-                    <DatePicker
-                        modal
-                        open={datePickerOpen}
-                        date={date || new Date()}
-                        minimumDate={today}
-                        onConfirm={handleDateConfirm}
-                        onCancel={() => setDatePickerOpen(false)}
-                        mode="datetime"
+                </View>
+                {error ? <Text style={{color: 'red', marginBottom: 10}}>{error}</Text> : null}
+
+                <View style={{ backgroundColor: "#151515", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
+
+                    <TextInput
+                        style={utilities.inputCenter}
+                        value={rideName}
+                        onChangeText={setRideName}
+                        placeholder="Enter ride name"
+                        placeholderTextColor="#fff"
+                        color="#fff"
                     />
+
+
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        style={{
+                            maxHeight: 75, // Reduced height
+                        }}
+                        contentContainerStyle={{
+                            paddingVertical: 0 // Remove padding
+                        }}
+                    >
+                        <View style={{
+                            flexDirection: 'row',
+                            flexWrap: 'nowrap',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                            <TouchableOpacity
+                            style={[
+                                utilities.riderTypeOption,
+                                riderType === 'car' && utilities.selectedRiderType,
+                                { borderTopRightRadius: 0, borderBottomRightRadius: 0, marginRight: 0 }
+                            ]}
+                            onPress={() => setRiderType('car')}
+                        >
+                            <FontAwesome name="car" size={24} color={riderType === 'car' ? '#fff' : '#333'} />
+                            <Text style={{marginTop: 5, color: riderType === 'car' ? '#fff' : '#333'}}>Car</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                utilities.riderTypeOption,
+                                riderType === 'motor' && utilities.selectedRiderType,
+                                { borderRadius: 0, marginRight: 0 }
+                            ]}
+                            onPress={() => setRiderType('motor')}
+                        >
+                            <FontAwesome name="motorcycle" size={24} color={riderType === 'motor' ? '#fff' : '#333'} />
+                            <Text style={{marginTop: 5, color: riderType === 'motor' ? '#fff' : '#333'}}>Motorcycle</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                utilities.riderTypeOption,
+                                riderType === 'bike' && utilities.selectedRiderType,
+                                { borderRadius: 0, marginRight: 0 }
+                            ]}
+                            onPress={() => setRiderType('bike')}
+                        >
+                            <FontAwesome name="running" size={24} color={riderType === 'run' ? '#fff' : '#333'} />
+                            <Text style={{marginTop: 5, color: riderType === 'run' ? '#fff' : '#333'}}>Run</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                utilities.riderTypeOption,
+                                riderType === 'bike' && utilities.selectedRiderType,
+                                { borderRadius: 0, marginRight: 0 }
+                            ]}
+                            onPress={() => setRiderType('bike')}
+                        >
+                            <FontAwesome name="bicycle" size={24} color={riderType === 'bike' ? '#fff' : '#333'} />
+                            <Text style={{marginTop: 5, color: riderType === 'bike' ? '#fff' : '#333'}}>Bike</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                utilities.riderTypeOption,
+                                riderType === 'cafe Racers' && utilities.selectedRiderType,
+                                { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }
+                            ]}
+                            onPress={() => setRiderType('cafe Racers')}
+                        >
+                            <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
+                            <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
+                        </TouchableOpacity>
+                    </View>
+                    </ScrollView>
+                        <View style={{ padding: 10, alignItems: 'center' }}>
+                            <TouchableOpacity
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    borderRadius: 10,
+                                    paddingHorizontal: 7,
+                                    paddingVertical: 3, // Add some vertical padding
+                                    alignSelf: 'flex-start',
+                                    borderWidth: dateError ? 2 : 1,
+                                    borderColor: dateError ? 'red' : colors.primary,
+                                }}
+                                onPress={() => setDatePickerOpen(true)}
+                                activeOpacity={0.7}
+                            >
+                                <FontAwesome name="calendar" size={45} color="#fff" />
+                                <View style={{ marginLeft: 5 }}> {/* Add a container for better text alignment */}
+                                    <Text style={{ color: dateError ? 'red' : '#fff', fontSize: 20 }}>
+                                        {date ? (
+                                            <>
+                                                <Text>
+                                                    {date.toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    })}
+                                                </Text>
+                                                {'\n'}
+                                                <Text style={{ fontSize: 25 }}>
+                                                    {date.toLocaleTimeString('en-US', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </Text>
+                                            </>
+                                        ) : "Select date"}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                            {dateError ? <Text style={{ color: 'red', fontSize: 12, marginTop: 2 }}>{dateError}</Text> : null}
+
+                            {/* The DatePicker doesn't take up space in the layout when modal is true */}
+                            <DatePicker
+                                modal
+                                open={datePickerOpen}
+                                date={date || new Date()}
+                                minimumDate={today}
+                                onConfirm={handleDateConfirm}
+                                onCancel={() => setDatePickerOpen(false)}
+                                mode="datetime"
+                            />
+                        </View>
+
+
+                        <Text style={[utilities.textWhite, { textAlign: 'center' }]}>Riders</Text>
+                    <View>
+                        <TextInput
+                            style={utilities.inputCenter}
+                            value={riderSearchQuery}
+                            onChangeText={(text) => {
+                                setRiderSearchQuery(text);
+                                handleSearchRiders(text);
+                            }}
+                            placeholder="Search for riders"
+                            placeholderTextColor=""
+                        />
+
+                        {isRiderSearching && (
+                            <ActivityIndicator size="small" color={colors.primary} style={{marginVertical: 10}} />
+                        )}
+
+                        {/* Search results */}
+                        {searchedRiders.length > 0 && riderSearchQuery.trim() !== '' && (
+                            <View style={utilities.searchResultsList}>
+                                {searchedRiders.map((username, index) => (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={utilities.searchResultItem}
+                                        onPress={() => {
+                                            try {
+                                                const participantsList = participants ? participants.split(',').map(p => p.trim()) : [];
+                                                if (!participantsList.includes(username)) {
+                                                    setParticipants(participants ?
+                                                        `${participants}, ${username}` :
+                                                        username);
+                                                }
+                                                setRiderSearchQuery('');
+                                                handleSearchRiders(''); // Clear search results when a rider is selected
+                                            } catch (error) {
+                                                console.error('Error selecting participant:', error);
+                                            }
+                                        }}
+                                    >
+                                        <Text style={utilities.searchResultName}>{username}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
+
+                        {/* Selected participants */}
+                        {participants && (
+                            <View style={{marginTop: 10, borderWidth: 1, borderColor: colors.primary, borderRadius: 8, overflow: 'hidden'}}>
+                                {/* Table Header */}
+                                <View style={{
+                                    flexDirection: 'row',
+                                    backgroundColor: colors.primary,
+                                    padding: 8,
+                                    borderBottomWidth: 1,
+                                    borderBottomColor: '#fff'
+                                }}>
+                                    <Text style={{color: '#fff', fontWeight: 'bold', flex: 1}}>Riders</Text>
+                                </View>
+
+                                {/* Table Body */}
+                                <ScrollView style={{maxHeight: participants.split(',').length > 4 ? 150 : 'auto'}}>
+                                    {participants.split(',').map((participant, index) => (
+                                        participant.trim() && (
+                                            <View key={index} style={{
+                                                flexDirection: 'row',
+                                                padding: 10,
+                                                backgroundColor: index % 2 === 0 ? '#333' : '#222',
+                                                borderBottomWidth: 1,
+                                                borderBottomColor: '#444',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Text style={{color: '#fff', flex: 1}}>{participant.trim()}</Text>
+                                                <TouchableOpacity
+                                                    style={{width: 50, alignItems: 'center'}}
+                                                    onPress={() => {
+                                                        const updated = participants.split(',')
+                                                            .filter(p => p.trim() !== participant.trim())
+                                                            .join(', ');
+                                                        setParticipants(updated);
+                                                    }}
+                                                >
+                                                    <FontAwesome name="times-circle" size={18} color={colors.primary} />
+                                                </TouchableOpacity>
+                                            </View>
+                                        )
+                                    ))}
+                                </ScrollView>
+
+                                {/* Empty state */}
+                                {(!participants || participants.trim() === '') && (
+                                    <View style={{padding: 10, alignItems: 'center'}}>
+                                        <Text style={{color: '#fff'}}>No participants added</Text>
+                                    </View>
+                                )}
+                            </View>
+                        )}
+                    </View>
+                        <View>
+
+                                <Text style={[utilities.textWhite, { textAlign: 'center' }]}>Description</Text>
+                                <TextInput
+                                    style={[utilities.input, {
+                                        height: 200,
+                                        textAlignVertical: 'top',
+                                        fontSize: 16,
+                                        paddingHorizontal: 15,
+                                        paddingVertical: 12
+                                    }]}                value={description}
+                                    onChangeText={setDescription}
+                                    placeholder="Enter ride description"
+                                    multiline
+                                />
+                        </View>
                 </View>
             </View>
-
-            <Text style={utilities.label}>Participants</Text>
-            <View>
-                <TextInput
-                    style={utilities.input}
-                    value={riderSearchQuery}
-                    onChangeText={(text) => {
-                        setRiderSearchQuery(text);
-                        handleSearchRiders(text);
-                    }}
-                    placeholder="Search for riders"
-                />
-
-                {isRiderSearching && (
-                    <ActivityIndicator size="small" color={colors.primary} style={{marginVertical: 10}} />
-                )}
-
-                {/* Search results */}
-                {searchedRiders.length > 0 && riderSearchQuery.trim() !== '' && (
-                    <View style={utilities.searchResultsList}>
-                        {searchedRiders.map((username, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={utilities.searchResultItem}
-                                onPress={() => {
-                                    try {
-                                        const participantsList = participants ? participants.split(',').map(p => p.trim()) : [];
-                                        if (!participantsList.includes(username)) {
-                                            setParticipants(participants ?
-                                                `${participants}, ${username}` :
-                                                username);
-                                        }
-                                        setRiderSearchQuery('');
-                                        handleSearchRiders(''); // Clear search results when a rider is selected
-                                    } catch (error) {
-                                        console.error('Error selecting participant:', error);
-                                    }
-                                }}
-                            >
-                                <Text style={utilities.searchResultName}>{username}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
-
-                {/* Selected participants */}
-                {participants && (
-                    <View style={{marginTop: 10}}>
-                        <Text style={utilities.label}>Selected Participants:</Text>
-                        <View style={{flexDirection: 'row', flexWrap: 'wrap', marginTop: 5}}>
-                            {participants.split(',').map((participant, index) => (
-                                participant.trim() && (
-                                    <View key={index} style={{
-                                        backgroundColor: colors.primary,
-                                        borderRadius: 15,
-                                        paddingHorizontal: 10,
-                                        paddingVertical: 5,
-                                        margin: 3,
-                                        flexDirection: 'row',
-                                        alignItems: 'center'
-                                    }}>
-                                        <Text style={{color: '#fff', marginRight: 5}}>{participant.trim()}</Text>
-                                        <TouchableOpacity onPress={() => {
-                                            const updated = participants.split(',')
-                                                .filter(p => p.trim() !== participant.trim())
-                                                .join(', ');
-                                            setParticipants(updated);
-                                        }}>
-                                            <FontAwesome name="times-circle" size={16} color="#fff" />
-                                        </TouchableOpacity>
-                                    </View>
-                                )
-                            ))}
-                        </View>
-                    </View>
-                )}
-            </View>
-
-            <Text style={utilities.label}>Description</Text>
-            <TextInput
-                style={[utilities.input, {
-                    height: 200,
-                    textAlignVertical: 'top',
-                    fontSize: 16,
-                    paddingHorizontal: 15,
-                    paddingVertical: 12
-                }]}                value={description}
-                onChangeText={setDescription}
-                placeholder="Enter ride description"
-                multiline
-            />
-
-
-            <View style={[utilities.bottomAreaContainerLeft, {
-            }]}>
-                <TouchableOpacity
-                    style={utilities.button}
-                    onPress={nextStep}
-                    disabled={!rideName.trim()}
-                >
-                    <Text style={utilities.buttonText}>Next</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
     );
 };
 
