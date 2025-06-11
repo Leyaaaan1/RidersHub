@@ -12,7 +12,7 @@ const utilities = StyleSheet.create({
     },
     containerWhite: {
         flexGrow: 1,
-        backgroundColor: "#1e1d1d",
+         backgroundColor: "#000000",
     },
     navbarContainer: {
         position: 'absolute',
@@ -33,8 +33,7 @@ const utilities = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-         backgroundColor: colors.primary,
-        borderRadius: 8,
+         backgroundColor: "#000000",
         height: 70,
         paddingVertical: 12,
         paddingHorizontal: 15,
@@ -45,10 +44,7 @@ const utilities = StyleSheet.create({
         backgroundColor: "#3a3636",
 
     },
-    centeredContainerPlain: {
-        backgroundColor: "#3a3636",
 
-    },
 
     listContainer: {
         flex: 1,
@@ -90,26 +86,23 @@ const utilities = StyleSheet.create({
 
     // === Rider Type Option Styles ===
     riderTypeOption: {
-        minWidth: 80,
-        flexGrow: 1,
-        flexBasis: '22%',
         backgroundColor: '#f0f0f0',
         borderRadius: 8,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 10,
         marginHorizontal: 5,
         padding: 12,
+        paddingHorizontal: 16,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1,
         elevation: 2,
+        alignSelf: 'flex-start',
     },
 
     selectedRiderType: {
         backgroundColor: colors.primary,
-        borderColor: '#2980b9',
         borderWidth: 1,
         shadowOpacity: 0.3,
         shadowRadius: 2,
@@ -153,7 +146,6 @@ const utilities = StyleSheet.create({
         borderRadius: 8,
         padding: 12,
         marginBottom: 16,
-        backgroundColor: '#fff',
         alignSelf: 'center',
         width: '80%',
     },

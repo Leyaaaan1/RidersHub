@@ -139,7 +139,7 @@ const RideStep4 = (props) => {
             <StatusBar backgroundColor={colors.black} barStyle="light-content" translucent={false} />
 
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 10,  backgroundColor: "#2a0e0e"}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 10,  backgroundColor: "#000000"}}>
                 {/* Back button - left */}
                 <View style={{ flex: 1, alignItems: 'flex-start' }}>
                     <TouchableOpacity
@@ -191,7 +191,7 @@ const RideStep4 = (props) => {
 
                 showsVerticalScrollIndicator={false}
             >
-                <View style={[utilities.centeredContainer, { padding:10, borderRadius: 20}]}>
+                <View style={{ backgroundColor: "#3a3636", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
 
 
                     <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>

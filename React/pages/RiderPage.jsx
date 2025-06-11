@@ -71,7 +71,7 @@ const RiderPage = ({ route , navigation}) => {
                         )}
                     </View>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                         <TouchableOpacity
                             style={[
                                 {
@@ -82,8 +82,9 @@ const RiderPage = ({ route , navigation}) => {
                                     borderRadius: 5,
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    minWidth: 80, // Add minimum width
-                                    height: 40,   // Add fixed height
+                                    minWidth: 80,
+                                    height: 40,
+                                    marginRight: 10, // Add some space to the right
                                 }
                             ]}
                             onPress={() => {
@@ -96,24 +97,22 @@ const RiderPage = ({ route , navigation}) => {
                         >
                             <Text style={[utilities.smallTextBlack, { color: colors.white, textAlign: 'center' }]}>Create</Text>
                         </TouchableOpacity>
+
                     </View>
 
-                    <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                        <TouchableOpacity onPress={() => {}}>
-                            <FontAwesome name="gear" size={18} color="white" />
-                        </TouchableOpacity>
+                <View style={{ flex: 1, alignItems: 'flex-end'}}>
+                    <View style={{ width: 150, alignSelf: 'flex-end' }}>
+                        <SearchHeader
+                            token={token}
+                            username={username}
+                            navigation={navigation}
+                        />
                     </View>
                 </View>
+                </View>
             </View>
-            <View style={{ marginTop: 10,  borderRadius: 6 }}>
 
-            <SearchHeader
-                    token={token}
-                    username={username}
-                    navigation={navigation}
 
-                />
-            </View>
 
 
             <View style={riderPageUtils.contentContainer}>
@@ -137,7 +136,6 @@ const RiderPage = ({ route , navigation}) => {
                         });
                     }}
                 />
-                showsVerticalScrollIndicator={false}
 
             </View>
             <View style={rideUtilities.customBottomContainer}>
@@ -148,7 +146,8 @@ const RiderPage = ({ route , navigation}) => {
                 </Text>
             </View>
         </View>
-    );};
+    );
+};
 
 
 export default RiderPage;

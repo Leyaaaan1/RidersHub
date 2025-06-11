@@ -77,12 +77,11 @@ const RidesList = ({
 
 
             <View style={{
-                backgroundColor: "#3a3636",
+                backgroundColor: "#151515",
                 padding: 25,
                 borderRadius: 12,
                 shadowColor: '#000',
                 shadowOffset: { width: 0,  },
-                borderBottomWidth: 2,
                 borderLeftWidth: 0,
                 borderRightWidth: 0,
             }}>
@@ -208,7 +207,8 @@ const RidesList = ({
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
                     contentContainerStyle={{ paddingVertical: 15, paddingHorizontal: 0 }}
-                    ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+                    ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+                    showsVerticalScrollIndicator={false}
 
                 />
             )}

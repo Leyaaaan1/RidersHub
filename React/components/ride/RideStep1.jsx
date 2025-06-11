@@ -40,9 +40,11 @@ const RideStep1 = ({
     };
 
     return (
-        <View style={utilities.container}>
-            <Text style={utilities.title}>RIDE DETAILS</Text>
+        <View style={utilities.containerWhite}>
+            <View style={[utilities.navbarContainerPrimary, { alignItems: 'center', justifyContent: 'center' }]}>
 
+            <Text style={utilities.textWhite}>RIDE DETAILS</Text>
+            </View>
             {error ? <Text style={{color: 'red', marginBottom: 10}}>{error}</Text> : null}
 
             <TextInput
@@ -50,12 +52,17 @@ const RideStep1 = ({
                 value={rideName}
                 onChangeText={setRideName}
                 placeholder="Enter ride name"
-                placeholderTextColor="#6f1c1c"
+                placeholderTextColor="#fff"
+                color="#fff"
             />
 
-            <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 10}}>
+            <View style={{flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'center', alignItems: 'center'}}>
                 <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'car' && utilities.selectedRiderType]}
+                    style={[
+                        utilities.riderTypeOption,
+                        riderType === 'car' && utilities.selectedRiderType,
+                        { borderTopRightRadius: 0, borderBottomRightRadius: 0, marginRight: 0 }
+                    ]}
                     onPress={() => setRiderType('car')}
                 >
                     <FontAwesome name="car" size={24} color={riderType === 'car' ? '#fff' : '#333'} />
@@ -63,7 +70,11 @@ const RideStep1 = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'motor' && utilities.selectedRiderType]}
+                    style={[
+                        utilities.riderTypeOption,
+                        riderType === 'motor' && utilities.selectedRiderType,
+                        { borderRadius: 0, marginRight: 0 }
+                    ]}
                     onPress={() => setRiderType('motor')}
                 >
                     <FontAwesome name="motorcycle" size={24} color={riderType === 'motor' ? '#fff' : '#333'} />
@@ -71,7 +82,11 @@ const RideStep1 = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'bike' && utilities.selectedRiderType]}
+                    style={[
+                        utilities.riderTypeOption,
+                        riderType === 'bike' && utilities.selectedRiderType,
+                        { borderRadius: 0, marginRight: 0 }
+                    ]}
                     onPress={() => setRiderType('bike')}
                 >
                     <FontAwesome name="bicycle" size={24} color={riderType === 'bike' ? '#fff' : '#333'} />
@@ -79,21 +94,11 @@ const RideStep1 = ({
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('cafe Racers')}
-                >
-                    <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
-                    onPress={() => setRiderType('cafe Racers')}
-                >
-                    <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
-                    <Text style={{marginTop: 5, color: riderType === 'cafe Racers' ? '#fff' : '#333'}}>Cafe Racers</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[utilities.riderTypeOption, riderType === 'cafe Racers' && utilities.selectedRiderType]}
+                    style={[
+                        utilities.riderTypeOption,
+                        riderType === 'cafe Racers' && utilities.selectedRiderType,
+                        { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }
+                    ]}
                     onPress={() => setRiderType('cafe Racers')}
                 >
                     <FontAwesome name="rocket" size={24} color={riderType === 'cafe Racers' ? '#fff' : '#333'} />
@@ -101,30 +106,41 @@ const RideStep1 = ({
                 </TouchableOpacity>
             </View>
 
-            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
 
-                <View style={{flex: 1, marginLeft: 5}}>
-                    <Text style={utilities.label}>Date</Text>
-                    <TouchableOpacity
-                        style={[utilities.input, dateError ? {borderColor: 'red'} : {}]}
-                        onPress={() => setDatePickerOpen(true)}
-                    >
-                        <Text style={dateError ? {color: 'red'} : {}}>
-                            {formatDate(date) || "Select date"}
-                        </Text>
-                    </TouchableOpacity>
-                    {dateError ? <Text style={{color: 'red', fontSize: 12}}>{dateError}</Text> : null}
+            <View>
+                <Text style={[utilities.textWhite, { fontSize: 14, marginBottom: 4 }]}>DATE</Text>
+                <TouchableOpacity
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: colors.primary,
+                        borderRadius: 8,
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        minWidth: 120,
+                        alignSelf: 'flex-start',
+                        borderWidth: dateError ? 1 : 0,
+                        borderColor: dateError ? 'red' : 'transparent'
+                    }}
+                    onPress={() => setDatePickerOpen(true)}
+                    activeOpacity={0.7}
+                >
+                    <FontAwesome name="calendar" size={16} color="#fff" style={{ marginRight: 6 }} />
+                    <Text style={{ color: dateError ? 'red' : '#fff', fontSize: 20 }}>
+                        {formatDate(date) || "Select date"}
+                    </Text>
+                </TouchableOpacity>
+                {dateError ? <Text style={{ color: 'red', fontSize: 12, marginTop: 2 }}>{dateError}</Text> : null}
 
-                    <DatePicker
-                        modal
-                        open={datePickerOpen}
-                        date={date || new Date()}
-                        minimumDate={today}
-                        onConfirm={handleDateConfirm}
-                        onCancel={() => setDatePickerOpen(false)}
-                        mode="datetime"
-                    />
-                </View>
+                <DatePicker
+                    modal
+                    open={datePickerOpen}
+                    date={date || new Date()}
+                    minimumDate={today}
+                    onConfirm={handleDateConfirm}
+                    onCancel={() => setDatePickerOpen(false)}
+                    mode="datetime"
+                />
             </View>
 
             <Text style={utilities.label}>Participants</Text>

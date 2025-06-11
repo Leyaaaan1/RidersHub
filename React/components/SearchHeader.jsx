@@ -44,7 +44,7 @@ const SearchHeader = ({ token, username, navigation }) => {
     };
 
     return (
-        <View style={{padding: 10 }}>
+        <View >
 
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TextInput
@@ -57,7 +57,7 @@ const SearchHeader = ({ token, username, navigation }) => {
                         marginRight: 10,
                         color: '#fff'
                     }}
-                    placeholder="Enter Ride ID"
+                    placeholder="Ride ID"
                     placeholderTextColor="#fff"
                     value={searchId}
                     onChangeText={setSearchId}
