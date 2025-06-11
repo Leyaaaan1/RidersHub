@@ -56,7 +56,7 @@ public class NominatimService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept-Language", "en");
-        headers.set("User-Agent", "RidersHub/1.0 (your_email@example.com)");
+        headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -95,7 +95,7 @@ public class NominatimService {
                 "&addressdetails=1&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "RidersHub/1.0 (your_email@example.com)");
+        headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 

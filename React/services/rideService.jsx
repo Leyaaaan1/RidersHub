@@ -1,22 +1,46 @@
 const API_BASE_URL = 'http://192.168.1.51:8080';
 console.log('Using API URL:', API_BASE_URL);
 
-export const searchLocation = async (query) => {
+export const searchLocation = async (token, query) => {
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json`);
+        const response = await fetch(`${API_BASE_URL}/location/search?query=${encodeURIComponent(query)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
         if (!response.ok) {
-            throw new Error('Failed to fetch location');
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch location: ${response.status} ${errorText}`);
         }
+
         return await response.json();
     } catch (error) {
         console.error('searchLocation error:', error);
         throw error;
     }
 };
-export const reverseGeocode = async (lat, lon) => {
+
+export const reverseGeocode = async (token, lat, lon) => {
     try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-        return await response.json();
+        const response = await fetch(`${API_BASE_URL}/location/reverse?lat=${lat}&lon=${lon}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to reverse geocode: ${response.status} ${errorText}`);
+        }
+
+        // Since the backend returns a String for reverse geocoding
+        const result = await response.text();
+        return result;
     } catch (err) {
         console.error("Reverse geocode fetch failed:", err);
         return null;

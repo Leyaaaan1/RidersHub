@@ -126,10 +126,9 @@ const CreateRide = ({ route, navigation }) => {
             setEndingLongitude,
             setLocationName,
             setStartingPoint,
-            setDate,
             setEndingPoint,
             setSearchQuery,
-            setMapboxImageUrl,
+            token
         });
     };
 
@@ -138,7 +137,7 @@ const CreateRide = ({ route, navigation }) => {
         const delayedSearch = setTimeout(() => {
             if (searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
                 setIsSearching(true);
-                searchLocation(searchQuery)
+                searchLocation(token, searchQuery)
                     .then(data => setSearchResults(data))
                     .catch(error => {
                         console.error('Error searching location:', error);
@@ -194,7 +193,7 @@ const CreateRide = ({ route, navigation }) => {
             // Only search if not manually selected and query is valid
             if (!locationSelected && searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
                 setIsSearching(true);
-                searchLocation(searchQuery)
+                searchLocation(token, searchQuery)
                     .then(data => setSearchResults(data))
                     .catch(error => {
                         console.error('Error searching location:', error);
