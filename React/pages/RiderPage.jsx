@@ -10,6 +10,7 @@ import {getCurrentRiderType, getRideDetails} from '../services/rideService';
 import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
+import ParticipantListModal from "../components/ParticipantListModal";
 
 
 
@@ -82,9 +83,7 @@ const RiderPage = ({ route , navigation}) => {
                                     borderRadius: 5,
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    minWidth: 80,
                                     height: 40,
-                                    marginRight: 10, // Add some space to the right
                                 }
                             ]}
                             onPress={() => {
@@ -114,7 +113,6 @@ const RiderPage = ({ route , navigation}) => {
 
 
 
-
             <View style={riderPageUtils.contentContainer}>
                 <RidesList
                     token={token}
@@ -139,12 +137,16 @@ const RiderPage = ({ route , navigation}) => {
 
             </View>
             <View style={rideUtilities.customBottomContainer}>
-                <Text style={rideUtilities.customBottomText}>
-                    Ride Summary
-                </Text>
-                <Text style={rideUtilities.customBottomSubText}>
-                </Text>
-            </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={rideUtilities.customBottomText}>Current Rides</Text>
+
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <Text style={rideUtilities.customBottomText}>Column 2</Text>
+                    </View>
+                </View>
+                </View>
         </View>
     );
 };

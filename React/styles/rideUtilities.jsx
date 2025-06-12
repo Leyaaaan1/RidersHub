@@ -106,7 +106,7 @@ const rideUtilities = StyleSheet.create({
     customBottomText: {
         color: colors.white,
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '500',
         textAlign: 'center',
         marginBottom: 5,
     },

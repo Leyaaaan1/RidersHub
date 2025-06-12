@@ -165,6 +165,13 @@ const utilities = StyleSheet.create({
         alignSelf: 'center',
         width: '80%',
     },
+    inputCenterDescription: {
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        alignSelf: 'center',
+        width: '80%',
+    },
     inputLocationName: {
         borderColor: colors.primary,
         borderRadius: 8,

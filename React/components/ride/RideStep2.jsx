@@ -62,33 +62,46 @@ const RideStep2 = ({
                     onPress={nextStep}
                 >
                     <Text style={utilities.buttonText}>Next</Text>
-                    <FontAwesome name="arrow-right" size={20} color="#fff" style={{ marginLeft: 8 }} />
+                    <FontAwesome name="arrow-right" size={20} color={colors.primary} style={{ marginLeft: 8 }} />
                 </TouchableOpacity>
             </View>
 
             {/* Search UI overlaid on map */}
             <View style={{
                 position: 'absolute',
-                top: 90,
+                top: 110,
                 left: 20,
                 right: 20,
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                backgroundColor: 'rgba(255,255,255,0.2)',
                 borderRadius: 10,
                 padding: 15,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3.84,
                 elevation: 5
             }}>
-                <TextInput
-                    style={utilities.inputLocationName}
-                    value={searchQuery}
-                    onChangeText={handleSearchInputChange}
-                    placeholder="Search for a location"
-                    placeholderTextColor="#000"
-                    color="#000"
-                />
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                        style={[utilities.inputLocationName, { flex: 1 }]}
+                        value={searchQuery}
+                        onChangeText={handleSearchInputChange}
+                        placeholder="Search for a location"
+                        placeholderTextColor="#fff"
+                        color="#fff"
+                        returnKeyType="search"
+                        onSubmitEditing={() => handleSearchInputChange(searchQuery)}
+                    />
+                    <TouchableOpacity
+                        onPress={() => handleSearchInputChange(searchQuery)}
+                        style={{
+                            marginLeft: 8,
+                            backgroundColor: colors.primary,
+                            padding: 8,
+                            borderRadius: 6,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <FontAwesome name="search" size={18} color="#fff" />
+                    </TouchableOpacity>
+                </View>
 
                 {isSearching && (
                     <Text style={utilities.searchingText}>Searching...</Text>
@@ -127,12 +140,12 @@ const RideStep2 = ({
                     bottom: 20,
                     left: 20,
                     right: 20,
-                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
                     borderRadius: 10,
                     padding: 15
                 }}>
                     <Text style={[utilities.label, { color: '#fff' }]}>Selected Location</Text>
-                    <Text style={{ color: '#fff', marginTop: 5 }}>{locationName}</Text>
+                    <Text style={{ color: '#fff', marginTop: 5, textAlign: 'center', fontSize:30 }}>{locationName}</Text>
                 </View>
             )}
 

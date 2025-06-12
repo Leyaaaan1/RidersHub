@@ -97,7 +97,75 @@ const RideStep3 = ({
                 <Text style={utilities.textWhite}>RIDE ROUTE</Text>
 
             </View>
+            <View style={{
+                position: 'absolute',
+                top: 150,
+                left: 20,
+                right: 20,
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                borderRadius: 10,
+                padding: 15,
+                elevation: 5,
+                zIndex: 10
+            }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput
+                        style={[utilities.inputLocationName, { flex: 1 }]}
+                        value={mapMode === 'starting' ? (startingPoint || '') : (endingPoint || '')}
+                        onChangeText={(text) => {
+                            if (mapMode === 'starting') setStartingPoint(text);
+                            else setEndingPoint(text);
+                        }}
+                        placeholder={`Search for a ${mapMode === 'starting' ? 'starting' : 'ending'} location`}
+                        placeholderTextColor="#fff"
+                        color="#fff"
+                        returnKeyType="search"
+                        // You may want to implement a search handler for mapMode
+                    />
+                    <TouchableOpacity
+                        // onPress={...} // Add your search handler here
+                        style={{
+                            marginLeft: 8,
+                            backgroundColor: colors.primary,
+                            padding: 8,
+                            borderRadius: 6,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <FontAwesome name="search" size={18} color="#fff" />
+                    </TouchableOpacity>
+                </View>
 
+                {isSearching && (
+                    <Text style={utilities.searchingText}>Searching...</Text>
+                )}
+
+                {searchResults && searchResults.length > 0 && (
+                    <ScrollView
+                        style={[utilities.searchResultsList, {
+                            maxHeight: 200,
+                            backgroundColor: 'white'
+                        }]}
+                        nestedScrollEnabled={true}
+                    >
+                        {searchResults.map((item) => (
+                            <TouchableOpacity
+                                key={item.place_id.toString()}
+                                style={utilities.resultItem}
+                                onPress={() => { handleLocationSelect(item) }}
+                            >
+                                <Text style={[utilities.searchResultName, { color: '#333' }]}>
+                                    {item.display_name.split(',')[0]}
+                                </Text>
+                                <Text style={[utilities.searchResultAddress, { color: '#666' }]}>
+                                    {item.display_name}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                )}
+            </View>
             <Text style={[utilities.mapInstructions, {
                 top: 95,
                 left: 20,

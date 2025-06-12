@@ -276,7 +276,7 @@ const RideStep1 = ({
 
                                 <Text style={[utilities.textWhite, { textAlign: 'center' }]}>Description</Text>
                                 <TextInput
-                                    style={[utilities.inputCenter, {
+                                    style={[utilities.inputCenterDescription, {
                                         height: 300,
                                         textAlignVertical: 'top',
                                         fontSize: 16,

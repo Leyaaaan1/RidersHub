@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,7 +25,6 @@ public class RidesService {
 
     private final RidesRepository ridesRepository;
 
-    private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
 
     @Autowired
     private final LocationService locationService;
@@ -39,11 +37,10 @@ public class RidesService {
 
     @Autowired
     public RidesService(RidesRepository ridesRepository,
-                        KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
+
                         LocationService locationService, RiderService riderService, MapImageService mapImageService, MapboxService mapboxService) {
 
         this.ridesRepository = ridesRepository;
-        this.kafkaTemplate = kafkaTemplate;
         this.riderService = riderService;
         this.locationService = locationService;
         this.mapImageService = mapImageService;
@@ -110,7 +107,6 @@ public class RidesService {
         }
 
         RideResponseDTO response = mapToResponseDTO(newRide);
-       kafkaTemplate.send("location", response);
         return response;
     }
 
