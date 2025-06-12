@@ -391,6 +391,7 @@ const CreateRide = ({ route, navigation }) => {
                     setStartingPoint={setStartingPoint}
                     endingPoint={endingPoint}
                     setEndingPoint={setEndingPoint}
+                    handleSearchInputChange={handleSearchInputChange}
                     prevStep={prevStep}
                     nextStep={nextStep}
                     handleCreateRide={handleCreateRide}

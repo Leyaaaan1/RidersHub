@@ -86,7 +86,7 @@ public class NominatimService {
 
 
     public List<Map<String, Object>> searchLocation(String query) {
-        return searchLocation(query, 1);
+        return searchLocation(query, 5);
     }
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {

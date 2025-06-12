@@ -1,6 +1,6 @@
 // React/components/ride/RideStep3.jsx
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
+import React from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
 import utilities from '../../styles/utilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
@@ -13,47 +13,34 @@ const RideStep3 = ({
                        startingLatitude, startingLongitude, endingLatitude, endingLongitude,
                        handleMessage, startingPoint, setStartingPoint,
                        endingPoint, setEndingPoint, prevStep, loading, nextStep,
-                       handleCreateRide
+                       handleCreateRide, handleSearchInputChange, searchQuery
                    }) => {
-    const [pendingCoordinates, setPendingCoordinates] = useState(null);
 
-    const handleMapMessageWithConfirmation = (event) => {
-        const data = JSON.parse(event.nativeEvent.data);
+    const handleSelectLocationAndUpdateMap = (item) => {
+        // First call the parent component's handler
+        handleLocationSelect(item);
 
-        if (data.type === 'mapClick') {
-            setPendingCoordinates({
-                lat: data.lat,
-                lng: data.lng
-            });
-        } else {
-            handleMessage(event);
+        // Then immediately center the map on the selected location
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+
+        if (webViewRef.current) {
+            webViewRef.current.injectJavaScript(`
+                map.setView([${lat}, ${lon}], 15);
+                marker.setLatLng([${lat}, ${lon}]);
+                true;
+            `);
         }
     };
 
-    const confirmLocation = () => {
-        if (pendingCoordinates) {
-            const syntheticEvent = {
-                nativeEvent: {
-                    data: JSON.stringify({
-                        type: 'mapClick',
-                        lat: pendingCoordinates.lat,
-                        lng: pendingCoordinates.lng
-                    })
-                }
-            };
-
-            handleMessage(syntheticEvent);
-
-            if (mapMode === 'starting') {
-                setMapMode('ending');
-            }
-
-            setPendingCoordinates(null);
+    // Finalize the current point selection and switch modes if needed
+    const finalizePointSelection = () => {
+        if (mapMode === 'starting' && startingPoint) {
+            setMapMode('ending');
+        } else if (mapMode === 'ending' && endingPoint) {
+            // Both points are selected, ready to proceed
+            handleCreateRide();
         }
-    };
-
-    const cancelLocation = () => {
-        setPendingCoordinates(null);
     };
 
     return (
@@ -76,7 +63,7 @@ const RideStep3 = ({
                             mapMode === 'starting' ? startingLongitude : endingLongitude
                         ) }}
                     style={{ flex: 1 }}
-                    onMessage={handleMapMessageWithConfirmation}
+                    onMessage={handleMessage}
                     javaScriptEnabled={true}
                 />
             </View>
@@ -95,8 +82,9 @@ const RideStep3 = ({
                     <Text style={utilities.buttonText}>Back</Text>
                 </TouchableOpacity>
                 <Text style={utilities.textWhite}>RIDE ROUTE</Text>
-
             </View>
+
+            {/* Search Box */}
             <View style={{
                 position: 'absolute',
                 top: 150,
@@ -111,19 +99,16 @@ const RideStep3 = ({
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
                         style={[utilities.inputLocationName, { flex: 1 }]}
-                        value={mapMode === 'starting' ? (startingPoint || '') : (endingPoint || '')}
-                        onChangeText={(text) => {
-                            if (mapMode === 'starting') setStartingPoint(text);
-                            else setEndingPoint(text);
-                        }}
+                        value={searchQuery}
+                        onChangeText={handleSearchInputChange}
                         placeholder={`Search for a ${mapMode === 'starting' ? 'starting' : 'ending'} location`}
                         placeholderTextColor="#fff"
                         color="#fff"
                         returnKeyType="search"
-                        // You may want to implement a search handler for mapMode
+                        onSubmitEditing={() => handleSearchInputChange(searchQuery)}
                     />
                     <TouchableOpacity
-                        // onPress={...} // Add your search handler here
+                        onPress={() => handleSearchInputChange(searchQuery)}
                         style={{
                             marginLeft: 8,
                             backgroundColor: colors.primary,
@@ -141,36 +126,41 @@ const RideStep3 = ({
                     <Text style={utilities.searchingText}>Searching...</Text>
                 )}
 
+                {/* Search Results */}
                 {searchResults && searchResults.length > 0 && (
-                    <ScrollView
-                        style={[utilities.searchResultsList, {
-                            maxHeight: 200,
-                            backgroundColor: 'white'
-                        }]}
-                        nestedScrollEnabled={true}
-                    >
-                        {searchResults.map((item) => (
-                            <TouchableOpacity
-                                key={item.place_id.toString()}
-                                style={utilities.resultItem}
-                                onPress={() => { handleLocationSelect(item) }}
-                            >
-                                <Text style={[utilities.searchResultName, { color: '#333' }]}>
-                                    {item.display_name.split(',')[0]}
-                                </Text>
-                                <Text style={[utilities.searchResultAddress, { color: '#666' }]}>
-                                    {item.display_name}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
+                        <ScrollView
+                            style={[utilities.searchResultsList, {
+                                maxHeight: 200,
+                                backgroundColor: 'white'
+                            }]}
+                            nestedScrollEnabled={true}
+                        >
+                            {searchResults.map((item) => (
+                                <TouchableOpacity
+                                    key={item.place_id.toString()}
+                                    style={utilities.resultItem}
+                                    onPress={() => {
+                                        handleSelectLocationAndUpdateMap(item);
+                                    }}
+                                >
+                                    <Text style={[utilities.searchResultName, { color: '#333' }]}>
+                                        {item.display_name.split(',')[0]}
+                                    </Text>
+                                    <Text style={[utilities.searchResultAddress, { color: '#666' }]}>
+                                        {item.display_name}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
                 )}
             </View>
+
+            {/* Map Instructions */}
             <Text style={[utilities.mapInstructions, {
                 top: 95,
                 left: 20,
                 right: 20,
-                backgroundColor: mapMode === 'starting' ? colors.primary : colors.primary,
+                backgroundColor: colors.primary,
                 padding: 12,
                 borderRadius: 8
             }]}>
@@ -179,55 +169,12 @@ const RideStep3 = ({
                     : 'Tap on the map to select ending point'}
             </Text>
 
-            {/* Confirmation UI */}
-            {pendingCoordinates && (
-                <View style={{
-                    marginTop: 50,
-                    marginHorizontal: 40,
-                    borderRadius: 8,
-                    padding: 20,
-                    alignItems: 'center',
-                }}>
-                    <Text style={{color: '#000', fontWeight: 'bold', marginBottom: 16, textAlign: 'center'}}>
-                        Confirm {mapMode === 'starting' ? 'starting' : 'ending'} point?
-                    </Text>
-                    <View style={{flexDirection: 'row', width: '70%'}}>
-                        <TouchableOpacity
-                            onPress={cancelLocation}
-                            style={{
-                                flex: 1,
-                                backgroundColor: '#eee',
-                                padding: 10,
-                                borderRadius: 5,
-                                marginRight: 10,
-                                alignItems: 'center'
-                            }}
-                        >
-                            <Text style={{color: '#333', fontWeight: 'bold', fontSize: 14}}>Cancel</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={confirmLocation}
-                            style={{
-                                flex: 1,
-                                backgroundColor: colors.primary,
-                                padding: 10,
-                                borderRadius: 5,
-                                alignItems: 'center'
-                            }}
-                        >
-                            <Text style={{color: '#fff', fontWeight: 'bold', fontSize: 14}}>Confirm</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            )}
-
-            {/* Progress indicators as overlay */}
+            {/* Progress indicators */}
             <View style={{
                 position: 'absolute',
-                bottom: 50,
+                bottom: 120,
                 left: 20,
                 right: 20,
-
             }}>
                 <View style={utilities.progressIndicator}>
                     <View style={[
@@ -238,11 +185,9 @@ const RideStep3 = ({
                         <Text style={utilities.progressText}>Starting Point</Text>
                         {startingPoint && (
                             <View style={{ flex: 1, marginRight: endingPoint ? 10 : 0 }}>
-                                <Text style={{ color: '#000' , fontWeight: 'bold'}}>{startingPoint}</Text>
+                                <Text style={{ color: '#000', fontWeight: 'bold'}}>{startingPoint}</Text>
                             </View>
                         )}
-
-
                     </View>
 
                     <View style={[utilities.progressConnector, startingPoint ? {backgroundColor: '#4CAF50'} : {backgroundColor: '#ccc'}]} />
@@ -262,7 +207,28 @@ const RideStep3 = ({
                 </View>
             </View>
 
-
+            {/* Finalize selection button */}
+            <View style={{
+                position: 'absolute',
+                bottom: 70,
+                left: 20,
+                right: 20,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+                <TouchableOpacity
+                    style={[utilities.button, {backgroundColor: colors.primary}]}
+                    onPress={finalizePointSelection}
+                    disabled={(mapMode === 'starting' && !startingPoint) || (mapMode === 'ending' && !endingPoint)}
+                >
+                    <Text style={utilities.buttonText}>
+                        {mapMode === 'starting'
+                            ? 'Confirm Starting Point & Continue'
+                            : 'Confirm Ending Point'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
 
             {/* Create ride button at bottom */}
             <View style={{
