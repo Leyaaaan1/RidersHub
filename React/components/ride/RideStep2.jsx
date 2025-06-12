@@ -22,7 +22,7 @@ const RideStep2 = ({
                        isSearching, searchResults, searchQuery, setSearchQuery,
                        handleLocationSelect, webViewRef, latitude, longitude,
                        handleMessage, locationName,
-                       prevStep, nextStep,
+                       prevStep, nextStep, handleSearchInputChange
                    }) => {
 
 
@@ -85,7 +85,7 @@ const RideStep2 = ({
                 <TextInput
                     style={utilities.inputLocationName}
                     value={searchQuery}
-                    onChangeText={setSearchQuery}
+                    onChangeText={handleSearchInputChange}
                     placeholder="Search for a location"
                     placeholderTextColor="#000"
                     color="#000"
