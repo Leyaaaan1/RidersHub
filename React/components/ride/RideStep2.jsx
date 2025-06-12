@@ -33,7 +33,6 @@ const RideStep2 = ({
         <View style={[utilities.containerWhite, { position: 'relative' }]}>
             <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-            {/* Full-screen map that extends behind everything */}
             <View style={{
                 position: 'absolute',
                 top: 0,
