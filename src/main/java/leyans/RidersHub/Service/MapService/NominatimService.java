@@ -34,7 +34,10 @@ public class NominatimService {
 
     private void enforceRateLimit() {
         try {
+            System.out.println("Waiting for rate limit...");
             bucket.asBlocking().consume(1);
+            System.out.println("Rate limit consumed, proceeding with request.");
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.err.println("Rate limiting wait was interrupted: " + e.getMessage());
@@ -83,7 +86,7 @@ public class NominatimService {
 
 
     public List<Map<String, Object>> searchLocation(String query) {
-        return searchLocation(query, 5);
+        return searchLocation(query, 1);
     }
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {
