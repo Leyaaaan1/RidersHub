@@ -1,44 +1,79 @@
 # Motorcycle Enthusiasts Project - Davao City
 
-A project-based learning website for motorcycle enthusiasts in Davao City, developed with Spring Boot and PostgreSQL, following Spring documentation and best practices.
+A project-based learning platform for motorcycle enthusiasts in Davao City, developed with **React Native** for the mobile frontend and **Spring Boot** with **PostgreSQL** on the backend, following official Spring documentation and best practices.
 
 ---
 
-## Overview
+## 🛠️ Overview
 
-This project implements a real-time location tracking system using Spring Boot, Apache Kafka (version 3.9+), and spatial calculations via PostGIS and Hibernate Spatial. It efficiently processes user location updates, determines movement significance using Haversine formula, and publishes relevant updates to Kafka for downstream processing.
-
----
-
-## Features
-
-- **Spring Web** – REST API endpoints  
-- **Spring Kafka (3.9+)** – Kafka integration using KRaft mode
-- **Spring Boot DevTools** – Fast reload during development  
-- **Spring Security** – Role-based access control for different rider types  
-- **Spring Hibernate & Hibernate Spatial** – ORM with advanced spatial data support  
-- **Spring Boot WebSocket** – Real-time communication (in progress)
+This project focuses on building a real-time ride creation and discovery system. It integrates **Mapbox** for interactive maps, **Cloudinary** for storing map snapshots, and uses **Nominatim API** for geolocation. A **Bucket4j** rate limiter ensures compliance with Nominatim's usage policy (1 request per second). **JWT-based authentication** secures access to protected APIs. **Redis** integration for managing live user locations is planned.
 
 ---
 
-## Location Processing & Optimization
+## 🚧 Current Progress
 
-- **GeometryFactory & Hibernate Spatial** – Use GeometryFactory to create spatial objects  
-- **Custom PostGIS Query with Haversine Formula** – Efficient distance calculation directly in PostgreSQL  
-- **Threshold-based updates** – Avoids sending Kafka messages for insignificant movement  
-- **Real-time tracking** – Sends updates only when movement exceeds threshold  
+- ✅ Create and display rides  
+- ✅ Interactive **homepage** and **map interface**  
+- ✅ **Add locations** via **Nominatim API**  
+- ✅ **Rate limiting** with **Bucket4j** (1 request/sec)  
+- ✅ **Mapbox integration** – capture and view map snapshots  
+- ✅ **Cloudinary integration** – upload and store map images  
+- ✅ **JWT-based authentication** – secure API access with token-based login  
+- 🔜 **Redis** – for storing and managing real-time user locations  
+- 🔜 **WebSocket** – for live ride and location updates
 
 ---
 
-## Kafka Setup (KRaft mode, no Zookeeper)
+## ✨ Features
 
-Since Kafka 3.3+, you can run Kafka without Zookeeper using KRaft mode. This project uses Kafka 3.9+.
+- **React Native** – Mobile application interface  
+- **Spring Boot** – Backend REST API  
+- **PostgreSQL + PostGIS** – Database with spatial support  
+- **Spring Security + JWT** – Token-based authentication and role access control  
+- **Spring Hibernate & Hibernate Spatial** – ORM with spatial queries  
+- **Mapbox** – Interactive maps & snapshot functionality  
+- **Cloudinary** – Upload and manage map screenshots  
+- **Nominatim API** – Location search and reverse geocoding  
+- **Bucket4j** – Rate limiter for API usage compliance  
+- **Spring DevTools** – Hot reload during development
 
-To start Kafka in KRaft mode:
+---
 
-```bash
-# Format storage for Kafka controller (only needed once)
-bin/kafka-storage.sh format -t <uuid> -c config/kraft/server.properties
+## 🔐 Authentication
 
-# Start Kafka broker (no Zookeeper)
-bin/kafka-server-start.sh config/kraft/server.properties
+The backend uses **JWT (JSON Web Token)** for secure, stateless user authentication.
+
+- 🔒 Login returns a JWT token
+- 🔐 Protected endpoints require the token in the `Authorization` header (as `Bearer <token>`)
+- 🛡️ Role-based access control is enforced using Spring Security filters
+
+---
+
+## 🌍 Location Processing & Optimization
+
+- 🧭 **GeometryFactory & Hibernate Spatial** – Create and handle spatial objects  
+- 📏 **PostGIS with Haversine Formula** – Fast distance calculations  
+- 🖼️ **Map Snapshot Capture** – Capture using **Mapbox**, store via **Cloudinary**
+
+---
+
+## 📦 Future Enhancements
+
+- 🔧 Integrate **Redis** for real-time user location caching  
+- 🔗 Add **WebSocket** support for live ride updates and messaging  
+- 📱 Improve mobile UX for ride discovery and navigation  
+- 🧪 Write unit and integration tests for key modules  
+
+---
+
+## 📍 Technologies Used
+
+| Tech Stack        | Description                           |
+|-------------------|---------------------------------------|
+| React Native      | Cross-platform mobile frontend        |
+| Spring Boot       | Java backend framework                |
+| PostgreSQL        | Relational database                   |
+| PostGIS           | Spatial extension for PostgreSQL      |
+| Mapbox            | Interactive maps and snapshot tool    |
+| Cloudinary        | Cloud-based image hosting             |
+| Nominatim API
