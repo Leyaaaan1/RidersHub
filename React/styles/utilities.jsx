@@ -31,7 +31,7 @@ const utilities = StyleSheet.create({
         borderBottomColor: '#2a0e0e',
     },
     navbarContainerPrimary: {
-        top: -2,
+        top: -20,
         left: 0,
         right: 0,
         zIndex: 100,
@@ -42,6 +42,17 @@ const utilities = StyleSheet.create({
         height: 70,
         paddingVertical: 12,
         paddingHorizontal: 15,
+    },
+    navbarContainerTransparent: {
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        backgroundColor: 'rgba(0,0,0,0.3)', // semi-transparent black
+        position: 'absolute',
+        top: -2,
+        left: 0,
+        right: 0,
+        zIndex: 100,
     },
 
     centeredContainer: {
@@ -153,6 +164,12 @@ const utilities = StyleSheet.create({
         marginBottom: 16,
         alignSelf: 'center',
         width: '80%',
+    },
+    inputLocationName: {
+        borderColor: colors.primary,
+        borderRadius: 8,
+        alignSelf: 'center',
+        width: '100%',
     },
 
     activeInput: {

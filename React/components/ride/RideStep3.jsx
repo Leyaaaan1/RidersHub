@@ -83,8 +83,11 @@ const RideStep3 = ({
                     utilities.mapInstructions,
                     {backgroundColor: mapMode === 'starting' ? colors.primary : colors.primary}
                 ]}>
+
                     <Text>
-                        {mapMode === 'starting' ? 'Tap on the map to select starting point' : 'Tap on the map to select ending point'}
+                        {mapMode === 'starting'
+                            ? 'Tap on the map to select starting point'
+                            : 'Tap on the map to select ending point'}
                     </Text>
                 </Text>
                 <WebView
