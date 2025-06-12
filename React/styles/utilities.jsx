@@ -39,7 +39,7 @@ const utilities = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
          backgroundColor: "#000000",
-        height: 70,
+        height: 82,
         paddingVertical: 12,
         paddingHorizontal: 15,
     },
