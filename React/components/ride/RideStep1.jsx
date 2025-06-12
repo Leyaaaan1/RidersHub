@@ -48,15 +48,32 @@ const RideStep1 = ({
 
                 <View style={{ backgroundColor: "#151515", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
 
-                    <TextInput
-                        style={utilities.inputCenter}
-                        value={rideName}
-                        onChangeText={setRideName}
-                        placeholder="Enter ride name"
-                        placeholderTextColor="#fff"
-                        color="#fff"
-                    />
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <TextInput
+                                style={[utilities.inputCenter, { flex: 1, marginRight: 10 }]}
+                                value={rideName}
+                                onChangeText={setRideName}
+                                placeholder="Enter ride name"
+                                placeholderTextColor="#fff"
+                                color="#fff"
+                            />
+                            <View style={{ alignItems: 'center' }}>
+                                <TouchableOpacity
+                                    style={{
+                                        borderRadius: 10,
+                                        alignSelf: 'flex-start',
+                                        borderWidth: dateError ? 2 : 1,
+                                        borderColor: dateError ? 'red' : colors.primary,
+                                        marginTop: -15,
+                                    }}
+                                    onPress={() => setDatePickerOpen(true)}
+                                    activeOpacity={0.7}
+                                >
+                                    <FontAwesome name="calendar" size={24} color="#fff" />
+                                </TouchableOpacity>
 
+                            </View>
+                        </View>
 
                     <ScrollView
                         horizontal
@@ -133,59 +150,29 @@ const RideStep1 = ({
                         </TouchableOpacity>
                     </View>
                     </ScrollView>
-                        <View style={{ padding: 10, alignItems: 'center' }}>
-                            <TouchableOpacity
-                                style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    borderRadius: 10,
-                                    paddingHorizontal: 7,
-                                    paddingVertical: 3, // Add some vertical padding
-                                    alignSelf: 'flex-start',
-                                    borderWidth: dateError ? 2 : 1,
-                                    borderColor: dateError ? 'red' : colors.primary,
-                                }}
-                                onPress={() => setDatePickerOpen(true)}
-                                activeOpacity={0.7}
-                            >
-                                <FontAwesome name="calendar" size={45} color="#fff" />
-                                <View style={{ marginLeft: 5 }}> {/* Add a container for better text alignment */}
-                                    <Text style={{ color: dateError ? 'red' : '#fff', fontSize: 20 }}>
-                                        {date ? (
-                                            <>
-                                                <Text>
-                                                    {date.toLocaleDateString('en-US', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })}
-                                                </Text>
-                                                {'\n'}
-                                                <Text style={{ fontSize: 25 }}>
-                                                    {date.toLocaleTimeString('en-US', {
-                                                        hour: '2-digit',
-                                                        minute: '2-digit'
-                                                    })}
-                                                </Text>
-                                            </>
-                                        ) : "Select date"}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                            {dateError ? <Text style={{ color: 'red', fontSize: 12, marginTop: 2 }}>{dateError}</Text> : null}
 
-                            {/* The DatePicker doesn't take up space in the layout when modal is true */}
-                            <DatePicker
-                                modal
-                                open={datePickerOpen}
-                                date={date || new Date()}
-                                minimumDate={today}
-                                onConfirm={handleDateConfirm}
-                                onCancel={() => setDatePickerOpen(false)}
-                                mode="datetime"
-                            />
-                        </View>
-
+                    <View style={{ padding: 10 }}>
+                        {date && (
+                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 4 }}>
+                                <Text style={{ color: '#fff', fontSize: 14, marginRight: 8 }}>
+                                    {date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </Text>
+                                <Text style={{ color: '#fff', fontSize: 14 }}>
+                                    {date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true }).replace(':', ':')}
+                                </Text>
+                            </View>
+                        )}
+                        {dateError ? <Text style={{ color: 'red', fontSize: 12, marginTop: 2 }}>{dateError}</Text> : null}
+                        <DatePicker
+                            modal
+                            open={datePickerOpen}
+                            date={date || new Date()}
+                            minimumDate={today}
+                            onConfirm={handleDateConfirm}
+                            onCancel={() => setDatePickerOpen(false)}
+                            mode="datetime"
+                        />
+                    </View>
 
                         <Text style={[utilities.textWhite, { textAlign: 'center' }]}>Riders</Text>
                     <View>
@@ -197,11 +184,12 @@ const RideStep1 = ({
                                 handleSearchRiders(text);
                             }}
                             placeholder="Search for riders"
-                            placeholderTextColor=""
+                            placeholderTextColor="#fff"
+                            color="#fff"
                         />
 
                         {isRiderSearching && (
-                            <ActivityIndicator size="small" color={colors.primary} style={{marginVertical: 10}} />
+                            <ActivityIndicator size="small" color="#fff" style={{marginVertical: 10}} />
                         )}
 
                         {/* Search results */}
@@ -234,7 +222,7 @@ const RideStep1 = ({
 
                         {/* Selected participants */}
                         {participants && (
-                            <View style={{marginTop: 10, borderWidth: 1, borderColor: colors.primary, borderRadius: 8, overflow: 'hidden'}}>
+                            <View style={{marginTop: 10, borderWidth: 1, borderColor: colors.white, borderRadius: 8, overflow: 'hidden'}}>
                                 {/* Table Header */}
                                 <View style={{
                                     flexDirection: 'row',
@@ -268,7 +256,7 @@ const RideStep1 = ({
                                                         setParticipants(updated);
                                                     }}
                                                 >
-                                                    <FontAwesome name="times-circle" size={18} color={colors.primary} />
+                                                    <FontAwesome name="times-circle" size={18} color={colors.white} />
                                                 </TouchableOpacity>
                                             </View>
                                         )
@@ -288,16 +276,19 @@ const RideStep1 = ({
 
                                 <Text style={[utilities.textWhite, { textAlign: 'center' }]}>Description</Text>
                                 <TextInput
-                                    style={[utilities.input, {
-                                        height: 200,
+                                    style={[utilities.inputCenter, {
+                                        height: 350,
                                         textAlignVertical: 'top',
                                         fontSize: 16,
                                         paddingHorizontal: 15,
-                                        paddingVertical: 12
-                                    }]}                value={description}
+                                        paddingVertical: 12,
+                                        width: '100%'
+                                    }]}
+                                    value={description}
                                     onChangeText={setDescription}
                                     placeholder="Enter ride description"
                                     multiline
+                                    color="#fff"
                                 />
                         </View>
                 </View>
