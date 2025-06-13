@@ -92,7 +92,7 @@ There are two ways to import PSGC data into the database:
 Run the following command:
 
 ```bash
-python ./react/script/import.py
+python ./react/utils/import.py
 ```
 
 Ensure your PostgreSQL server is running and credentials match those in your `.env` file.
