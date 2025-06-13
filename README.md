@@ -85,13 +85,34 @@ NOMINATIM_VIEWBOX_TOP=12.0
 
 ### 2. 📅 Import PSGC Data
 
-Run the import script to load PSGC data into PostgreSQL:
+There are two ways to import PSGC data into the database:
+
+#### Option 1: Use the built-in import script
+
+Run the following command:
 
 ```bash
 python ./react/script/import.py
 ```
 
-Make sure your PostgreSQL server is up and running with the correct credentials from your `.env`.
+Ensure your PostgreSQL server is running and credentials match those in your `.env` file.
+
+#### Option 2: Manually download and import the official PSA dataset
+
+1. Go to [https://psa.gov.ph/classification/psgc](https://psa.gov.ph/classification/psgc)
+2. Look in the attachments section and download:
+   **"PSGC 1Q 2025 Publication Datafile"**
+3. Open the dataset in your spreadsheet editor or script and ensure the column names are renamed to:
+
+```
+'10-digit PSGC' -> psgc_code
+'Name' -> name
+'Correspondence Code' -> correspondence_code
+'Geographic Level' -> geographic_level
+```
+
+4. Remove all other columns from the dataset.
+5. Import the cleaned dataset into your PostgreSQL database.
 
 ---
 
