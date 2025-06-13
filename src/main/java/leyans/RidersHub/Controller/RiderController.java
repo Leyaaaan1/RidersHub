@@ -5,13 +5,18 @@ import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
+import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
 import leyans.RidersHub.Service.StartRideService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
+import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +32,8 @@ public class RiderController {
 
     private final RiderService riderService;
     private final RidesService ridesService;
+
+
 
 
     @Autowired
@@ -69,10 +76,7 @@ public class RiderController {
                 rideRequest.getStartLat(),
                 rideRequest.getStartLng(),
                 rideRequest.getEndLat(),
-                rideRequest.getEndLng(),
-                rideRequest.getMapImageUrl(),
-                rideRequest.getMagImageStartingLocation(),
-                rideRequest.getMagImageEndingLocation()
+                rideRequest.getEndLng()
         );
         System.out.println("Authenticated username: " + username);
         return ResponseEntity.ok(response);
@@ -116,11 +120,43 @@ public class RiderController {
         }
     }
 
+    @GetMapping("/my-rides")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getMyRides() {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            List<RideResponseDTO> rides = ridesService.findRidesByUsername(username);
+            return ResponseEntity.ok(rides);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving rides: " + e.getMessage());
+        }
+    }
+
+
+
     @GetMapping("/rides")
-    public Page<RideResponseDTO> getRides(
+    public ResponseEntity<?> getPaginatedRides(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        return ridesService.getRidesWithPagination(page, size);
+        try {
+            // Check authentication status explicitly
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            if (username == null || username.equals("anonymousUser")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Authentication required");
+            }
+
+            Page<RideResponseDTO> rides = ridesService.getPaginatedRides(page, size);
+            return ResponseEntity.ok(rides);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving rides: " + e.getMessage());
+        }
     }
+
+
 
 }

@@ -73,13 +73,6 @@ public class    RiderService {
                 .collect(Collectors.toList());
     }
 
-    public List<Rider> addRiderParticipants(List<String> usernames) {
-        if (usernames == null) return List.of();
-        return usernames.stream()
-                .map(riderRepository::findByUsername)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
 
     public Rider getRiderByUsername(String username) {
         Rider rider = riderRepository.findByUsername(username);

@@ -16,6 +16,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,6 +107,10 @@ public class StartRideService {
 
         return responseDTO;
 
+    }
+
+    public Page<Rides> getAllRides(Pageable pageable) {
+        return ridesRepository.findAll(pageable);
     }
 
 

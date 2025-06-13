@@ -11,6 +11,7 @@ import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
 import ParticipantListModal from "../components/ParticipantListModal";
+import MyRidesModal from '../components/MyRidesModal';
 
 
 
@@ -21,6 +22,7 @@ const RiderPage = ({ route , navigation}) => {
     const [riderType, setRiderType] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const [myRidesModalVisible, setMyRidesModalVisible] = useState(false);
 
 
     useEffect(() => {
@@ -139,14 +141,39 @@ const RiderPage = ({ route , navigation}) => {
             <View style={rideUtilities.customBottomContainer}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                     <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={rideUtilities.customBottomText}>Current Rides</Text>
-
+                        <TouchableOpacity>
+                            <Text style={rideUtilities.customBottomText}>Current Rides</Text>
+                        </TouchableOpacity>
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={rideUtilities.customBottomText}>Column 2</Text>
+                        <TouchableOpacity onPress={() => setMyRidesModalVisible(true)}>
+                            <Text style={rideUtilities.customBottomText}>My Rides</Text>
+                        </TouchableOpacity>
+
+                        <MyRidesModal
+                            visible={myRidesModalVisible}
+                            onClose={() => setMyRidesModalVisible(false)}
+                            token={token}
+                            onRideSelect={(ride) => {
+                                navigation.navigate('RideStep4', {
+                                    generatedRidesId: ride.generatedRidesId,
+                                    rideName: ride.ridesName,
+                                    locationName: ride.locationName,
+                                    riderType: ride.riderType,
+                                    distance: ride.distance,
+                                    date: ride.date,
+                                    startingPoint: ride.startingPointName,
+                                    endingPoint: ride.endingPointName,
+                                    participants: ride.participants,
+                                    description: ride.description,
+                                    token: token,
+                                    username: username
+                                });
+                            }}
+                        />
                     </View>
                 </View>
-                </View>
+            </View>
         </View>
     );
 };

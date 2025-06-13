@@ -38,12 +38,12 @@ public class StartRideController {
         }
     }
 
-    @GetMapping("/{rideId}/search")
-    public ResponseEntity<String> searchRide(@PathVariable Integer rideId) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        // This is just a placeholder for the actual search logic
-        // In a real application, you would implement the search logic here
-        return ResponseEntity.ok("Searching for ride with ID: " + rideId + " for user: " + username);
-    }
+//    @GetMapping("/{rideId}/search")
+//    public ResponseEntity<String> searchRide(@PathVariable Integer rideId) {
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        // This is just a placeholder for the actual search logic
+//        // In a real application, you would implement the search logic here
+//        return ResponseEntity.ok("Searching for ride with ID: " + rideId + " for user: " + username);
+//    }
 }
 

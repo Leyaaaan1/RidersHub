@@ -176,13 +176,15 @@ const RideStep4 = (props) => {
                 </View>
                 {/* Join Ride - right */}
                 <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: 10 }}>
-                    <TouchableOpacity>
-                        <View>
-                            <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
-                                Join Ride
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
+                    {username !== props.currentUsername && (
+                        <TouchableOpacity>
+                            <View>
+                                <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
+                                    Join Ride
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
 
@@ -205,6 +207,7 @@ const RideStep4 = (props) => {
                         >
                             {rideName}
                         </Text>
+
                         <Text style={{ color: '#fff', fontSize: 14, marginTop: 2 }}>Location</Text>
                         <View style={[rideUtilities.formGroup, { alignItems: 'center', marginTop: 8 }]}>
                             <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
@@ -281,48 +284,7 @@ const RideStep4 = (props) => {
                 <View>
 
 
-                {/*{participants && (*/}
-                {/*            <View style={{width: '100%', marginTop: 10, alignItems: 'flex-start'}}>*/}
-                {/*                <View style={{*/}
-                {/*                    borderWidth: 1,*/}
-                {/*                    borderColor: colors.secondary,*/}
-                {/*                    borderRadius: 8,*/}
-                {/*                    marginTop: 5,*/}
-                {/*                    width: '100%',*/}
-                {/*                    overflow: 'hidden'*/}
-                {/*                }}>*/}
-                {/*                    /!* Header *!/*/}
-                {/*                    <View style={{*/}
-                {/*                        flexDirection: 'row',*/}
-                {/*                        backgroundColor: 'rgba(76, 175, 80, 0.3)',*/}
-                {/*                        padding: 8,*/}
-                {/*                        borderBottomWidth: 1,*/}
-                {/*                        borderBottomColor: colors.secondary*/}
-                {/*                    }}>*/}
-                {/*                        <Text style={{flex: 0.8, color: '#fff', fontWeight: 'bold', textAlign: 'left'}}>Riders</Text>*/}
-                {/*                    </View>*/}
 
-                {/*                    /!* Participant rows *!/*/}
-                {/*                    {Array.isArray(participants) ?*/}
-                {/*                        participants.map((participant, index) => (*/}
-                {/*                            <View key={index} style={{*/}
-                {/*                                flexDirection: 'row',*/}
-                {/*                                padding: 8,*/}
-                {/*                                borderBottomWidth: index < participants.length - 1 ? 1 : 0,*/}
-                {/*                                borderBottomColor: 'rgba(255, 255, 255, 0.2)',*/}
-                {/*                                backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent'*/}
-                {/*                            }}>*/}
-                {/*                                <Text style={{flex: 0.2, color: '#fff', textAlign: 'left', paddingLeft: 5}}>{index + 1}</Text>*/}
-                {/*                                <Text style={{flex: 0.8, color: '#fff', textAlign: 'left'}}>{typeof participant === 'object' ? participant.username : participant}</Text>*/}
-                {/*                            </View>*/}
-                {/*                        )) :*/}
-                {/*                        <View style={{padding: 8, width: '100%'}}>*/}
-                {/*                            <Text style={{color: '#fff', textAlign: 'left'}}>{participants}</Text>*/}
-                {/*                        </View>*/}
-                {/*                    }*/}
-                {/*                </View>*/}
-                {/*            </View>*/}
-                {/*        )}*/}
                 </View>
             </ScrollView>
             <View style={rideUtilities.customBottomContainer}>
@@ -331,11 +293,17 @@ const RideStep4 = (props) => {
                         <TouchableOpacity onPress={() => setShowParticipantsModal(true)}>
                             <Text style={rideUtilities.customBottomText}>Participants</Text>
                         </TouchableOpacity>
+
                         <ParticipantListModal
                             visible={showParticipantsModal}
                             onClose={() => setShowParticipantsModal(false)}
                             participants={participants}
                         />
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <FontAwesome name="play-circle" size={40} color="#fff" style={{ marginRight: 5 }} />
+                        </View>
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <Text style={rideUtilities.customBottomText}>Column 2</Text>
