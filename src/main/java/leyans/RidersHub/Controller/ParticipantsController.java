@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/participants")
 public class ParticipantsController {
 
 
@@ -19,7 +20,7 @@ public class ParticipantsController {
         this.rideParticipantService = rideParticipantService;
     }
 
-    @PostMapping("/{rideId}/participants/{username}")
+    @PostMapping("/{rideId}/add/{username}")
     public ResponseEntity<?> addParticipant(@PathVariable("rideId") Integer generatedRidesId,
                                             @PathVariable("username") String username) {
         try {
@@ -29,7 +30,8 @@ public class ParticipantsController {
             }
 
             rideParticipantService.addParticipantToRide(generatedRidesId, username);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Participant " + username + " added to ride " + generatedRidesId);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -37,7 +39,7 @@ public class ParticipantsController {
         }
     }
 
-    @DeleteMapping("/{rideId}/participants/{username}")
+    @DeleteMapping("/{rideId}/remove/{username}")
     public ResponseEntity<?> removeParticipant(@PathVariable("rideId") Integer generatedRidesId,
                                                @PathVariable("username") String username) {
         try {
@@ -47,13 +49,16 @@ public class ParticipantsController {
             }
 
             rideParticipantService.removeParticipantFromRide(generatedRidesId, username);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok()
+                    .body("Participant " + username + " removed from ride " + generatedRidesId);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error removing participant: " + e.getMessage());
         }
     }
+
+
 
 
 

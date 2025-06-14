@@ -48,7 +48,6 @@ public class RideParticipantService {
         Rider rider = findRiderByUsername(username);
 
 
-        // Check if rider is already a participant
         if (ride.getParticipants().stream()
                 .noneMatch(p -> p.getId().equals(rider.getId()))) {
             ridesRepository.addParticipantToRide(ride.getRidesId(), rider.getId());
@@ -74,13 +73,13 @@ public class RideParticipantService {
 //        return ride.getParticipants();
 //    }
 
-    private Rides findRideById(Integer generatedRidesId) {
+    public Rides findRideById(Integer generatedRidesId) {
         return ridesRepository.findByGeneratedRidesId(generatedRidesId)
                 .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
     }
 
 
-    private Rider findRiderByUsername(String username) {
+    public Rider findRiderByUsername(String username) {
         Rider rider = riderRepository.findByUsername(username);
         if (rider == null) {
             throw new EntityNotFoundException("Rider not found with username: " + username);

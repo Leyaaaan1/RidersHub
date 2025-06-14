@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                                 "/rides/*/start",
                                 "/riders/rider-type", "/riders/all", "/riders/add", "/riders/create","/riders/search", "/riders/*/start",
                                 "/rides/**", " /riders/**" ,"/riders/current-rider-type", "/riders/**",
-                                "/location/**" ,"/riders/*/map-image"
+                                "/location/**" ,"/participants/**","/join/**","/riders/*/map-image"
                         )
                         .authenticated()
                         .anyRequest().authenticated())
