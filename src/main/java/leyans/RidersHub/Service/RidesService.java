@@ -76,7 +76,14 @@ public class RidesService {
 
         Rides newRide = new Rides();
         if (generatedRidesId == null) {
-            int randomFourDigitNumber = 1000 + (int)(Math.random() * 9000); // Generates number between 1000-9999
+            int randomFourDigitNumber;
+            boolean idExists;
+
+            do {
+                randomFourDigitNumber = 1000 + (int)(Math.random() * 9000);
+                idExists = ridesRepository.findByGeneratedRidesId(randomFourDigitNumber).isPresent();
+            } while (idExists);
+
             newRide.setGeneratedRidesId(randomFourDigitNumber);
         } else {
             newRide.setGeneratedRidesId(generatedRidesId);

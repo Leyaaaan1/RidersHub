@@ -1,16 +1,23 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine, text
+import requests
 
-# PostgreSQL credentials
-# here
+# add your PostgreSQL credentials here
+# host here
 # pass and user
-# Path to your CSV file
-csv_path = r'C:\Users\leyan\Downloads\psgc.csv'
 
-# Read CSV
-df = pd.read_csv(csv_path, encoding='ISO-8859-1')
-# Rename columns to match DB schema
+# Download directly from PSA website
+url = "https://psa.gov.ph/system/files/scd/PSGC-1Q-2025-Publication-Datafile.xlsx"
+output_path = 'psgc.xlsx'
+
+response = requests.get(url)
+with open(output_path, 'wb') as f:
+    f.write(response.content)
+
+csv_path = output_path
+
+df = pd.read_excel(csv_path)
 df = df.rename(columns={
     '10-digit PSGC': 'psgc_code',
     'Name': 'name',
@@ -18,7 +25,6 @@ df = df.rename(columns={
     'Geographic Level': 'geographic_level'
 })
 
-# Ensure code columns are strings
 df['psgc_code'] = df['psgc_code'].astype(str)
 df['correspondence_code'] = df['correspondence_code'].astype(str)
 

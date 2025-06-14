@@ -48,7 +48,6 @@ public class RideParticipantService {
         Rider rider = findRiderByUsername(username);
 
 
-        // Check if rider is already a participant
         if (ride.getParticipants().stream()
                 .noneMatch(p -> p.getId().equals(rider.getId()))) {
             ridesRepository.addParticipantToRide(ride.getRidesId(), rider.getId());

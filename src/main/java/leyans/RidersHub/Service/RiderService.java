@@ -29,15 +29,13 @@ public class    RiderService {
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private final RidesRepository ridesRepository;
 
 
-    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, PasswordEncoder passwordEncoder, RidesRepository ridesRepository) {
+
+    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, PasswordEncoder passwordEncoder) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.passwordEncoder = passwordEncoder;
-        this.ridesRepository = ridesRepository;
     }
 
     public RiderType addRiderType(String riderTypeName) {

@@ -1,4 +1,3 @@
-// Base URL for all API endpoints
 const BASE_URL = 'http://192.168.1.51:8080/riders';
 
 export const loginUser = async (username, password) => {

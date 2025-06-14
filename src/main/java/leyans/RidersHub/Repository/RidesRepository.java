@@ -30,8 +30,7 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO rides_participants (rides_id, rider_id) VALUES (:rideId, :riderId)", nativeQuery = true)
+    @Query(value = "INSERT INTO ride_participants (ride_id, rider_username) VALUES (:rideId, :riderId)", nativeQuery = true)
     void addParticipantToRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
-
 
 }
