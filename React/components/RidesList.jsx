@@ -13,7 +13,9 @@ const RidesList = ({
                        onRideSelect,
                        emptyMessage = "No rides found",
                        headerComponent = null,
-                       style = {}
+                       renderActionButton,
+                       style = {},
+
                    }) => {
     const [rides, setRides] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -139,12 +141,10 @@ const RidesList = ({
                         </View>
                     </View>
 
-                    {/* Right Side (Location) */}
 
                 </View>
 
 
-                {/* Map image (unchanged size) */}
                 {item.mapImageUrl && (
                     <Image
                         source={{ uri: item.mapImageUrl }}
@@ -159,7 +159,11 @@ const RidesList = ({
                         </Text>
                     </View>
                 )}
+                {renderActionButton && renderActionButton(item)}
+
+
             </View>
+
         </TouchableWithoutFeedback>
     );
     const renderFooter = () => {

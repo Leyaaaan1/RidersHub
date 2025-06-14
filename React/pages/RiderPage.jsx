@@ -12,6 +12,7 @@ import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
 import ParticipantListModal from "../components/ParticipantListModal";
 import MyRidesModal from '../components/MyRidesModal';
+import {createJoinRequest} from "../services/joinService";
 
 
 
@@ -28,6 +29,19 @@ const RiderPage = ({ route , navigation}) => {
     useEffect(() => {
         fetchCurrentRiderType();
     }, [token]);
+
+    const handleJoinRequest = async (rideId) => {
+        try {
+            setLoading(true);
+            const response = await createJoinRequest(token, rideId);
+            Alert.alert('Success', 'Join request sent successfully');
+        } catch (error) {
+            console.error('Error joining ride:', error);
+            Alert.alert('Error', error.message || 'Failed to join ride');
+        } finally {
+            setLoading(false);
+        }
+    };
 
 
     const fetchCurrentRiderType = async () => {
@@ -132,9 +146,23 @@ const RiderPage = ({ route , navigation}) => {
                             participants: ride.participants,
                             description: ride.description,
                             token: token,
-                            username: username
+                            username: username,
+                            currentUsername: username
                         });
                     }}
+                    renderActionButton={(ride) => (
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: colors.primary,
+                                padding: 8,
+                                borderRadius: 5,
+                                marginTop: 10
+                            }}
+                            onPress={() => handleJoinRequest(ride.generatedRidesId)}
+                        >
+                            <Text style={{ color: '#fff', textAlign: 'center' }}>Join Ride</Text>
+                        </TouchableOpacity>
+                    )}
                 />
 
             </View>

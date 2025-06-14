@@ -20,6 +20,8 @@ import WaveLine from '../../styles/waveLineComponent';
 import colors from '../../styles/colors';
 import MapImageSwapper from "../../styles/MapImageSwapper";
 import ParticipantListModal from '../ParticipantListModal';
+import JoinRequestsModal from '../JoinRequestsModal';
+
 const RideStep4 = (props) => {
     const navigation = useNavigation();
     const route = props.route || {};
@@ -65,6 +67,9 @@ const RideStep4 = (props) => {
     const [distanceState, setDistance] = useState(distance || "--");
 
     const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+
+    const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
+
     useEffect(() => {
         const getMapImage = async () => {
             console.log("useEffect running with rideId:", generatedRidesId);
@@ -306,7 +311,16 @@ const RideStep4 = (props) => {
                         </View>
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>
-                        <Text style={rideUtilities.customBottomText}>Column 2</Text>
+                        <TouchableOpacity onPress={() => setShowJoinRequestsModal(true)}>
+                            <Text style={rideUtilities.customBottomText}>Join Requests</Text>
+                        </TouchableOpacity>
+
+                        <JoinRequestsModal
+                            visible={showJoinRequestsModal}
+                            onClose={() => setShowJoinRequestsModal(false)}
+                            generatedRidesId={generatedRidesId}
+                            token={token}
+                        />
                     </View>
                 </View>
             </View>

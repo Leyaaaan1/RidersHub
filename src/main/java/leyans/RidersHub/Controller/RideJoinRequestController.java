@@ -2,11 +2,16 @@ package leyans.RidersHub.Controller;
 
 import leyans.RidersHub.Config.Security.SecurityUtils;
 import leyans.RidersHub.DTO.JoinRequestCreateDto;
+import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Service.RideJoinRequestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/join")
@@ -18,9 +23,9 @@ public class RideJoinRequestController {
         this.rideJoinRequestService = rideJoinRequestService;
     }
 
-    @PostMapping("/{rideId}/join-requests")
-    public ResponseEntity<JoinResponseDTO> createJoinRequest(
-            @PathVariable Integer rideId) {
+    @PostMapping("/{generatedRidesId}/join-requests")
+    public ResponseEntity<JoinResponseCreateDto> createJoinRequest(
+            @PathVariable Integer generatedRidesId) {
 
         ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
         if (authResponse != null) {
@@ -30,17 +35,17 @@ public class RideJoinRequestController {
         String currentUsername = SecurityUtils.getCurrentUsername();
 
         JoinRequestCreateDto createDto = new JoinRequestCreateDto();
-        createDto.setRideId(rideId);
+        createDto.setGeneratedRidesId(generatedRidesId);
         createDto.setUsername(currentUsername);
 
-        JoinResponseDTO response = rideJoinRequestService.createJoinRequest(createDto);
+        JoinResponseCreateDto response = rideJoinRequestService.createJoinRequest(createDto);
         return ResponseEntity.ok(response);
     }
 
-    //rideId is the id in the  for ride participants table,
-    @PutMapping("/{rideId}/join-requests/{username}/accept")
-    public ResponseEntity<JoinResponseDTO> acceptJoinRequest(
-            @PathVariable Integer rideId,
+    //rideId is the id in the  ride participants table,
+    @PutMapping("/{generatedRidesId}/{username}/accept")
+    public ResponseEntity<JoinResponseCreateDto> acceptJoinRequest(
+            @PathVariable Integer generatedRidesId,
             @PathVariable String username) {
 
         ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
@@ -50,10 +55,34 @@ public class RideJoinRequestController {
 
         String currentUsername = SecurityUtils.getCurrentUsername();
 
-        JoinResponseDTO response = rideJoinRequestService.acceptJoinRequest(rideId, username, currentUsername);
+        JoinResponseCreateDto response = rideJoinRequestService.acceptJoinRequest(generatedRidesId, username, currentUsername);
         return ResponseEntity.ok(response);
     }
 
 
-}
+    @GetMapping("/{generatedRidesId}/list-requests")
+    public ResponseEntity<?> getJoinRequestsByRideId(@PathVariable Integer generatedRidesId) {
+        ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
+        if (authResponse != null) {
+            return ResponseEntity.status(authResponse.getStatusCode()).build();
+        }
+
+        try {
+            List<JoinResponseDTO> requests = rideJoinRequestService.getJoinRequestsByRideId(generatedRidesId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("requests", requests);
+            response.put("count", requests.size());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: " + e.getMessage());
+        }
+    }
+
+    }
+
+
+
 
