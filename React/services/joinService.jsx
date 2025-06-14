@@ -1,71 +1,69 @@
-
 const API_BASE_URL = 'http://192.168.1.51:8080';
 console.log('Using API URL:', API_BASE_URL);
 
-export const createJoinRequest = async (token, rideId) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/join/${rideId}/join-requests`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({})
-        });
-//1644
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to create join request: ${response.status} ${errorText}`);
-        }
+// Join request services
+export const joinService = {
+    createJoinRequest: async (generatedRidesId, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/join/${generatedRidesId}/join-requests`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-        return await response.json();
-    } catch (error) {
-        console.error('Error creating join request:', error);
-        throw error;
-    }
-};
-export const getJoinRequestsByOwner = async (token, rideId) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/join/${rideId}/list-requests`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
             }
-        });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to fetch join requests: ${response.status} ${errorText}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error creating join request:', error);
+            throw error;
         }
+    },
 
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching join requests:', error);
-        throw error;
-    }
-};
+    acceptJoinRequest: async (generatedRidesId, username, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/join/${generatedRidesId}/${username}/accept`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-
-export const acceptJoinRequest = async (token, rideId, username) => {
-    try {
-        const response = await fetch(`${API_BASE_URL}/join/${rideId}/join-requests/${username}/accept`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
             }
-        });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to accept join request: ${response.status} ${errorText}`);
+            return await response.json();
+        } catch (error) {
+            console.error('Error accepting join request:', error);
+            throw error;
         }
+    },
 
-        return await response.json();
-    } catch (error) {
-        console.error('Error accepting join request:', error);
-        throw error;
+    // Get all join requests for a specific ride
+    getJoinRequestsByRideId: async (generatedRidesId, token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/join/${generatedRidesId}/list-requests`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching join requests:', error);
+            throw error;
+        }
     }
 };
-

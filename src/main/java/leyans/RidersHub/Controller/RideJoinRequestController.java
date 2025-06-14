@@ -5,7 +5,6 @@ import leyans.RidersHub.DTO.JoinRequestCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Service.RideJoinRequestService;
-import leyans.RidersHub.model.RideJoinRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +43,7 @@ public class RideJoinRequestController {
     }
 
     //rideId is the id in the  ride participants table,
-    @PutMapping("/{generatedRidesId}/join-requests/{username}/accept")
+    @PutMapping("/{generatedRidesId}/{username}/accept")
     public ResponseEntity<JoinResponseCreateDto> acceptJoinRequest(
             @PathVariable Integer generatedRidesId,
             @PathVariable String username) {
@@ -61,7 +60,7 @@ public class RideJoinRequestController {
     }
 
 
-    @GetMapping("/requests/by-ride/{generatedRidesId}")
+    @GetMapping("/{generatedRidesId}/list-requests")
     public ResponseEntity<?> getJoinRequestsByRideId(@PathVariable Integer generatedRidesId) {
         ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
         if (authResponse != null) {

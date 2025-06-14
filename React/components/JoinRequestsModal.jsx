@@ -1,135 +1,216 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, ActivityIndicator, Alert, FlatList } from 'react-native';
-import { getJoinRequestsByOwner, acceptJoinRequest } from '../services/joinService';
-import colors from "../styles/colors";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+    View,
+    Text,
+    Modal,
+    FlatList,
+    TouchableOpacity,
+    StyleSheet,
+    SafeAreaView,
+    ActivityIndicator,
+    Alert
+} from 'react-native';
+import { joinService } from '../services/joinService';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
-const JoinRequestsModal = ({ visible, onClose, rideId }) => {
+const JoinRequestsModal = ({ visible, onClose, generatedRidesId, token }) => {
     const [joinRequests, setJoinRequests] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [processing, setProcessing] = useState(false);
-    const [selectedRideId, setSelectedRideId] = useState(rideId);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (visible) {
-            fetchJoinRequests();
+        if (visible && generatedRidesId) {
+            loadJoinRequests();
         }
-    }, [visible, rideId]);
+    }, [visible, generatedRidesId]);
 
-    useEffect(() => {
-        // Update selectedRideId when rideId prop changes
-        if (rideId) {
-            setSelectedRideId(rideId);
-        }
-    }, [rideId]);
-
-    const fetchJoinRequests = async () => {
+    const loadJoinRequests = async () => {
+        setLoading(true);
+        setError(null);
         try {
-            setLoading(true);
-            const token = await AsyncStorage.getItem('userToken');
-
-            // If no rideId is provided, we'll need to get the current ride ID
-            // from the context or fetch it from the API
-            if (!selectedRideId) {
-                Alert.alert('Error', 'No ride selected');
-                setLoading(false);
-                return;
-            }
-
-            const requests = await getJoinRequestsByOwner(token, selectedRideId);
-            setJoinRequests(requests);
-        } catch (error) {
-            console.error('Error fetching join requests:', error);
-            Alert.alert('Error', 'Failed to load join requests');
+            const data = await joinService.getJoinRequestsByRideId(generatedRidesId, token);
+            // Extract the requests array from the response
+            setJoinRequests(data.requests || []);
+        } catch (err) {
+            setError('Failed to load join requests');
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleAccept = async (username) => {
+    const handleAcceptRequest = async (username) => {
         try {
-            if (!selectedRideId) {
-                Alert.alert('Error', 'No ride selected');
-                return;
-            }
-
-            setProcessing(true);
-            const token = await AsyncStorage.getItem('userToken');
-            await acceptJoinRequest(token, selectedRideId, username);
-
-            // Remove the accepted request from the list
-            setJoinRequests(joinRequests.filter(req => req.username !== username));
-            Alert.alert('Success', `${username} has been added to the ride`);
-        } catch (error) {
-            console.error('Error accepting join request:', error);
+            await joinService.acceptJoinRequest(generatedRidesId, username, token);
+            Alert.alert('Success', 'Join request accepted');
+            // Refresh the list
+            loadJoinRequests();
+        } catch (err) {
             Alert.alert('Error', 'Failed to accept join request');
-        } finally {
-            setProcessing(false);
+            console.error(err);
         }
     };
 
-    return (
-        <Modal visible={visible} animationType="slide" transparent>
-            <View style={{
-                flex: 1,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                justifyContent: 'center',
-                alignItems: 'center'
-            }}>
-                <View style={{
-                    backgroundColor: '#222',
-                    borderRadius: 12,
-                    padding: 20,
-                    width: '90%',
-                    maxHeight: '80%'
-                }}>
-                    <TouchableOpacity onPress={onClose} style={{ alignSelf: 'flex-end', marginBottom: 10 }}>
-                        <Text style={{ color: colors.white, fontWeight: 'bold' }}>Close</Text>
-                    </TouchableOpacity>
-                    <Text style={{ color: colors.white, fontSize: 18, marginBottom: 10 }}>Join Requests</Text>
-
-                    {loading ? (
-                        <ActivityIndicator size="large" color="#fff" />
-                    ) : joinRequests.length > 0 ? (
-                        <View style={{ borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', borderRadius: 6, overflow: 'hidden' }}>
-                            <View style={{ flexDirection: 'row', backgroundColor: 'rgba(255,255,255,0.10)', padding: 8 }}>
-                                <Text style={{ flex: 0.6, color: '#fff', fontWeight: 'bold' }}>Username</Text>
-                                <Text style={{ flex: 0.4, color: '#fff', fontWeight: 'bold', textAlign: 'center' }}>Action</Text>
-                            </View>
-                            {joinRequests.map((request, index) => (
-                                <View key={index} style={{
-                                    flexDirection: 'row',
-                                    padding: 8,
-                                    alignItems: 'center',
-                                    borderBottomWidth: index < joinRequests.length - 1 ? 1 : 0,
-                                    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
-                                    backgroundColor: index % 2 === 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent'
-                                }}>
-                                    <Text style={{ flex: 0.6, color: '#fff' }}>{request.username}</Text>
-                                    <View style={{ flex: 0.4, alignItems: 'center' }}>
-                                        <TouchableOpacity
-                                            onPress={() => handleAccept(request.username)}
-                                            disabled={processing}
-                                            style={{
-                                                backgroundColor: '#2a9d8f',
-                                                paddingVertical: 6,
-                                                paddingHorizontal: 12,
-                                                borderRadius: 4
-                                            }}
-                                        >
-                                            <Text style={{ color: '#fff' }}>Accept</Text>
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
-                            ))}
-                        </View>
-                    ) : (
-                        <Text style={{ color: '#fff', textAlign: 'center' }}>No pending join requests</Text>
-                    )}
-                </View>
+    const renderRequestItem = ({ item }) => (
+        <View style={styles.requestItem}>
+            <View style={styles.requestInfo}>
+                <Text style={styles.username}>{item.username}</Text>
+                <Text style={styles.requestDate}>
+                    Requested: {new Date(item.requestDate).toLocaleString()}
+                </Text>
             </View>
+            <TouchableOpacity
+                style={styles.acceptButton}
+                onPress={() => handleAcceptRequest(item.username)}
+            >
+                <Text style={styles.acceptButtonText}>Accept</Text>
+            </TouchableOpacity>
+        </View>
+    );
+
+    const renderEmpty = () => (
+        <View style={styles.emptyContainer}>
+            <Icon name="inbox" size={50} color="#ccc" />
+            <Text style={styles.emptyText}>No join requests yet</Text>
+        </View>
+    );
+
+    return (
+        <Modal
+            visible={visible}
+            animationType="slide"
+            transparent={false}
+            onRequestClose={onClose}
+        >
+            <SafeAreaView style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>Join Requests</Text>
+                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                        <Icon name="close" size={24} color="#000" />
+                    </TouchableOpacity>
+                </View>
+
+                {error ? (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity
+                            style={styles.retryButton}
+                            onPress={loadJoinRequests}
+                        >
+                            <Text style={styles.retryButtonText}>Retry</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={joinRequests}
+                        renderItem={renderRequestItem}
+                        keyExtractor={(item) => `${item.username}-${item.requestDate}`}
+                        ListEmptyComponent={loading ? null : renderEmpty}
+                        contentContainerStyle={styles.listContainer}
+                        showsVerticalScrollIndicator={false}
+                        ListFooterComponent={loading ? (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="large" color="#0066cc" />
+                            </View>
+                        ) : null}
+                    />
+                )}
+            </SafeAreaView>
         </Modal>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    closeButton: {
+        padding: 5,
+    },
+    listContainer: {
+        padding: 15,
+        flexGrow: 1,
+    },
+    requestItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    requestInfo: {
+        flex: 1,
+    },
+    username: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    requestDate: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 5,
+    },
+    acceptButton: {
+        backgroundColor: '#0066cc',
+        paddingHorizontal: 15,
+        paddingVertical: 8,
+        borderRadius: 5,
+    },
+    acceptButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 10,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+    errorText: {
+        fontSize: 16,
+        color: 'red',
+        marginBottom: 10,
+    },
+    retryButton: {
+        backgroundColor: '#0066cc',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+        marginTop: 15,
+    },
+    retryButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    loadingContainer: {
+        padding: 20,
+        alignItems: 'center',
+    },
+});
 
 export default JoinRequestsModal;
