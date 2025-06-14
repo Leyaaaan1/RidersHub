@@ -39,7 +39,7 @@ const utilities = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
          backgroundColor: "#000000",
-        height: 70,
+        height: 82,
         paddingVertical: 12,
         paddingHorizontal: 15,
     },
@@ -159,6 +159,13 @@ const utilities = StyleSheet.create({
     inputCenter: {
         borderWidth: 1,
         borderColor: colors.primary,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        alignSelf: 'center',
+        width: '80%',
+    },
+    inputCenterDescription: {
         borderRadius: 8,
         padding: 12,
         marginBottom: 16,

@@ -10,7 +10,6 @@ import leyans.RidersHub.model.PsgcData;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderLocation;
 import leyans.RidersHub.model.StartedRide;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -29,7 +28,6 @@ public class RideLocationService {
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
     private final RiderRepository riderRepository;
-    private final KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate;
 
     private final PsgcDataRepository psgcDataRepository;
     private final NominatimService nominatimService;
@@ -39,11 +37,10 @@ public class RideLocationService {
 
     @Autowired
     public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo, RiderRepository riderRepository, KafkaTemplate<Object, LocationUpdateRequestDTO> kafkaTemplate, PsgcDataRepository psgcDataRepository, NominatimService nominatimService, LocationService locationService) {
+                               RiderLocationRepository locationRepo, RiderRepository riderRepository,  PsgcDataRepository psgcDataRepository, NominatimService nominatimService, LocationService locationService) {
         this.startedRideRepo = startedRideRepo;
         this.locationRepo = locationRepo;
         this.riderRepository = riderRepository;
-        this.kafkaTemplate = kafkaTemplate;
         this.psgcDataRepository = psgcDataRepository;
         this.nominatimService = nominatimService;
         this.locationService = locationService;
@@ -121,7 +118,6 @@ public class RideLocationService {
 //        }
 
         // Send Kafka message
-        kafkaTemplate.send("rider-locations", locationDTO);
 
         return locationDTO;
     }

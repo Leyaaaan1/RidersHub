@@ -26,35 +26,12 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
     Page<Rides> findAll(Pageable pageable);
 
-    @Query("SELECT r FROM Rides r WHERE r.generatedRidesId = :generatedRidesId")
-    Optional<Rides> findByGenerateid(@Param("generatedRidesId") Integer generatedRidesId);
-    @Query("SELECT r FROM Rides r WHERE r.ridesName = :ridesName")
-    Optional<Rides> findByRidesName(@Param("ridesName") String ridesName);
-
-    @Query("SELECT p FROM Rides r JOIN r.participants p WHERE r.ridesId = :rideId")
-    List<Rider> findParticipantsByRideId(@Param("rideId") Integer rideId);
-    @Query("SELECT COUNT(p) > 0 FROM Rides r JOIN r.participants p WHERE r.ridesId = :rideId AND p.id = :riderId")
-    boolean isRiderParticipantInRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
-
-    @Query("SELECT p FROM Rides r JOIN r.participants p WHERE r.ridesId = :rideId AND p.id = :riderId")
-    Optional<Rider> findRiderByIdInRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
-    @Query("SELECT COUNT(sr) > 0 FROM StartedRide sr WHERE sr.ride.ridesId = :rideId")
-    boolean isRideStarted(@Param("rideId") Integer rideId);
-
-    @Query("SELECT COUNT(p) FROM Rides r JOIN r.participants p WHERE r.ridesId = :rideId")
-    Long countParticipantsByRideId(@Param("rideId") Integer rideId);
-
-
-    // subject to change since schema is using username to rider_id
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO ride_participants (ride_id, rider_username) VALUES (:rideId, :username)", nativeQuery = true)
-    void addParticipantToRide(@Param("rideId") Integer rideId, @Param("username") String username);
-
+    List<Rides> findByUsername_Username(String username);
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM ride_participants WHERE ride_id = :rideId AND rider_username = :username", nativeQuery = true)
-    void removeParticipantFromRide(@Param("rideId") Integer rideId, @Param("username") String username);
+    @Query(value = "INSERT INTO rides_participants (rides_id, rider_id) VALUES (:rideId, :riderId)", nativeQuery = true)
+    void addParticipantToRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
+
 
 }

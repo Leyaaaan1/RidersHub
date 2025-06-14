@@ -177,6 +177,7 @@ const CreateRide = ({ route, navigation }) => {
             setEndingPoint(location.display_name.split(',')[0] || startingPoint);
         }
 
+        // Set the display name as search query without triggering a new search
         setSearchQuery(location.display_name);
         setSearchResults([]);
         setMapRegion({
@@ -321,7 +322,14 @@ const CreateRide = ({ route, navigation }) => {
         setCurrentStep(3);
     };
 
-    return (
+    const handleSearchInputChange = (text) => {
+        setSearchQuery(text);
+        if (locationSelected) {
+            setLocationSelected(false);
+        }
+    }
+
+            return (
         <ScrollView contentContainerStyle={utilities.container}>
             {currentStep === 1 && (
                 <RideStep1
@@ -353,6 +361,7 @@ const CreateRide = ({ route, navigation }) => {
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     handleLocationSelect={handleLocationSelect}
+                    handleSearchInputChange={handleSearchInputChange}
                     webViewRef={webViewRef}
                     latitude={latitude}
                     longitude={longitude}
@@ -382,6 +391,7 @@ const CreateRide = ({ route, navigation }) => {
                     setStartingPoint={setStartingPoint}
                     endingPoint={endingPoint}
                     setEndingPoint={setEndingPoint}
+                    handleSearchInputChange={handleSearchInputChange}
                     prevStep={prevStep}
                     nextStep={nextStep}
                     handleCreateRide={handleCreateRide}

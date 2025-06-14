@@ -10,6 +10,8 @@ import {getCurrentRiderType, getRideDetails} from '../services/rideService';
 import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
+import ParticipantListModal from "../components/ParticipantListModal";
+import MyRidesModal from '../components/MyRidesModal';
 
 
 
@@ -20,6 +22,7 @@ const RiderPage = ({ route , navigation}) => {
     const [riderType, setRiderType] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const [myRidesModalVisible, setMyRidesModalVisible] = useState(false);
 
 
     useEffect(() => {
@@ -82,9 +85,7 @@ const RiderPage = ({ route , navigation}) => {
                                     borderRadius: 5,
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    minWidth: 80,
                                     height: 40,
-                                    marginRight: 10, // Add some space to the right
                                 }
                             ]}
                             onPress={() => {
@@ -114,7 +115,6 @@ const RiderPage = ({ route , navigation}) => {
 
 
 
-
             <View style={riderPageUtils.contentContainer}>
                 <RidesList
                     token={token}
@@ -139,11 +139,40 @@ const RiderPage = ({ route , navigation}) => {
 
             </View>
             <View style={rideUtilities.customBottomContainer}>
-                <Text style={rideUtilities.customBottomText}>
-                    Ride Summary
-                </Text>
-                <Text style={rideUtilities.customBottomSubText}>
-                </Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <TouchableOpacity>
+                            <Text style={rideUtilities.customBottomText}>Current Rides</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={{ flex: 1, alignItems: 'center' }}>
+                        <TouchableOpacity onPress={() => setMyRidesModalVisible(true)}>
+                            <Text style={rideUtilities.customBottomText}>My Rides</Text>
+                        </TouchableOpacity>
+
+                        <MyRidesModal
+                            visible={myRidesModalVisible}
+                            onClose={() => setMyRidesModalVisible(false)}
+                            token={token}
+                            onRideSelect={(ride) => {
+                                navigation.navigate('RideStep4', {
+                                    generatedRidesId: ride.generatedRidesId,
+                                    rideName: ride.ridesName,
+                                    locationName: ride.locationName,
+                                    riderType: ride.riderType,
+                                    distance: ride.distance,
+                                    date: ride.date,
+                                    startingPoint: ride.startingPointName,
+                                    endingPoint: ride.endingPointName,
+                                    participants: ride.participants,
+                                    description: ride.description,
+                                    token: token,
+                                    username: username
+                                });
+                            }}
+                        />
+                    </View>
+                </View>
             </View>
         </View>
     );

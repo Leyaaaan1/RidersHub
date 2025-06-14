@@ -16,7 +16,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,18 +35,15 @@ public class StartRideService {
     private final StartedRideRepository startedRideRepository;
 
     private final RiderRepository riderRepository;
-    private final KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate;
 
 
 
     @Autowired
     public StartRideService(RidesRepository ridesRepository,
-                            StartedRideRepository startedRideRepository, RiderRepository riderRepository,
-                            KafkaTemplate<Object, StartRideResponseDTO> kafkaTemplate) {
+                            StartedRideRepository startedRideRepository, RiderRepository riderRepository) {
         this.ridesRepository = ridesRepository;
         this.startedRideRepository = startedRideRepository;
         this.riderRepository = riderRepository;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
 
@@ -106,10 +104,13 @@ public class StartRideService {
                 latitude,
                 started.getStartTime());
 
-        kafkaTemplate.send("ride-started", responseDTO);
 
         return responseDTO;
 
+    }
+
+    public Page<Rides> getAllRides(Pageable pageable) {
+        return ridesRepository.findAll(pageable);
     }
 
 

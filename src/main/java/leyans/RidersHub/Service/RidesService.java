@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,36 +25,34 @@ public class RidesService {
 
     private final RidesRepository ridesRepository;
 
-    private final KafkaTemplate<Object, RideResponseDTO> kafkaTemplate;
 
     @Autowired
     private final LocationService locationService;
 
     private final RiderService riderService;
 
-    private final MapImageService mapImageService;
     private final MapboxService mapboxService;
 
+    private final RideParticipantService rideParticipantService;
 
     @Autowired
     public RidesService(RidesRepository ridesRepository,
-                        KafkaTemplate<Object, RideResponseDTO> kafkaTemplate,
-                        LocationService locationService, RiderService riderService, MapImageService mapImageService, MapboxService mapboxService) {
+
+                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService) {
 
         this.ridesRepository = ridesRepository;
-        this.kafkaTemplate = kafkaTemplate;
         this.riderService = riderService;
         this.locationService = locationService;
-        this.mapImageService = mapImageService;
         this.mapboxService = mapboxService;
+        this.rideParticipantService = rideParticipantService;
     }
 
     @Transactional
     public RideResponseDTO createRide( Integer generatedRidesId, String creatorUsername, String ridesName, String locationName, String riderType, Integer distance, LocalDateTime date,
                                       List<String> participantUsernames, String description,
                                       double latitude, double longitude, double startLatitude,
-                                      double startLongitude, double endLatitude, double endLongitude, String mapImageUrl,
-                                       String magImageStartingLocation, String magImageEndingLocation) {
+                                      double startLongitude, double endLatitude, double endLongitude
+                                       ) {
 
         String imageUrl = mapboxService.getStaticMapImageUrl(longitude, latitude);
         String startImageUrl = mapboxService.getStaticMapImageUrl(startLongitude, startLatitude);
@@ -65,7 +62,7 @@ public class RidesService {
 
         Rider creator = riderService.getRiderByUsername(creatorUsername);
         RiderType rideType = riderService.getRiderTypeByName(riderType);
-        List<Rider> participants = riderService.addRiderParticipants(participantUsernames);
+        List<Rider> participants = rideParticipantService.addRiderParticipants(participantUsernames);
 
         Point rideLocation = locationService.createPoint(longitude, latitude);
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
@@ -110,7 +107,6 @@ public class RidesService {
         }
 
         RideResponseDTO response = mapToResponseDTO(newRide);
-       kafkaTemplate.send("location", response);
         return response;
     }
 
@@ -142,23 +138,37 @@ public class RidesService {
 
     @Transactional
     public String getRideMapImageUrlById(Integer generatedRidesId) {
-        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
         return ride.getMapImageUrl();
     }
 
     @Transactional
     public RideResponseDTO findRideByGeneratedId(Integer generatedRidesId) {
-        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
         return mapToResponseDTO(ride);
     }
 
-    public Page<RideResponseDTO> getRidesWithPagination(int page, int size) {
+    @Transactional
+    public List<RideResponseDTO> findRidesByUsername(String username) {
+        List<Rides> rides = ridesRepository.findByUsername_Username(username);
+        return rides.stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+    }
+
+
+
+    public Page<RideResponseDTO> getPaginatedRides(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Rides> ridesPage = ridesRepository.findAll(pageable);
-
         return ridesPage.map(this::mapToResponseDTO);
+    }
+
+
+    @Transactional
+    public Rides findRideEntityByGeneratedId(Integer generatedRidesId) {
+        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
     }
 
 
