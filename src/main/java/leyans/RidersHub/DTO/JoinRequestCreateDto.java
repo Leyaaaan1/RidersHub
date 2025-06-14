@@ -1,18 +1,18 @@
 package leyans.RidersHub.DTO;
 
 public class JoinRequestCreateDto {
-    private Integer rideId;
+    private Integer generatedRidesId;
     private String username;
 
     public JoinRequestCreateDto() {
     }
 
-    public Integer getRideId() {
-        return rideId;
+    public Integer getGeneratedRidesId() {
+        return generatedRidesId;
     }
 
-    public void setRideId(Integer rideId) {
-        this.rideId = rideId;
+    public void setGeneratedRidesId(Integer generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
     }
 
     public String getUsername() {

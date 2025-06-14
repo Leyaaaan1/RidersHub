@@ -1,19 +1,9 @@
-package leyans.RidersHub.DTO.Response;
+package leyans.RidersHub.DTO;
 
-public class JoinResponseDTO {
+public class JoinRequestDTO {
 
-    private Integer id;
     private Integer generatedRidesId;
     private String username;
-
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public Integer getGeneratedRidesId() {
         return generatedRidesId;

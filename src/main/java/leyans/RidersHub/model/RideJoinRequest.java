@@ -14,8 +14,8 @@ public class RideJoinRequest {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "rides_id", nullable = false)
-    private Rides ride;
+    @JoinColumn(name = "generatedRidesId", referencedColumnName = "generatedRidesId", nullable = false)
+    private Rides generatedRidesId;
 
     @ManyToOne
     @JoinColumn(name = "rider_id", nullable = false)
@@ -25,24 +25,19 @@ public class RideJoinRequest {
     public RideJoinRequest() {
 
     }
-    public RideJoinRequest(Integer id, Rides ride, Rider rider) {
+    public RideJoinRequest(Integer id, Rider rider, Rides generatedRidesId) {
         this.id = id;
-        this.ride = ride;
         this.rider = rider;
+        this.generatedRidesId = generatedRidesId;
     }
 
 
-
-    public enum RequestStatus {
-       PENDING, ACCEPTED, REJECTED
+    public Rides getGeneratedRidesId() {
+        return generatedRidesId;
     }
 
-    public Rides getRide() {
-        return ride;
-    }
-
-    public void setRide(Rides ride) {
-        this.ride = ride;
+    public void setGeneratedRidesId(Rides generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
     }
 
     public Integer getId() {

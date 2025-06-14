@@ -24,10 +24,32 @@ export const createJoinRequest = async (token, rideId) => {
         throw error;
     }
 };
+export const getJoinRequestsByOwner = async (token, rideId) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/join/${rideId}/list-requests`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch join requests: ${response.status} ${errorText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching join requests:', error);
+        throw error;
+    }
+};
+
 
 export const acceptJoinRequest = async (token, rideId, username) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/rides/${rideId}/join-requests/${username}/accept`, {
+        const response = await fetch(`${API_BASE_URL}/join/${rideId}/join-requests/${username}/accept`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -46,3 +68,4 @@ export const acceptJoinRequest = async (token, rideId, username) => {
         throw error;
     }
 };
+
