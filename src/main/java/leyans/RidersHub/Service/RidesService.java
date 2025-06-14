@@ -138,15 +138,13 @@ public class RidesService {
 
     @Transactional
     public String getRideMapImageUrlById(Integer generatedRidesId) {
-        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
         return ride.getMapImageUrl();
     }
 
     @Transactional
     public RideResponseDTO findRideByGeneratedId(Integer generatedRidesId) {
-        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
         return mapToResponseDTO(ride);
     }
 
@@ -166,9 +164,12 @@ public class RidesService {
         return ridesPage.map(this::mapToResponseDTO);
     }
 
-//    public Page<Rides> getAllRides(Pageable pageable) {
-//        return ridesRepository.findAll(pageable);
-//    }
+
+    @Transactional
+    public Rides findRideEntityByGeneratedId(Integer generatedRidesId) {
+        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+    }
 
 
 }

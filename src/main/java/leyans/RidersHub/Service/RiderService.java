@@ -1,11 +1,14 @@
 package leyans.RidersHub.Service;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.RiderDTO;
 import leyans.RidersHub.Repository.RiderTypeRepository;
+import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
+import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,11 +29,15 @@ public class    RiderService {
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private final RidesRepository ridesRepository;
 
-    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, PasswordEncoder passwordEncoder) {
+
+    public RiderService(RiderRepository riderRepository, RiderTypeRepository riderTypeRepository, PasswordEncoder passwordEncoder, RidesRepository ridesRepository) {
         this.riderRepository = riderRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.passwordEncoder = passwordEncoder;
+        this.ridesRepository = ridesRepository;
     }
 
     public RiderType addRiderType(String riderTypeName) {

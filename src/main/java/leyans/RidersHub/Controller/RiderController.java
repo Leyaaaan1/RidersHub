@@ -1,6 +1,7 @@
 package leyans.RidersHub.Controller;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import leyans.RidersHub.Config.Security.SecurityUtils;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.LocationResponseDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
@@ -59,7 +60,7 @@ public class RiderController {
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = SecurityUtils.getCurrentUsername();
 
         RideResponseDTO response = ridesService.createRide(
                 rideRequest.getGeneratedRidesId(),
@@ -141,15 +142,13 @@ public class RiderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         try {
-            // Check authentication status explicitly
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            if (username == null || username.equals("anonymousUser")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Authentication required");
-            }
+                ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
+                if (authResponse != null) {
+                    return authResponse;
+                }
 
-            Page<RideResponseDTO> rides = ridesService.getPaginatedRides(page, size);
-            return ResponseEntity.ok(rides);
+                Page<RideResponseDTO> rides = ridesService.getPaginatedRides(page, size);
+                return ResponseEntity.ok(rides);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
