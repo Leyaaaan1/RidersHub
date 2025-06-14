@@ -1,5 +1,6 @@
 package leyans.RidersHub.Service;
 
+import leyans.RidersHub.Config.Security.SecurityUtils;
 import leyans.RidersHub.DTO.JoinRequestCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Repository.RideJoinRequestRepository;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RideJoinRequestService {
@@ -100,6 +103,23 @@ public class RideJoinRequestService {
         JoinResponseDTO responseDTO = convertToDTO(request);
         rideJoinRequestRepository.delete(request);
         return responseDTO;
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<JoinResponseDTO> getJoinRequestsByOwner(Integer rideId, String username) {
+        Rides ride = ridesRepository.findById(rideId)
+                .orElseThrow(() -> new RuntimeException("Ride not found"));
+
+        if (!ride.getUsername().getUsername().equals(username)) {
+            throw new RuntimeException("Only the ride owner can view join requests");
+        }
+
+        List<RideJoinRequest> requests = rideJoinRequestRepository.findByRide_RidesId(rideId);
+
+        return requests.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
 
