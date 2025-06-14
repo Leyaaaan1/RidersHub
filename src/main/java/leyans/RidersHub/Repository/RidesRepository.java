@@ -28,6 +28,8 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
     List<Rides> findByUsername_Username(String username);
 
+
+
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO ride_participants (ride_id, rider_username) VALUES (:rideId, :riderId)", nativeQuery = true)
