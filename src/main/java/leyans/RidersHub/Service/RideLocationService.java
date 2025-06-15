@@ -1,15 +1,9 @@
 package leyans.RidersHub.Service;
 
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
-import leyans.RidersHub.Repository.PsgcDataRepository;
-import leyans.RidersHub.Repository.RiderLocationRepository;
-import leyans.RidersHub.Repository.RiderRepository;
-import leyans.RidersHub.Repository.StartedRideRepository;
+import leyans.RidersHub.Repository.*;
 import leyans.RidersHub.Service.MapService.NominatimService;
-import leyans.RidersHub.model.PsgcData;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.RiderLocation;
-import leyans.RidersHub.model.StartedRide;
+import leyans.RidersHub.model.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -25,49 +19,42 @@ public class RideLocationService {
 
     private final StartedRideRepository startedRideRepo;
     private final RiderLocationRepository locationRepo;
-    private final GeometryFactory geometryFactory = new GeometryFactory();
-
-    private final RiderRepository riderRepository;
 
     private final PsgcDataRepository psgcDataRepository;
-    private final NominatimService nominatimService;
 
     private final LocationService locationService;
+
+    private final RideParticipantService rideParticipantService;
+
 
 
     @Autowired
     public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo, RiderRepository riderRepository,  PsgcDataRepository psgcDataRepository, NominatimService nominatimService, LocationService locationService) {
+                               RiderLocationRepository locationRepo, PsgcDataRepository psgcDataRepository, LocationService locationService, RideParticipantService rideParticipantService) {
         this.startedRideRepo = startedRideRepo;
         this.locationRepo = locationRepo;
-        this.riderRepository = riderRepository;
         this.psgcDataRepository = psgcDataRepository;
-        this.nominatimService = nominatimService;
         this.locationService = locationService;
+        this.rideParticipantService = rideParticipantService;
     }
 
-    /**
-     * Record rider's location update and compute distance via PostGIS.
-     */
-    @Transactional
-    public LocationUpdateRequestDTO updateLocation(Integer rideId, double latitude, double longitude) {
 
-        StartedRide started = startedRideRepo.findById(rideId)
-                .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + rideId));
+    @Transactional
+    public LocationUpdateRequestDTO updateLocation(Integer generatedRidesId, double latitude, double longitude) {
+
+        StartedRide started = startedRideRepo.findByGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + generatedRidesId));
 
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Rider rider = riderRepository.findByUsername(username);
+        Rider rider = rideParticipantService.findRiderByUsername(username);
+
         if (!started.getParticipants().contains(rider)) {
             throw new IllegalArgumentException("User is not a participant in this ride");
         }
-
-
-        //Current location of the rider
         Point userPoint = locationService.createPoint(longitude, latitude);
-
-
         String barangayName = locationService.resolveBarangayName(null, latitude, longitude);
+
         String locationName = null;
         if (barangayName != null) {
             List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
@@ -85,60 +72,61 @@ public class RideLocationService {
         double distanceMeters = locationRepo.getDistanceBetweenPoints(userPoint, startPoint);
 
 
+        if (userPoint == null) {
+            throw new IllegalArgumentException("User location point cannot be null");
+        }
+
+// Create and populate the rider location
         RiderLocation loc = new RiderLocation();
         loc.setStartedRide(started);
         loc.setUsername(rider);
         loc.setLocation(userPoint);
-
         loc.setTimestamp(LocalDateTime.now());
         loc.setDistanceMeters(distanceMeters);
         if (locationName != null) {
             loc.setLocationName(locationName);
         }
-        loc = locationRepo.save(loc);
 
+        try {
+            loc = locationRepo.save(loc);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save rider location", e);
+        }
 
         LocationUpdateRequestDTO locationDTO = new LocationUpdateRequestDTO(
-                rideId,
+                generatedRidesId,
                 username,
                 latitude,
                 longitude,
                 locationName,
                 distanceMeters,
                 loc.getTimestamp()
-
         );
 
-//        try {
-//            String locationJson = objectMapper.writeValueAsString(locationDTO);
-//            String redisKey = "rider_location:" + rider.getUsername();
-//            stringRedisTemplate.opsForValue().set(redisKey, locationJson, 3, TimeUnit.MINUTES);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to serialize location update", e);
-//        }
-
-        // Send Kafka message
 
         return locationDTO;
     }
 
-
-
-//    public  LocationUpdateRequestDTO getRiderLocation(String username) {
+//    @Transactional(readOnly = true)
+//    public List<LocationUpdateRequestDTO> getAllRiderLocations(Integer generatedRidesId) {
+//        StartedRide started = startedRideRepo.findByGeneratedRidesId(generatedRidesId)
+//                .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + generatedRidesId));
 //
-//        String redisKey = "rider_location:" + username;
-//        String locationJson = stringRedisTemplate.opsForValue().get(redisKey);
+//        // Get the latest location for each rider in this ride
+//        return locationRepo.findLatestLocationsForRide(generatedRidesId).stream()
+//                .map(loc -> new LocationUpdateRequestDTO(
+//                        generatedRidesId,
+//                        loc.getUsername().getUsername(),
+//                        loc.getLocation().getY(), // latitude
+//                        loc.getLocation().getX(), // longitude
+//                        loc.getLocationName(),
+//                        loc.getDistanceMeters(),
+//                        loc.getTimestamp()
+//                ))
 //
-//        if (locationJson == null) {
-//            throw new RuntimeException("No location found for rider: " + username);
-//        }
-//        try {
-//            return objectMapper.readValue(locationJson, LocationUpdateRequestDTO.class);
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to deserialize rider location", e);
-//        }
 //
-//    }
+//
+////    }
 
 
 

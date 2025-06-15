@@ -5,7 +5,7 @@ import leyans.RidersHub.model.Rider;
 import java.time.LocalDateTime;
 
 public class LocationUpdateRequestDTO {
-    private Integer rideId;
+    private Integer generatedRidesId;
     private double latitude;
     private double longitude;
 
@@ -15,8 +15,8 @@ public class LocationUpdateRequestDTO {
     private String initiator;
 
 
-    public LocationUpdateRequestDTO(Integer rideId, String initiator, double latitude, double longitude, String locationName, double distanceMeters, LocalDateTime timestamp) {
-        this.rideId = rideId;
+    public LocationUpdateRequestDTO(Integer generatedRidesId, String initiator, double latitude, double longitude, String locationName, double distanceMeters, LocalDateTime timestamp) {
+        this.generatedRidesId = generatedRidesId;
         this.initiator = initiator;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -40,12 +40,13 @@ public class LocationUpdateRequestDTO {
         this.initiator = initiator;
     }
 
-    public Integer getRideId() {
-        return rideId;
+
+    public Integer getGeneratedRidesId() {
+        return generatedRidesId;
     }
 
-    public void setRideId(Integer rideId) {
-        this.rideId = rideId;
+    public void setGeneratedRidesId(Integer generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
     }
 
     public double getLatitude() {
