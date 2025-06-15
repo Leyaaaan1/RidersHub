@@ -86,8 +86,17 @@ public class RideJoinRequestService {
     }
 
     @Transactional(readOnly = true)
-    public List<JoinResponseDTO> getJoinRequestsByRideId(Integer generatedRidesId) {
+    public List<JoinResponseDTO> getJoinRequestsByRideId(Integer generatedRidesId, String requestingUsername) {
         try {
+            // Find the ride first
+            Rides ride = rideParticipantService.findRideById(generatedRidesId);
+
+            // Check if the requesting user is the owner of the ride
+            if (!ride.getUsername().getUsername().equals(requestingUsername)) {
+                throw new RuntimeException("Only the ride owner can view join requests");
+            }
+
+            // If authorized, proceed to get join requests
             List<RideJoinRequest> requests = rideJoinRequestRepository.findByGeneratedRidesId_GeneratedRidesId(generatedRidesId);
             return requests.stream()
                     .map(this::convertToJoinResponseDTO)

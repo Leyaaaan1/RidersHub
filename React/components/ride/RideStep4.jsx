@@ -19,6 +19,8 @@ import {fetchRideMapImage, getRideDetails} from '../../services/rideService';
 import colors from '../../styles/colors';
 import MapImageSwapper from "../../styles/MapImageSwapper";
 import ParticipantListModal from '../ParticipantListModal';
+import useJoinRide from './RideHandler';
+
 const RideStep4 = (props) => {
     const navigation = useNavigation();
     const route = props.route || {};
@@ -68,6 +70,21 @@ const RideStep4 = (props) => {
     const [distanceState, setDistance] = useState(distance || "--");
 
     const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+
+    const { loading: joiningRide, joinRide } = useJoinRide();
+
+
+
+    const handleJoinRide = () => {
+        if (!generatedRidesId || !token) {
+            Alert.alert("Error", "Missing ride information. Please try again.");
+            return;
+        }
+        joinRide(generatedRidesId, token, () => {
+            // Optional callback after successful join
+            console.log("Successfully requested to join ride");
+        });
+    };
 
     useEffect(() => {
         const getMapImage = async () => {
@@ -132,7 +149,7 @@ const RideStep4 = (props) => {
             <StatusBar backgroundColor={colors.black} barStyle="light-content" translucent={false} />
 
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 10,  backgroundColor: "#000000"}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 10,  backgroundColor: "#000000" }}>
                 {/* Back button - left */}
                 <View style={{ flex: 1, alignItems: 'flex-start' }}>
                     <TouchableOpacity
@@ -169,8 +186,8 @@ const RideStep4 = (props) => {
                 </View>
                 {/* Join Ride - right */}
                 <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: 10 }}>
-                    {username !== props.currentUsername ? (
-                        <TouchableOpacity>
+                    {username !== currentUsername ? (
+                        <TouchableOpacity onPress={() => handleJoinRide()}>
                             <View>
                                 <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
                                     Join Ride
@@ -194,7 +211,7 @@ const RideStep4 = (props) => {
 
                 showsVerticalScrollIndicator={false}
             >
-                <View style={{ backgroundColor: "#151515", borderWidth: 2,  borderRadius: 12, margin: 10, padding: 10 }}>
+                <View style={{ backgroundColor: "#151515", borderWidth: 2, padding: 10}}>
 
 
                     <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>
@@ -253,28 +270,7 @@ const RideStep4 = (props) => {
                         </View>
                     </View>
                 </View>
-
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start', width: '100%', marginTop: 10 }}>
-                        {startMapImage || endMapImage ? (
-                            <MapImageSwapper
-                                startImage={startMapImage}
-                                endImage={endMapImage}
-                                startPoint={startingPoint}
-                                endPoint={endingPoint}
-                                imageStyle={[utilities.oblongImage, { width: 300, height: 250 }]}
-                            />
-                        ) : (
-                            <Text style={{ color: '#fff', textAlign: 'center', width: '100%' }}>No start or end map available</Text>
-                        )}
-                    </View>
-                            {/*<Text style={[utilities.label, { color: '#000', fontSize: 12, textAlign: 'right' }]}>Ending Point:</Text>*/}
-                            {/*<Text style={[utilities.compactText, { color: '#000', textAlign: 'right' }]}>{endingPoint}</Text>*/}
-                        {/*</View>*/}
-                    {/*</View>*/}
                 <View style={{ padding: 10 }}>
-
-
                     {description && (
                         <View style={{ marginTop: 10, padding: 5 }}>
                             <Text style={[utilities.smallText, { lineHeight: 18 }]}>
@@ -283,6 +279,34 @@ const RideStep4 = (props) => {
                         </View>
                     )}
                 </View>
+
+
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'flex-start',
+                    width: '100%',
+                    backgroundColor: '#151515',
+                    borderWidth: 2,
+                    borderColor: '#333',
+                    borderRadius: 8,
+                    padding: 15,
+                    marginVertical: 10
+                }}>
+                    {startMapImage || endMapImage ? (
+                        <MapImageSwapper
+                            startImage={startMapImage}
+                            endImage={endMapImage}
+                            startPoint={startingPoint}
+                            endPoint={endingPoint}
+                            imageStyle={[utilities.oblongImage, { width: 330, height: 360, padding: 10 }]}
+                        />
+                    ) : (
+                        <Text style={{ color: '#fff', textAlign: 'center', width: '100%' }}>No start or end map available</Text>
+                    )}
+                </View>
+
+
 
             </ScrollView>
             <View style={rideUtilities.customBottomContainer}>
@@ -301,6 +325,8 @@ const RideStep4 = (props) => {
                             onRideSelect={(ride) => {
                                 setShowParticipantsModal(false);
                             }}
+                            username={username}
+                            currentUsername={currentUsername}
                         />
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>

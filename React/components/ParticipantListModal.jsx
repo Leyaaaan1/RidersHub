@@ -4,13 +4,13 @@ import { fetchMyRides } from '../services/rideService';
 import { joinService } from '../services/joinService';
 import colors from "../styles/colors";
 
-const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId, token, onRideSelect }) => {
+const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId, token, onRideSelect , username, currentUsername}) => {
     const [rides, setRides] = useState([]);
     const [joinRequests, setJoinRequests] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('participants');
-
+console.log(username, currentUsername, 'ParticipantListModal');
     useEffect(() => {
         if (visible && activeTab === 'rides') {
             loadMyRides();
@@ -92,12 +92,12 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
         <Modal visible={visible} animationType="slide" transparent>
             <View style={{
                 flex: 1,
-                backgroundColor: 'rgba(0,0,0,0.5)',
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
                 justifyContent: 'center',
                 alignItems: 'center'
             }}>
                 <View style={{
-                    backgroundColor: '#222',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
                     borderRadius: 12,
                     padding: 20,
                     width: '90%',
@@ -119,20 +119,23 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
                             }}
                             onPress={() => setActiveTab('participants')}
                         >
-                            <Text style={{ color: activeTab === 'participants' ? colors.primary : '#ddd', fontSize: 14 }}>Riders</Text>
+                            <Text style={{ color: activeTab === 'participants' ? colors.primary : '#ddd', fontSize: 20 }}>Riders</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                flex: 1,
-                                padding: 8,
-                                alignItems: 'center',
-                                borderBottomWidth: 2,
-                                borderBottomColor: activeTab === 'requests' ? colors.primary : 'transparent'
-                            }}
-                            onPress={() => setActiveTab('requests')}
-                        >
-                            <Text style={{ color: activeTab === 'requests' ? colors.primary : '#ddd', fontSize: 14 }}>Joiners</Text>
-                        </TouchableOpacity>
+                        {username === currentUsername && (
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    padding: 8,
+                                    alignItems: 'center',
+                                    borderBottomWidth: 2,
+                                    borderBottomColor: activeTab === 'requests' ? colors.primary : 'transparent'
+                                }}
+                                onPress={() => setActiveTab('requests')}
+                            >
+                                <Text style={{ color: activeTab === 'requests' ? colors.primary : '#ddd', fontSize: 20,   }}>Joiners</Text>
+                            </TouchableOpacity>
+                        )}
+
 
                     </View>
 

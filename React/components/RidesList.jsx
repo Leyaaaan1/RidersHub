@@ -87,22 +87,28 @@ const RidesList = ({
                 borderLeftWidth: 0,
                 borderRightWidth: 0,
             }}>
+
                 <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center', marginBottom: 0, paddingBottom: 0 }]}>{item.locationName.toUpperCase()}</Text>
+
                 <Text style={[utilities.smallText, { marginTop: -8 } ]}>ID: {item.generatedRidesId}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text
-                        style={[utilities.titleText, { fontSize: 25, flexShrink: 1, flexWrap: 'wrap' }]}
-                    >
-                        {item.ridesName}
-                    </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 10, marginHorizontal: 5 }}>
                     <View style={{ justifyContent: 'flex-start', alignItems: 'flex-end' }}>
                         <FontAwesome
                             name="map-marker"
                             size={24}
                             color={colors.white}
-                            style={{  marginRight: 5, marginTop: -15 }}
+                            style={{ marginRight: 8, marginTop: -15 }}
                         />
                     </View>
+                    <Text
+                        style={[utilities.titleText, { fontSize: 25, flexShrink: 1, flexWrap: 'wrap', marginRight: 8 }]}
+                    >
+                        {item.ridesName}
+                    </Text>
+
+                    <Text style={[utilities.smallText, { fontSize: 12, marginLeft: 'auto' }]}>
+                        By: {item.username}
+                    </Text>
                 </View>
                 <Text style={[utilities.smallText, { fontWeight: 'bold', fontSize: 15, marginTop: 5, textAlign: 'center' }]}>
                     {item.startingPointName} <FontAwesome name="arrow-right" size={16} color="#fff" /> {item.endingPointName}
@@ -135,15 +141,13 @@ const RidesList = ({
                                 color="#fff"
                                 style={{ marginRight: 5 }}
                             />
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={[utilities.smallText, { fontSize: 12 }]}>
                                 {item.distance} km
-
                             </Text>
-                            <Text style={[utilities.smallText, { fontSize: 12 }]}>
-                                yawa: {item.username} km
-
-                            </Text>
+                            </View>
                         </View>
+
                     </View>
 
 
@@ -156,7 +160,10 @@ const RidesList = ({
                         style={{ width: '100%', height: 200, borderRadius: 6, marginTop: 8, borderWidth: 2, borderColor: colors.primary }}
                         resizeMode="cover"
                     />
+
                 )}
+
+
                 {item.description && (
                     <View style={{ marginTop: 10, padding: 5 }}>
                         <Text style={[utilities.smallText, { lineHeight: 18 }]}>
@@ -165,6 +172,7 @@ const RidesList = ({
                     </View>
                 )}
                 {renderActionButton && renderActionButton(item)}
+
 
 
             </View>

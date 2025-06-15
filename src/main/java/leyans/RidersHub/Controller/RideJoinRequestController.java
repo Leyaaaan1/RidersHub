@@ -66,9 +66,10 @@ public class RideJoinRequestController {
         if (authResponse != null) {
             return ResponseEntity.status(authResponse.getStatusCode()).build();
         }
+        String currentUsername = SecurityUtils.getCurrentUsername();
 
         try {
-            List<JoinResponseDTO> requests = rideJoinRequestService.getJoinRequestsByRideId(generatedRidesId);
+            List<JoinResponseDTO> requests = rideJoinRequestService.getJoinRequestsByRideId(generatedRidesId, currentUsername);
 
             Map<String, Object> response = new HashMap<>();
             response.put("requests", requests);
