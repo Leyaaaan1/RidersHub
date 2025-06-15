@@ -65,9 +65,9 @@ NOMINATIM_API_KEY=your_nominatim_api_key
 
 # Mapbox API
 MAPBOX_API_KEY=your_mapbox_api_key
-```
 
-```
+
+
 NOMINATIM_URL_REVERSE=your api url for geo reverse
 NOMINATIM_URL_SEARCH = you api to search location
 NOMINATIM_USERAGENT= email
@@ -171,7 +171,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 If you're using pgAdmin, go to the database, open the Query Tool, and paste the command above.
 
 ---
-
+---
 ## 🔐 Authentication
 
 The backend uses **JWT (JSON Web Token)** for secure, stateless user authentication.
