@@ -1,9 +1,7 @@
 package leyans.RidersHub.Repository;
 
 import jakarta.transaction.Transactional;
-import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
-import leyans.RidersHub.model.StartedRide;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,5 +32,8 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     @Transactional
     @Query(value = "INSERT INTO ride_participants (ride_id, rider_username) VALUES (:rideId, :riderId)", nativeQuery = true)
     void addParticipantToRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
+
+    @Query("SELECT r FROM Rides r LEFT JOIN FETCH r.participants WHERE r.generatedRidesId = :generatedRidesId")
+    Optional<Rides> findRideWithParticipantsById(@Param("generatedRidesId") Integer generatedRidesId);
 
 }

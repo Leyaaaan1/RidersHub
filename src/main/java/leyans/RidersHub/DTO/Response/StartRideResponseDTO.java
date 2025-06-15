@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class StartRideResponseDTO implements Serializable {
-    private Integer id;
+    private Integer generatedRidesId;
     private String ridesName;
     private String locationName;
 
@@ -20,8 +20,8 @@ public class StartRideResponseDTO implements Serializable {
     private List<String> participantUsernames;
 
 
-    public StartRideResponseDTO(Integer id, String initiator, String ridesName, String locationName, List<String> participantUsernames, double longitude, double latitude, LocalDateTime startTime) {
-        this.id = id;
+    public StartRideResponseDTO(Integer generatedRidesId, String initiator, String ridesName, String locationName, List<String> participantUsernames, double longitude, double latitude, LocalDateTime startTime) {
+        this.generatedRidesId = generatedRidesId;
         this.initiator = initiator;
         this.ridesName = ridesName;
         this.locationName = locationName;
@@ -49,12 +49,12 @@ public class StartRideResponseDTO implements Serializable {
         this.participantUsernames = participantUsernames;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getGeneratedRidesId() {
+        return generatedRidesId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setGeneratedRidesId(Integer generatedRidesId) {
+        this.generatedRidesId = generatedRidesId;
     }
 
     public double getLatitude() {
