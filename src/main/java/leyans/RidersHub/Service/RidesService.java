@@ -138,7 +138,8 @@ public class RidesService {
                 ride.getEndingLocation().getX(),
                 ride.getMapImageUrl(), 
                 ride.getMagImageStartingLocation(), 
-                ride.getMagImageEndingLocation()
+                ride.getMagImageEndingLocation(),
+                ride.getUsername().getUsername()
         );
     }
 

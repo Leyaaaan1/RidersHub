@@ -16,12 +16,9 @@ import rideUtilities from '../../styles/rideUtilities';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import {fetchRideMapImage, getRideDetails} from '../../services/rideService';
-import WaveLine from '../../styles/waveLineComponent';
 import colors from '../../styles/colors';
 import MapImageSwapper from "../../styles/MapImageSwapper";
 import ParticipantListModal from '../ParticipantListModal';
-import JoinRequestsModal from '../JoinRequestsModal';
-
 const RideStep4 = (props) => {
     const navigation = useNavigation();
     const route = props.route || {};
@@ -38,9 +35,13 @@ const RideStep4 = (props) => {
         participants = props.participants || routeParams.participants,
         description = props.description || routeParams.description,
         token = props.token || routeParams.token,
-        username = props.username || routeParams.username,
-        distance = props.distance || routeParams.distance
+        distance = props.distance || routeParams.distance,
+        username= props.username || routeParams.username,
+        currentUsername = props.currentUsername || routeParams.currentUsername,
+
+
     } = props;
+    console.log("RideStep4 props:", props);
 
     const formatDate = (date) => {
         if (!date) return 'Not specified';
@@ -68,27 +69,19 @@ const RideStep4 = (props) => {
 
     const [showParticipantsModal, setShowParticipantsModal] = useState(false);
 
-    const [showJoinRequestsModal, setShowJoinRequestsModal] = useState(false);
-
     useEffect(() => {
         const getMapImage = async () => {
-            console.log("useEffect running with rideId:", generatedRidesId);
 
             if (!generatedRidesId) {
-                console.log("No ride ID available yet");
                 return;
             }
 
             try {
-                console.log("Fetching map image for ride ID:", generatedRidesId);
                 setImageLoading(true);
                 const imageUrl = await fetchRideMapImage(generatedRidesId, token);
-                console.log("Successfully fetched map image URL:", imageUrl);
                 setMapImage(imageUrl);
             } catch (error) {
-                console.error("Failed to load map image:", error.message || error);
                 if (error.response) {
-                    console.error("Response data:", error.response.data);
                     console.error("Response status:", error.response.status);
                 }
             } finally {
@@ -117,19 +110,14 @@ const RideStep4 = (props) => {
                     setEndMapImage(rideDetails.magImageEndingLocation);
                 }
 
-                console.log("Full ride details response:", rideDetails);
                 if (rideDetails && typeof rideDetails.distance !== 'undefined') {
-                    console.log("Ride distance from backend:", rideDetails.distance);
                     setDistance(rideDetails.distance);
                 } else {
-                    console.warn("No distance found in ride details:", rideDetails);
                     setDistance("N/A");
                 }
             })
             .catch(error => {
-                console.error('Error fetching ride details:', error.message || error);
                 if (error.response) {
-                    console.error("Response data:", error.response.data);
                     console.error("Response status:", error.response.status);
                 }
                 setDistance("Error");
@@ -181,7 +169,7 @@ const RideStep4 = (props) => {
                 </View>
                 {/* Join Ride - right */}
                 <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: 10 }}>
-                    {username !== props.currentUsername && (
+                    {username !== props.currentUsername ? (
                         <TouchableOpacity>
                             <View>
                                 <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
@@ -189,7 +177,15 @@ const RideStep4 = (props) => {
                                 </Text>
                             </View>
                         </TouchableOpacity>
+                    ) : (
+                        <TouchableOpacity>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
+                                <FontAwesome name="play-circle" size={40} color="#fff" style={{ marginRight: 5 }} />
+                            </View>
+                        </TouchableOpacity>
                     )}
+
+
                 </View>
             </View>
 
@@ -242,6 +238,7 @@ const RideStep4 = (props) => {
                         {/* Left Column */}
                         <View style={{ flex: 1, alignItems: 'flex-start' }}>
                             <Text style={rideUtilities.detailText}>Owner: {username} </Text>
+                            <Text style={rideUtilities.detailText}>current user: {currentUsername} </Text>
                             <Text style={rideUtilities.detailText}>{distanceState} km</Text>
                         </View>
                         {/* Right Column */}
@@ -286,42 +283,32 @@ const RideStep4 = (props) => {
                         </View>
                     )}
                 </View>
-                <View>
 
-
-
-                </View>
             </ScrollView>
             <View style={rideUtilities.customBottomContainer}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <TouchableOpacity onPress={() => setShowParticipantsModal(true)}>
-                            <Text style={rideUtilities.customBottomText}>Participants</Text>
+                            <Text style={rideUtilities.customBottomText}>Riders</Text>
                         </TouchableOpacity>
 
                         <ParticipantListModal
                             visible={showParticipantsModal}
                             onClose={() => setShowParticipantsModal(false)}
                             participants={participants}
+                            generatedRidesId={generatedRidesId}
+                            token={token}
+                            onRideSelect={(ride) => {
+                                setShowParticipantsModal(false);
+                            }}
                         />
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <FontAwesome name="play-circle" size={40} color="#fff" style={{ marginRight: 5 }} />
+                            <Text style={{color: "#fff"}}> Sample </Text>
                         </View>
                     </View>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                        <TouchableOpacity onPress={() => setShowJoinRequestsModal(true)}>
-                            <Text style={rideUtilities.customBottomText}>Join Requests</Text>
-                        </TouchableOpacity>
 
-                        <JoinRequestsModal
-                            visible={showJoinRequestsModal}
-                            onClose={() => setShowJoinRequestsModal(false)}
-                            generatedRidesId={generatedRidesId}
-                            token={token}
-                        />
-                    </View>
                 </View>
             </View>
 

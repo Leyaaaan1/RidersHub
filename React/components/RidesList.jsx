@@ -137,6 +137,11 @@ const RidesList = ({
                             />
                             <Text style={[utilities.smallText, { fontSize: 12 }]}>
                                 {item.distance} km
+
+                            </Text>
+                            <Text style={[utilities.smallText, { fontSize: 12 }]}>
+                                yawa: {item.username} km
+
                             </Text>
                         </View>
                     </View>
