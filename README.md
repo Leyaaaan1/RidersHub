@@ -1,8 +1,5 @@
-# Motorcycle Enthusiasts Project - Davao City
-A project-based learning platform for motorcycle enthusiasts in Davao City, developed with **React Native** for the mobile frontend and **Spring Boot** with **PostgreSQL** on the backend, following official Spring documentation and best practices.
 
 ##  Current Progress
-
 *  Create and display rides
 *  Interactive **homepage** and **map interface**
 *  **Add locations** via **Nominatim API**
@@ -13,7 +10,6 @@ A project-based learning platform for motorcycle enthusiasts in Davao City, deve
 *  **PSGC mapping**: match coordinates to barangays using PSA official codes
 * (Soon) **Redis**: for storing and managing real-time user locations
 * (Soon) **WebSocket**: for live ride and location updates
-
 ---
 ##  Features
 * **React Native**: Mobile application interface
@@ -27,8 +23,6 @@ A project-based learning platform for motorcycle enthusiasts in Davao City, deve
 * **Bucket4j**: Rate limiter for API usage compliance
 * **PSGC Data Integration**: Convert coordinates into barangay names and codes
 * **Spring DevTools**: Hot reload during development
----
-
 ---
 ##  Overview
 This project focuses on building a real-time ride creation and discovery system. It integrates **Mapbox** for interactive maps, **Cloudinary** for storing map snapshots, and uses **Nominatim API** for geolocation. A **Bucket4j** rate limiter ensures compliance with Nominatim's usage policy (1 request per second). **JWT-based authentication** secures API access. It also uses official **PSGC data** from the [Philippine Statistics Authority](https://psa.gov.ph/classification/psgc) to convert coordinates into barangay-level locations. **Redis** integration for managing live user locations is planned.
