@@ -22,7 +22,7 @@ const RideStep2 = ({
                        isSearching, searchResults, searchQuery, setSearchQuery,
                        handleLocationSelect, webViewRef, latitude, longitude,
                        handleMessage, locationName,
-                       prevStep, nextStep, handleSearchInputChange
+                       prevStep, nextStep, handleSearchInputChange, token
                    }) => {
 
 
