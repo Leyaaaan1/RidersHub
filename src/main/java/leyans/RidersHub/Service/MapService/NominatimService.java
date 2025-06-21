@@ -82,7 +82,50 @@ public class NominatimService {
     }
 
 
+    public String getCityOrLandmarkFromCoordinates(double lat, double lon) {
+        enforceRateLimit();
 
+        String url = "https://nominatim.openstreetmap.org/reverse?" +
+                "format=json&lat=" + lat + "&lon=" + lon +
+                "&zoom=14&addressdetails=1" +
+                "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept-Language", "en");
+        headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+            Map<String, Object> body = response.getBody();
+
+            if (body != null) {
+                String displayName = (String) body.get("display_name");
+
+                if (body.containsKey("address")) {
+                    Map<String, String> address = (Map<String, String>) body.get("address");
+
+                    String landmark = address.getOrDefault("tourism",
+                            address.getOrDefault("historic",
+                                    address.getOrDefault("amenity", null)));
+
+                    if (landmark != null) {
+                        return landmark;
+                    }
+
+                    return address.getOrDefault("city",
+                            address.getOrDefault("town",
+                                    address.getOrDefault("county",
+                                            displayName != null ? displayName.split(",")[0] : null)));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Nominatim City/Landmark Error: " + e.getMessage());
+        }
+
+        return null;
+    }
 
 
     public List<Map<String, Object>> searchLocation(String query) {

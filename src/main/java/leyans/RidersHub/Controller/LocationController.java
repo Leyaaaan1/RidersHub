@@ -34,4 +34,14 @@ public class LocationController {
         String name = nominatimService.getBarangayNameFromCoordinates(lat, lon);
         return ResponseEntity.ok(name);
     }
+
+    @GetMapping("/landmark")
+    public ResponseEntity<String> getLandmarkOrCity(
+            @RequestParam("lat") double lat,
+            @RequestParam("lon") double lon) {
+        String landmark = nominatimService.getCityOrLandmarkFromCoordinates(lat, lon);
+        return ResponseEntity.ok(landmark != null ? landmark : "No landmark found");
+    }
+
 }
+

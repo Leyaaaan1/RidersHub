@@ -67,7 +67,7 @@ public class RidesService {
         Point rideLocation = locationService.createPoint(longitude, latitude);
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
-        String resolvedLocationName = locationService.resolveBarangayName(locationName, latitude, longitude);
+        String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
         String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
         String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
 
