@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import utilities from '../styles/utilities';
-import {searchLocation, createRide, searchRiders} from '../services/rideService';
+import {searchLocation, searchCityOrLandmark, createRide, searchRiders} from '../services/rideService';
 import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
@@ -115,12 +115,19 @@ const CreateRide = ({ route, navigation }) => {
     // Debounce search
     useEffect(() => {
         const delayedSearch = setTimeout(() => {
-            if (searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
+            // Only search if not manually selected and query is valid
+            if (!locationSelected && searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
                 setIsSearching(true);
-                searchLocation(token, searchQuery)
+
+                // Use different search function based on mapMode
+                const searchFunc = mapMode === 'location'
+                    ? searchCityOrLandmark
+                    : searchLocation;
+
+                searchFunc(token, searchQuery)
                     .then(data => setSearchResults(data))
                     .catch(error => {
-                        console.error('Error searching location:', error);
+                        console.error(`Error searching ${mapMode}:`, error);
                         Alert.alert('Error', 'Failed to search locations');
                     })
                     .finally(() => setIsSearching(false));
@@ -130,8 +137,7 @@ const CreateRide = ({ route, navigation }) => {
         }, 500);
 
         return () => clearTimeout(delayedSearch);
-    }, [searchQuery]);
-
+    }, [searchQuery, locationSelected, mapMode]);
 
 
 
@@ -174,10 +180,16 @@ const CreateRide = ({ route, navigation }) => {
             // Only search if not manually selected and query is valid
             if (!locationSelected && searchQuery && searchQuery.trim() && searchQuery.length >= 3) {
                 setIsSearching(true);
-                searchLocation(token, searchQuery)
+
+                // Use searchCityOrLandmark for location mode, searchLocation for starting/ending points
+                const searchFunc = mapMode === 'location'
+                    ? searchCityOrLandmark
+                    : searchLocation;
+
+                searchFunc(token, searchQuery)
                     .then(data => setSearchResults(data))
                     .catch(error => {
-                        console.error('Error searching location:', error);
+                        console.error(`Error searching ${mapMode}:`, error);
                         Alert.alert('Error', 'Failed to search locations');
                     })
                     .finally(() => setIsSearching(false));
@@ -187,7 +199,7 @@ const CreateRide = ({ route, navigation }) => {
         }, 500);
 
         return () => clearTimeout(delayedSearch);
-    }, [searchQuery, locationSelected]);
+    }, [searchQuery, locationSelected, mapMode, token]);
 
     useEffect(() => {
         const handleSearchQueryChange = (text) => {

@@ -23,6 +23,28 @@ export const searchLocation = async (token, query) => {
     }
 };
 
+export const searchCityOrLandmark = async (token, query) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/location/search-landmark?query=${encodeURIComponent(query)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch landmarks: ${response.status} ${errorText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('searchCityOrLandmark error:', error);
+        throw error;
+    }
+};
+
 export const reverseGeocode = async (token, lat, lon) => {
     try {
         const response = await fetch(`${API_BASE_URL}/location/reverse?lat=${lat}&lon=${lon}`, {
