@@ -48,6 +48,31 @@ export const reverseGeocode = async (token, lat, lon) => {
 };
 
 
+export const reverseGeocodeLandmark = async (token, lat, lon) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/location/landmark?lat=${lat}&lon=${lon}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to reverse geocode: ${response.status} ${errorText}`);
+        }
+
+        // Since the backend returns a String for reverse geocoding
+        const result = await response.text();
+        return result;
+    } catch (err) {
+        console.error("Reverse geocode fetch failed:", err);
+        return null;
+    }
+};
+
+
 export const createRide = async (token, rideData) => {
     const response = await fetch(`${API_BASE_URL}/riders/create`, {
         method: 'POST',

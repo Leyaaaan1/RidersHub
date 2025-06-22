@@ -1,5 +1,5 @@
 // React/utils/mapUtils.js
-import { reverseGeocode } from '../services/rideService';
+import { reverseGeocode, reverseGeocodeLandmark } from '../services/rideService';
 
 export const handleWebViewMessage = async (event, state) => {
     const data = JSON.parse(event.nativeEvent.data);
@@ -30,8 +30,16 @@ export const handleWebViewMessage = async (event, state) => {
 
         // Get location name from coordinates
         try {
-            // Pass token and use the new response format
-            const locationName = await reverseGeocode(token, data.lat, data.lng);
+            let locationName;
+
+            // Use different geocoding methods based on the mode
+            if (mapMode === 'location') {
+                // Use landmark geocoding for location mode
+                locationName = await reverseGeocodeLandmark(token, data.lat, data.lng);
+            } else {
+                // Use regular geocoding for starting and ending points
+                locationName = await reverseGeocode(token, data.lat, data.lng);
+            }
             console.log("Location name received:", locationName);
 
             if (locationName) {

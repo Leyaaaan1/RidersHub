@@ -1,8 +1,6 @@
-// React/pages/CreateRide.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import utilities from '../styles/utilities';
-import { WebView } from 'react-native-webview';
 import {searchLocation, createRide, searchRiders} from '../services/rideService';
 import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
@@ -48,7 +46,7 @@ const CreateRide = ({ route, navigation }) => {
 
     const [mapboxImageUrl, setMapboxImageUrl] = useState('');
 
-    const [generatedRidesId, setgeneratedRidesId] = useState(null);
+    const [generatedRidesId, setGeneratedRidesId] = useState(null);
 
     const [showRideModal, setShowRideModal] = useState(false);
 
@@ -89,24 +87,6 @@ const CreateRide = ({ route, navigation }) => {
         }
     };
 
-    const updateMapLocation = () => {
-        let lat, lon;
-        if (mapMode === 'location') {
-            lat = parseFloat(latitude) || 7.0731;
-            lon = parseFloat(longitude) || 125.6128;
-        } else if (mapMode === 'starting') {
-            lat = parseFloat(startingLatitude) || 7.0731;
-            lon = parseFloat(startingLongitude) || 125.6128;
-        } else if (mapMode === 'ending') {
-            lat = parseFloat(endingLatitude) || parseFloat(startingLatitude) || 7.0731;
-            lon = parseFloat(endingLongitude) || parseFloat(startingLongitude) || 125.6128;
-        }
-
-        webViewRef.current?.injectJavaScript(`
-            map.setView([${lat}, ${lon}], 15);
-            marker.setLatLng([${lat}, ${lon}]);
-        `);
-    };
 
     useEffect(() => {
         if (currentStep === 2) {
@@ -207,7 +187,7 @@ const CreateRide = ({ route, navigation }) => {
         }, 500);
 
         return () => clearTimeout(delayedSearch);
-    }, [searchQuery, locationSelected]);;
+    }, [searchQuery, locationSelected]);
 
     useEffect(() => {
         const handleSearchQueryChange = (text) => {
@@ -244,7 +224,11 @@ const CreateRide = ({ route, navigation }) => {
         setLoading(true);
         setError('');
 
-        const participantsArray = participants ? participants.split(',').map(p => p.trim()) : [];
+        const participantsArray = Array.isArray(participants)
+            ? participants
+            : (typeof participants === 'string' && participants.trim()
+                ? participants.split(',').map(p => p.trim())
+                : []);
 
         const rideData = {
             ridesName: rideName,
@@ -273,7 +257,7 @@ const CreateRide = ({ route, navigation }) => {
             console.log('Ride creation response:', result);
 
             if (result && result.generatedRidesId) {
-                setgeneratedRidesId(result.generatedRidesId);
+                setGeneratedRidesId(result.generatedRidesId);
                 console.log('Ride ID set:', result.generatedRidesId);
 
                 // Navigate to RideStep4 instead of showing modal
@@ -370,6 +354,7 @@ const CreateRide = ({ route, navigation }) => {
                     setLocationName={setLocationName}
                     prevStep={prevStep}
                     nextStep={nextStep}
+                    token={token}
                     // setMapboxImageUrl={setMapboxImageUrl}
                 />
             )}

@@ -48,6 +48,18 @@ public class LocationService {
                 .orElse(barangay);
     }
 
+    public String resolveLandMark(String fallback, double lat, double lon) {
+        String landmark = nominatimService.getCityOrLandmarkFromCoordinates(lat, lon);
+        if (landmark == null) {
+            return fallback != null ? fallback : "Lat: " + lat + ", Lng: " + lon;
+        }
+        return psgcDataRepository.findByNameIgnoreCase(landmark)
+                .stream()
+                .findFirst()
+                .map(PsgcData::getName)
+                .orElse(landmark);
+    }
+
 
     public int calculateDistance(Point startPoint, Point endPoint) {
         double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
