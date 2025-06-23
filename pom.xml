@@ -55,7 +55,10 @@
 			<version>6.2.5.Final</version>
 		</dependency>
 
-
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 			<!-- Spring Data JPA -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
