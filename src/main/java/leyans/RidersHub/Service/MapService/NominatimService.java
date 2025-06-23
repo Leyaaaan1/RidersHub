@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ import java.util.Map;
 public class NominatimService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${USER_AGENT}")
+    private String userAgent;
 
     private final Bucket bucket;
 
@@ -65,7 +69,7 @@ public class NominatimService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept-Language", "en");
-        headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
+        headers.set("User-Agent", userAgent);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -98,7 +102,7 @@ public class NominatimService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept-Language", "en");
-        headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
+        headers.set("User-Agent", userAgent);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -147,7 +151,7 @@ public class NominatimService {
                 "&addressdetails=1&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
+        headers.set("User-Agent", userAgent);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -176,7 +180,7 @@ public class NominatimService {
             );
 
             HttpHeaders headers = new HttpHeaders();
-            headers.set("User-Agent", "RidersHub/1.0 (paninsorolean@gmail.com)");
+            headers.set("User-Agent", userAgent);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
