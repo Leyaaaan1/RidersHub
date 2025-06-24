@@ -4,27 +4,31 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.Service.Util.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class RideParticipantService {
 
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
 
+    private final RiderUtil riderUtil;
 
 
-
-    public RideParticipantService(RidesRepository ridesRepository, RiderRepository riderRepository) {
+    public RideParticipantService(RidesRepository ridesRepository, RiderRepository riderRepository, RiderUtil riderUtil) {
         this.ridesRepository = ridesRepository;
 
         this.riderRepository = riderRepository;
+        this.riderUtil = riderUtil;
     }
 
     //add in creation of ride
@@ -33,7 +37,7 @@ public class RideParticipantService {
         return usernames.stream()
                 .map(username -> {
                     try {
-                        return findRiderByUsername(username);
+                        return riderUtil.findRiderByUsername(username);
                     } catch (EntityNotFoundException e) {
                         return null;
                     }
@@ -43,9 +47,9 @@ public class RideParticipantService {
     }
     @Transactional
     public void addParticipantToRide(Integer generatedRidesId, String username) {
-        Rides ride = findRideById(generatedRidesId);
+        Rides ride = riderUtil.findRideById(generatedRidesId);
 
-        Rider rider = findRiderByUsername(username);
+        Rider rider = riderUtil.findRiderByUsername(username);
 
 
         if (ride.getParticipants().stream()
@@ -56,8 +60,8 @@ public class RideParticipantService {
 
     @Transactional
     public void removeParticipantFromRide(Integer generatedRidesId, String username) {
-        Rides ride = findRideById(generatedRidesId);
-        Rider rider = findRiderByUsername(username);
+        Rides ride = riderUtil.findRideById(generatedRidesId);
+        Rider rider = riderUtil.findRiderByUsername(username);
 
         if (ride.getParticipants() != null &&
                 ride.getParticipants().stream()
@@ -73,17 +77,5 @@ public class RideParticipantService {
 //        return ride.getParticipants();
 //    }
 
-    public Rides findRideById(Integer generatedRidesId) {
-        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
-    }
 
-
-    public Rider findRiderByUsername(String username) {
-        Rider rider = riderRepository.findByUsername(username);
-        if (rider == null) {
-            throw new EntityNotFoundException("Rider not found with username: " + username);
-        }
-        return rider;
-    }
 }

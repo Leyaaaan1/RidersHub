@@ -55,10 +55,7 @@
 			<version>6.2.5.Final</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-		</dependency>
+
 			<!-- Spring Data JPA -->
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
@@ -111,25 +108,24 @@
 			<version>3.0.0</version>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
-		</dependency>
+
+		<!-- Bucket4j Core -->
 		<dependency>
 			<groupId>com.bucket4j</groupId>
 			<artifactId>bucket4j-core</artifactId>
-			<version>8.3.0</version>
+			<version>8.7.0</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.bucket4j</groupId>-->
-<!--			<artifactId>bucket4j-redis</artifactId>-->
-<!--			<version>8.3.0</version>-->
-<!--		</dependency>-->
+
+		<!-- Bucket4j Redis -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j-redis</artifactId>
+			<version>8.7.0</version>
+		</dependency>
 		<dependency>
 			<groupId>com.cloudinary</groupId>
 			<artifactId>cloudinary-http5</artifactId>

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
+import leyans.RidersHub.Config.Redis.RateLimitService;
+import leyans.RidersHub.Service.Util.RateLimitUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -28,30 +30,19 @@ import java.util.Map;
 public class NominatimService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RateLimitUtil rateLimitUtil;
+    private static final String RATE_LIMIT_KEY = "nominatim_api";
 
     @Value("${USER_AGENT}")
     private String userAgent;
 
-    private final Bucket bucket;
 
-    public NominatimService() {
+    public NominatimService( RateLimitUtil rateLimitUtil) {
+        this.rateLimitUtil = rateLimitUtil;
         this.restTemplate = new RestTemplate();
 
-        Bandwidth limit = Bandwidth.classic(1, Refill.greedy(1, Duration.ofSeconds(1)));
-        this.bucket = Bucket.builder().addLimit(limit).build();
 
-    }
 
-    private void enforceRateLimit() {
-        try {
-            System.out.println("Waiting for rate limit...");
-            bucket.asBlocking().consume(1);
-            System.out.println("Rate limit consumed, proceeding with request.");
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.err.println("Rate limiting wait was interrupted: " + e.getMessage());
-        }
     }
 
 //    First search consumes the only token in the bucket
@@ -60,7 +51,8 @@ public class NominatimService {
 //    The thread waits until a full second has passed since the first request
 //    Once the token is refilled (after 1 second), the second search proceeds
     public String getBarangayNameFromCoordinates(double lat, double lon) {
-        enforceRateLimit();
+        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
@@ -93,7 +85,7 @@ public class NominatimService {
 
 
     public String getCityOrLandmarkFromCoordinates(double lat, double lon) {
-        enforceRateLimit();
+        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
@@ -143,7 +135,7 @@ public class NominatimService {
     }
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {
-        enforceRateLimit();
+        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
 
         String url = "https://nominatim.openstreetmap.org/search?" +
                 "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8) +
@@ -170,7 +162,7 @@ public class NominatimService {
     }
 
     public List<Map<String, Object>> searchCityOrLandmark(String query, int limit) {
-        enforceRateLimit();
+        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
 
         try {
             String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);

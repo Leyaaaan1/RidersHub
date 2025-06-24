@@ -5,7 +5,6 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Service.MapService.MapBox.MapImageService;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;

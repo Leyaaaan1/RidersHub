@@ -2,11 +2,10 @@ package leyans.RidersHub.Service;
 
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Repository.*;
-import leyans.RidersHub.Service.MapService.NominatimService;
+import leyans.RidersHub.Service.Util.RiderUtil;
 import leyans.RidersHub.model.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,18 +23,18 @@ public class RideLocationService {
 
     private final LocationService locationService;
 
-    private final RideParticipantService rideParticipantService;
+    private final RiderUtil riderUtil;
 
 
 
     @Autowired
     public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo, PsgcDataRepository psgcDataRepository, LocationService locationService, RideParticipantService rideParticipantService) {
+                               RiderLocationRepository locationRepo, PsgcDataRepository psgcDataRepository, LocationService locationService, RiderUtil riderUtil) {
         this.startedRideRepo = startedRideRepo;
         this.locationRepo = locationRepo;
         this.psgcDataRepository = psgcDataRepository;
         this.locationService = locationService;
-        this.rideParticipantService = rideParticipantService;
+        this.riderUtil = riderUtil;
     }
 
 
@@ -47,7 +46,7 @@ public class RideLocationService {
 
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Rider rider = rideParticipantService.findRiderByUsername(username);
+        Rider rider = riderUtil.findRiderByUsername(username);
 
         if (!started.getParticipants().contains(rider)) {
             throw new IllegalArgumentException("User is not a participant in this ride");

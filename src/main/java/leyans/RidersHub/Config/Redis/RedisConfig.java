@@ -1,49 +1,62 @@
-//package leyans.RidersHub.Config.Redis;
-//
-//import org.springframework.cache.CacheManager;
-//import org.springframework.cache.annotation.EnableCaching;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.data.redis.cache.RedisCacheConfiguration;
-//import org.springframework.data.redis.cache.RedisCacheManager;
-//import org.springframework.data.redis.connection.RedisConnectionFactory;
-//import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-//import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-//import org.springframework.data.redis.serializer.RedisSerializationContext;
-//
-//import java.time.Duration;
-//import java.util.HashMap;
-//import java.util.Map;
-//
-//@Configuration
-//@EnableCaching
-//public class RedisConfig {
-//
-//    @Bean
-//    public RedisConnectionFactory redisConnectionFactory() {
-//        return new LettuceConnectionFactory();
-//    }
-//
-//
-//    @Bean
-//    public CacheManager cacheManager(RedisConnectionFactory factory) {
-//        Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
-//
-//        cacheConfigs.put("barangayCache",
-//                RedisCacheConfiguration.defaultCacheConfig()
-//                        .entryTtl(Duration.ofHours(12))
-//                        .disableCachingNullValues()
-//                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())));
-//
-//        cacheConfigs.put("searchLocationCache",
-//                RedisCacheConfiguration.defaultCacheConfig()
-//                        .entryTtl(Duration.ofMinutes(30))
-//                        .disableCachingNullValues()
-//                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer())));
-//
-//        return RedisCacheManager.builder(factory)
-//                .withInitialCacheConfigurations(cacheConfigs)
-//                .build();
-//    }
-//
-//}
+package leyans.RidersHub.Config.Redis;
+
+import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
+import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.codec.ByteArrayCodec;
+import io.lettuce.core.codec.RedisCodec;
+import io.lettuce.core.codec.StringCodec;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
+
+@Configuration
+@EnableCaching
+public class RedisConfig {
+    @Value("${spring.redis.host:localhost}")
+    private String redisHost;
+
+    @Value("${spring.redis.port:6379}")
+    private int redisPort;
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(redisHost, redisPort);
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        return template;
+    }
+    @Bean
+    public LettuceBasedProxyManager<String> proxyManager() {
+        RedisClient redisClient = RedisClient.create(RedisURI.builder()
+                .withHost(redisHost)
+                .withPort(redisPort)
+                .build());
+
+        StatefulRedisConnection<String, byte[]> redisConnection = redisClient.connect(
+                RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE));
+
+        return LettuceBasedProxyManager.builderFor(redisConnection)
+                .withExpirationStrategy(ExpirationAfterWriteStrategy.basedOnTimeForRefillingBucketUpToMax(Duration.ofHours(10)))
+                .build();
+    }
+}

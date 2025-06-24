@@ -5,6 +5,7 @@ import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Repository.RideJoinRequestRepository;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.Service.Util.RiderUtil;
 import leyans.RidersHub.model.RideJoinRequest;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
@@ -21,15 +22,16 @@ public class RideJoinRequestService {
 
     private final RideJoinRequestRepository rideJoinRequestRepository;
     private final RidesRepository ridesRepository;
-    private final RideParticipantService rideParticipantService;
+
+    private final RiderUtil riderUtil;
 
     @Autowired
     public RideJoinRequestService(
             RideJoinRequestRepository rideJoinRequestRepository,
-            RidesRepository ridesRepository, RideParticipantService rideParticipantService) {
+            RidesRepository ridesRepository, RiderUtil riderUtil) {
         this.rideJoinRequestRepository = rideJoinRequestRepository;
         this.ridesRepository = ridesRepository;
-        this.rideParticipantService = rideParticipantService;
+        this.riderUtil = riderUtil;
     }
 
     @Transactional
@@ -45,8 +47,8 @@ public class RideJoinRequestService {
             return convertToDTO(request);
         }
 
-        Rides ride = rideParticipantService.findRideById(generatedRidesId);
-        Rider rider = rideParticipantService.findRiderByUsername(username);
+        Rides ride = riderUtil.findRideById(generatedRidesId);
+        Rider rider = riderUtil.findRiderByUsername(username);
 
         RideJoinRequest request = new RideJoinRequest();
         request.setGeneratedRidesId(ride);
@@ -89,7 +91,7 @@ public class RideJoinRequestService {
     public List<JoinResponseDTO> getJoinRequestsByRideId(Integer generatedRidesId, String requestingUsername) {
         try {
             // Find the ride first
-            Rides ride = rideParticipantService.findRideById(generatedRidesId);
+            Rides ride = riderUtil.findRideById(generatedRidesId);
 
             // Check if the requesting user is the owner of the ride
             if (!ride.getUsername().getUsername().equals(requestingUsername)) {
