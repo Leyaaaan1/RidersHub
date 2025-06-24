@@ -259,6 +259,30 @@ export const fetchMyRides = async (token) => {
 };
 
 
+export const getLocationImage = async (rideName, token) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/wikimedia/location?locationName=${encodeURIComponent(rideName)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                return null; // No image found
+            }
+            const errorText = await response.text();
+            throw new Error(`Failed to fetch location image: ${response.status} ${errorText}`);
+        }
+
+        return await response.json(); // Returns LocationImageDto with imageUrl, author, and license
+    } catch (error) {
+        console.error('Error fetching location image:', error);
+        throw error;
+    }
+};
 
 
 

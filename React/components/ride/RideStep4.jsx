@@ -9,13 +9,13 @@ import {
     Image,
     Modal,
     SafeAreaView,
-    StatusBar
+    StatusBar, Alert
 } from 'react-native';
 import utilities from '../../styles/utilities';
 import rideUtilities from '../../styles/rideUtilities';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import {fetchRideMapImage, getRideDetails} from '../../services/rideService';
+import {fetchRideMapImage, getRideDetails, getLocationImage} from '../../services/rideService';
 import colors from '../../styles/colors';
 import MapImageSwapper from "../../styles/MapImageSwapper";
 import ParticipantListModal from '../ParticipantListModal';
@@ -73,6 +73,39 @@ const RideStep4 = (props) => {
 
     const { loading: joiningRide, joinRide } = useJoinRide();
 
+    const [rideNameImage, setRideNameImage] = useState(null);
+    const [rideNameImageLoading, setRideNameImageLoading] = useState(false);
+    const [rideNameImageError, setRideNameImageError] = useState(null);
+
+
+    const fetchLocationImage = async (rideName) => {
+        if (!rideName || !token) {
+            console.log("Missing ride name or token for image fetch");
+            return;
+        }
+
+        try {
+            setRideNameImageLoading(true);
+            setRideNameImageError(null);
+            const imageData = await getLocationImage(rideName, token);
+            console.log("Location image data:", imageData);
+            // Store the complete image data object
+            setRideNameImage(imageData);
+            return imageData;
+        } catch (error) {
+            console.error("Failed to fetch location image:", error);
+            setRideNameImageError(error.message || "Failed to load location image");
+            return null;
+        } finally {
+            setRideNameImageLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (locationName && token) {
+            fetchLocationImage(locationName);
+        }
+    }, [locationName, token]);
 
 
     const handleJoinRide = () => {
@@ -230,6 +263,36 @@ const RideStep4 = (props) => {
                         <View style={[rideUtilities.formGroup, { alignItems: 'center', marginTop: 8 }]}>
                             <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
                         </View>
+                        <View style={{width: '100%', alignItems: 'center'}}>
+                            {rideNameImageLoading ? (
+                                <ActivityIndicator size="large" color="#fff" />
+                            ) : rideNameImage && rideNameImage.imageUrl ? (
+                                <View style={{width: '100%'}}>
+                                    <Image
+                                        source={{ uri: rideNameImage.imageUrl }}
+                                        style={{
+                                            width: '100%',
+                                            height: 200,
+                                            borderRadius: 8,
+                                            borderWidth: 2,
+                                            marginTop: 20
+                                        }}
+                                        resizeMode="cover"
+                                    />
+                                    {(rideNameImage.author || rideNameImage.license) && (
+                                        <Text style={{color: '#aaa', fontSize: 10, marginTop: 4, textAlign: 'right'}}>
+                                            {rideNameImage.author ? `Photo: ${rideNameImage.author}` : ''}
+                                            {rideNameImage.author && rideNameImage.license ? ' | ' : ''}
+                                            {rideNameImage.license ? `License: ${rideNameImage.license}` : ''}
+                                        </Text>
+                                    )}
+                                </View>
+                            ) : (
+                                <Text style={{color: '#fff'}}>
+                                    {rideNameImageError || "No location image available"}
+                                </Text>
+                            )}
+                        </View>
 
                         <View style={{width: '100%', alignItems: 'center'}}>
                             {imageLoading ? (
@@ -250,6 +313,8 @@ const RideStep4 = (props) => {
                                 <Text style={{color: '#fff'}}>No map available</Text>
                             )}
                         </View>
+
+
                     </View>
                     <View style={{ flexDirection: 'row', width: '100%' }}>
                         {/* Left Column */}
@@ -337,8 +402,8 @@ const RideStep4 = (props) => {
 
                 </View>
             </View>
-
         </View>
+
 
     );
 };
