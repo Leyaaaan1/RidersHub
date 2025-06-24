@@ -9,6 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class WikimediaImageService {
+
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -22,13 +23,19 @@ public class WikimediaImageService {
     public LocationImageDto getLocationImage(String locationName) {
         try {
             // Step 1: Search for images related to the location
+            // Enhanced search for Mindanao locations
+            String enhancedSearchTerm = enhanceSearchForMindanao(locationName);
+
             String searchUrl = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API_BASE)
                     .queryParam("action", "query")
                     .queryParam("format", "json")
                     .queryParam("list", "search")
-                    .queryParam("srsearch", locationName)
+                    .queryParam("srsearch", enhancedSearchTerm)
                     .queryParam("srnamespace", "6") // File namespace
-                    .queryParam("srlimit", "1")
+                    .queryParam("srlimit", "3") // Get more results to have better options
+                    .queryParam("prop", "imageinfo")
+                    .queryParam("iiprop", "url|user|extmetadata|size|mime|timestamp")
+                    .queryParam("iiurlwidth", "800") // Get a reasonable sized image
                     .build()
                     .toUriString();
 
@@ -40,7 +47,8 @@ public class WikimediaImageService {
                 return null; // No images found
             }
 
-            String fileName = searchResults.get(0).path("title").asText();
+            // Find the best image from results (prefer non-maps, non-logos)
+            String fileName = findBestImageFromResults(searchResults);
 
             // Step 2: Get image info including URL, author, and license
             String imageInfoUrl = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API_BASE)
@@ -81,5 +89,74 @@ public class WikimediaImageService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch image from Wikimedia Commons", e);
         }
+    }
+
+    private String enhanceSearchForMindanao(String locationName) {
+        // Add context for better Mindanao location searches
+        String enhanced = locationName;
+
+        // Add Philippines context if not already specified
+        if (!locationName.toLowerCase().contains("philippines") &&
+                !locationName.toLowerCase().contains("mindanao")) {
+            enhanced += " Philippines";
+        }
+
+        // Common Mindanao location enhancements
+        if (isMindanaoCity(locationName)) {
+            enhanced += " Mindanao";
+        }
+
+        return enhanced;
+    }
+
+    private boolean isMindanaoCity(String locationName) {
+        String[] mindanaoCities = {
+                // Zamboanga Peninsula (Region IX)
+                "zamboanga", "dipolog", "dapitan", "pagadian", "isabela",
+                // Northern Mindanao (Region X)
+                "cagayan de oro", "iligan", "malaybalay", "valencia", "ozamiz",
+                "tangub", "gingoog", "el salvador", "oroquieta",
+                // Davao Region (Region XI)
+                "davao", "tagum", "panabo", "mati", "digos", "samal",
+                // SOCCSKSARGEN (Region XII)
+                "general santos", "koronadal", "kidapawan", "tacurong",
+                // Caraga Region (Region XIII)
+                "butuan", "surigao", "bislig", "tandag", "cabadbaran", "bayugan",
+                // BARMM
+                "cotabato", "marawi", "lamitan"
+        };
+
+        String lowerLocation = locationName.toLowerCase();
+        for (String city : mindanaoCities) {
+            if (lowerLocation.contains(city)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String findBestImageFromResults(JsonNode searchResults) {
+        // Prefer actual photos over maps, logos, or diagrams
+        for (JsonNode result : searchResults) {
+            String title = result.path("title").asText().toLowerCase();
+            String snippet = result.path("snippet").asText().toLowerCase();
+
+            // Skip maps, logos, diagrams
+            if (title.contains("map") || title.contains("logo") ||
+                    title.contains("diagram") || title.contains("chart") ||
+                    snippet.contains("map") || snippet.contains("logo")) {
+                continue;
+            }
+
+            // Prefer images with photo-like extensions or descriptions
+            if (title.contains(".jpg") || title.contains(".jpeg") ||
+                    title.contains(".png") || snippet.contains("photo") ||
+                    snippet.contains("view") || snippet.contains("building")) {
+                return result.path("title").asText();
+            }
+        }
+
+        // If no preferred image found, return the first one
+        return searchResults.get(0).path("title").asText();
     }
 }
