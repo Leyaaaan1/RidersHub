@@ -35,7 +35,7 @@ public class RateLimitService {
         // Configuration for Mapbox API (50 requests per minute)
         configurations.put("mapbox_api", () ->
                 BucketConfiguration.builder()
-                        .addLimit(Bandwidth.simple(50, Duration.ofMinutes(1)))
+                        .addLimit(Bandwidth.simple(1, Duration.ofMinutes(1)))
                         .build());
     }
 

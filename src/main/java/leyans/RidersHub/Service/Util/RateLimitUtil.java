@@ -15,14 +15,17 @@ public class RateLimitUtil {
 
     public void enforceRateLimit(String rateKey) {
         try {
-            System.out.println("Waiting for " + rateKey + " rate limit...");
-            while (!rateLimitService.isAllowed(rateKey)) {
-                Thread.sleep(1000);
+            // Try to get a token from the bucket without blocking
+            if (!rateLimitService.isAllowed(rateKey)) {
+                // Only log when we actually hit a rate limit
+                System.out.println("Rate limit reached for " + rateKey + ", waiting briefly...");
+                // Wait a shorter time before retry
+                Thread.sleep(100);
+                // Try one more time before proceeding anyway
+                rateLimitService.isAllowed(rateKey);
             }
-            System.out.println("Rate limit consumed, proceeding with request.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.err.println("Rate limiting wait was interrupted: " + e.getMessage());
         }
-    }
-}
+    }}

@@ -21,9 +21,13 @@ public class RideParticipantService {
     private final RidesRepository ridesRepository;
     private final RiderRepository riderRepository;
 
+    @Autowired
     private final RiderUtil riderUtil;
 
 
+
+
+    @Autowired
     public RideParticipantService(RidesRepository ridesRepository, RiderRepository riderRepository, RiderUtil riderUtil) {
         this.ridesRepository = ridesRepository;
 
@@ -77,5 +81,17 @@ public class RideParticipantService {
 //        return ride.getParticipants();
 //    }
 
+    public Rides findRideById(Integer generatedRidesId) {
+        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+    }
 
+
+    public Rider findRiderByUsername(String username) {
+        Rider rider = riderRepository.findByUsername(username);
+        if (rider == null) {
+            throw new EntityNotFoundException("Rider not found with username: " + username);
+        }
+        return rider;
+    }
 }
