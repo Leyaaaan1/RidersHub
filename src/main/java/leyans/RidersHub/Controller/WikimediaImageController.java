@@ -1,14 +1,14 @@
 package leyans.RidersHub.Controller;
 
 import leyans.RidersHub.DTO.LocationImageDto;
-import leyans.RidersHub.Service.WikimediaImageService;
+import leyans.RidersHub.Service.MapService.WikimediaImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wikimedia")
-public class LocationImageController {
+public class WikimediaImageController {
 
     @Autowired
     private WikimediaImageService wikimediaImageService;

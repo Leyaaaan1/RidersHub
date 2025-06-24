@@ -1,8 +1,10 @@
-package leyans.RidersHub.Service;
+package leyans.RidersHub.Service.MapService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.DTO.LocationImageDto;
+import leyans.RidersHub.Service.Util.RateLimitUtil;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -13,14 +15,22 @@ public class WikimediaImageService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    private static final String WIKIMEDIA_API_BASE = "https://commons.wikimedia.org/w/api.php";
 
-    public WikimediaImageService() {
+    private final RateLimitUtil rateLimitUtil;
+    private static final String WIKIMEDIA_API_BASE = "https://commons.wikimedia.org/w/api.php";
+    private static final String RATE_LIMIT_KEY = "wikimedia_api";
+
+    public WikimediaImageService(RateLimitUtil rateLimitUtil) {
+        this.rateLimitUtil = rateLimitUtil;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
 
+    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase()")
     public LocationImageDto getLocationImage(String locationName) {
+        // Check rate limit before making API call
+        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+
         try {
             // Step 1: Search for images related to the location
             // Enhanced search for Mindanao locations
