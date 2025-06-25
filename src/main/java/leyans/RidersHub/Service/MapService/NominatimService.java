@@ -2,12 +2,9 @@ package leyans.RidersHub.Service.MapService;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
-import leyans.RidersHub.Config.Redis.RateLimitService;
-import leyans.RidersHub.Service.Util.RateLimitUtil;
+import leyans.RidersHub.Util.RateLimitUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +17,6 @@ import org.springframework.web.util.UriUtils;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,8 +46,13 @@ public class NominatimService {
 //    Your code calls bucket.asBlocking().consume(1) which blocks the thread
 //    The thread waits until a full second has passed since the first request
 //    Once the token is refilled (after 1 second), the second search proceeds
+
+    @Cacheable(value = "geocoding", key = "'barangay_' + #lat + '_' + #lon")
     public String getBarangayNameFromCoordinates(double lat, double lon) {
-        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+        return getBarangayNameFromCoordinatesInternal(lat, lon);
+    }
+    private String getBarangayNameFromCoordinatesInternal(double lat, double lon) {
+        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
@@ -83,9 +84,13 @@ public class NominatimService {
         return null;
     }
 
-
+    @Cacheable(value = "geocoding", key = "'city_' + #lat + '_' + #lon")
     public String getCityOrLandmarkFromCoordinates(double lat, double lon) {
-        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+        return getCityOrLandmarkFromCoordinatesInternal(lat, lon);
+    }
+
+    private String getCityOrLandmarkFromCoordinatesInternal(double lat, double lon) {
+        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
@@ -129,13 +134,13 @@ public class NominatimService {
         return null;
     }
 
-
+    @Cacheable(value = "geocoding", key = "'search_' + #query.toLowerCase().trim() + '_' + #limit")
     public List<Map<String, Object>> searchLocation(String query) {
         return searchLocation(query, 5);
     }
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {
-        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
         String url = "https://nominatim.openstreetmap.org/search?" +
                 "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8) +
@@ -156,13 +161,13 @@ public class NominatimService {
         }
     }
 
-
+    @Cacheable(value = "geocoding", key = "'citylandmark_' + #query.toLowerCase().trim() + '_' + #limit")
     public List<Map<String, Object>> searchCityOrLandmark(String query) {
         return searchCityOrLandmark(query, 5);
     }
 
     public List<Map<String, Object>> searchCityOrLandmark(String query, int limit) {
-        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
         try {
             String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);

@@ -1,15 +1,10 @@
 package leyans.RidersHub.Service.MapService.MapBox;
 
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
-import leyans.RidersHub.Config.Redis.RateLimitService;
-import leyans.RidersHub.Service.Util.RateLimitUtil;
+import leyans.RidersHub.Util.RateLimitUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-
-import java.time.Duration;
 
 @Component
 public class MapboxService {
@@ -19,7 +14,8 @@ public class MapboxService {
     private final RateLimitUtil rateLimitUtil;
 
     private static final String RATE_LIMIT_KEY = "mapbox_api";
-
+    @Value("${mapbox.static-map.url-template}")
+    private String mapboxUrlTemplate;
 
     @Autowired
     public MapboxService(@Value("${MAPBOX_TOKEN}") String mapboxToken,
@@ -28,14 +24,25 @@ public class MapboxService {
         this.mapImageService = mapImageService;
         this.rateLimitUtil = rateLimitUtil;
     }
-
-
+    @Cacheable(value = "mapbox", key = "'static_map_' + #lon + '_' + #lat")
     public String getStaticMapImageUrl(double lon, double lat) {
-        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
-        String mapboxUrl = "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-s-marker+ff0000("
-                + lon + "," + lat + ")/" + lon + "," + lat
-                + ",14/600x300?access_token=" + mapboxToken;
+        rateLimitUtil.enforceRateLimitMapBox(RATE_LIMIT_KEY);
+
+
+
+        String mapboxUrl = String.format(mapboxUrlTemplate,
+                lon, lat, lon, lat, mapboxToken);
 
         return mapImageService.uploadMapImage(mapboxUrl);
+    }
+
+
+    public String checkCachedMapImage(double lon, double lat) {
+        return getCachedMapImage(lon, lat);
+    }
+
+    @Cacheable(value = "mapbox", key = "'static_map_' + #lon + '_' + #lat", condition = "false")
+    public String getCachedMapImage(double lon, double lat) {
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package leyans.RidersHub.Controller;
 
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,8 +19,15 @@ public class MapboxController {
     }
 
     @GetMapping("/staticImage")
-    public String getMapImage(@RequestParam double longitude, @RequestParam double latitude) {
-        return mapboxService.getStaticMapImageUrl(longitude, latitude);
+    public ResponseEntity<String> getMapImage(@RequestParam double lon, @RequestParam double lat) {
+        String cachedImageUrl = mapboxService.checkCachedMapImage(lon, lat);
+
+        if (cachedImageUrl != null) {
+            return ResponseEntity.ok(cachedImageUrl);
+        }
+
+        String imageUrl = mapboxService.getStaticMapImageUrl(lon, lat);
+        return ResponseEntity.ok(imageUrl);
     }
 
 

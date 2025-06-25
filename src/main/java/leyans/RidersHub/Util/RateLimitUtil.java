@@ -1,7 +1,8 @@
-package leyans.RidersHub.Service.Util;
+package leyans.RidersHub.Util;
 
 
 import leyans.RidersHub.Config.Redis.RateLimitService;
+import leyans.RidersHub.ExceptionHandler.InvalidRequestException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +14,7 @@ public class RateLimitUtil {
         this.rateLimitService = rateLimitService;
     }
 
-    public void enforceRateLimit(String rateKey) {
+    public void freeApiAllowed(String rateKey) {
         try {
             // Try to get a token from the bucket without blocking
             if (!rateLimitService.isAllowed(rateKey)) {
@@ -28,4 +29,17 @@ public class RateLimitUtil {
             Thread.currentThread().interrupt();
             System.err.println("Rate limiting wait was interrupted: " + e.getMessage());
         }
-    }}
+    }
+
+    public void enforceRateLimitMapBox(String rateKey) {
+        try {
+            boolean allowed = rateLimitService.isAllowed(rateKey);
+            System.out.println("Rate limit check for key: " + rateKey + ", allowed: " + allowed);
+            if (!allowed) {
+                System.out.println("Rate limit exceeded for key: " + rateKey);
+            }
+        } catch (Exception e) {
+           System.err.println("Error during rate limit enforcement for key: " + rateKey + ", error: " + e.getMessage());
+        }
+    }
+}

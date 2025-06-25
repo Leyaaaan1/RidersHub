@@ -15,12 +15,18 @@ public class WikimediaImageController {
 
     @GetMapping("/location")
     public ResponseEntity<LocationImageDto> getLocationImage(@RequestParam String locationName) {
-        LocationImageDto image = wikimediaImageService.getLocationImage(locationName);
+        LocationImageDto cachedImage = wikimediaImageService.checkCachedLocationImage(locationName);
 
-        if (image == null) {
+        if (cachedImage != null) {
+            return ResponseEntity.ok(cachedImage);
+        }
+
+        LocationImageDto imageDto = wikimediaImageService.getLocationImage(locationName);
+
+        if (imageDto == null) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(image);
+        return ResponseEntity.ok(imageDto);
     }
 }

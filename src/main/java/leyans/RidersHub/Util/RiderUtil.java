@@ -1,4 +1,4 @@
-package leyans.RidersHub.Service.Util;
+package leyans.RidersHub.Util;
 
 import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.Repository.RiderRepository;

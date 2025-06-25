@@ -4,12 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Service.Util.RiderUtil;
+import leyans.RidersHub.Util.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +51,6 @@ public class RideParticipantService {
     @Transactional
     public void addParticipantToRide(Integer generatedRidesId, String username) {
         Rides ride = riderUtil.findRideById(generatedRidesId);
-
         Rider rider = riderUtil.findRiderByUsername(username);
 
 
@@ -81,17 +79,5 @@ public class RideParticipantService {
 //        return ride.getParticipants();
 //    }
 
-    public Rides findRideById(Integer generatedRidesId) {
-        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
-    }
 
-
-    public Rider findRiderByUsername(String username) {
-        Rider rider = riderRepository.findByUsername(username);
-        if (rider == null) {
-            throw new EntityNotFoundException("Rider not found with username: " + username);
-        }
-        return rider;
-    }
 }
