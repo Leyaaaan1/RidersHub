@@ -45,6 +45,8 @@ const RideStep4 = (props) => {
     } = props;
     console.log("RideStep4 props:", props);
 
+    console.log(username, currentUsername, "RideStep4 username and currentUsername");
+
     const formatDate = (date) => {
         if (!date) return 'Not specified';
         const d = date instanceof Date ? date : new Date(date);

@@ -23,6 +23,8 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableCaching
@@ -51,16 +53,46 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        RedisCacheConfiguration cacheConfig = RedisCacheConfiguration.defaultCacheConfig()
+        // Different TTL for different cache types
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+
+        // Wikimedia images - cache for 7 days (rarely change)
+        cacheConfigurations.put("locationImages",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofDays(7))
+                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                        .disableCachingNullValues());
+
+        // Geocoding results - cache for 24 hours
+        cacheConfigurations.put("geocoding",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofHours(24))
+                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                        .disableCachingNullValues());
+
+        // Mapbox results - cache for 1 hour (to maximize free tier usage)
+        cacheConfigurations.put("mapbox",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofHours(1))
+                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                        .disableCachingNullValues());
+
+        // Default cache config
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofHours(1))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
                 .disableCachingNullValues();
 
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(cacheConfig)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }
+
     @Bean
     public ProxyManager<String> proxyManager() {
         RedisClient redisClient = RedisClient.create(RedisURI.builder()

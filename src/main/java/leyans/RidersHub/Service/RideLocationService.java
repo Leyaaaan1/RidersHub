@@ -2,7 +2,7 @@ package leyans.RidersHub.Service;
 
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Repository.*;
-import leyans.RidersHub.Service.Util.RiderUtil;
+import leyans.RidersHub.Util.RiderUtil;
 import leyans.RidersHub.model.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -106,26 +106,6 @@ public class RideLocationService {
         return locationDTO;
     }
 
-//    @Transactional(readOnly = true)
-//    public List<LocationUpdateRequestDTO> getAllRiderLocations(Integer generatedRidesId) {
-//        StartedRide started = startedRideRepo.findByGeneratedRidesId(generatedRidesId)
-//                .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + generatedRidesId));
-//
-//        // Get the latest location for each rider in this ride
-//        return locationRepo.findLatestLocationsForRide(generatedRidesId).stream()
-//                .map(loc -> new LocationUpdateRequestDTO(
-//                        generatedRidesId,
-//                        loc.getUsername().getUsername(),
-//                        loc.getLocation().getY(), // latitude
-//                        loc.getLocation().getX(), // longitude
-//                        loc.getLocationName(),
-//                        loc.getDistanceMeters(),
-//                        loc.getTimestamp()
-//                ))
-//
-//
-//
-////    }
 
 
 

@@ -3,7 +3,7 @@ package leyans.RidersHub.Service.MapService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.DTO.LocationImageDto;
-import leyans.RidersHub.Service.Util.RateLimitUtil;
+import leyans.RidersHub.Util.RateLimitUtil;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -26,14 +26,11 @@ public class WikimediaImageService {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase()")
+    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase().trim()")
     public LocationImageDto getLocationImage(String locationName) {
-        // Check rate limit before making API call
-        rateLimitUtil.enforceRateLimit(RATE_LIMIT_KEY);
+        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
         try {
-            // Step 1: Search for images related to the location
-            // Enhanced search for Mindanao locations
             String enhancedSearchTerm = enhanceSearchForMindanao(locationName);
 
             String searchUrl = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API_BASE)
@@ -57,10 +54,8 @@ public class WikimediaImageService {
                 return null; // No images found
             }
 
-            // Find the best image from results (prefer non-maps, non-logos)
             String fileName = findBestImageFromResults(searchResults);
 
-            // Step 2: Get image info including URL, author, and license
             String imageInfoUrl = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API_BASE)
                     .queryParam("action", "query")
                     .queryParam("format", "json")
@@ -80,12 +75,11 @@ public class WikimediaImageService {
 
             String imageUrl = imageInfo.path("thumburl").asText();
             if (imageUrl.isEmpty()) {
-                imageUrl = imageInfo.path("url").asText(); // Fallback to full size if thumb not available
+                imageUrl = imageInfo.path("url").asText();
             }
 
             String author = imageInfo.path("user").asText();
 
-            // Extract license from extmetadata
             String license = "Unknown";
             JsonNode extMetadata = imageInfo.path("extmetadata");
             if (extMetadata.has("LicenseShortName")) {
@@ -101,6 +95,10 @@ public class WikimediaImageService {
         }
     }
 
+    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase().trim()", condition = "false")
+    public LocationImageDto checkCachedLocationImage(String locationName) {
+        return null; // This will only return the cached value, never execute this code
+    }
     private String enhanceSearchForMindanao(String locationName) {
         // Add context for better Mindanao location searches
         String enhanced = locationName;

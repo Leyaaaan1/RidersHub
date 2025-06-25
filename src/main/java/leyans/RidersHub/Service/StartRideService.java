@@ -2,9 +2,9 @@ package leyans.RidersHub.Service;
 
 
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
-import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
+import leyans.RidersHub.Util.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StartedRide;
@@ -24,35 +24,49 @@ public class StartRideService {
     private final RidesRepository ridesRepository;
     private final StartedRideRepository startedRideRepository;
 
-    private final RiderRepository riderRepository;
-
-    private final RiderService riderService;
-
+    private final RiderUtil riderUtil;
 
 
     @Autowired
     public StartRideService(RidesRepository ridesRepository,
-                            StartedRideRepository startedRideRepository, RiderRepository riderRepository, RiderService riderService) {
+                            StartedRideRepository startedRideRepository, RiderUtil riderUtil) {
         this.ridesRepository = ridesRepository;
         this.startedRideRepository = startedRideRepository;
-        this.riderRepository = riderRepository;
-        this.riderService = riderService;
+        this.riderUtil = riderUtil;
     }
 
 
     @Transactional
     public StartRideResponseDTO startRide(Integer generatedRidesId) throws AccessDeniedException {
+        Rider initiator = authenticateAndGetInitiator();
 
+        Rides ride = validateAndGetRide(generatedRidesId, initiator);
+
+        double[] coordinates = extractLocationCoordinates(ride);
+        double longitude = coordinates[0];
+        double latitude = coordinates[1];
+
+        StartedRide started = createAndSaveStartedRide(ride, initiator);
+
+        return buildResponseDTO(ride, initiator, started, longitude, latitude);
+    }
+
+
+    private Rider authenticateAndGetInitiator() throws AccessDeniedException {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        Rider initiator = riderService.getRiderByUsername(username);
+        Rider initiator = riderUtil.findRiderByUsername(username);
 
         if (initiator == null) {
             throw new AccessDeniedException("Rider not found with username: " + username);
         }
 
-        Optional<Rides> rideOptional = ridesRepository.findRideWithParticipantsById(generatedRidesId);
-        Rides ride = rideOptional.orElseThrow(() -> new IllegalArgumentException("Ride not found with ID: " + generatedRidesId));
+        return initiator;
+    }
 
+    private Rides validateAndGetRide(Integer generatedRidesId, Rider initiator) throws AccessDeniedException {
+        Optional<Rides> rideOptional = ridesRepository.findRideWithParticipantsById(generatedRidesId);
+        Rides ride = rideOptional.orElseThrow(() ->
+                new IllegalArgumentException("Ride not found with ID: " + generatedRidesId));
 
         if (ride.getUsername() == null || !ride.getUsername().getUsername().equals(initiator.getUsername())) {
             throw new AccessDeniedException("Only the ride initiator can start this ride");
@@ -62,6 +76,10 @@ public class StartRideService {
             throw new IllegalStateException("Ride has already been started");
         }
 
+        return ride;
+    }
+
+    private double[] extractLocationCoordinates(Rides ride) {
         double longitude = 0.0;
         double latitude = 0.0;
 
@@ -69,6 +87,11 @@ public class StartRideService {
             longitude = ride.getLocation().getX();
             latitude = ride.getLocation().getY();
         }
+
+        return new double[]{longitude, latitude};
+    }
+
+    private StartedRide createAndSaveStartedRide(Rides ride, Rider initiator) {
         StartedRide started = new StartedRide(
                 ride,
                 LocalDateTime.now(),
@@ -77,18 +100,20 @@ public class StartRideService {
                 initiator
         );
 
+        try {
+            return startedRideRepository.save(started);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save rider location", e);
+        }
+    }
 
+    private StartRideResponseDTO buildResponseDTO(Rides ride, Rider initiator, StartedRide started,
+                                                  double longitude, double latitude) {
         List<String> participantUsernames = ride.getParticipants().stream()
                 .map(Rider::getUsername)
                 .toList();
 
-        try {
-        started = startedRideRepository.save(started);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to save rider location", e);
-        }
-
-        StartRideResponseDTO startRideResponseDTO = new StartRideResponseDTO(
+        return new StartRideResponseDTO(
                 ride.getGeneratedRidesId(),
                 initiator.getUsername(),
                 ride.getRidesName(),
@@ -97,13 +122,7 @@ public class StartRideService {
                 longitude,
                 latitude,
                 started.getStartTime());
-
-        return startRideResponseDTO;
     }
-
-
-
-
 
 
 
