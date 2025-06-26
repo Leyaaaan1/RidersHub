@@ -402,7 +402,8 @@ const RideStep4 = (props) => {
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={{color: "#fff"}}> Sample </Text>
+                            <Text style={rideUtilities.customBottomText}>Routes</Text>
+
                         </View>
                     </View>
 
