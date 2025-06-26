@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/wikimedia")
 public class WikimediaImageController {
@@ -14,19 +16,19 @@ public class WikimediaImageController {
     private WikimediaImageService wikimediaImageService;
 
     @GetMapping("/location")
-    public ResponseEntity<LocationImageDto> getLocationImage(@RequestParam String locationName) {
-        LocationImageDto cachedImage = wikimediaImageService.checkCachedLocationImage(locationName);
+    public ResponseEntity<List<LocationImageDto>> getLocationImages(@RequestParam String locationName) {
+        List<LocationImageDto> cachedImages = wikimediaImageService.checkCachedLocationImage(locationName);
 
-        if (cachedImage != null) {
-            return ResponseEntity.ok(cachedImage);
+        if (cachedImages != null && !cachedImages.isEmpty()) {
+            return ResponseEntity.ok(cachedImages);
         }
 
-        LocationImageDto imageDto = wikimediaImageService.getLocationImage(locationName);
+        List<LocationImageDto> imageDtos = wikimediaImageService.getLocationImage(locationName);
 
-        if (imageDto == null) {
+        if (imageDtos == null || imageDtos.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.ok(imageDto);
+        return ResponseEntity.ok(imageDtos);
     }
 }
