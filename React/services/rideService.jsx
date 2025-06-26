@@ -271,19 +271,18 @@ export const getLocationImage = async (rideName, token) => {
 
         if (!response.ok) {
             if (response.status === 404) {
-                return null; // No image found
+                return []; // No images found
             }
             const errorText = await response.text();
-            throw new Error(`Failed to fetch location image: ${response.status} ${errorText}`);
+            throw new Error(`Failed to fetch location images: ${response.status} ${errorText}`);
         }
 
-        return await response.json(); // Returns LocationImageDto with imageUrl, author, and license
+        return await response.json(); // Returns an array of LocationImageDto objects
     } catch (error) {
-        console.error('Error fetching location image:', error);
+        console.error('Error fetching location images:', error);
         throw error;
     }
 };
-
 
 
 

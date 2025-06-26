@@ -16,14 +16,10 @@ public class RateLimitUtil {
 
     public void freeApiAllowed(String rateKey) {
         try {
-            // Try to get a token from the bucket without blocking
-            if (!rateLimitService.isAllowed(rateKey)) {
-                // Only log when we actually hit a rate limit
+            if (!rateLimitService.isAllowedForThree(rateKey)) {
                 System.out.println("Rate limit reached for " + rateKey + ", waiting briefly...");
-                // Wait a shorter time before retry
                 Thread.sleep(100);
-                // Try one more time before proceeding anyway
-                rateLimitService.isAllowed(rateKey);
+                rateLimitService.isAllowedForThree(rateKey);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -33,7 +29,7 @@ public class RateLimitUtil {
 
     public void enforceRateLimitMapBox(String rateKey) {
         try {
-            boolean allowed = rateLimitService.isAllowed(rateKey);
+            boolean allowed = rateLimitService.isAllowedForThree(rateKey);
             System.out.println("Rate limit check for key: " + rateKey + ", allowed: " + allowed);
             if (!allowed) {
                 System.out.println("Rate limit exceeded for key: " + rateKey);

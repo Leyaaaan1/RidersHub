@@ -9,7 +9,8 @@ import {
     Image,
     Modal,
     SafeAreaView,
-    StatusBar, Alert
+    StatusBar, Alert,
+    FlatList
 } from 'react-native';
 import utilities from '../../styles/utilities';
 import rideUtilities from '../../styles/rideUtilities';
@@ -20,6 +21,7 @@ import colors from '../../styles/colors';
 import MapImageSwapper from "../../styles/MapImageSwapper";
 import ParticipantListModal from '../ParticipantListModal';
 import useJoinRide from './RideHandler';
+import imageStyles from "../../styles/ImageStyles";
 
 const RideStep4 = (props) => {
     const navigation = useNavigation();
@@ -89,14 +91,13 @@ const RideStep4 = (props) => {
         try {
             setRideNameImageLoading(true);
             setRideNameImageError(null);
-            const imageData = await getLocationImage(rideName, token);
-            console.log("Location image data:", imageData);
-            // Store the complete image data object
-            setRideNameImage(imageData);
-            return imageData;
+            const imageDataList = await getLocationImage(rideName, token);
+            console.log("Location image data list:", imageDataList);
+            setRideNameImage(Array.isArray(imageDataList) ? imageDataList : []);
+            return imageDataList;
         } catch (error) {
-            console.error("Failed to fetch location image:", error);
-            setRideNameImageError(error.message || "Failed to load location image");
+            console.error("Failed to fetch location images:", error);
+            setRideNameImageError(error.message || "Failed to load location images");
             return null;
         } finally {
             setRideNameImageLoading(false);
@@ -268,30 +269,33 @@ const RideStep4 = (props) => {
                         <View style={{width: '100%', alignItems: 'center'}}>
                             {rideNameImageLoading ? (
                                 <ActivityIndicator size="large" color="#fff" />
-                            ) : rideNameImage && rideNameImage.imageUrl ? (
-                                <View style={{width: '100%'}}>
-                                    <Image
-                                        source={{ uri: rideNameImage.imageUrl }}
-                                        style={{
-                                            width: '100%',
-                                            height: 200,
-                                            borderRadius: 8,
-                                            borderWidth: 2,
-                                            marginTop: 20
-                                        }}
-                                        resizeMode="cover"
-                                    />
-                                    {(rideNameImage.author || rideNameImage.license) && (
-                                        <Text style={{color: '#aaa', fontSize: 10, marginTop: 4, textAlign: 'right'}}>
-                                            {rideNameImage.author ? `Photo: ${rideNameImage.author}` : ''}
-                                            {rideNameImage.author && rideNameImage.license ? ' | ' : ''}
-                                            {rideNameImage.license ? `License: ${rideNameImage.license}` : ''}
-                                        </Text>
+                            ) : Array.isArray(rideNameImage) && rideNameImage.length > 0 ? (
+                                <FlatList
+                                    data={rideNameImage}
+                                    horizontal
+                                    pagingEnabled
+                                    keyExtractor={(_, idx) => idx.toString()}
+                                    renderItem={({ item }) => (
+                                        <View style={imageStyles.imageContainer}>
+                                            <Image
+                                                source={{ uri: item.imageUrl }}
+                                                style={imageStyles.image}
+                                                resizeMode="cover"
+                                            />
+                                            {(item.author || item.license) && (
+                                                <Text style={imageStyles.imageMeta}>
+                                                    {item.author ? `Photo: ${item.author}` : ''}
+                                                    {item.author && item.license ? ' | ' : ''}
+                                                    {item.license ? `License: ${item.license}` : ''}
+                                                </Text>
+                                            )}
+                                        </View>
                                     )}
-                                </View>
+                                    showsHorizontalScrollIndicator={false}
+                                />
                             ) : (
                                 <Text style={{color: '#fff'}}>
-                                    {rideNameImageError || "No location image available"}
+                                    {rideNameImageError || "No location images available"}
                                 </Text>
                             )}
                         </View>
