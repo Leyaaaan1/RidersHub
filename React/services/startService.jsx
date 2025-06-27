@@ -27,6 +27,9 @@ export const startService = {
                     case 409:
                         errorMessage = 'This ride has already been started.';
                         break;
+                    case 410:
+                        errorMessage = 'You have currently rides ongoing.';
+                        break;
                     default:
                         errorMessage = 'An error occurred while starting the ride.';
                 }

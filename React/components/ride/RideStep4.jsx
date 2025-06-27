@@ -22,6 +22,7 @@ import MapImageSwapper from "../../styles/MapImageSwapper";
 import ParticipantListModal from '../ParticipantListModal';
 import useJoinRide from './RideHandler';
 import imageStyles from "../../styles/ImageStyles";
+import {startService} from "../../services/startService";
 
 const RideStep4 = (props) => {
     const navigation = useNavigation();
@@ -231,7 +232,20 @@ const RideStep4 = (props) => {
                             </View>
                         </TouchableOpacity>
                     ) : (
-                        <TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={async () => {
+                                try {
+                                    await startService.startRide(generatedRidesId, token);
+                                    navigation.navigate('StartedRide', {
+                                        generatedRidesId,
+                                        token,
+                                        username
+                                    });
+                                } catch (error) {
+                                    Alert.alert('Error', error.message || 'Failed to start the ride.');
+                                }
+                            }}
+                        >
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
                                 <FontAwesome name="play-circle" size={40} color="#fff" style={{ marginRight: 5 }} />
                             </View>
