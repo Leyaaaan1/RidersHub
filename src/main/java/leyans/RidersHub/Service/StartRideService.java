@@ -73,7 +73,10 @@ public class StartRideService {
         }
 
         if (startedRideRepository.existsByRide(ride)) {
-            throw new IllegalStateException("Ride has already been started");
+            throw new IllegalStateException("You have currently rides ongoing");
+        }
+        if (startedRideRepository.existsByUsername(initiator)) {
+            throw new IllegalStateException("Ride is already in progress");
         }
 
         return ride;

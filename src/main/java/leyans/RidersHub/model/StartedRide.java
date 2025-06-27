@@ -34,7 +34,7 @@ public class StartedRide {
 
     @ManyToMany
     @JoinTable(
-            name = "started_ride_participants", // Avoid conflict with Rides entity
+            name = "started_ride_participants",
             joinColumns = @JoinColumn(name = "started_ride_id"),
             inverseJoinColumns = @JoinColumn(name = "rider_username")
     )

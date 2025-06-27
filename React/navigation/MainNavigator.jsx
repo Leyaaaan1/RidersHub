@@ -4,6 +4,7 @@ import AuthScreen from "../screens/AuthScreen";
 import RiderPage from "../pages/RiderPage";
 import CreateRide from "../pages/CreateRide";
 import RideStep4 from "../components/ride/RideStep4";
+import StartedRide from "../pages/StartedRide";
 const Stack = createNativeStackNavigator();
 
 const MainNavigator = () => {
@@ -14,6 +15,7 @@ const MainNavigator = () => {
             <Stack.Screen name="RiderPage" component={RiderPage} />
             <Stack.Screen name="CreateRide" component={CreateRide} />
             <Stack.Screen name="RideStep4" component={RideStep4} />
+            <Stack.Screen name="StartedRide" component={StartedRide} />
         </Stack.Navigator>
     );
 };
