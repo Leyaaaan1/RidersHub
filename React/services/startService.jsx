@@ -42,5 +42,61 @@ export const startService = {
             console.error('Error starting ride:', error);
             throw error;
         }
-    }
+    },
+
+
 };
+
+export async function currentRide(generatedRidesId, token) {
+    const response = await fetch(`${API_BASE_URL}/ready/${generatedRidesId}`, {
+
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch ride details');
+    }
+    return await response.json();
+}
+
+
+// export const currentRide = async (generatedRidesId, token) => {
+//     try {
+//         const response = await fetch(`${API_BASE_URL}/ready/${generatedRidesId}`, {
+//             method: 'GET',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${token}`
+//             }
+//         });
+//
+//         if (!response.ok) {
+//             const status = response.status;
+//             let errorMessage = '';
+//
+//             switch (status) {
+//                 case 403:
+//                     errorMessage = 'You are not authorized to view this ride.';
+//                     break;
+//                 case 404:
+//                     errorMessage = 'Started ride not found.';
+//                     break;
+//                 case 409:
+//                     errorMessage = 'Ride is already in progress.';
+//                     break;
+//                 default:
+//                     errorMessage = 'An error occurred while fetching the started ride.';
+//             }
+//
+//             throw new Error(errorMessage);
+//         }
+//
+//         return await response.json();
+//     } catch (error) {
+//         console.error('Error fetching started ride:', error);
+//         throw error;
+//     }
+// };

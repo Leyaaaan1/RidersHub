@@ -21,7 +21,7 @@ public class StartedRide {
     private Rider username;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "rides_id", referencedColumnName = "ridesId", nullable = false)
+    @JoinColumn(name = "rides_id", referencedColumnName = "generatedRidesId", nullable = false)
     private Rides ride;
 
     @Column(name = "start_time", nullable = false)

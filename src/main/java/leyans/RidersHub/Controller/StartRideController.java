@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 
 @RestController
-@RequestMapping("/ready")
+@RequestMapping("/start")
 public class StartRideController {
 
     private final StartRideService rideService;
@@ -22,10 +22,11 @@ public class StartRideController {
         this.rideService = rideService;
     }
 
-    @PostMapping("/{generatedRidesId}/start")
+    @PostMapping("/{generatedRidesId}")
     public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable Integer generatedRidesId) {
         try {
             StartRideResponseDTO response = rideService.startRide(generatedRidesId);
+
             return ResponseEntity.ok(response);
         } catch (AccessDeniedException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -39,5 +40,26 @@ public class StartRideController {
     }
 
 
+    @GetMapping("/view/{generatedRidesId}")
+    public ResponseEntity<?> getStartedRide(@PathVariable Integer generatedRidesId) {
+        try {
+            StartRideResponseDTO responseDTO = rideService.getStartedRideByRideId(generatedRidesId);
+            return ResponseEntity.ok(responseDTO);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(403).body("Access Denied: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(404).body("Ride not found: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Server error: " + e.getMessage());
+        }
+    }
+
+
+
+
+
+
 }
+
+
 

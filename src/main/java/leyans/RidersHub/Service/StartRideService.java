@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -50,6 +51,38 @@ public class StartRideService {
 
         return buildResponseDTO(ride, initiator, started, longitude, latitude);
     }
+    @Transactional(readOnly = true)
+    public StartRideResponseDTO getStartedRideByRideId(Integer generatedRidesId) throws AccessDeniedException {
+        Rider requester = authenticateAndGetInitiator();
+
+        Optional<StartedRide> optionalStartedRide = startedRideRepository.findByRideGeneratedRidesId(generatedRidesId);
+        if (optionalStartedRide.isEmpty()) {
+            throw new IllegalStateException("Started ride not found.");
+        }
+
+        StartedRide startedRide = optionalStartedRide.get();
+        Rides ride = startedRide.getRide();
+
+        boolean isInitiator = Objects.equals(ride.getUsername().getUsername(), requester.getUsername());
+        boolean isParticipant = ride.getParticipants().stream()
+                .anyMatch(r -> Objects.equals(r.getUsername(), requester.getUsername()));
+
+        if (!isInitiator && !isParticipant) {
+            throw new AccessDeniedException("You are not authorized to view this ride.");
+        }
+
+        double longitude = 0.0;
+        double latitude = 0.0;
+        if (ride.getLocation() != null) {
+            longitude = ride.getLocation().getX();
+            latitude = ride.getLocation().getY();
+        }
+
+        return buildResponseDTO(ride, startedRide.getUsername(), startedRide, longitude, latitude);
+    }
+
+
+
 
 
     private Rider authenticateAndGetInitiator() throws AccessDeniedException {
@@ -64,9 +97,7 @@ public class StartRideService {
     }
 
     private Rides validateAndGetRide(Integer generatedRidesId, Rider initiator) throws AccessDeniedException {
-        Optional<Rides> rideOptional = ridesRepository.findRideWithParticipantsById(generatedRidesId);
-        Rides ride = rideOptional.orElseThrow(() ->
-                new IllegalArgumentException("Ride not found with ID: " + generatedRidesId));
+        Rides ride = riderUtil.findRideById(generatedRidesId);
 
         if (ride.getUsername() == null || !ride.getUsername().getUsername().equals(initiator.getUsername())) {
             throw new AccessDeniedException("Only the ride initiator can start this ride");
@@ -110,6 +141,8 @@ public class StartRideService {
         }
     }
 
+
+
     private StartRideResponseDTO buildResponseDTO(Rides ride, Rider initiator, StartedRide started,
                                                   double longitude, double latitude) {
         List<String> participantUsernames = ride.getParticipants().stream()
@@ -124,8 +157,13 @@ public class StartRideService {
                 participantUsernames,
                 longitude,
                 latitude,
-                started.getStartTime());
+                started != null ? started.getStartTime() : null
+        );
     }
+
+
+
+
 
 
 

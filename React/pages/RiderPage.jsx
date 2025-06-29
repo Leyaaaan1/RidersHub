@@ -10,8 +10,8 @@ import {getCurrentRiderType, getRideDetails} from '../services/rideService';
 import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
-import ParticipantListModal from "../components/ParticipantListModal";
 import MyRidesModal from '../components/MyRidesModal';
+import {currentRide} from "../services/startService";
 
 
 
@@ -24,6 +24,7 @@ const RiderPage = ({ route , navigation}) => {
 
     const [myRidesModalVisible, setMyRidesModalVisible] = useState(false);
 
+    console.log('RiderPage mounted with username:', token);
 
     useEffect(() => {
         fetchCurrentRiderType();
@@ -159,11 +160,21 @@ const RiderPage = ({ route , navigation}) => {
             </View>
             <View style={rideUtilities.customBottomContainer}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                        <TouchableOpacity>
-                            <Text style={rideUtilities.customBottomText}>Current Rides</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity
+                        onPress={async () => {
+                            try {
+                                const startedRide = await currentRide( token);
+                                navigation.navigate('StartedRide', {
+                                    startedRide,
+                                    token,
+                                });
+                            } catch (error) {
+                                Alert.alert('Error', error.message || 'Failed to fetch current ride');
+                            }
+                        }}
+                    >
+                        <Text style={rideUtilities.customBottomText}>Current Rides</Text>
+                    </TouchableOpacity>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <TouchableOpacity onPress={() => setMyRidesModalVisible(true)}>
                             <Text style={rideUtilities.customBottomText}>My Rides</Text>
