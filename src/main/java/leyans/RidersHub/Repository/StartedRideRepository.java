@@ -17,16 +17,13 @@ public interface StartedRideRepository extends JpaRepository<StartedRide, Intege
 
     boolean existsByRide(Rides ride);
 
+    Optional<StartedRide> findByRide(Rides ride);
+
     boolean existsByUsername(Rider username);
+    Optional<StartedRide> findByRideGeneratedRidesId(Integer generatedRidesId);
 
     @Query("SELECT sr FROM StartedRide sr WHERE sr.ride.generatedRidesId = :generatedRidesId")
     Optional<StartedRide> findByGeneratedRidesId(@Param("generatedRidesId") Integer generatedRidesId);
-
-//    @Query("SELECT CASE WHEN COUNT(sr) > 0 THEN true ELSE false END FROM StartedRide sr " +
-//            "JOIN sr.ride r JOIN r.participants p " +
-//            "WHERE r.generatedRidesId = :generatedRidesId AND p = :rider")
-//    boolean existsByGeneratedRidesIdAndParticipantsContaining(@Param("generatedRidesId") Integer generatedRidesId, @Param("rider") Rider rider);
-//
 
 
 }
