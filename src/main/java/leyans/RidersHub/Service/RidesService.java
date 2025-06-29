@@ -74,21 +74,7 @@ public class RidesService {
         int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
 
         Rides newRide = new Rides();
-        if (generatedRidesId == null) {
-            int randomFourDigitNumber;
-            boolean idExists;
-
-            do {
-                randomFourDigitNumber = 1000 + (int)(Math.random() * 9000);
-                idExists = ridesRepository.findByGeneratedRidesId(randomFourDigitNumber).isPresent();
-            } while (idExists);
-
-            newRide.setGeneratedRidesId(randomFourDigitNumber);
-        } else {
-            newRide.setGeneratedRidesId(generatedRidesId);
-        }
-
-        newRide.setRidesName(ridesName);
+        newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : generateUniqueRideId());
         newRide.setRidesName(ridesName);
         newRide.setLocationName(resolvedLocationName);
         newRide.setDescription(description);
@@ -116,6 +102,17 @@ public class RidesService {
         return response;
     }
 
+    private int generateUniqueRideId() {
+        int randomFourDigitNumber;
+        boolean idExists;
+
+        do {
+            randomFourDigitNumber = 1000 + (int)(Math.random() * 9000);
+            idExists = ridesRepository.findByGeneratedRidesId(randomFourDigitNumber).isPresent();
+        } while (idExists);
+
+        return randomFourDigitNumber;
+    }
     private RideResponseDTO mapToResponseDTO(Rides ride) {
         return new RideResponseDTO(
 

@@ -22,16 +22,14 @@ import java.util.Optional;
 @Service
 public class StartRideService {
 
-    private final RidesRepository ridesRepository;
     private final StartedRideRepository startedRideRepository;
 
     private final RiderUtil riderUtil;
 
 
+
     @Autowired
-    public StartRideService(RidesRepository ridesRepository,
-                            StartedRideRepository startedRideRepository, RiderUtil riderUtil) {
-        this.ridesRepository = ridesRepository;
+    public StartRideService(StartedRideRepository startedRideRepository, RiderUtil riderUtil) {
         this.startedRideRepository = startedRideRepository;
         this.riderUtil = riderUtil;
     }
@@ -86,7 +84,7 @@ public class StartRideService {
 
 
     private Rider authenticateAndGetInitiator() throws AccessDeniedException {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = riderUtil.getCurrentUsername();
         Rider initiator = riderUtil.findRiderByUsername(username);
 
         if (initiator == null) {
