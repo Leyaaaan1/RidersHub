@@ -72,11 +72,12 @@ NOMINATIM_URL_REVERSE=your_api_url_for_geo_reverse
 NOMINATIM_URL_SEARCH=your_api_to_search_location
 NOMINATIM_USERAGENT=your_email_address
 
-# Nominatim Geographic Boundaries (Philippines)
-NOMINATIM_VIEWBOX_LEFT=120.0
-NOMINATIM_VIEWBOX_BOTTOM=10.0
-NOMINATIM_VIEWBOX_RIGHT=122.0
-NOMINATIM_VIEWBOX_TOP=12.0
+# ==============================================
+# Agent for your api 
+# Sample = WIKIMEDIA_API_USERAGENT=RidersHub/1.0 (add your email here)
+# ==============================================
+wikimedia.api.useragent=${WIKIMEDIA_API_USERAGENT}
+USER_AGENT=${NOMINATIM_API_USERAGENT}
 
 # ==============================================
 # MAPBOX API CONFIGURATION
@@ -192,4 +193,5 @@ The backend uses **JWT (JSON Web Token)** for secure, stateless user authenticat
 This is a personal learning project. Contributions are welcome as suggestions or feature ideas.
 
 ## Contact
-Feel free to reach out if you're a fellow enthusiast or developer from Davao City!
+Feel free to reach out if you're a fellow enthusiast or developer from Davao City!  
+Or if you need help to set up, just email me: paninsorolean@gmail.com
