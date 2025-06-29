@@ -68,8 +68,6 @@ spring.data.redis.port=${PORT}
 # NOMINATIM API CONFIGURATION
 # ==============================================
 NOMINATIM_API_KEY=your_nominatim_api_key
-NOMINATIM_URL_REVERSE=your_api_url_for_geo_reverse
-NOMINATIM_URL_SEARCH=your_api_to_search_location
 NOMINATIM_USERAGENT=your_email_address
 
 # ==============================================
