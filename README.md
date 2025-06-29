@@ -2,11 +2,13 @@
 *  Create and display rides
 *  Interactive **homepage** and **map interface**
 *  **Add locations** via **Nominatim API**
-*  **Rate limiting** with **Bucket4j** (1 request/sec)
+*  **Rate limiting** with **Bucket4j** (1 request/sec, Redis-backed)
 *  **Mapbox integration**: capture and view map snapshots
 *  **Cloudinary integration**: upload and store map images
 *  **JWT-based authentication**: secure API access with token-based login
 *  **PSGC mapping**: match coordinates to barangays using PSA official codes
+*  **Redis cache**: stores API responses and manages rate limits for Nominatim, Mapbox, and Wikimedia APIs
+*  **Wikimedia API**: fetches location images and info, with Redis caching and rate limiting
 * (Soon) **Redis**: for storing and managing real-time user locations
 * (Soon) **WebSocket**: for live ride and location updates
 ---
@@ -19,9 +21,10 @@
 * **Mapbox**: Interactive maps & snapshot functionality
 * **Cloudinary**: Upload and manage map screenshots
 * **Nominatim API**: Location search and reverse geocoding
-* **Bucket4j**: Rate limiter for API usage compliance
+* **Wikimedia API**: Location images and info, with Redis caching and rate limiting
+* **Bucket4j**: Redis-backed rate limiter for API usage compliance (Nominatim, Mapbox, Wikimedia)
 * **PSGC Data Integration**: Convert coordinates into barangay names and codes
-* **Spring DevTools**: Hot reload during development
+* **Redis Cache**: Caches geocoding, map, and Wikimedia results for performance and API quota management
 ---
 ##  Overview
 This project focuses on building a real-time ride creation and discovery system. It integrates **Mapbox** for interactive maps, **Cloudinary** for storing map snapshots, and uses **Nominatim API** for geolocation. A **Bucket4j** rate limiter ensures compliance with Nominatim's usage policy (1 request per second). **JWT-based authentication** secures API access. It also uses official **PSGC data** from the [Philippine Statistics Authority](https://psa.gov.ph/classification/psgc) to convert coordinates into barangay-level locations. **Redis** integration for managing live user locations is planned.
@@ -42,6 +45,10 @@ JWT_EXPIRATION=
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+
+spring.cache.type=redis
+spring.data.redis.host=${HOST}
+spring.data.redis.port=${PORT}
 
 # Nominatim API
 NOMINATIM_API_KEY=your_nominatim_api_key
@@ -79,6 +86,10 @@ Ensure your PostgreSQL server is running and credentials match those in your .en
 
 4. Remove all other columns from the dataset.
 5. Import the cleaned dataset into your PostgreSQL database.
+6. Rename the file to psgc_data, also that is the need of the table in the database
+---
+### 3.  Run Docker Desktop and Docker-compose.yml
+- For redis cache
 ---
 ### 3.  Run Spring Boot Backend
 From the root project directory, run the backend:
