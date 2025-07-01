@@ -83,12 +83,12 @@ public class NominatimService {
         return getCityOrLandmarkFromCoordinatesInternal(lat, lon);
     }
 
-    private String getCityOrLandmarkFromCoordinatesInternal(double lat, double lon) {
+    public String getCityOrLandmarkFromCoordinatesInternal(double lat, double lon) {
         rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
-                "&zoom=14&addressdetails=1" +
+                "&zoom=18&addressdetails=1" +
                 "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
         HttpHeaders headers = new HttpHeaders();
@@ -101,28 +101,34 @@ public class NominatimService {
             ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
             Map<String, Object> body = response.getBody();
 
-            if (body != null) {
-                String displayName = (String) body.get("display_name");
+            if (body != null && body.containsKey("address")) {
+                Map<String, String> address = (Map<String, String>) body.get("address");
 
-                if (body.containsKey("address")) {
-                    Map<String, String> address = (Map<String, String>) body.get("address");
+                // 1. Try to get most specific location name
+                String[] landmarkKeys = {
+                        "attraction", "tourism", "leisure", "historic", "building", "stadium", "mall", "theatre",
+                        "hotel", "resort", "camp_site", "natural", "park", "museum", "man_made", "place", "shop"
+                };
 
-                    String landmark = address.getOrDefault("tourism",
-                            address.getOrDefault("historic",
-                                    address.getOrDefault("amenity", null)));
-
-                    if (landmark != null) {
-                        return landmark;
+                for (String key : landmarkKeys) {
+                    if (address.containsKey(key)) {
+                        return address.get(key);  // Return the most specific result
                     }
-
-                    return address.getOrDefault("city",
-                            address.getOrDefault("town",
-                                    address.getOrDefault("county",
-                                            displayName != null ? displayName.split(",")[0] : null)));
                 }
+
+                // 2. Fallback to display_name's first segment if available
+                if (body.containsKey("display_name")) {
+                    String displayName = (String) body.get("display_name");
+                    return displayName.split(",")[0].trim();  // First part is usually landmark name
+                }
+
+                // 3. Fallback to city/town/county
+                return address.getOrDefault("city",
+                        address.getOrDefault("town",
+                                address.getOrDefault("county", null)));
             }
         } catch (Exception e) {
-            System.err.println("Nominatim City/Landmark Error: " + e.getMessage());
+            System.err.println("Nominatim Reverse Error: " + e.getMessage());
         }
 
         return null;
@@ -181,54 +187,42 @@ public class NominatimService {
 
             String json = response.getBody();
             List<Map<String, Object>> results = objectMapper.readValue(json, new TypeReference<>() {});
-
-            if (results == null || results.isEmpty()) {
-                return Collections.emptyList();
-            }
+            if (results == null || results.isEmpty()) return Collections.emptyList();
 
             List<Map<String, Object>> filteredResults = new ArrayList<>();
 
             List<String> landmarkKeys = List.of(
-                    "tourism", "historic", "amenity", "leisure", "attraction",
-                    "camp_site", "resort", "natural", "park", "hotel", "museum"
+                    "attraction", "tourism", "historic", "leisure", "building", "stadium", "mall", "theatre",
+                    "amenity", "hotel", "resort", "camp_site", "natural", "park", "museum", "man_made", "shop", "place"
             );
 
             for (Map<String, Object> result : results) {
-                boolean added = false;
+                Map<String, Object> address = (Map<String, Object>) result.get("address");
+                boolean isLandmark = false;
 
-                String name = (String) result.get("name");
-                String displayName = (String) result.get("display_name");
-
-                if ((name != null && name.toLowerCase().contains(query.toLowerCase())) ||
-                        (displayName != null && displayName.toLowerCase().contains(query.toLowerCase()))) {
-                    result.put("place_type", "landmark");
-                    filteredResults.add(result);
-                    added = true;
+                for (String key : landmarkKeys) {
+                    if (address != null && address.containsKey(key)) {
+                        result.put("place_type", "landmark");
+                        filteredResults.add(result);
+                        isLandmark = true;
+                        break;
+                    }
                 }
 
-                if (!added && result.containsKey("address")) {
-                    Map<String, Object> address = (Map<String, Object>) result.get("address");
-
+                if (!isLandmark && address != null) {
                     if (address.containsKey("city")) {
                         result.put("place_type", "city");
                         filteredResults.add(result);
                     } else if (address.containsKey("town")) {
                         result.put("place_type", "town");
                         filteredResults.add(result);
-                    } else {
-                        for (String key : landmarkKeys) {
-                            if (address.containsKey(key)) {
-                                result.put("place_type", "landmark");
-                                filteredResults.add(result);
-                                break;
-                            }
-                        }
                     }
                 }
 
                 if (filteredResults.size() >= limit) break;
             }
 
+            // Fallback in case nothing matches
             if (filteredResults.isEmpty()) {
                 for (Map<String, Object> fallback : results.subList(0, Math.min(limit, results.size()))) {
                     fallback.putIfAbsent("place_type", "landmark");
@@ -239,7 +233,6 @@ public class NominatimService {
             return filteredResults;
         } catch (Exception e) {
             System.err.println("Nominatim Search Error: " + e.getMessage());
-            e.printStackTrace();
             return Collections.emptyList();
         }
     }
