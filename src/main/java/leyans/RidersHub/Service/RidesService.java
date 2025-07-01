@@ -66,6 +66,7 @@ public class RidesService {
         Point rideLocation = locationService.createPoint(longitude, latitude);
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
+
         String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
         String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
         String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
@@ -76,18 +77,23 @@ public class RidesService {
         Rides newRide = new Rides();
         newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : generateUniqueRideId());
         newRide.setRidesName(ridesName);
-        newRide.setLocationName(resolvedLocationName);
         newRide.setDescription(description);
         newRide.setRiderType(rideType);
         newRide.setUsername(creator);
         newRide.setDistance(calculatedDistance);
         newRide.setParticipants(participants);
-        newRide.setStartingLocation(startPoint);
-        newRide.setEndingLocation(endPoint);
-        newRide.setStartingPointName(startLocationName);
-        newRide.setEndingPointName(endLocationName);
-        newRide.setDate(date);
+
+        newRide.setLocationName(resolvedLocationName);
         newRide.setLocation(rideLocation);
+
+        newRide.setStartingLocation(startPoint);
+        newRide.setStartingPointName(startLocationName);
+
+        newRide.setEndingLocation(endPoint);
+        newRide.setEndingPointName(endLocationName);
+
+        newRide.setDate(date);
+
         newRide.setMapImageUrl(imageUrl);
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);

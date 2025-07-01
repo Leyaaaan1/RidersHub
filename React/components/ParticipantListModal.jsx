@@ -10,7 +10,8 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('participants');
-console.log(username, currentUsername, 'ParticipantListModal');
+
+
     useEffect(() => {
         if (visible && activeTab === 'rides') {
             loadMyRides();

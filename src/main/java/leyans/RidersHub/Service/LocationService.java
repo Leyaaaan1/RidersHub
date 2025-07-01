@@ -53,13 +53,15 @@ public class LocationService {
         if (landmark == null) {
             return fallback != null ? fallback : "Lat: " + lat + ", Lng: " + lon;
         }
-        return psgcDataRepository.findByNameIgnoreCase(landmark)
-                .stream()
-                .findFirst()
-                .map(PsgcData::getName)
-                .orElse(landmark);
+        if (landmark.matches("\\d+")) {
+            return psgcDataRepository.findByNameIgnoreCase(fallback)
+                    .stream()
+                    .findFirst()
+                    .map(PsgcData::getName)
+                    .orElse(fallback != null ? fallback : "Lat: " + lat + ", Lng: " + lon);
+        }
+        return landmark;
     }
-
 
     public int calculateDistance(Point startPoint, Point endPoint) {
         double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
