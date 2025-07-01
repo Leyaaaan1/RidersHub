@@ -66,6 +66,7 @@ public class RidesService {
         Point rideLocation = locationService.createPoint(longitude, latitude);
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
+
         String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
         String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
         String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
@@ -74,34 +75,25 @@ public class RidesService {
         int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
 
         Rides newRide = new Rides();
-        if (generatedRidesId == null) {
-            int randomFourDigitNumber;
-            boolean idExists;
-
-            do {
-                randomFourDigitNumber = 1000 + (int)(Math.random() * 9000);
-                idExists = ridesRepository.findByGeneratedRidesId(randomFourDigitNumber).isPresent();
-            } while (idExists);
-
-            newRide.setGeneratedRidesId(randomFourDigitNumber);
-        } else {
-            newRide.setGeneratedRidesId(generatedRidesId);
-        }
-
+        newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : generateUniqueRideId());
         newRide.setRidesName(ridesName);
-        newRide.setRidesName(ridesName);
-        newRide.setLocationName(resolvedLocationName);
         newRide.setDescription(description);
         newRide.setRiderType(rideType);
         newRide.setUsername(creator);
         newRide.setDistance(calculatedDistance);
         newRide.setParticipants(participants);
-        newRide.setStartingLocation(startPoint);
-        newRide.setEndingLocation(endPoint);
-        newRide.setStartingPointName(startLocationName);
-        newRide.setEndingPointName(endLocationName);
-        newRide.setDate(date);
+
+        newRide.setLocationName(resolvedLocationName);
         newRide.setLocation(rideLocation);
+
+        newRide.setStartingLocation(startPoint);
+        newRide.setStartingPointName(startLocationName);
+
+        newRide.setEndingLocation(endPoint);
+        newRide.setEndingPointName(endLocationName);
+
+        newRide.setDate(date);
+
         newRide.setMapImageUrl(imageUrl);
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
@@ -116,6 +108,17 @@ public class RidesService {
         return response;
     }
 
+    private int generateUniqueRideId() {
+        int randomFourDigitNumber;
+        boolean idExists;
+
+        do {
+            randomFourDigitNumber = 1000 + (int)(Math.random() * 9000);
+            idExists = ridesRepository.findByGeneratedRidesId(randomFourDigitNumber).isPresent();
+        } while (idExists);
+
+        return randomFourDigitNumber;
+    }
     private RideResponseDTO mapToResponseDTO(Rides ride) {
         return new RideResponseDTO(
 

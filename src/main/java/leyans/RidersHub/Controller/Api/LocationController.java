@@ -1,4 +1,4 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Api;
 
 import leyans.RidersHub.Service.MapService.NominatimService;
 import org.springframework.beans.factory.annotation.Autowired;

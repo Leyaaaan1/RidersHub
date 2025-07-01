@@ -41,13 +41,7 @@ public class NominatimService {
 
     }
 
-//    First search consumes the only token in the bucket
-//    When you immediately try to search again, the bucket is empty
-//    Your code calls bucket.asBlocking().consume(1) which blocks the thread
-//    The thread waits until a full second has passed since the first request
-//    Once the token is refilled (after 1 second), the second search proceeds
-
-    @Cacheable(value = "geocoding", key = "'barangay_' + #lat + '_' + #lon")
+    @Cacheable(value = "geocoding", key = "'barangay_' + #lat + '_' + #lon", unless = "#result == null")
     public String getBarangayNameFromCoordinates(double lat, double lon) {
         return getBarangayNameFromCoordinatesInternal(lat, lon);
     }
@@ -84,7 +78,7 @@ public class NominatimService {
         return null;
     }
 
-    @Cacheable(value = "geocoding", key = "'city_' + #lat + '_' + #lon")
+    @Cacheable(value = "geocoding", key = "'city_' + #lat + '_' + #lon", unless = "#result == null")
     public String getCityOrLandmarkFromCoordinates(double lat, double lon) {
         return getCityOrLandmarkFromCoordinatesInternal(lat, lon);
     }
@@ -134,7 +128,7 @@ public class NominatimService {
         return null;
     }
 
-    @Cacheable(value = "geocoding", key = "'search_' + #query.toLowerCase().trim() + '_' + #limit")
+    @Cacheable(value = "geocoding", key = "'search_' + #query.toLowerCase().trim() + '_' + #limit", unless = "#result == null")
     public List<Map<String, Object>> searchLocation(String query) {
         return searchLocation(query, 5);
     }
@@ -161,7 +155,7 @@ public class NominatimService {
         }
     }
 
-    @Cacheable(value = "geocoding", key = "'citylandmark_' + #query.toLowerCase().trim() + '_' + #limit")
+    @Cacheable(value = "geocoding", key = "'citylandmark_' + #query?.toLowerCase()?.trim() + '_' + #limit", unless = "#result == null")
     public List<Map<String, Object>> searchCityOrLandmark(String query) {
         return searchCityOrLandmark(query, 5);
     }

@@ -3,8 +3,11 @@ package leyans.RidersHub.Util;
 import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.Repository.StartedRideRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
+import leyans.RidersHub.model.StartedRide;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,9 +15,12 @@ public class RiderUtil {
 
     private final RidesRepository ridesRepository;
 
+    private final StartedRideRepository startedRideRepository;
+
     private final RiderRepository riderRepository;
-    public RiderUtil(RidesRepository ridesRepository, RiderRepository riderRepository) {
+    public RiderUtil(RidesRepository ridesRepository, StartedRideRepository startedRideRepository, RiderRepository riderRepository) {
         this.ridesRepository = ridesRepository;
+        this.startedRideRepository = startedRideRepository;
         this.riderRepository = riderRepository;
     }
 
@@ -30,6 +36,15 @@ public class RiderUtil {
             throw new EntityNotFoundException("Rider not found with username: " + username);
         }
         return rider;
+    }
+
+    public StartedRide findStartedRideByRideId(Integer generatedRidesId) {
+        return startedRideRepository.findByRideGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Started ride not found with ride ID: " + generatedRidesId));
+    }
+
+    public String getCurrentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
 }

@@ -1,4 +1,4 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Api;
 
 import leyans.RidersHub.DTO.LocationImageDto;
 import leyans.RidersHub.Service.MapService.WikimediaImageService;

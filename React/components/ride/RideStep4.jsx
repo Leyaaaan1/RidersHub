@@ -82,7 +82,7 @@ const RideStep4 = (props) => {
     const [rideNameImageLoading, setRideNameImageLoading] = useState(false);
     const [rideNameImageError, setRideNameImageError] = useState(null);
 
-
+    console.log('Participants:', participants);
     const fetchLocationImage = async (rideName) => {
         if (!rideName || !token) {
             console.log("Missing ride name or token for image fetch");
@@ -399,6 +399,7 @@ const RideStep4 = (props) => {
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <TouchableOpacity onPress={() => setShowParticipantsModal(true)}>
                             <Text style={rideUtilities.customBottomText}>Riders</Text>
+
                         </TouchableOpacity>
 
                         <ParticipantListModal

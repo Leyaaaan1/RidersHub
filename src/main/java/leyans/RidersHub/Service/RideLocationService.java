@@ -41,11 +41,8 @@ public class RideLocationService {
     @Transactional
     public LocationUpdateRequestDTO updateLocation(Integer generatedRidesId, double latitude, double longitude) {
 
-        StartedRide started = startedRideRepo.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new IllegalArgumentException("Started ride not found: " + generatedRidesId));
-
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        StartedRide started = riderUtil.findStartedRideByRideId(generatedRidesId);
+        String username = riderUtil.getCurrentUsername();
         Rider rider = riderUtil.findRiderByUsername(username);
 
         if (!started.getParticipants().contains(rider)) {
