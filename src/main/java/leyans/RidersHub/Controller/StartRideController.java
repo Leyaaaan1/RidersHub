@@ -7,25 +7,27 @@ import leyans.RidersHub.Service.StartRideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/start")
 public class StartRideController {
 
-    private final StartRideService rideService;
+    private final StartRideService startRideService;
 
-    public StartRideController(StartRideService rideService) {
-        this.rideService = rideService;
+    public StartRideController(StartRideService startRideService) {
+        this.startRideService = startRideService;
     }
 
     @PostMapping("/{generatedRidesId}")
     public ResponseEntity<StartRideResponseDTO> startRide(@PathVariable Integer generatedRidesId) {
         try {
-            StartRideResponseDTO response = rideService.startRide(generatedRidesId);
+            StartRideResponseDTO response = startRideService.startRide(generatedRidesId);
 
             return ResponseEntity.ok(response);
         } catch (AccessDeniedException ex) {
@@ -39,32 +41,16 @@ public class StartRideController {
         }
     }
 
-
-    @GetMapping("/view/{generatedRidesId}")
-    public ResponseEntity<?> getStartedRide(@PathVariable Integer generatedRidesId) {
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<StartRideResponseDTO>> getCurrentStartedRides() {
         try {
-            StartRideResponseDTO responseDTO = rideService.getStartedRideByRideId(generatedRidesId);
-            return ResponseEntity.ok(responseDTO);
+            List<StartRideResponseDTO> rides = startRideService.getCurrentStartedRides();
+            return ResponseEntity.ok(rides);
         } catch (AccessDeniedException e) {
-            return ResponseEntity.status(403).body("Access Denied: " + e.getMessage());
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(404).body("Ride not found: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Server error: " + e.getMessage());
+            return ResponseEntity.status(403).build();
         }
     }
-
-//    @GetMapping("/current")
-//    public ResponseEntity<?> getCurrentRidesForUser() {
-//        return ResponseEntity.ok(rideService.getCurrentRidesForUser());
-//    }
-
-    @GetMapping("/started/{generatedRidesId}")
-    public StartRideResponseDTO getStartedRides(@PathVariable Integer generatedRidesId) throws AccessDeniedException {
-        return rideService.getStartedRides(generatedRidesId);
-    }
-
-
 
 
 

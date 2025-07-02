@@ -6,12 +6,13 @@ import riderPageUtils from "../styles/riderPageUtils";
 import colors from "../styles/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
-import {getCurrentRiderType, getRideDetails} from '../services/rideService';
+import {getCurrentRiderType, } from '../services/rideService';
 import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
 import MyRidesModal from '../components/MyRidesModal';
-import {currentRide, startService} from "../services/startService";
+import {getCurrentStartedRides,} from "../services/startService";
+import CurrentRideHeader from "../components/CurrentRideHeader";
 
 
 
@@ -24,12 +25,13 @@ const RiderPage = ({ route , navigation}) => {
 
     const [myRidesModalVisible, setMyRidesModalVisible] = useState(false);
 
-    console.log('RiderPage mounted with username:', token);
+    const [startedRides, setStartedRides] = useState([]);
+    const [startedRidesLoading, setStartedRidesLoading] = useState(false);
+    const [startedRidesError, setStartedRidesError] = useState('');
 
     useEffect(() => {
         fetchCurrentRiderType();
     }, [token]);
-
 
 
 
@@ -50,6 +52,34 @@ const RiderPage = ({ route , navigation}) => {
             setLoading(false);
         }
     };
+    const fetchAndDisplayStartedRides = async (token) => {
+        try {
+            const rides = await getCurrentStartedRides(token);
+            return rides.map(ride => ({
+                ridesId: ride.generatedRidesId,
+                ridesName: ride.ridesName,
+                locationName: ride.locationName
+            }));
+        } catch (error) {
+            console.error('Error fetching started rides:', error);
+            throw error;
+        }
+    };
+
+    useEffect(() => {
+        if (!token) return;
+        setStartedRidesLoading(true);
+        fetchAndDisplayStartedRides(token)
+            .then(rides => {
+                setStartedRides(rides);
+                setStartedRidesError('');
+            })
+            .catch(err => {
+                setStartedRides([]);
+                setStartedRidesError('Failed to fetch started rides');
+            })
+            .finally(() => setStartedRidesLoading(false));
+    }, [token]);
 
     return (
         <View style={utilities.containerWhite}>
@@ -119,8 +149,31 @@ const RiderPage = ({ route , navigation}) => {
 
             <View style={riderPageUtils.contentContainer}>
                 <View style={utilities.currentRideContainer}>
-                    <View style={{  padding: 10, borderRadius: 8 , borderColor: colors.primary, borderWidth: 1}}>
-                        <Text style={{ color: colors.white, textAlign: 'center' }}>Current Ride</Text>
+                    <View style={utilities.currentRideBox}>
+                        <Text style={utilities.currentRideTitle}>Current Ride</Text>
+                        {startedRidesLoading ? (
+                            <ActivityIndicator color={colors.white} />
+                        ) : startedRidesError ? (
+                            <Text style={utilities.currentRideError}>{startedRidesError}</Text>
+                        ) : startedRides.length > 0 ? (
+                            startedRides.map((ride, idx) => (
+                                <View key={idx} style={utilities.currentRideItem}>
+                                    <Text style={utilities.currentRideLabel}>
+                                        Ride ID: <Text style={utilities.currentRideValue}>{ride.ridesId}</Text>
+                                    </Text>
+                                    <Text style={utilities.currentRideLabel}>
+                                        Name: <Text style={utilities.currentRideValue}>{ride.ridesName}</Text>
+                                    </Text>
+                                    <Text style={utilities.currentRideLabel}>
+                                        Location: <Text style={utilities.currentRideValue}>{ride.locationName}</Text>
+                                    </Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={utilities.currentRideEmpty}>
+                                No current ride found.
+                            </Text>
+                        )}
                     </View>
                 </View>
                 <RidesList
@@ -146,41 +199,13 @@ const RiderPage = ({ route , navigation}) => {
                             currentUsername: username
                         });
                     }}
-                    // renderActionButton={(ride) => (
-                    //     <TouchableOpacity
-                    //         style={{
-                    //             backgroundColor: colors.primary,
-                    //             padding: 8,
-                    //             borderRadius: 5,
-                    //             marginTop: 10
-                    //         }}
-                    //         onPress={() => handleJoinRequest(ride.generatedRidesId)}
-                    //     >
-                    //         <Text style={{ color: '#fff', textAlign: 'center' }}>Join Ride</Text>
-                    //     </TouchableOpacity>
-                    // )}
+
                 />
 
             </View>
             <View style={rideUtilities.customBottomContainer}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                    <TouchableOpacity
-                        onPress={async () => {
-                            try {
-                                await startService.startRide(generatedRidesId, token);
-                                navigation.navigate('StartedRide', { generatedRidesId, token });
-                            } catch (error) {
-                                if (error.response) {
-                                    console.log('Error status:', error.response.status);
-                                    console.log('Error data:', error.response.data);
-                                } else {
-                                    console.log('Error:', error);
-                                }
-                                Alert.alert('Error', error.message || 'Failed to start the ride.');
-                            }                        }}
-                    >
-                        <Text style={rideUtilities.customBottomText}>Current Rides</Text>
-                    </TouchableOpacity>
+
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <TouchableOpacity onPress={() => setMyRidesModalVisible(true)}>
                             <Text style={rideUtilities.customBottomText}>My Rides</Text>

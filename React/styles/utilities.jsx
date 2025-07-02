@@ -494,7 +494,47 @@ const utilities = StyleSheet.create({
         height: 16,
 
     },
-
+    currentRideBox: {
+        padding: 14,
+        borderRadius: 10,
+        borderColor: colors.primary,
+        borderWidth: 1.5,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        marginBottom: 10,
+    },
+    currentRideTitle: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 18,
+        textAlign: 'center',
+        marginBottom: 8,
+    },
+    currentRideError: {
+        color: 'red',
+        textAlign: 'center',
+        fontSize: 14,
+    },
+    currentRideItem: {
+        marginVertical: 6,
+        backgroundColor: '#393e46',
+        borderRadius: 6,
+        padding: 8,
+    },
+    currentRideLabel: {
+        color: '#bfc9d1',
+        fontSize: 15,
+        marginBottom: 2,
+    },
+    currentRideValue: {
+        color: '#00adb5',
+        fontWeight: 'bold',
+    },
+    currentRideEmpty: {
+        color: '#bfc9d1',
+        textAlign: 'center',
+        fontStyle: 'italic',
+        marginTop: 8,
+    },
 });
 
 export default utilities;
