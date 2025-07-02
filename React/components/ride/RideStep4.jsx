@@ -239,7 +239,6 @@ const RideStep4 = (props) => {
                                     navigation.navigate('StartedRide', {
                                         generatedRidesId,
                                         token,
-                                        username
                                     });
                                 } catch (error) {
                                     Alert.alert('Error', error.message || 'Failed to start the ride.');

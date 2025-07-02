@@ -54,6 +54,15 @@ public class StartRideController {
         }
     }
 
+//    @GetMapping("/current")
+//    public ResponseEntity<?> getCurrentRidesForUser() {
+//        return ResponseEntity.ok(rideService.getCurrentRidesForUser());
+//    }
+
+    @GetMapping("/started/{generatedRidesId}")
+    public StartRideResponseDTO getStartedRides(@PathVariable Integer generatedRidesId) throws AccessDeniedException {
+        return rideService.getStartedRides(generatedRidesId);
+    }
 
 
 

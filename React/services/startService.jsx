@@ -5,7 +5,7 @@ console.log('Using API URL:', API_BASE_URL);
 export const startService = {
     startRide: async (generatedRidesId, token) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/ready/${generatedRidesId}/start`, {
+            const response = await fetch(`${API_BASE_URL}/start/${generatedRidesId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export const startService = {
 };
 
 export async function currentRide(generatedRidesId, token) {
-    const response = await fetch(`${API_BASE_URL}/ready/${generatedRidesId}`, {
+    const response = await fetch(`${API_BASE_URL}/start/view/${generatedRidesId}`, {
 
         method: 'GET',
         headers: {

@@ -9,6 +9,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StartedRide;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,7 @@ public class StartRideService {
 
         return buildResponseDTO(ride, initiator, started, longitude, latitude);
     }
+    @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
     public StartRideResponseDTO getStartedRideByRideId(Integer generatedRidesId) throws AccessDeniedException {
         Rider requester = authenticateAndGetInitiator();
@@ -69,18 +71,34 @@ public class StartRideService {
             throw new AccessDeniedException("You are not authorized to view this ride.");
         }
 
-        double longitude = 0.0;
-        double latitude = 0.0;
-        if (ride.getLocation() != null) {
-            longitude = ride.getLocation().getX();
-            latitude = ride.getLocation().getY();
-        }
+        double[] coordinates = extractLocationCoordinates(ride);
+        double longitude = coordinates[0];
+        double latitude = coordinates[1];
 
         return buildResponseDTO(ride, startedRide.getUsername(), startedRide, longitude, latitude);
     }
 
 
+    @PreAuthorize("isAuthenticated()")
+    @Transactional(readOnly = true)
+    public StartRideResponseDTO getStartedRides(Integer generatedRidesId) throws AccessDeniedException {
+        Rider requester = authenticateAndGetInitiator();
 
+        List<StartedRide> startedRides = riderUtil.findStartedRidesByRider(requester);
+
+        StartedRide currentStartedRide = startedRides.stream()
+                .filter(sr -> sr.getRide().getGeneratedRidesId().equals(generatedRidesId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Started ride not found."));
+
+        Rides ride = currentStartedRide.getRide();
+
+        double[] coordinates = extractLocationCoordinates(ride);
+        double longitude = coordinates[0];
+        double latitude = coordinates[1];
+
+        return buildResponseDTO(ride, currentStartedRide.getUsername(), currentStartedRide, longitude, latitude);
+    }
 
 
     private Rider authenticateAndGetInitiator() throws AccessDeniedException {
@@ -158,6 +176,7 @@ public class StartRideService {
                 started != null ? started.getStartTime() : null
         );
     }
+
 
 
 

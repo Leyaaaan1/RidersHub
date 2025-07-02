@@ -36,9 +36,6 @@ public class NominatimService {
     public NominatimService( RateLimitUtil rateLimitUtil) {
         this.rateLimitUtil = rateLimitUtil;
         this.restTemplate = new RestTemplate();
-
-
-
     }
 
     @Cacheable(value = "geocoding", key = "'barangay_' + #lat + '_' + #lon", unless = "#result == null")
@@ -48,6 +45,7 @@ public class NominatimService {
     private String getBarangayNameFromCoordinatesInternal(double lat, double lon) {
         rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
+        System.out.println(" getBarangayNameFromCoordinatesInternal (cache miss)");
 
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
@@ -85,7 +83,7 @@ public class NominatimService {
 
     public String getCityOrLandmarkFromCoordinatesInternal(double lat, double lon) {
         rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
-
+        System.out.println(" getCityOrLandmarkFromCoordinatesInternal (cache miss)");
         String url = "https://nominatim.openstreetmap.org/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
                 "&zoom=18&addressdetails=1" +
@@ -141,6 +139,7 @@ public class NominatimService {
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {
         rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
+        System.out.println(" searchLocation (cache miss)");
 
         String url = "https://nominatim.openstreetmap.org/search?" +
                 "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8) +
@@ -164,11 +163,13 @@ public class NominatimService {
     @Cacheable(value = "geocoding", key = "'citylandmark_' + #query?.toLowerCase()?.trim() + '_' + #limit", unless = "#result == null")
     public List<Map<String, Object>> searchCityOrLandmark(String query) {
         return searchCityOrLandmark(query, 5);
+
     }
 
     public List<Map<String, Object>> searchCityOrLandmark(String query, int limit) {
         rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
+        System.out.println(" searchCityOrLandmark (cache miss)");
         try {
             String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
             String url = String.format(
@@ -236,4 +237,5 @@ public class NominatimService {
             return Collections.emptyList();
         }
     }
+
 }

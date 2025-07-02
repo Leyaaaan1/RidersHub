@@ -11,7 +11,7 @@ import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import rideUtilities from "../styles/rideUtilities";
 import MyRidesModal from '../components/MyRidesModal';
-import {currentRide} from "../services/startService";
+import {currentRide, startService} from "../services/startService";
 
 
 
@@ -117,8 +117,12 @@ const RiderPage = ({ route , navigation}) => {
             </View>
 
 
-
             <View style={riderPageUtils.contentContainer}>
+                <View style={utilities.currentRideContainer}>
+                    <View style={{  padding: 10, borderRadius: 8 , borderColor: colors.primary, borderWidth: 1}}>
+                        <Text style={{ color: colors.white, textAlign: 'center' }}>Current Ride</Text>
+                    </View>
+                </View>
                 <RidesList
                     token={token}
 
@@ -163,15 +167,17 @@ const RiderPage = ({ route , navigation}) => {
                     <TouchableOpacity
                         onPress={async () => {
                             try {
-                                const startedRide = await currentRide( token);
-                                navigation.navigate('StartedRide', {
-                                    startedRide,
-                                    token,
-                                });
+                                await startService.startRide(generatedRidesId, token);
+                                navigation.navigate('StartedRide', { generatedRidesId, token });
                             } catch (error) {
-                                Alert.alert('Error', error.message || 'Failed to fetch current ride');
-                            }
-                        }}
+                                if (error.response) {
+                                    console.log('Error status:', error.response.status);
+                                    console.log('Error data:', error.response.data);
+                                } else {
+                                    console.log('Error:', error);
+                                }
+                                Alert.alert('Error', error.message || 'Failed to start the ride.');
+                            }                        }}
                     >
                         <Text style={rideUtilities.customBottomText}>Current Rides</Text>
                     </TouchableOpacity>

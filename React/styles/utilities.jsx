@@ -31,7 +31,7 @@ const utilities = StyleSheet.create({
         borderBottomColor: '#2a0e0e',
     },
     navbarContainerPrimary: {
-        top: -20,
+        top: -15,
         left: 0,
         right: 0,
         zIndex: 100,
@@ -42,6 +42,12 @@ const utilities = StyleSheet.create({
         height: 82,
         paddingVertical: 12,
         paddingHorizontal: 15,
+    },
+
+    currentRideContainer: {
+        zIndex: 100,
+        justifyContent: 'space-between',
+        backgroundColor: "#000000",
     },
     navbarContainerTransparent: {
         alignItems: 'center',
