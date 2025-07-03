@@ -10,6 +10,8 @@ import leyans.RidersHub.model.StartedRide;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RiderUtil {
 
@@ -45,6 +47,13 @@ public class RiderUtil {
 
     public String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    public List<StartedRide> findStartedRidesByRider(Rider rider) {
+        return startedRideRepository.findAll().stream()
+                .filter(sr -> sr.getUsername().equals(rider) ||
+                        sr.getRide().getParticipants().contains(rider))
+                .toList();
     }
 
 }

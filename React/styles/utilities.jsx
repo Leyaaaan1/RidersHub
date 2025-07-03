@@ -31,18 +31,17 @@ const utilities = StyleSheet.create({
         borderBottomColor: '#2a0e0e',
     },
     navbarContainerPrimary: {
-        top: -20,
+        top: 0,
         left: 0,
         right: 0,
-        zIndex: 100,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-         backgroundColor: "#000000",
-        height: 82,
-        paddingVertical: 12,
-        paddingHorizontal: 15,
+        backgroundColor: "#151515",
+        height: 60,
+        paddingHorizontal: 16,
     },
+
     navbarContainerTransparent: {
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -488,7 +487,49 @@ const utilities = StyleSheet.create({
         height: 16,
 
     },
-
+    currentRideItem: {
+        marginVertical: 6,
+        backgroundColor: "#1c1c1e",
+        borderRadius: 8,
+        padding: 10,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        elevation: 2,
+    },
+    currentRideLabel: {
+        color: '#d0d3d4',
+        fontSize: 14,
+        marginBottom: 3,
+        textAlign: 'left',
+    },
+    currentRideLabelMiddle: {
+        color: '#bfc9d1',
+        fontSize: 13,
+        marginBottom: 2,
+        textAlign: 'left',
+    },
+    currentRideValue: {
+        color: colors.white,
+        fontWeight: 'bold',
+    },
+    currentRideValueMiddle: {
+        color: colors.white,
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    currentRideError: {
+        color: 'red',
+        textAlign: 'center',
+        fontSize: 13,
+        marginVertical: 6,
+    },
+    currentRideEmpty: {
+        color: '#9eaab5',
+        textAlign: 'center',
+        fontStyle: 'italic',
+        fontSize: 13,
+        marginTop: 6,
+    },
 });
 
 export default utilities;

@@ -15,8 +15,15 @@ const riderPageUtils = StyleSheet.create({
         shadowRadius: 3,
         elevation: 2
     },
+    middleContentContainer: {
+        height: '25%',
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor:  '#f5f5f5'
+    },
     contentContainer: {
-        flex: 1,
+        flex: 1
     },
     searchLabel: {
         fontSize: 18,

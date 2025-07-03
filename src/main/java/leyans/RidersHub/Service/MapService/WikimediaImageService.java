@@ -28,10 +28,10 @@ public class WikimediaImageService {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase().trim()", condition = "false")
+    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase().trim()")
     public List<LocationImageDto> getLocationImage(String locationName) {
         rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
-
+        System.out.println("Fetching images from Wikimedia API for: " + locationName);
         try {
             String enhancedSearchTerm = enhanceSearchForMindanao(locationName);
 
