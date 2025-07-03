@@ -83,9 +83,10 @@ const RidesList = ({
                 padding: 25,
                 borderRadius: 12,
                 shadowColor: '#000',
-                shadowOffset: { width: 0,  },
-                borderLeftWidth: 0,
-                borderRightWidth: 0,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 3,
             }}>
 
                 <Text style={[utilities.titleText, { fontSize: 35, textAlign: 'center', alignSelf: 'center', marginBottom: 0, paddingBottom: 0 }]}>{item.locationName.toUpperCase()}</Text>
@@ -223,8 +224,7 @@ const RidesList = ({
                     onEndReachedThreshold={0.5}
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
-                    contentContainerStyle={{ paddingVertical: 15, paddingHorizontal: 0 }}
-                    ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+                    ItemSeparatorComponent={() => <View style={{ height: 5 }} />}
                     showsVerticalScrollIndicator={false}
 
                 />

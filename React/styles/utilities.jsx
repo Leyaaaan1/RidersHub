@@ -31,24 +31,17 @@ const utilities = StyleSheet.create({
         borderBottomColor: '#2a0e0e',
     },
     navbarContainerPrimary: {
-        top: -15,
+        top: 0,
         left: 0,
         right: 0,
-        zIndex: 100,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-         backgroundColor: "#000000",
-        height: 82,
-        paddingVertical: 12,
-        paddingHorizontal: 15,
+        backgroundColor: "#151515",
+        height: 60,
+        paddingHorizontal: 16,
     },
 
-    currentRideContainer: {
-        zIndex: 100,
-        justifyContent: 'space-between',
-        backgroundColor: "#000000",
-    },
     navbarContainerTransparent: {
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -494,46 +487,48 @@ const utilities = StyleSheet.create({
         height: 16,
 
     },
-    currentRideBox: {
-        padding: 14,
-        borderRadius: 10,
+    currentRideItem: {
+        marginVertical: 6,
+        backgroundColor: "#1c1c1e",
+        borderRadius: 8,
+        padding: 10,
+        borderWidth: 1,
         borderColor: colors.primary,
-        borderWidth: 1.5,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        marginBottom: 10,
+        elevation: 2,
     },
-    currentRideTitle: {
-        color: '#fff',
+    currentRideLabel: {
+        color: '#d0d3d4',
+        fontSize: 14,
+        marginBottom: 3,
+        textAlign: 'left',
+    },
+    currentRideLabelMiddle: {
+        color: '#bfc9d1',
+        fontSize: 13,
+        marginBottom: 2,
+        textAlign: 'left',
+    },
+    currentRideValue: {
+        color: colors.white,
         fontWeight: 'bold',
-        fontSize: 18,
-        textAlign: 'center',
-        marginBottom: 8,
+    },
+    currentRideValueMiddle: {
+        color: colors.white,
+        fontWeight: '600',
+        fontSize: 13,
     },
     currentRideError: {
         color: 'red',
         textAlign: 'center',
-        fontSize: 14,
-    },
-    currentRideItem: {
+        fontSize: 13,
         marginVertical: 6,
-        backgroundColor: '#393e46',
-        borderRadius: 6,
-        padding: 8,
-    },
-    currentRideLabel: {
-        color: '#bfc9d1',
-        fontSize: 15,
-        marginBottom: 2,
-    },
-    currentRideValue: {
-        color: '#00adb5',
-        fontWeight: 'bold',
     },
     currentRideEmpty: {
-        color: '#bfc9d1',
+        color: '#9eaab5',
         textAlign: 'center',
         fontStyle: 'italic',
-        marginTop: 8,
+        fontSize: 13,
+        marginTop: 6,
     },
 });
 

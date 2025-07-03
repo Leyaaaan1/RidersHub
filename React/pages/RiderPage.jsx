@@ -1,6 +1,6 @@
 
 import React, {useEffect, useState} from "react";
-import {View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert, StatusBar} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert, StatusBar, ScrollView} from 'react-native';
 import utilities from "../styles/utilities";
 import riderPageUtils from "../styles/riderPageUtils";
 import colors from "../styles/colors";
@@ -84,7 +84,7 @@ const RiderPage = ({ route , navigation}) => {
     return (
         <View style={utilities.containerWhite}>
 
-            <View style={[utilities.navbarContainerPrimary, { paddingVertical: 12, paddingHorizontal: 20 }]}>
+            <View style={utilities.navbarContainerPrimary}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 5 }}>
                     <View style={{ flex: 1, alignItems: 'flex-start' }}>
                         <Text style={[utilities.textWhite, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
@@ -148,41 +148,34 @@ const RiderPage = ({ route , navigation}) => {
 
 
             <View style={riderPageUtils.contentContainer}>
-                <View style={utilities.currentRideContainer}>
-                    <View style={utilities.currentRideBox}>
-                        <Text style={utilities.currentRideTitle}>Current Ride</Text>
-                        {startedRidesLoading ? (
-                            <ActivityIndicator color={colors.white} />
-                        ) : startedRidesError ? (
-                            <Text style={utilities.currentRideError}>{startedRidesError}</Text>
-                        ) : startedRides.length > 0 ? (
-                            startedRides.map((ride, idx) => (
-                                <View key={idx} style={utilities.currentRideItem}>
-                                    <Text style={utilities.currentRideLabel}>
-                                        Ride ID: <Text style={utilities.currentRideValue}>{ride.ridesId}</Text>
-                                    </Text>
-                                    <Text style={utilities.currentRideLabel}>
-                                        Name: <Text style={utilities.currentRideValue}>{ride.ridesName}</Text>
-                                    </Text>
-                                    <Text style={utilities.currentRideLabel}>
-                                        Location: <Text style={utilities.currentRideValue}>{ride.locationName}</Text>
-                                    </Text>
-                                </View>
-                            ))
-                        ) : (
-                            <Text style={utilities.currentRideEmpty}>
-                                No current ride found.
-                            </Text>
-                        )}
-                    </View>
-                </View>
+                {startedRidesLoading ? (
+                    <ActivityIndicator color={colors.white} size="small" style={{ marginTop: 6 }} />
+                ) : startedRidesError ? (
+                    <Text style={utilities.currentRideError}>{startedRidesError}</Text>
+                ) : startedRides.length > 0 ? (
+                    startedRides.map((ride, idx) => (
+                        <View key={idx} style={utilities.currentRideItem}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
+                                <Text style={utilities.currentRideValue}>
+                                    {ride.locationName} (ID: {ride.ridesId})
+                                </Text>
+                                <Text style={{ marginLeft: 8, color: 'green', fontWeight: 'bold', fontSize: 12 , padding: 6}}>Active</Text>
+                                <FontAwesome name="circle" size={14} color="green" />
+                            </View>
+                            <View>
+                                <Text style={utilities.currentRideLabelMiddle}>
+                                    Rides Name: <Text style={utilities.currentRideValueMiddle}>{ride.ridesName}</Text>
+                                </Text>
+                            </View>
+                        </View>
+                    ))
+                ) : (
+                    <Text style={utilities.currentRideEmpty}>No ongoing ride found.</Text>
+                )}
                 <RidesList
                     token={token}
 
                     onRideSelect={(ride) => {
-                        console.log('Selected ride:', ride);
-                        console.log('Selected ride:', ride.username);
-                        console.log('Selected ride:', username);
                         navigation.navigate('RideStep4', {
                             generatedRidesId: ride.generatedRidesId,
                             rideName: ride.ridesName,
