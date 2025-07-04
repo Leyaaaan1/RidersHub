@@ -71,6 +71,7 @@ public class RideResponseDTO {
 
     }
 
+
     public String getUsername() {
         return username;
     }

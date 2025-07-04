@@ -1,4 +1,3 @@
-// React/pages/StartedRide.jsx
 import React, { useState, useEffect } from 'react';
 import {
     View,
@@ -7,13 +6,12 @@ import {
     SafeAreaView,
     StatusBar,
     ScrollView,
-    Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import colors from '../styles/colors';
 import styles from '../styles/StartedRideStyles';
-import { currentRide } from "../services/startService";
+import { getCurrentStartedRides } from "../services/startService";
 
 const StartedRide = ({ route }) => {
     const navigation = useNavigation();
@@ -22,34 +20,35 @@ const StartedRide = ({ route }) => {
     const { generatedRidesId, token } = route.params || {};
 
     useEffect(() => {
-        if (!generatedRidesId || !token) {
-            Alert.alert('Error', 'Missing ride ID or authentication token.');
-            setLoading(false);
-            return;
-        }
-        const fetchRide = async () => {
+        const fetchStartedRide = async () => {
             try {
-                const data = await currentRide(generatedRidesId, token);
-                setRideData(data);
+                const rides = await getCurrentStartedRides(token);
+                // Find the ride with the matching generatedRidesId
+                const currentRide = Array.isArray(rides)
+                    ? rides.find(r => r.generatedRidesId === generatedRidesId)
+                    : null;
+                setRideData(currentRide);
             } catch (error) {
                 setRideData(null);
-                Alert.alert('Error', error.message || 'Failed to load ride information');
             } finally {
                 setLoading(false);
             }
         };
-        fetchRide();
-    }, [generatedRidesId, token]);
+        if (token && generatedRidesId) {
+            fetchStartedRide();
+        } else {
+            setLoading(false);
+        }
+    }, [token, generatedRidesId]);
 
     const handleBack = () => {
         navigation.goBack();
     };
 
+    console.log('Ride Data:', rideData);
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar backgroundColor={colors.black} barStyle="light-content" />
-
-            {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={handleBack}>
                     <FontAwesome name="arrow-left" size={20} color="#fff" />
@@ -58,8 +57,6 @@ const StartedRide = ({ route }) => {
                 <Text style={styles.headerTitle}>ACTIVE RIDE</Text>
                 <View style={styles.headerRight} />
             </View>
-
-            {/* Content */}
             <ScrollView style={styles.content}>
                 {loading ? (
                     <View style={styles.loadingContainer}>
@@ -67,9 +64,16 @@ const StartedRide = ({ route }) => {
                     </View>
                 ) : rideData ? (
                     <View style={styles.rideInfoContainer}>
-                        <Text style={styles.rideTitle}>{rideData.rideName}</Text>
-                        <Text style={styles.rideId}>ID: {generatedRidesId}</Text>
+                        <Text style={styles.rideTitle}>{rideData.ridesName}</Text>
+                        <Text style={styles.rideId}>ID: {rideData.generatedRidesId}</Text>
+                        <Text style={styles.rideId}>Location: {rideData.locationName}</Text>
+                        <Text style={styles.rideId}>Owner {rideData.initiator}</Text>
 
+                        <Text style={styles.rideId}>
+                            Participants: {Array.isArray(rideData.participantUsernames) ? rideData.participantUsernames.join(', ') : rideData.participantUsernames}
+                        </Text>
+                        <Text style={styles.rideId}>Start Time: {new Date(rideData.startTime).toLocaleString()}</Text>
+                        {/* Add more details as needed */}
                         <View style={styles.infoCard}>
                             <Text style={styles.infoTitle}>Ride in Progress</Text>
                             <Text style={styles.infoText}>
@@ -77,8 +81,6 @@ const StartedRide = ({ route }) => {
                                 the ride from this screen.
                             </Text>
                         </View>
-
-                        {/* Add more ride details and controls as needed */}
                     </View>
                 ) : (
                     <View style={styles.errorContainer}>

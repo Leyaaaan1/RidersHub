@@ -1,6 +1,7 @@
 package leyans.RidersHub.Controller;
 
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Service.RideLocationService;
 import leyans.RidersHub.Service.StartRideService;
@@ -43,9 +44,9 @@ public class StartRideController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<StartRideResponseDTO>> getCurrentStartedRides() {
+    public ResponseEntity<List<RideResponseDTO>> getCurrentStartedRides() {
         try {
-            List<StartRideResponseDTO> rides = startRideService.getCurrentStartedRides();
+            List<RideResponseDTO> rides = startRideService.getCurrentStartedRides();
             return ResponseEntity.ok(rides);
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(403).build();

@@ -47,21 +47,6 @@ export const startService = {
 
 };
 
-export async function currentRide(generatedRidesId, token) {
-    const response = await fetch(`${API_BASE_URL}/start/view/${generatedRidesId}`, {
-
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch ride details');
-    }
-    return await response.json();
-}
-
 
 export async function getCurrentStartedRides(token) {
     const response = await fetch(`${API_BASE_URL}/start`, {

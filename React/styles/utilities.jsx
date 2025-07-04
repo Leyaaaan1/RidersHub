@@ -493,7 +493,6 @@ const utilities = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         borderWidth: 1,
-        borderColor: colors.primary,
         elevation: 2,
     },
     currentRideLabel: {

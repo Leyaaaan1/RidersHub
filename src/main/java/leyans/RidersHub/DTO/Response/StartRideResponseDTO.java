@@ -20,6 +20,7 @@ public class StartRideResponseDTO implements Serializable {
     private List<String> participantUsernames;
 
 
+
     public StartRideResponseDTO(Integer generatedRidesId, String initiator, String ridesName, String locationName, List<String> participantUsernames, double longitude, double latitude, LocalDateTime startTime) {
         this.generatedRidesId = generatedRidesId;
         this.initiator = initiator;

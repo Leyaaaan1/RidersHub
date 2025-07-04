@@ -1,6 +1,7 @@
 package leyans.RidersHub.Service;
 
 
+import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
@@ -53,19 +54,12 @@ public class StartRideService {
 
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
-    public List<StartRideResponseDTO> getCurrentStartedRides() throws AccessDeniedException {
+    public List<RideResponseDTO> getCurrentStartedRides() throws AccessDeniedException {
         Rider requester = authenticateAndGetInitiator();
-
         List<StartedRide> startedRides = riderUtil.findStartedRidesByRider(requester);
 
         return startedRides.stream()
-                .map(sr -> {
-                    Rides ride = sr.getRide();
-                    double[] coordinates = extractLocationCoordinates(ride);
-                    double longitude = coordinates[0];
-                    double latitude = coordinates[1];
-                    return buildResponseDTO(ride, sr.getUsername(), sr, longitude, latitude);
-                })
+                .map(sr -> mapToRideResponseDTO(sr.getRide()))
                 .toList();
     }
 
@@ -126,6 +120,30 @@ public class StartRideService {
         }
     }
 
+    private RideResponseDTO mapToRideResponseDTO(Rides ride) {
+        return new RideResponseDTO(
+                ride.getGeneratedRidesId(),
+                ride.getLocationName(),
+                ride.getRidesName(),
+                ride.getRiderType(),
+                ride.getDistance(),
+                ride.getDate(),
+                ride.getLocation().getY(),
+                ride.getLocation().getX(),
+                ride.getParticipants().stream().map(Rider::getUsername).toList(),
+                ride.getDescription(),
+                ride.getStartingPointName(),
+                ride.getStartingLocation().getY(),
+                ride.getStartingLocation().getX(),
+                ride.getEndingPointName(),
+                ride.getEndingLocation().getY(),
+                ride.getEndingLocation().getX(),
+                ride.getMapImageUrl(),
+                ride.getMagImageStartingLocation(),
+                ride.getMagImageEndingLocation(),
+                ride.getUsername().getUsername()
+        );
+    }
 
 
     private StartRideResponseDTO buildResponseDTO(Rides ride, Rider initiator, StartedRide started,

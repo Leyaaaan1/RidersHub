@@ -154,7 +154,19 @@ const RiderPage = ({ route , navigation}) => {
                     <Text style={utilities.currentRideError}>{startedRidesError}</Text>
                 ) : startedRides.length > 0 ? (
                     startedRides.map((ride, idx) => (
-                        <View key={idx} style={utilities.currentRideItem}>
+                        <View
+                            key={idx}
+                            style={utilities.currentRideItem}
+                            onTouchEnd={() => {
+                                navigation.navigate('StartedRide', {
+                                    generatedRidesId: ride.ridesId, // Pass as generatedRidesId
+                                    ridesName: ride.ridesName,
+                                    locationName: ride.locationName,
+                                    token: token,
+                                    username: username
+                                });
+                            }}
+                        >
                             <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
                                 <Text style={utilities.currentRideValue}>
                                     {ride.locationName} (ID: {ride.ridesId})
