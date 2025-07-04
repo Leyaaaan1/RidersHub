@@ -6,12 +6,16 @@ import {
     SafeAreaView,
     StatusBar,
     ScrollView,
+    Image,
+    ActivityIndicator,
+    PermissionsAndroid, Platform
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import colors from '../styles/colors';
 import styles from '../styles/StartedRideStyles';
 import { getCurrentStartedRides } from "../services/startService";
+import rideUtilities from "../styles/rideUtilities";
 
 const StartedRide = ({ route }) => {
     const navigation = useNavigation();
@@ -23,7 +27,6 @@ const StartedRide = ({ route }) => {
         const fetchStartedRide = async () => {
             try {
                 const rides = await getCurrentStartedRides(token);
-                // Find the ride with the matching generatedRidesId
                 const currentRide = Array.isArray(rides)
                     ? rides.find(r => r.generatedRidesId === generatedRidesId)
                     : null;
@@ -50,38 +53,83 @@ const StartedRide = ({ route }) => {
         <SafeAreaView style={styles.container}>
             <StatusBar backgroundColor={colors.black} barStyle="light-content" />
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                    <FontAwesome name="arrow-left" size={20} color="#fff" />
-                    <Text style={styles.backText}>Back</Text>
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>ACTIVE RIDE</Text>
-                <View style={styles.headerRight} />
+
+                <View style={{ flex: 1, alignItems: 'flex-start' }}>
+                    <TouchableOpacity
+                        style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}
+                        onPress={handleBack}
+                    >
+                        <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                        <FontAwesome name="location-arrow" size={20} color="#ffd54f" style={[styles.routeIcon, { padding: 4, marginRight: 8 }]} />
+                        <Text
+                            style={[
+                                rideUtilities.title,
+                                {
+                                    color: colors.white,
+                                    marginBottom: 0,
+                                    textAlign: 'center',
+                                    width: 'auto',
+                                }
+                            ]}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                        >
+                            {rideData?.locationName?.toUpperCase() || ''}
+                        </Text>
+                    </View>
+
+                    <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 0, textAlign: 'center', width: '100%' }}>
+                        {rideData?.generatedRidesId || ''}
+                    </Text>
+                </View>
+                <View style={{ flex: 1 }} />
             </View>
             <ScrollView style={styles.content}>
                 {loading ? (
-                    <View style={styles.loadingContainer}>
-                        <Text style={styles.loadingText}>Loading ride details...</Text>
+                    <View style={styles.errorContainer}>
+                        <ActivityIndicator color="#fff" size="large" />
+                        <Text style={styles.errorText}>Loading ride details...</Text>
                     </View>
                 ) : rideData ? (
-                    <View style={styles.rideInfoContainer}>
-                        <Text style={styles.rideTitle}>{rideData.ridesName}</Text>
-                        <Text style={styles.rideId}>ID: {rideData.generatedRidesId}</Text>
-                        <Text style={styles.rideId}>Location: {rideData.locationName}</Text>
-                        <Text style={styles.rideId}>Owner {rideData.initiator}</Text>
 
-                        <Text style={styles.rideId}>
-                            Participants: {Array.isArray(rideData.participantUsernames) ? rideData.participantUsernames.join(', ') : rideData.participantUsernames}
-                        </Text>
-                        <Text style={styles.rideId}>Start Time: {new Date(rideData.startTime).toLocaleString()}</Text>
-                        {/* Add more details as needed */}
-                        <View style={styles.infoCard}>
-                            <Text style={styles.infoTitle}>Ride in Progress</Text>
-                            <Text style={styles.infoText}>
-                                Your ride has started. You can track your progress and manage
-                                the ride from this screen.
-                            </Text>
-                        </View>
-                    </View>
+
+                            <View style={styles.routeCard}>
+                                <Text style={styles.routeTitle}>
+                                    Route Details
+                                </Text>
+                                <View style={styles.routeRow}>
+                                    <FontAwesome name="map-marker" size={24} color="#4fc3f7" style={styles.routeIcon} />
+                                    <Text style={styles.routeText}>
+                                        Starting Point: {rideData?.startingPointName || 'N/A'}
+                                    </Text>
+                                </View>
+                                <View style={styles.routeRow}>
+                                    <FontAwesome name="flag-checkered" size={22} color="#81c784" style={styles.routeIcon} />
+                                    <Text style={styles.routeText}>
+                                        1st Stop: {rideData?.endingPointName || 'N/A'}
+                                    </Text>
+                                </View>
+                                <View style={styles.routeRow}>
+                                    <FontAwesome name="location-arrow" size={20} color="#ffd54f" style={styles.routeIcon} />
+                                    <Text style={styles.routeText}>
+                                        Location: {rideData?.locationName || 'N/A'}
+                                    </Text>
+                                </View>
+                                <View style={styles.routeRow}>
+                                    <FontAwesome name="road" size={20} color="#ff8a65" style={styles.routeIcon} />
+                                    <Text style={styles.routeText}>
+                                        Distance: {rideData?.distance ? `${rideData.distance} km` : 'N/A'}
+                                    </Text>
+                                </View>
+
+                            </View>
                 ) : (
                     <View style={styles.errorContainer}>
                         <Text style={styles.errorText}>Failed to load ride information</Text>
