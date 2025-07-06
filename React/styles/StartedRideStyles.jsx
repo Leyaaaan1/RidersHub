@@ -1,17 +1,21 @@
-// React/pages/StartedRideStyles.js
+// React/styles/StartedRideStyles.jsx
 import { StyleSheet } from 'react-native';
+import colors from './colors';
+import utilities from './utilities';
 
 const styles = StyleSheet.create({
+    ...utilities, // Import all utility styles
+
     container: {
+        ...utilities.containerWhite, // Use the same background as RideStep4
         flex: 1,
-        backgroundColor: '#000',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#000',
-        paddingVertical: 15,
+        backgroundColor: colors.black,
+        paddingVertical: 10,
         paddingHorizontal: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#333',
@@ -28,6 +32,8 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
+        textAlign: 'center',
+        flex: 2,
     },
     headerRight: {
         width: 50,
@@ -36,31 +42,26 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 15,
     },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    loadingText: {
-        color: '#fff',
-        fontSize: 16,
-    },
     rideInfoContainer: {
+        backgroundColor: "#151515",
+        borderWidth: 2,
         padding: 10,
+        borderRadius: 8,
+        marginBottom: 10,
     },
     rideTitle: {
+        ...utilities.title,
         color: '#fff',
-        fontSize: 24,
-        fontWeight: 'bold',
+        fontSize: 30,
         textAlign: 'center',
+        textDecorationLine: 'underline',
         marginBottom: 5,
     },
     rideId: {
-        color: '#aaa',
+        color: '#fff',
         fontSize: 14,
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 2,
     },
     infoCard: {
         backgroundColor: '#151515',
@@ -91,6 +92,44 @@ const styles = StyleSheet.create({
         color: '#ff6b6b',
         fontSize: 16,
         textAlign: 'center',
+    },
+    image: {
+        width: '100%',
+        height: 200,
+        borderRadius: 8,
+        borderWidth: 2,
+        marginTop: 20,
+    },
+    routeCard: {
+        backgroundColor: '#222',
+        borderRadius: 12,
+        padding: 16,
+        marginTop: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    routeTitle: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        textAlign: 'center',
+        letterSpacing: 1,
+    },
+    routeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    routeIcon: {
+        marginRight: 10,
+    },
+    routeText: {
+        color: '#fff',
+        fontSize: 16,
+        flex: 1,
     },
 });
 

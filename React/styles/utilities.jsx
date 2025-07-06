@@ -383,30 +383,43 @@ const utilities = StyleSheet.create({
     },
 
     // === Progress Indicators ===
-    progressIndicator: {
-        flexDirection: 'row',
+    progressIndicatorVertical: {
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-start',
+        position: 'absolute',
+        right: 0,
+        bottom: 80,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: 12,
+        padding: 6,
+        zIndex: 10,
+        maxHeight: 300,
+    },
+    progressStepConnector: {
+        width: 2,
+        height: 24,
+        backgroundColor: '#fff',
+        alignSelf: 'left',
+        opacity: 0.5,
+    },
+    progressStepSmall: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'center',
-        marginVertical: 15,
+        marginBottom: 6,
+        minWidth: 60,
+        backgroundColor: '#444',
     },
-
-    progressStep: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 15,
-        alignItems: 'center',
+    progressStepSmallSelected: {
+        backgroundColor: colors.primary,
     },
-
-    progressConnector: {
-        height: 3,
-        width: 40,
-    },
-
-    progressText: {
+    progressTextSmall: {
         color: '#fff',
         fontWeight: 'bold',
+        fontSize: 12,
     },
-
     // === Form Styles ===
     formGroup: {
         marginBottom: spacing.md,
@@ -493,7 +506,6 @@ const utilities = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         borderWidth: 1,
-        borderColor: colors.primary,
         elevation: 2,
     },
     currentRideLabel: {

@@ -4,11 +4,13 @@ package leyans.RidersHub.Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
+import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
+import leyans.RidersHub.model.StopPoint;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -47,10 +49,11 @@ public class RidesService {
     }
 
     @Transactional
-    public RideResponseDTO createRide( Integer generatedRidesId, String creatorUsername, String ridesName, String locationName, String riderType, Integer distance, LocalDateTime date,
+    public RideResponseDTO createRide( Integer generatedRidesId, String creatorUsername, String ridesName, String locationName, String riderType, LocalDateTime date,
                                       List<String> participantUsernames, String description,
                                       double latitude, double longitude, double startLatitude,
-                                      double startLongitude, double endLatitude, double endLongitude
+                                      double startLongitude, double endLatitude, double endLongitude,
+                                       List<StopPointDTO> stopPointsDto
                                        ) {
 
         String imageUrl = mapboxService.getStaticMapImageUrl(longitude, latitude);
@@ -71,10 +74,12 @@ public class RidesService {
         String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
         String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
 
+        List<StopPoint> stopPoints = convertStopPointDTOs(stopPointsDto);
 
         int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
 
         Rides newRide = new Rides();
+        newRide.setStopPoints(stopPoints);
         newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : generateUniqueRideId());
         newRide.setRidesName(ridesName);
         newRide.setDescription(description);
@@ -108,6 +113,15 @@ public class RidesService {
         return response;
     }
 
+    private List<StopPoint> convertStopPointDTOs(List<StopPointDTO> stopPointsDto) {
+        if (stopPointsDto == null) return List.of();
+        return stopPointsDto.stream()
+                .map(dto -> new StopPoint(
+                        locationService.resolveLandMark(null, dto.getStopLatitude(), dto.getStopLongitude()),
+                        locationService.createPoint( dto.getStopLongitude(), dto.getStopLatitude())
+                ))
+                .toList();
+    }
     private int generateUniqueRideId() {
         int randomFourDigitNumber;
         boolean idExists;
@@ -141,11 +155,22 @@ public class RidesService {
                 ride.getMapImageUrl(), 
                 ride.getMagImageStartingLocation(), 
                 ride.getMagImageEndingLocation(),
-                ride.getUsername().getUsername()
+                ride.getUsername().getUsername(),
+                mapStopPointsToDTOs(ride.getStopPoints())
+
+
         );
     }
 
-
+    public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {
+        return stopPoints.stream()
+                .map(stopPoint -> new StopPointDTO(
+                        stopPoint.getStopName(),
+                        stopPoint.getStopLocation().getX(),
+                        stopPoint.getStopLocation().getY()
+                ))
+                .toList();
+    }
     @Transactional
     public String getRideMapImageUrlById(Integer generatedRidesId) {
         Rides ride = findRideEntityByGeneratedId(generatedRidesId);
