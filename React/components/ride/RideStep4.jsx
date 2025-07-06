@@ -48,7 +48,6 @@ const RideStep4 = (props) => {
     } = props;
     console.log("RideStep4 props:", props);
 
-    console.log(username, currentUsername, "RideStep4 username and currentUsername");
 
     const formatDate = (date) => {
         if (!date) return 'Not specified';
@@ -266,16 +265,24 @@ const RideStep4 = (props) => {
                     <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>
                         <Text
                             style={[
-                                rideUtilities.detailText,
-                                { fontSize: 30, textAlign: 'center', width: '100%', textDecorationLine: 'underline' }
+                                rideUtilities.title,
+                                {
+                                    color: colors.white,
+                                    marginBottom: 0,
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    textAlign: 'center',
+                                    width: '100%',
+                                }
                             ]}
                             numberOfLines={1}
                             ellipsizeMode="tail"
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
                         >
                             {rideName}
                         </Text>
 
-                        <Text style={{ color: '#fff', fontSize: 14, marginTop: 2 }}>Location</Text>
                         <View style={[rideUtilities.formGroup, { alignItems: 'center', marginTop: 8 }]}>
                             <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
                         </View>
@@ -365,30 +372,7 @@ const RideStep4 = (props) => {
                 </View>
 
 
-                <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'flex-start',
-                    width: '100%',
-                    backgroundColor: '#151515',
-                    borderWidth: 2,
-                    borderColor: '#333',
-                    borderRadius: 8,
-                    padding: 15,
-                    marginVertical: 10
-                }}>
-                    {startMapImage || endMapImage ? (
-                        <MapImageSwapper
-                            startImage={startMapImage}
-                            endImage={endMapImage}
-                            startPoint={startingPoint}
-                            endPoint={endingPoint}
-                            imageStyle={[utilities.oblongImage, { width: 330, height: 360, padding: 10 }]}
-                        />
-                    ) : (
-                        <Text style={{ color: '#fff', textAlign: 'center', width: '100%' }}>No start or end map available</Text>
-                    )}
-                </View>
+
 
 
 
@@ -416,8 +400,28 @@ const RideStep4 = (props) => {
                     </View>
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={rideUtilities.customBottomText}>Routes</Text>
-
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('RideRoutesPage', {
+                                    startMapImage,
+                                    endMapImage,
+                                    mapImage,
+                                    rideNameImage,
+                                    startingPoint,
+                                    endingPoint,
+                                    rideName,
+                                    locationName,
+                                    riderType,
+                                    date,
+                                    participants,
+                                    description,
+                                    token,
+                                    distance,
+                                    username,
+                                    currentUsername
+                                })}
+                            >
+                                <Text style={rideUtilities.customBottomText}>Routes</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-
-const MapImageSwapper = ({ startImage, endImage, startPoint, endPoint, imageStyle }) => {
+import colors from './colors';
+import utilities from "./utilities";
+const MapImageSwapper = ({ startImage, endImage, startPoint, endPoint }) => {
     const [showStart, setShowStart] = useState(true);
 
     const toggleImage = () => setShowStart(!showStart);
@@ -12,54 +13,41 @@ const MapImageSwapper = ({ startImage, endImage, startPoint, endPoint, imageStyl
     const otherLabel = showStart ? 'Destination' : 'Starting Point';
 
     return (
-        <View style={{width: '100%', alignItems: 'center'}}>
+        <View style={[utilities.containerWhite, { position: 'relative' }]}>
             {currentImage ? (
-                <TouchableOpacity onPress={toggleImage} style={{alignItems: 'center'}}>
-                    <View style={{position: 'relative'}}>
-                        <Text style={{color: '#fff', marginTop: 5,  fontSize: 12, textAlign: 'center'}}>
+                <TouchableOpacity onPress={toggleImage} style={{ alignItems: 'center'  }}>
+
+                    <Image
+                        source={{ uri: currentImage }}
+                        style={{ width: '100%', height: 200, borderRadius: 8, borderWidth: 2, borderColor: '#fff', backgroundColor: '#222' }}
+                        resizeMode="cover"
+                    />`
+                    <View style={{ marginTop: 4, alignItems: 'center' }}>
+                        <Text style={{ color: '#fff', fontSize: 12, textAlign: 'center', paddingVertical: 0, marginVertical: 0 }}>
                             Tap to see {otherLabel}
                         </Text>
-                        <Image
-                            source={{uri: currentImage}}
-                            style={[
-                                imageStyle,
-                                {
-                                    shadowColor: '#000',
+                    </View>
+                    <View style={{
 
-                                    elevation: 8, // for Android
-                                }
-                            ]}
-                        />
+                    }}>
                         <View style={{
-                            position: 'absolute',
-                            top: 10,
-                            left: 0,
-                            right: 0,
-                            alignItems: 'center'
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            padding: 6,
+                            borderRadius: 10,
                         }}>
-                            <View style={{
-                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                                padding: 8,
-                                borderRadius: 15,
-                                marginTop: 300
-                            }}>
-                                <Text style={{color: '#fff', fontSize: 12}}>{currentLabel}:</Text>
-                                <Text style={{
-                                    color: '#fff',
-                                    fontSize: 24,
-                                    textAlign: 'center'
-                                }}>{currentPoint}</Text>
-                            </View>
+                            <Text style={{ color: '#fff', fontSize: 12 }}>{currentLabel}:</Text>
+                            <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>{currentPoint}</Text>
                         </View>
-
                     </View>
                 </TouchableOpacity>
             ) : (
-                <Text style={{color: '#fff', textAlign: 'center'}}>
+                <Text style={{ color: '#fff', textAlign: 'center' }}>
                     No map available
                 </Text>
             )}
+
         </View>
     );
 };
+
 export default MapImageSwapper;
