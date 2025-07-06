@@ -7,23 +7,15 @@ public class StopPointDTO {
     private double stopLatitude;
     private double stopLongitude;
 
-    private Point stopName;
+    private String stopName;
 
     public StopPointDTO() {
     }
 
-    public StopPointDTO(double stopLatitude, double stopLongitude, Point stopName) {
-        this.stopLatitude = stopLatitude;
+    public StopPointDTO(String stopName, double stopLongitude, double stopLatitude) {
+        this.stopName = stopName;
         this.stopLongitude = stopLongitude;
-        this.stopName = stopName;
-    }
-
-    public Point getStopName() {
-        return stopName;
-    }
-
-    public void setStopName(Point stopName) {
-        this.stopName = stopName;
+        this.stopLatitude = stopLatitude;
     }
 
     public double getStopLatitude() {
@@ -42,5 +34,11 @@ public class StopPointDTO {
         this.stopLongitude = stopLongitude;
     }
 
+    public String getStopName() {
+        return stopName;
+    }
 
+    public void setStopName(String stopName) {
+        this.stopName = stopName;
+    }
 }

@@ -165,12 +165,10 @@ public class RidesService {
     public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {
         return stopPoints.stream()
                 .map(stopPoint -> new StopPointDTO(
-                        stopPoint.getStopLocation().getY(),
+                        stopPoint.getStopName(),
                         stopPoint.getStopLocation().getX(),
-                        new java.awt.Point(
-                                (int) stopPoint.getStopLocation().getX(),
-                                (int) stopPoint.getStopLocation().getY()
-                        )))
+                        stopPoint.getStopLocation().getY()
+                ))
                 .toList();
     }
     @Transactional

@@ -1,6 +1,7 @@
 // React/utils/mapUtils.js
 import { reverseGeocode, reverseGeocodeLandmark } from '../services/rideService';
 
+// Add to your state: const [stopPoints, setStopPoints] = useState([]);
 export const handleWebViewMessage = async (event, state) => {
     const data = JSON.parse(event.nativeEvent.data);
 
@@ -10,10 +11,10 @@ export const handleWebViewMessage = async (event, state) => {
             setStartingLatitude, setStartingLongitude,
             setEndingLatitude, setEndingLongitude,
             setLocationName, setStartingPoint, setEndingPoint, setSearchQuery,
-            token // Need to get token from state
+            stopPoints, setStopPoints, // Add these
+            token
         } = state;
 
-        // Update coordinates based on map mode
         if (mapMode === 'location') {
             setLatitude(data.lat.toString());
             setLongitude(data.lng.toString());
@@ -26,25 +27,23 @@ export const handleWebViewMessage = async (event, state) => {
             setEndingLatitude(data.lat.toString());
             setEndingLongitude(data.lng.toString());
             setEndingPoint('Fetching location name...');
+        } else if (mapMode === 'stop') {
+            // For stop points, add a placeholder while fetching
+            setStopPoints([
+                ...stopPoints,
+                { lat: data.lat, lng: data.lng, name: 'Fetching location name...' }
+            ]);
         }
 
-        // Get location name from coordinates
         try {
             let locationName;
-
-            // Use different geocoding methods based on the mode
             if (mapMode === 'location') {
-                // Use landmark geocoding for location mode
                 locationName = await reverseGeocodeLandmark(token, data.lat, data.lng);
             } else {
-                // Use regular geocoding for starting and ending points
                 locationName = await reverseGeocode(token, data.lat, data.lng);
             }
-            console.log("Location name received:", locationName);
 
             if (locationName) {
-                console.log("Resolved name:", locationName, "for mapMode:", mapMode);
-
                 if (mapMode === 'location') {
                     setLocationName(locationName);
                     setSearchQuery(locationName);
@@ -54,17 +53,32 @@ export const handleWebViewMessage = async (event, state) => {
                 } else if (mapMode === 'ending') {
                     setEndingPoint(locationName);
                     setSearchQuery(locationName);
+                } else if (mapMode === 'stop') {
+                    // Update the last stop point with the resolved name
+                    setStopPoints(prev =>
+                        prev.map((sp, idx) =>
+                            idx === prev.length - 1
+                                ? { ...sp, name: locationName }
+                                : sp
+                        )
+                    );
                 }
             } else {
-                console.warn("No location name returned from backend.");
                 const fallbackName = `${data.lat.toFixed(4)}, ${data.lng.toFixed(4)}`;
-
                 if (mapMode === 'location') {
                     setLocationName(fallbackName);
                 } else if (mapMode === 'starting') {
                     setStartingPoint(fallbackName);
                 } else if (mapMode === 'ending') {
                     setEndingPoint(fallbackName);
+                } else if (mapMode === 'stop') {
+                    setStopPoints(prev =>
+                        prev.map((sp, idx) =>
+                            idx === prev.length - 1
+                                ? { ...sp, name: fallbackName }
+                                : sp
+                        )
+                    );
                 }
             }
         } catch (error) {
