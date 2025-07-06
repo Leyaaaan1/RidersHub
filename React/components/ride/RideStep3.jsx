@@ -6,7 +6,7 @@ import getMapHTML from '../../utils/mapHTML';
 import colors from '../../styles/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
-
+import ProgressBar from './ProgressBar';
 const RideStep3 = ({
                        mapMode, setMapMode, isSearching, searchResults,
                        handleLocationSelect, webViewRef,
@@ -19,7 +19,7 @@ const RideStep3 = ({
     const [currentStop, setCurrentStop] = useState(null);
     const [isAddingStop, setIsAddingStop] = useState(false);
     const [addingStopLoading, setAddingStopLoading] = useState(false);
-
+    const [showProgressBar, setShowProgressBar] = useState(true);
     const startAddStopPoint = () => {
         setMapMode('stop');
         setIsAddingStop(true);
@@ -78,32 +78,8 @@ const RideStep3 = ({
         else handleMessage(event);
     };
 
-    const renderProgressBar = () => (
-        <View style={utilities.progressIndicatorVertical}>
-            <View style={[utilities.progressStepSmall, {
-                backgroundColor: startingPoint ? '#2e7d32' : colors.primary }]}>
-                <Text style={utilities.progressTextSmall}>Start</Text>
-                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 10 }}>{startingPoint || 'Not set'}</Text>
-            </View>
-            {stopPoints.map((sp, idx) => (
-                <View key={idx} style={[utilities.progressStepSmall, { backgroundColor: '#1565c0' }]}>
-                    <Text style={utilities.progressTextSmall}>Stop {idx + 1}</Text>
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 10 }}>{sp.name || `${sp.lat}, ${sp.lng}`}</Text>
-                </View>
-            ))}
-            {isAddingStop && (
-                <View style={[utilities.progressStepSmall, { backgroundColor: '#f9a825' }]}>
-                    <Text style={utilities.progressTextSmall}>Adding...</Text>
-                    {currentStop && <Text style={{ fontSize: 10, color: '#fff' }}>{currentStop.name || `${currentStop.lat}, ${currentStop.lng}`}</Text>}
-                </View>
-            )}
-            <View style={[utilities.progressStepSmall, { backgroundColor: endingPoint ? '#2e7d32' : colors.primary }]}>
-                <Text style={utilities.progressTextSmall}>End</Text>
-                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 10 }}>{endingPoint || 'Not set'}</Text>
-            </View>
-        </View>
-    );
-    return (
+return (
+
         <View style={[utilities.containerWhite, { position: 'relative' }]}>
             <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
@@ -208,32 +184,42 @@ const RideStep3 = ({
 
             {/* Progress Bar */}
             <View style={{ position: 'absolute', bottom: 200, left: 20, right: 20 }}>
-                {renderProgressBar()}
+                <ProgressBar
+                    showProgressBar={showProgressBar}
+                    setShowProgressBar={setShowProgressBar}
+                    startingPoint={startingPoint}
+                    endingPoint={endingPoint}
+                    stopPoints={stopPoints}
+                    isAddingStop={isAddingStop}
+                    currentStop={currentStop}
+                />
             </View>
 
             {/* Stop Point Controls */}
-            <View style={{ position: 'absolute', bottom: 150, left: 20, right: 20 }}>
-                {!isAddingStop && (
-                    <TouchableOpacity
-                        style={[utilities.button, { backgroundColor: '#2196F3', marginTop: 8 }]}
-                        onPress={startAddStopPoint}
-                        disabled={mapMode === 'starting' || mapMode === 'ending'}
-                    >
-                        <Text style={utilities.buttonText}>Add Stop Point</Text>
-                    </TouchableOpacity>
-                )}
-                {isAddingStop && (
-                    <TouchableOpacity
-                        style={[utilities.button, { backgroundColor: '#4CAF50', marginTop: 8 }]}
-                        onPress={confirmStopPoint}
-                        disabled={!currentStop || addingStopLoading}
-                    >
-                        <Text style={utilities.buttonText}>
-                            {addingStopLoading ? 'Resolving...' : 'Confirm Stop Point'}
-                        </Text>
-                    </TouchableOpacity>
-                )}
-            </View>
+            {mapMode === 'stop' && (
+                <View style={{ position: 'absolute', bottom: 150, left: 20, right: 20 }}>
+                    {!isAddingStop && (
+                        <TouchableOpacity
+                            style={[utilities.button, { backgroundColor: '#2196F3', marginTop: 8 }]}
+                            onPress={startAddStopPoint}
+                            disabled={mapMode === 'starting' || mapMode === 'ending'}
+                        >
+                            <Text style={utilities.buttonText}>Add Stop Point</Text>
+                        </TouchableOpacity>
+                    )}
+                    {isAddingStop && (
+                        <TouchableOpacity
+                            style={[utilities.button, { backgroundColor: '#4CAF50', marginTop: 8 }]}
+                            onPress={confirmStopPoint}
+                            disabled={!currentStop || addingStopLoading}
+                        >
+                            <Text style={utilities.buttonText}>
+                                {addingStopLoading ? 'Resolving...' : 'Confirm Stop Point'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            )}
 
             {/* Finalize selection button */}
             <View style={{
@@ -248,8 +234,8 @@ const RideStep3 = ({
                     >
                         <Text style={utilities.buttonText}>
                             {mapMode === 'starting'
-                                ? 'Confirm Starting Point & Continue'
-                                : 'Confirm Ending Point & Add Stops'}
+                                ? 'Confirm Starting Point'
+                                : 'Confirm Ending Point'}
                         </Text>
                     </TouchableOpacity>
                 )}
