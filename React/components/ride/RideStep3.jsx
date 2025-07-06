@@ -20,14 +20,12 @@ const RideStep3 = ({
     const [isAddingStop, setIsAddingStop] = useState(false);
     const [addingStopLoading, setAddingStopLoading] = useState(false);
 
-    // Start adding a stop point
     const startAddStopPoint = () => {
         setMapMode('stop');
         setIsAddingStop(true);
         setCurrentStop(null);
     };
 
-    // Handle map click for stop point
     const handleStopMapMessage = async (event) => {
         const data = JSON.parse(event.nativeEvent.data);
         if (data.type === 'mapClick') {
@@ -47,7 +45,6 @@ const RideStep3 = ({
         }
     };
 
-    // Confirm stop point
     const confirmStopPoint = () => {
         if (!currentStop) return;
         setStopPoints(prev => [
@@ -59,7 +56,6 @@ const RideStep3 = ({
         setMapMode('ending');
     };
 
-    // Handle location select for start/end
     const handleSelectLocationAndUpdateMap = async (item) => {
         await handleLocationSelect(item);
         const lat = parseFloat(item.lat);
@@ -72,45 +68,41 @@ const RideStep3 = ({
             `);
         }
     };
-
-    // Finalize start/end point selection
     const finalizePointSelection = () => {
         if (mapMode === 'starting' && startingPoint) setMapMode('ending');
         else if (mapMode === 'ending' && endingPoint) setMapMode('stop');
     };
 
-    // Use correct handler for map message
     const onWebViewMessage = (event) => {
         if (mapMode === 'stop' && isAddingStop) handleStopMapMessage(event);
         else handleMessage(event);
     };
 
-    // Progress bar for all points
     const renderProgressBar = () => (
-        <ScrollView horizontal style={{ marginVertical: 10 }}>
-            <View style={[utilities.progressStep, { backgroundColor: startingPoint ? '#4CAF50' : colors.primary, marginRight: 8 }]}>
-                <Text style={utilities.progressText}>Start</Text>
-                <Text style={{ color: '#000', fontWeight: 'bold' }}>{startingPoint || 'Not set'}</Text>
+        <View style={utilities.progressIndicatorVertical}>
+            <View style={[utilities.progressStepSmall, {
+                backgroundColor: startingPoint ? '#2e7d32' : colors.primary }]}>
+                <Text style={utilities.progressTextSmall}>Start</Text>
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 10 }}>{startingPoint || 'Not set'}</Text>
             </View>
             {stopPoints.map((sp, idx) => (
-                <View key={idx} style={[utilities.progressStep, { backgroundColor: '#2196F3', marginRight: 8 }]}>
-                    <Text style={utilities.progressText}>Stop {idx + 1}</Text>
-                    <Text style={{ color: '#000', fontWeight: 'bold' }}>{sp.name || `${sp.lat}, ${sp.lng}`}</Text>
+                <View key={idx} style={[utilities.progressStepSmall, { backgroundColor: '#1565c0' }]}>
+                    <Text style={utilities.progressTextSmall}>Stop {idx + 1}</Text>
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 10 }}>{sp.name || `${sp.lat}, ${sp.lng}`}</Text>
                 </View>
             ))}
             {isAddingStop && (
-                <View style={[utilities.progressStep, { backgroundColor: '#FFC107', marginRight: 8 }]}>
-                    <Text style={utilities.progressText}>Adding...</Text>
-                    {currentStop && <Text>{currentStop.name || `${currentStop.lat}, ${currentStop.lng}`}</Text>}
+                <View style={[utilities.progressStepSmall, { backgroundColor: '#f9a825' }]}>
+                    <Text style={utilities.progressTextSmall}>Adding...</Text>
+                    {currentStop && <Text style={{ fontSize: 10, color: '#fff' }}>{currentStop.name || `${currentStop.lat}, ${currentStop.lng}`}</Text>}
                 </View>
             )}
-            <View style={[utilities.progressStep, { backgroundColor: endingPoint ? '#4CAF50' : colors.primary }]}>
-                <Text style={utilities.progressText}>End</Text>
-                <Text style={{ color: '#000', fontWeight: 'bold' }}>{endingPoint || 'Not set'}</Text>
+            <View style={[utilities.progressStepSmall, { backgroundColor: endingPoint ? '#2e7d32' : colors.primary }]}>
+                <Text style={utilities.progressTextSmall}>End</Text>
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 10 }}>{endingPoint || 'Not set'}</Text>
             </View>
-        </ScrollView>
+        </View>
     );
-
     return (
         <View style={[utilities.containerWhite, { position: 'relative' }]}>
             <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
