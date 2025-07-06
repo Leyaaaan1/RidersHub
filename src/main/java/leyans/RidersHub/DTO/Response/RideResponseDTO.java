@@ -1,6 +1,7 @@
 package leyans.RidersHub.DTO.Response;
 
 import jakarta.persistence.Column;
+import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 
@@ -34,6 +35,8 @@ public class RideResponseDTO {
 
     private String username;
 
+    private List<StopPointDTO> stopPoints;
+
 
 
 
@@ -43,7 +46,8 @@ public class RideResponseDTO {
                            String startingPointName, double startLat, double startLng,
                            String endingPointName, double endLat, double endLng,
                            String mapImageUrl, String magImageStartingLocation, String magImageEndingLocation,
-                           String username
+                           String username,
+                            List<StopPointDTO> stopPoints
 
     ) {
         this.generatedRidesId = generatedRidesId;
@@ -67,10 +71,18 @@ public class RideResponseDTO {
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
         this.username = username;
+        this.stopPoints = stopPoints;
 
 
     }
 
+    public List<StopPointDTO> getStopPoints() {
+        return stopPoints;
+    }
+
+    public void setStopPoints(List<StopPointDTO> stopPoints) {
+        this.stopPoints = stopPoints;
+    }
 
     public String getUsername() {
         return username;

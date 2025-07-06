@@ -27,6 +27,8 @@ public class RideRequestDTO {
     private String magImageStartingLocation;
     private String magImageEndingLocation;
 
+    private List<StopPointDTO> stopPoints;
+
 
     public RideRequestDTO(Integer generatedRidesId, String username, List<String> participants, String description,
                           String ridesName, String locationName,
@@ -35,7 +37,8 @@ public class RideRequestDTO {
                           String startingPointName, double startLat,double startLng,
             String endingPointName, double endLat, double endLng,
                           String mapImageUrl,
-                          String magImageStartingLocation, String magImageEndingLocation) {
+                          String magImageStartingLocation, String magImageEndingLocation,
+                          List<StopPointDTO> stopPoints) {
         this.generatedRidesId = generatedRidesId;
         this.username = username;
         this.ridesName = ridesName;
@@ -56,8 +59,17 @@ public class RideRequestDTO {
         this.mapImageUrl = mapImageUrl;
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
+        this.stopPoints = stopPoints;
 
 
+    }
+
+    public List<StopPointDTO> getStopPoints() {
+        return stopPoints;
+    }
+
+    public void setStopPoints(List<StopPointDTO> stopPoints) {
+        this.stopPoints = stopPoints;
     }
 
     public String getMagImageStartingLocation() {

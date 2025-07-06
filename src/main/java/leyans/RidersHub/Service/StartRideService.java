@@ -28,12 +28,15 @@ public class StartRideService {
 
     private final RiderUtil riderUtil;
 
+    private final RidesService ridesService;
+
 
 
     @Autowired
-    public StartRideService(StartedRideRepository startedRideRepository, RiderUtil riderUtil) {
+    public StartRideService(StartedRideRepository startedRideRepository, RiderUtil riderUtil, RidesService ridesService) {
         this.startedRideRepository = startedRideRepository;
         this.riderUtil = riderUtil;
+        this.ridesService = ridesService;
     }
 
 
@@ -141,7 +144,8 @@ public class StartRideService {
                 ride.getMapImageUrl(),
                 ride.getMagImageStartingLocation(),
                 ride.getMagImageEndingLocation(),
-                ride.getUsername().getUsername()
+                ride.getUsername().getUsername(),
+                ridesService.mapStopPointsToDTOs(ride.getStopPoints())
         );
     }
 

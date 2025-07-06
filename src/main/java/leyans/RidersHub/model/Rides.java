@@ -69,6 +69,11 @@ public class Rides {
     @Column(name = "endingPointName", nullable = false)
     private String endingPointName;
 
+
+    @ElementCollection
+    @CollectionTable(name = "ride_stop_points", joinColumns = @JoinColumn(name = "ride_id"))
+    private List<StopPoint> stopPoints = new ArrayList<>();
+
     @Column(name = "ride_date", nullable = false)
     private LocalDateTime date;
 
@@ -111,6 +116,14 @@ public class Rides {
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
 
+    }
+
+    public List<StopPoint> getStopPoints() {
+        return stopPoints;
+    }
+
+    public void setStopPoints(List<StopPoint> stopPoints) {
+        this.stopPoints = stopPoints;
     }
 
     public String getMagImageStartingLocation() {
