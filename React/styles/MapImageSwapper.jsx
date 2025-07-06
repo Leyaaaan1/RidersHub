@@ -1,53 +1,142 @@
-import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import colors from './colors';
 import utilities from "./utilities";
-const MapImageSwapper = ({ startImage, endImage, startPoint, endPoint }) => {
-    const [showStart, setShowStart] = useState(true);
 
-    const toggleImage = () => setShowStart(!showStart);
-
+const MapImageSwapper = ({ startImage, endImage, startPoint, endPoint, showStart, setShowStart }) => {
     const currentImage = showStart ? startImage : endImage;
     const currentPoint = showStart ? startPoint : endPoint;
-    const currentLabel = showStart ? 'Starting Point' : 'Destination';
+    const currentLabel = showStart ? 'Starting point' : 'Destination';
     const otherLabel = showStart ? 'Destination' : 'Starting Point';
 
     return (
-        <View style={[utilities.containerWhite, { position: 'relative' }]}>
+        <View style={styles.container}>
             {currentImage ? (
-                <TouchableOpacity onPress={toggleImage} style={{ alignItems: 'center'  }}>
+                <View style={styles.mapContainer}>
+                    <TouchableOpacity
+                        onPress={() => setShowStart(!showStart)}
+                        style={styles.imageContainer}
+                        activeOpacity={0.9}
+                    >
+                        <Image
+                            source={{ uri: currentImage }}
+                            style={styles.mapImage}
+                            resizeMode="cover"
+                        />
+                    </TouchableOpacity>
 
-                    <Image
-                        source={{ uri: currentImage }}
-                        style={{ width: '100%', height: 200, borderRadius: 8, borderWidth: 2, borderColor: '#fff', backgroundColor: '#222' }}
-                        resizeMode="cover"
-                    />`
-                    <View style={{ marginTop: 4, alignItems: 'center' }}>
-                        <Text style={{ color: '#fff', fontSize: 12, textAlign: 'center', paddingVertical: 0, marginVertical: 0 }}>
-                            Tap to see {otherLabel}
-                        </Text>
-                    </View>
-                    <View style={{
-
-                    }}>
-                        <View style={{
-                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                            padding: 6,
-                            borderRadius: 10,
-                        }}>
-                            <Text style={{ color: '#fff', fontSize: 12 }}>{currentLabel}:</Text>
-                            <Text style={{ color: '#fff', fontSize: 18, textAlign: 'center' }}>{currentPoint}</Text>
+                    {/* Clean Location Info */}
+                    <View style={styles.locationInfo}>
+                        <View style={styles.locationRow}>
+                            <View style={styles.locationDot} />
+                            <View style={styles.locationText}>
+                                <Text style={styles.locationLabel}>{currentLabel}</Text>
+                                <Text style={styles.locationName}>{currentPoint}</Text>
+                            </View>
                         </View>
                     </View>
-                </TouchableOpacity>
-            ) : (
-                <Text style={{ color: '#fff', textAlign: 'center' }}>
-                    No map available
-                </Text>
-            )}
 
+                    {/* Minimal Tap Instruction */}
+                    <TouchableOpacity
+                        style={styles.tapButton}
+                        onPress={() => setShowStart(!showStart)}
+                    >
+                        <Text style={styles.tapText}>
+                            Top to view {otherLabel}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
+                <View style={styles.noMapContainer}>
+                    <Text style={styles.noMapText}>
+                        No map available
+                    </Text>
+                </View>
+            )}
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        backgroundColor: '#000',
+    },
+    mapContainer: {
+        backgroundColor: '#111',
+        borderRadius: 8,
+        overflow: 'hidden',
+    },
+    imageContainer: {
+        position: 'relative',
+    },
+    mapImage: {
+        width: '100%',
+        height: 200,
+        backgroundColor: '#222',
+    },
+
+    // Clean Location Info
+    locationInfo: {
+        backgroundColor: '#111',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderTopWidth: 1,
+        borderTopColor: '#222',
+    },
+    locationRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    locationDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#8c2323',
+        marginRight: 12,
+    },
+    locationText: {
+        flex: 1,
+    },
+    locationLabel: {
+        color: '#666',
+        fontSize: 12,
+        fontWeight: '500',
+        marginBottom: 2,
+        textTransform: 'capitalize',
+    },
+    locationName: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        letterSpacing: -0.2,
+    },
+
+    // Minimal Tap Button
+    tapButton: {
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        paddingVertical: 10,
+        alignItems: 'center',
+    },
+    tapText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+        letterSpacing: 0.2,
+    },
+
+    // No Map State
+    noMapContainer: {
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#111',
+        borderRadius: 8,
+    },
+    noMapText: {
+        color: '#666',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+});
 
 export default MapImageSwapper;

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, ScrollView } from 'react-native';
+import { View, Text, Image, FlatList, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
 import MapImageSwapper from "../../styles/MapImageSwapper";
 import { getLocationImage } from "../../services/rideService";
+import rideRoutesUtilities from "../../styles/rideRoutesUtilities";
+import LinearGradient from 'react-native-linear-gradient';
+import imageStyles from "../../styles/ImageStyles";
 
 const RideRoutesPage = ({ route }) => {
     const {
@@ -13,12 +16,12 @@ const RideRoutesPage = ({ route }) => {
     } = route.params;
 
     const [startingPointImages, setStartingPointImages] = useState([]);
-    const [startingPointImageLoading, setStartingPointImageLoading] = useState(false);
-    const [startingPointImageError, setStartingPointImageError] = useState(null);
-
     const [endingPointImages, setEndingPointImages] = useState([]);
+    const [startingPointImageLoading, setStartingPointImageLoading] = useState(false);
     const [endingPointImageLoading, setEndingPointImageLoading] = useState(false);
+    const [startingPointImageError, setStartingPointImageError] = useState(null);
     const [endingPointImageError, setEndingPointImageError] = useState(null);
+    const [showStart, setShowStart] = useState(true);
 
     const fetchPointImages = async (start, end) => {
         if (!start || !end || !token) {
@@ -53,79 +56,89 @@ const RideRoutesPage = ({ route }) => {
 
     useEffect(() => {
         fetchPointImages(startingPoint, endingPoint);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startingPoint, endingPoint, token]);
 
-    return (
-        <ScrollView>
-            {startMapImage || endMapImage ? (
-                <MapImageSwapper
-                    startImage={startMapImage}
-                    endImage={endMapImage}
-                    startPoint={startingPoint}
-                    endPoint={endingPoint}
-                />
-            ) : (
-                <Text style={{ color: '#fff', textAlign: 'center', width: '100%' }}>
-                    No start or end map available
-                </Text>
-            )}
+    const images = showStart ? startingPointImages : endingPointImages;
+    const imagesLoading = showStart ? startingPointImageLoading : endingPointImageLoading;
+    const imagesError = showStart ? startingPointImageError : endingPointImageError;
 
-            <View style={{ marginTop: 20 }}>
-                <Text style={{ color: '#fff', fontWeight: 'bold', marginBottom: 8 }}>
-                    Starting Point Images
-                </Text>
-                {startingPointImageLoading ? (
-                    <Text style={{ color: '#fff' }}>Loading...</Text>
-                ) : startingPointImages.length > 0 ? (
+    return (
+        <ScrollView style={rideRoutesUtilities.scrollView} contentContainerStyle={{ paddingBottom: 30 }}>
+            <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+            {/* Minimal Header */}
+            <View style={rideRoutesUtilities.header}>
+                <View style={rideRoutesUtilities.headerContent}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <TouchableOpacity >
+                            <Text style={{ fontSize: 22, color: '#fff', marginRight: 12 }}>{'\u25C0'}</Text>
+                        </TouchableOpacity>
+                        <View style={rideRoutesUtilities.routeDetails}>
+                            <Text style={rideRoutesUtilities.routeText}>{startingPoint}</Text>
+                            <View style={rideRoutesUtilities.routeArrow} />
+                            <Text style={rideRoutesUtilities.routeText}>{endingPoint}</Text>
+                        </View>
+                    </View>
+                </View>
+            </View>
+
+            {/* Clean Image Section */}
+            <View style={rideRoutesUtilities.imageSection}>
+                {imagesLoading ? (
+                    <View style={rideRoutesUtilities.loadingContainer}>
+                        <Text style={rideRoutesUtilities.loadingText}>Loading...</Text>
+                    </View>
+                ) : images.length > 0 ? (
                     <FlatList
-                        data={startingPointImages}
+                        data={images}
                         horizontal
                         pagingEnabled
                         keyExtractor={(_, idx) => idx.toString()}
                         renderItem={({ item }) => (
-                            <Image
-                                source={{ uri: item.imageUrl }}
-                                style={{ width: 300, height: 200, marginRight: 10 }}
-                                resizeMode="cover"
-                            />
+                            <View>
+                                <Image
+                                    source={{ uri: item.imageUrl }}
+                                    style={rideRoutesUtilities.image}
+                                    resizeMode="cover"
+                                />
+                                {(item.author || item.license) && (
+                                    <Text style={imageStyles.imageMeta}>
+                                        {item.author ? `Photo: ${item.author}` : ''}
+                                        {item.author && item.license ? ' | ' : ''}
+                                        {item.license ? `License: ${item.license}` : ''}
+                                    </Text>
+                                )}
+                            </View>
                         )}
                         showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={rideRoutesUtilities.imagesList}
                     />
                 ) : (
-                    <Text style={{ color: '#fff' }}>
-                        {startingPointImageError || "No images available"}
-                    </Text>
+                    <View style={rideRoutesUtilities.errorContainer}>
+                        <Text style={rideRoutesUtilities.errorText}>
+                            {imagesError || "No images available"}
+                        </Text>
+                    </View>
                 )}
+
+                {/* Minimal Switch Button */}
+
             </View>
 
-            <View style={{ marginTop: 20 }}>
-                <Text style={{ color: '#fff', fontWeight: 'bold', marginBottom: 8 }}>
-                    Ending Point Images
-                </Text>
-                {endingPointImageLoading ? (
-                    <Text style={{ color: '#fff' }}>Loading...</Text>
-                ) : endingPointImages.length > 0 ? (
-                    <FlatList
-                        data={endingPointImages}
-                        horizontal
-                        pagingEnabled
-                        keyExtractor={(_, idx) => idx.toString()}
-                        renderItem={({ item }) => (
-                            <Image
-                                source={{ uri: item.imageUrl }}
-                                style={{ width: 300, height: 200, marginRight: 10 }}
-                                resizeMode="cover"
-                            />
-                        )}
-                        showsHorizontalScrollIndicator={true}
+            {/* Map Section */}
+            <View style={rideRoutesUtilities.mapSection}>
+                <View style={rideRoutesUtilities.swapperSection}>
+                    <MapImageSwapper
+                        startImage={startMapImage}
+                        endImage={endMapImage}
+                        startPoint={startingPoint}
+                        endPoint={endingPoint}
+                        showStart={showStart}
+                        setShowStart={setShowStart}
                     />
-                ) : (
-                    <Text style={{ color: '#fff' }}>
-                        {endingPointImageError || "No images available"}
-                    </Text>
-                )}
+                </View>
             </View>
+
         </ScrollView>
     );
 };

@@ -542,6 +542,8 @@ const utilities = StyleSheet.create({
         fontSize: 13,
         marginTop: 6,
     },
+
+
 });
 
 export default utilities;
