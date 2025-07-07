@@ -6,6 +6,7 @@ import rideRoutesPageUtilities from "../../styles/RideRoutesPageUtilities";
 import LinearGradient from 'react-native-linear-gradient';
 import imageStyles from "../../styles/ImageStyles";
 import { getStopPointsByRideId } from '../../services/startService';
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 const { width, height } = Dimensions.get('window');
 
@@ -88,7 +89,9 @@ const RideRoutesPage = ({ route }) => {
     }, [token, generatedRidesId]);
 
     const fetchPointImages = async (start, end) => {
-        if (!start || !end || !token) {
+        if (!start || !
+
+            end || !token) {
             setStartingPointImageError("Missing starting point, ending point, or token");
             setEndingPointImageError("Missing starting point, ending point, or token");
             return;
@@ -139,51 +142,34 @@ const RideRoutesPage = ({ route }) => {
             >
                 <Animated.View style={[rideRoutesPageUtilities.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
                     <View style={rideRoutesPageUtilities.headerContent}>
-                        <View style={rideRoutesPageUtilities.headerRow}>
-                            <TouchableOpacity style={rideRoutesPageUtilities.backButton}>
-                                <Text style={rideRoutesPageUtilities.backButtonText}>{'◀'}</Text>
-                            </TouchableOpacity>
-                            <View style={rideRoutesPageUtilities.routeStatusContainer}>
-                                <Animated.View style={[rideRoutesPageUtilities.statusDot, { transform: [{ scale: pulseAnim }] }]} />
-                                <Text style={rideRoutesPageUtilities.statusText}>Route Active</Text>
-                            </View>
-                        </View>
                         <View style={rideRoutesPageUtilities.routeDetailsContainer}>
                             <View style={rideRoutesPageUtilities.routePoint}>
                                 <View style={rideRoutesPageUtilities.startDot} />
                                 <Text style={rideRoutesPageUtilities.routePointText} numberOfLines={2}>{startingPoint}</Text>
                             </View>
                             <View style={rideRoutesPageUtilities.routeConnection}>
-                                <View style={rideRoutesPageUtilities.routeLine} />
-                                <View style={rideRoutesPageUtilities.routeArrowContainer}>
-                                    <Text style={rideRoutesPageUtilities.routeArrow}>→</Text>
-                                </View>
+                                <FontAwesome name="arrow-right" size={18} color="#2e7d32" style={{ alignSelf: 'center', marginVertical: 2 }} />
                             </View>
                             <View style={rideRoutesPageUtilities.routePoint}>
                                 <View style={rideRoutesPageUtilities.endDot} />
                                 <Text style={rideRoutesPageUtilities.routePointText} numberOfLines={2}>{endingPoint}</Text>
                             </View>
                         </View>
+                        <View style={rideRoutesPageUtilities.sectionTitleRow}>
+                            <Text style={rideRoutesPageUtilities.sectionTitle}>{currentLabel}</Text>
+                            <TouchableOpacity
+                                style={rideRoutesPageUtilities.switchButton}
+                                onPress={() => setShowStart(!showStart)}
+                            >
+                                <Text style={rideRoutesPageUtilities.switchButtonText}>View {otherLabel}</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </Animated.View>
             </LinearGradient>
 
             <Animated.View style={[rideRoutesPageUtilities.imageSection, { opacity: fadeAnim }]}>
-                <View style={rideRoutesPageUtilities.sectionHeader}>
-                    <View style={rideRoutesPageUtilities.sectionTitleRow}>
-                        <View style={rideRoutesPageUtilities.sectionIndicator} />
-                        <Text style={rideRoutesPageUtilities.sectionTitle}>{currentLabel}</Text>
-                        <View style={rideRoutesPageUtilities.sectionBadge}>
-                            <Text style={rideRoutesPageUtilities.sectionBadgeText}>{showStart ? 'START' : 'END'}</Text>
-                        </View>
-                    </View>
-                    <TouchableOpacity
-                        style={rideRoutesPageUtilities.switchButton}
-                        onPress={() => setShowStart(!showStart)}
-                    >
-                        <Text style={rideRoutesPageUtilities.switchButtonText}>View {otherLabel}</Text>
-                    </TouchableOpacity>
-                </View>
+
                 {imagesLoading ? (
                     <View style={rideRoutesPageUtilities.loadingContainer}>
                         <Animated.View style={[rideRoutesPageUtilities.loadingDot, { transform: [{ scale: pulseAnim }] }]} />
@@ -237,13 +223,6 @@ const RideRoutesPage = ({ route }) => {
 
             <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
                 <View style={rideRoutesPageUtilities.sectionHeader}>
-                    <View style={rideRoutesPageUtilities.sectionTitleRow}>
-                        <View style={rideRoutesPageUtilities.sectionIndicator} />
-                        <Text style={rideRoutesPageUtilities.sectionTitle}>Route Map</Text>
-                        <View style={rideRoutesPageUtilities.mapBadge}>
-                            <Text style={rideRoutesPageUtilities.mapBadgeText}>LIVE</Text>
-                        </View>
-                    </View>
                 </View>
                 <View style={rideRoutesPageUtilities.mapContainer}>
                     <MapImageSwapper

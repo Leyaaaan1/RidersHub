@@ -121,7 +121,6 @@ const rideRoutesPageUtilities = StyleSheet.create({
     sectionTitleRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 12,
     },
     sectionIndicator: {
         width: 4,
@@ -179,9 +178,10 @@ const rideRoutesPageUtilities = StyleSheet.create({
         borderColor: '#8c2323',
     },
     switchButtonText: {
-        color: '#8c2323',
+        color: '#fff',
         fontSize: 14,
         fontWeight: '600',
+
     },
     imageCard: {
         marginHorizontal: 8,
