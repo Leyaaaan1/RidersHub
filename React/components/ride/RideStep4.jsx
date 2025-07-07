@@ -417,7 +417,8 @@ const RideStep4 = (props) => {
                                     token,
                                     distance,
                                     username,
-                                    currentUsername
+                                    currentUsername,
+                                    generatedRidesId
                                 })}
                             >
                                 <Text style={rideUtilities.customBottomText}>Routes</Text>

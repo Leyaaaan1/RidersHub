@@ -2,11 +2,11 @@ package leyans.RidersHub.Service;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
+import leyans.RidersHub.Util.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
@@ -17,7 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,16 +36,20 @@ public class RidesService {
 
     private final RideParticipantService rideParticipantService;
 
+    private final RiderUtil riderUtil;
+
+
     @Autowired
     public RidesService(RidesRepository ridesRepository,
 
-                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService) {
+                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil) {
 
         this.ridesRepository = ridesRepository;
         this.riderService = riderService;
         this.locationService = locationService;
         this.mapboxService = mapboxService;
         this.rideParticipantService = rideParticipantService;
+        this.riderUtil = riderUtil;
     }
 
     @Transactional
@@ -111,6 +115,18 @@ public class RidesService {
 
         RideResponseDTO response = mapToResponseDTO(newRide);
         return response;
+    }
+    @Transactional(readOnly = true)
+    public List<StopPointDTO> getStopPointsDTOByGeneratedRideId(Integer generatedRidesId) {
+        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
+        String currentUsername = riderUtil.getCurrentUsername();
+        boolean isOwner = ride.getUsername().getUsername().equals(currentUsername);
+        boolean isParticipant = ride.getParticipants().stream()
+                .anyMatch(rider -> rider.getUsername().equals(currentUsername));
+        if (!isOwner && !isParticipant) {
+            throw new org.springframework.security.access.AccessDeniedException("Access denied: not owner or participant");
+        }
+        return mapStopPointsToDTOs(ride.getStopPoints());
     }
 
     private List<StopPoint> convertStopPointDTOs(List<StopPointDTO> stopPointsDto) {
