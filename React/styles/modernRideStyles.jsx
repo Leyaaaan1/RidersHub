@@ -13,13 +13,12 @@ const modernRideStyles = StyleSheet.create({
     // Header Styles
     header: {
         backgroundColor: '#1a1a1a',
-        paddingVertical: 16,
+        paddingVertical: 10,
         paddingHorizontal: 20,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottomWidth: 1,
-        borderBottomColor: '#333',
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -71,8 +70,6 @@ const modernRideStyles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '500',
         textAlign: 'center',
-        marginTop: 2,
-        opacity: 0.9,
     },
 
     joinButton: {
@@ -95,10 +92,7 @@ const modernRideStyles = StyleSheet.create({
 
     startButton: {
         backgroundColor: 'rgba(140, 35, 35, 0.2)',
-        padding: 8,
         borderRadius: 25,
-        borderWidth: 2,
-        borderColor: '#8c2323',
     },
 
     // Main Content Styles
@@ -108,7 +102,7 @@ const modernRideStyles = StyleSheet.create({
 
     heroSection: {
         backgroundColor: '#151515',
-        padding: 20,
+        paddingLeft: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#333',
     },
@@ -118,7 +112,6 @@ const modernRideStyles = StyleSheet.create({
         fontSize: 28,
         fontWeight: '800',
         textAlign: 'center',
-        marginBottom: 8,
         letterSpacing: 0.3,
     },
 
@@ -129,8 +122,6 @@ const modernRideStyles = StyleSheet.create({
         paddingHorizontal: 16,
         marginBottom: 20,
         alignSelf: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(140, 35, 35, 0.3)',
     },
 
     dateText: {
@@ -205,8 +196,7 @@ const modernRideStyles = StyleSheet.create({
     statsSection: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 20,
-        paddingHorizontal: 4,
+        padding: 10,
     },
 
     statsLeft: {
@@ -247,16 +237,13 @@ const modernRideStyles = StyleSheet.create({
     },
 
     distanceContainer: {
-        backgroundColor: 'rgba(140, 35, 35, 0.2)',
         borderRadius: 20,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        borderColor: '#8c2323',
+
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 80,
     },
+
 
     distanceText: {
         color: '#8c2323',
@@ -268,11 +255,9 @@ const modernRideStyles = StyleSheet.create({
     rideTypeContainer: {
         backgroundColor: 'rgba(140, 35, 35, 0.1)',
         borderRadius: 25,
-        width: 50,
-        height: 50,
+        height: 30,
         alignItems: 'center',
         justifyContent: 'center',
-        borderWidth: 2,
         borderColor: '#8c2323',
     },
 
@@ -300,11 +285,9 @@ const modernRideStyles = StyleSheet.create({
     // Bottom Navigation
     bottomNav: {
         backgroundColor: '#1a1a1a',
-        paddingVertical: 16,
-        paddingHorizontal: 20,
+        paddingVertical: 9,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        borderTopWidth: 1,
         borderTopColor: '#333',
         elevation: 8,
         shadowColor: '#000',
@@ -330,10 +313,12 @@ const modernRideStyles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
-    },
+
+
+},
 
     bottomNavText: {
-        color: '#8c2323',
+        color: '#fff',
         fontSize: 14,
         fontWeight: '600',
         textAlign: 'center',

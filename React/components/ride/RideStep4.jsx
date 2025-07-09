@@ -243,7 +243,7 @@ const RideStep4 = (props) => {
                         {locationName?.toUpperCase()}
                     </Text>
                     <Text style={modernRideStyles.rideId}>
-                        #{generatedRidesId}
+                        {generatedRidesId}
                     </Text>
                 </View>
 
@@ -278,11 +278,23 @@ const RideStep4 = (props) => {
                 <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
                     {/* Hero Section */}
                     <View style={modernRideStyles.heroSection}>
-                        <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
-
-                        <View style={modernRideStyles.dateContainer}>
-                            <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
+                        <View style={[modernRideStyles.statsSection, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
+                            {/* Username on the left */}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                                <FontAwesome name="user" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
+                                <Text style={modernRideStyles.ownerText}>{username}</Text>
+                            </View>
+                            {/* Ride name in the center */}
+                            <View style={{ flex: 2, alignItems: 'center' }}>
+                                <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
+                            </View>
+                            {/* Ride type on the right */}
+                            <Animated.View style={[{ transform: [{ scale: pulseAnim }], flex: 1, alignItems: 'center', justifyContent: 'center' }]}>
+                                <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
+                            </Animated.View>
                         </View>
+
+
 
                         {/* Location Images */}
                         <View style={modernRideStyles.imagesSection}>
@@ -325,6 +337,9 @@ const RideStep4 = (props) => {
                                     </View>
                                 )}
                             </View>
+                            <View style={modernRideStyles.dateContainer}>
+                                <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
+                            </View>
 
                             {/* Map Image */}
                             <View style={modernRideStyles.mapContainer}>
@@ -347,31 +362,19 @@ const RideStep4 = (props) => {
                         </View>
 
                         {/* Stats Section */}
-                        <View style={modernRideStyles.statsSection}>
-                            <View style={modernRideStyles.statsLeft}>
-                                <View style={modernRideStyles.statItem}>
-                                    <FontAwesome name="user" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
-                                    <Text style={modernRideStyles.ownerText}>{username}</Text>
-                                </View>
-
-                                <Animated.View style={[modernRideStyles.distanceContainer, modernRideStyles.pulseContainer, { transform: [{ scale: pulseAnim }] }]}>
-                                    <FontAwesome name="road" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
-                                    <Text style={modernRideStyles.distanceText}>{distanceState} km</Text>
-                                </Animated.View>
-                            </View>
-
-                            <View style={modernRideStyles.statsRight}>
-                                <Animated.View style={[modernRideStyles.rideTypeContainer, { transform: [{ scale: pulseAnim }] }]}>
-                                    <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
-                                </Animated.View>
-                            </View>
-                        </View>
                     </View>
 
                     {/* Description Section */}
                     {description && (
                         <View style={modernRideStyles.descriptionSection}>
-                            <Text style={modernRideStyles.descriptionTitle}>About This Ride</Text>
+                            <Text style={modernRideStyles.descriptionTitle}>
+                                About This Ride{'  '}
+                                <FontAwesome name="road" size={14} color="#8c2323" />
+                                <Text style={modernRideStyles.distanceContainer}>
+                                    {' '}
+                                    <Text style={modernRideStyles.distanceText}>{distance} km</Text>
+                                </Text>
+                            </Text>
                             <Text style={modernRideStyles.descriptionText}>{description}</Text>
                         </View>
                     )}

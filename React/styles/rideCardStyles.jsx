@@ -102,7 +102,7 @@ export const rideCardStyles = StyleSheet.create({
 
     ownerText: {
         fontSize: 13,
-        color: TEXT_SECONDARY,
+        color: TEXT_LIGHT,
     },
 
     // Route Section
@@ -110,7 +110,7 @@ export const rideCardStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.primary,
+        backgroundColor: 'rgba(140, 35, 35, 0.1)',
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 8,
@@ -144,7 +144,7 @@ export const rideCardStyles = StyleSheet.create({
 
     dateText: {
         fontSize: 13,
-        color: TEXT_SECONDARY,
+        color: TEXT_LIGHT,
         marginBottom: 4,
     },
 
@@ -198,7 +198,7 @@ export const rideCardStyles = StyleSheet.create({
 
     descriptionText: {
         fontSize: 14,
-        color: TEXT_SECONDARY,
+        color: TEXT_LIGHT,
         lineHeight: 20,
     },
 
@@ -255,63 +255,3 @@ export const rideCardStyles = StyleSheet.create({
     },
 });
 
-// Dark Theme Variant (Optional)
-export const darkRideCardStyles = StyleSheet.create({
-    ...rideCardStyles,
-
-    container: {
-        ...rideCardStyles.container,
-        backgroundColor: '#121212',
-    },
-
-    cardContainer: {
-        ...rideCardStyles.cardContainer,
-        backgroundColor: DARK_CARD_BACKGROUND,
-        borderColor: DARK_BORDER_COLOR,
-    },
-
-    rideTitle: {
-        ...rideCardStyles.rideTitle,
-        color: WHITE,
-    },
-
-    locationText: {
-        ...rideCardStyles.locationText,
-        color: WHITE,
-    },
-
-    ownerText: {
-        ...rideCardStyles.ownerText,
-        color: '#ccc',
-    },
-
-    routeSection: {
-        ...rideCardStyles.routeSection,
-        backgroundColor: '#2a2a2a',
-    },
-
-    routeText: {
-        ...rideCardStyles.routeText,
-        color: WHITE,
-    },
-
-    dateText: {
-        ...rideCardStyles.dateText,
-        color: '#ccc',
-    },
-
-    descriptionSection: {
-        ...rideCardStyles.descriptionSection,
-        backgroundColor: '#2a2a2a',
-    },
-
-    descriptionText: {
-        ...rideCardStyles.descriptionText,
-        color: '#ccc',
-    },
-
-    emptyText: {
-        ...rideCardStyles.emptyText,
-        color: '#666',
-    },
-});
