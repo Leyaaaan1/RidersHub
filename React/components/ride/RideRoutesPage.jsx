@@ -7,8 +7,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import imageStyles from "../../styles/ImageStyles";
 import { getStopPointsByRideId } from '../../services/startService';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import RideImagesCarousel from "../../styles/RideImagesCarousel";
 
-const { width, height } = Dimensions.get('window');
 
 const RideRoutesPage = ({ route }) => {
     const {
@@ -168,58 +168,12 @@ const RideRoutesPage = ({ route }) => {
                 </Animated.View>
             </LinearGradient>
 
-            <Animated.View style={[rideRoutesPageUtilities.imageSection, { opacity: fadeAnim }]}>
-
-                {imagesLoading ? (
-                    <View style={rideRoutesPageUtilities.loadingContainer}>
-                        <Animated.View style={[rideRoutesPageUtilities.loadingDot, { transform: [{ scale: pulseAnim }] }]} />
-                        <Text style={rideRoutesPageUtilities.loadingText}>Loading images...</Text>
-                    </View>
-                ) : images.length > 0 ? (
-                    <FlatList
-                        data={images}
-                        horizontal
-                        pagingEnabled
-                        keyExtractor={(_, idx) => idx.toString()}
-                        renderItem={({ item, index }) => (
-                            <View style={rideRoutesPageUtilities.imageCard}>
-                                <Image
-                                    source={{ uri: item.imageUrl }}
-                                    style={rideRoutesPageUtilities.image}
-                                    resizeMode="cover"
-                                />
-                                <LinearGradient
-                                    colors={['transparent', 'rgba(0,0,0,0.7)']}
-                                    style={rideRoutesPageUtilities.imageOverlay}
-                                />
-                                {(item.author || item.license) && (
-                                    <View style={rideRoutesPageUtilities.imageMetaContainer}>
-                                        <Text style={rideRoutesPageUtilities.imageMeta}>
-                                            {item.author ? `📸 ${item.author}` : ''}
-                                            {item.author && item.license ? ' • ' : ''}
-                                            {item.license ? `${item.license}` : ''}
-                                        </Text>
-                                    </View>
-                                )}
-                                <View style={rideRoutesPageUtilities.imageCounter}>
-                                    <Text style={rideRoutesPageUtilities.imageCounterText}>
-                                        {index + 1} / {images.length}
-                                    </Text>
-                                </View>
-                            </View>
-                        )}
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={rideRoutesPageUtilities.imagesList}
-                    />
-                ) : (
-                    <View style={rideRoutesPageUtilities.errorContainer}>
-                        <Text style={rideRoutesPageUtilities.errorIcon}>📷</Text>
-                        <Text style={rideRoutesPageUtilities.errorText}>
-                            {imagesError || "No images available"}
-                        </Text>
-                    </View>
-                )}
-            </Animated.View>
+            <RideImagesCarousel
+                images={images}
+                imagesLoading={imagesLoading}
+                imagesError={imagesError}
+                pulseAnim={pulseAnim}
+            />
 
             <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
                 <View style={rideRoutesPageUtilities.sectionHeader}>
@@ -237,15 +191,7 @@ const RideRoutesPage = ({ route }) => {
             </Animated.View>
 
             <Animated.View style={[rideRoutesPageUtilities.stopPointsSection, { opacity: fadeAnim }]}>
-                <View style={rideRoutesPageUtilities.sectionHeader}>
-                    <View style={rideRoutesPageUtilities.sectionTitleRow}>
-                        <View style={rideRoutesPageUtilities.sectionIndicator} />
-                        <Text style={rideRoutesPageUtilities.sectionTitle}>Stop Points</Text>
-                        <View style={rideRoutesPageUtilities.countBadge}>
-                            <Text style={rideRoutesPageUtilities.countBadgeText}>{stopPoints.length}</Text>
-                        </View>
-                    </View>
-                </View>
+
                 {stopPointsLoading ? (
                     <View style={rideRoutesPageUtilities.loadingContainer}>
                         <Animated.View style={[rideRoutesPageUtilities.loadingDot, { transform: [{ scale: pulseAnim }] }]} />

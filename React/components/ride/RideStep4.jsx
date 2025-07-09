@@ -1,5 +1,5 @@
 // React/components/ride/RideStep4.jsx
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -9,20 +9,21 @@ import {
     Image,
     Modal,
     SafeAreaView,
-    StatusBar, Alert,
-    FlatList
+    StatusBar,
+    Alert,
+    FlatList,
+    Animated,
+    Dimensions
 } from 'react-native';
-import utilities from '../../styles/utilities';
-import rideUtilities from '../../styles/rideUtilities';
+import modernRideStyles from '../../styles/modernRideStyles';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import {fetchRideMapImage, getRideDetails, getLocationImage} from '../../services/rideService';
-import colors from '../../styles/colors';
-import MapImageSwapper from "../../styles/MapImageSwapper";
+import { fetchRideMapImage, getRideDetails, getLocationImage } from '../../services/rideService';
 import ParticipantListModal from '../ParticipantListModal';
 import useJoinRide from './RideHandler';
-import imageStyles from "../../styles/ImageStyles";
-import {startService} from "../../services/startService";
+import { startService } from "../../services/startService";
+
+const { width } = Dimensions.get('window');
 
 const RideStep4 = (props) => {
     const navigation = useNavigation();
@@ -41,13 +42,62 @@ const RideStep4 = (props) => {
         description = props.description || routeParams.description,
         token = props.token || routeParams.token,
         distance = props.distance || routeParams.distance,
-        username= props.username || routeParams.username,
+        username = props.username || routeParams.username,
         currentUsername = props.currentUsername || routeParams.currentUsername,
-
-
     } = props;
-    console.log("RideStep4 props:", props);
 
+    // Animation values
+    const [fadeAnim] = useState(new Animated.Value(0));
+    const [slideAnim] = useState(new Animated.Value(50));
+    const [pulseAnim] = useState(new Animated.Value(1));
+
+    // State variables
+    const [mapImage, setMapImage] = useState(null);
+    const [startMapImage, setStartMapImage] = useState(null);
+    const [endMapImage, setEndMapImage] = useState(null);
+    const [imageLoading, setImageLoading] = useState(false);
+    const [distanceState, setDistance] = useState(distance || "--");
+    const [showParticipantsModal, setShowParticipantsModal] = useState(false);
+    const [rideNameImage, setRideNameImage] = useState(null);
+    const [rideNameImageLoading, setRideNameImageLoading] = useState(false);
+    const [rideNameImageError, setRideNameImageError] = useState(null);
+
+    const { loading: joiningRide, joinRide } = useJoinRide();
+
+    // Start animations on component mount
+    useEffect(() => {
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 800,
+                useNativeDriver: true,
+            }),
+        ]).start();
+
+        // Start pulse animation
+        const pulseAnimation = Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1.1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        );
+        pulseAnimation.start();
+
+        return () => pulseAnimation.stop();
+    }, []);
 
     const formatDate = (date) => {
         if (!date) return 'Not specified';
@@ -66,22 +116,6 @@ const RideStep4 = (props) => {
         navigation.goBack();
     };
 
-    const [mapImage, setMapImage] = useState(null);
-    const [startMapImage, setStartMapImage] = useState(null);
-    const [endMapImage, setEndMapImage] = useState(null);
-
-    const [imageLoading, setImageLoading] = useState(false);
-    const [distanceState, setDistance] = useState(distance || "--");
-
-    const [showParticipantsModal, setShowParticipantsModal] = useState(false);
-
-    const { loading: joiningRide, joinRide } = useJoinRide();
-
-    const [rideNameImage, setRideNameImage] = useState(null);
-    const [rideNameImageLoading, setRideNameImageLoading] = useState(false);
-    const [rideNameImageError, setRideNameImageError] = useState(null);
-
-    console.log('Participants:', participants);
     const fetchLocationImage = async (rideName) => {
         if (!rideName || !token) {
             console.log("Missing ride name or token for image fetch");
@@ -104,30 +138,41 @@ const RideStep4 = (props) => {
         }
     };
 
-    useEffect(() => {
-        if (locationName && token) {
-            fetchLocationImage(locationName);
-        }
-    }, [locationName, token]);
-
-
     const handleJoinRide = () => {
         if (!generatedRidesId || !token) {
             Alert.alert("Error", "Missing ride information. Please try again.");
             return;
         }
         joinRide(generatedRidesId, token, () => {
-            // Optional callback after successful join
             console.log("Successfully requested to join ride");
         });
     };
 
+    const getRideTypeIcon = (type) => {
+        switch (type) {
+            case 'car':
+                return 'car';
+            case 'motor':
+                return 'motorcycle';
+            case 'bike':
+                return 'bicycle';
+            case 'cafe Racers':
+                return 'rocket';
+            default:
+                return 'circle';
+        }
+    };
+
+    // Fetch effects
+    useEffect(() => {
+        if (locationName && token) {
+            fetchLocationImage(locationName);
+        }
+    }, [locationName, token]);
+
     useEffect(() => {
         const getMapImage = async () => {
-
-            if (!generatedRidesId) {
-                return;
-            }
+            if (!generatedRidesId) return;
 
             try {
                 setImageLoading(true);
@@ -181,57 +226,35 @@ const RideStep4 = (props) => {
     }, [generatedRidesId, token]);
 
     return (
-        <View style={[utilities.containerWhite, { flex: 1 }]}>
-            <StatusBar backgroundColor={colors.black} barStyle="light-content" translucent={false} />
+        <Animated.View style={[modernRideStyles.container, { opacity: fadeAnim }]}>
+            <StatusBar backgroundColor="#1a1a1a" barStyle="light-content" translucent={false} />
 
-
-            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', paddingVertical: 10,  backgroundColor: "#000000" }}>
-                {/* Back button - left */}
-                <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                    <TouchableOpacity
-                        style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}
-                        onPress={handleBack}
-                    >
-                        <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
+            {/* Header */}
+            <View style={modernRideStyles.header}>
+                <View style={modernRideStyles.headerLeft}>
+                    <TouchableOpacity style={modernRideStyles.backButton} onPress={handleBack}>
+                        <FontAwesome name="chevron-left" size={14} color="#fff" />
+                        <Text style={modernRideStyles.backButtonText}>Back</Text>
                     </TouchableOpacity>
                 </View>
-                {/* Name and ID - center */}
-                <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text
-                        style={[
-                            rideUtilities.title,
-                            {
-                                color: colors.white,
-                                marginBottom: 0,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                textAlign: 'center',
-                                width: '100%',
-                            }
-                        ]}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.7}
-                    >
+
+                <View style={modernRideStyles.headerCenter}>
+                    <Text style={modernRideStyles.locationTitle}>
                         {locationName?.toUpperCase()}
                     </Text>
-                    <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 0, textAlign: 'center', width: '100%' }}>
-                        {generatedRidesId}
+                    <Text style={modernRideStyles.rideId}>
+                        #{generatedRidesId}
                     </Text>
                 </View>
-                {/* Join Ride - right */}
-                <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: 10 }}>
+
+                <View style={modernRideStyles.headerRight}>
                     {username !== currentUsername ? (
-                        <TouchableOpacity onPress={() => handleJoinRide()}>
-                            <View>
-                                <Text style={{ color: colors.white, fontSize: 12, opacity: 0.7 }}>
-                                    Join Ride
-                                </Text>
-                            </View>
+                        <TouchableOpacity style={modernRideStyles.joinButton} onPress={handleJoinRide}>
+                            <Text style={modernRideStyles.joinButtonText}>Join Ride</Text>
                         </TouchableOpacity>
                     ) : (
                         <TouchableOpacity
+                            style={modernRideStyles.startButton}
                             onPress={async () => {
                                 try {
                                     await startService.startRide(generatedRidesId, token);
@@ -244,193 +267,170 @@ const RideStep4 = (props) => {
                                 }
                             }}
                         >
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                                <FontAwesome name="play-circle" size={40} color="#fff" style={{ marginRight: 5 }} />
-                            </View>
+                            <FontAwesome name="play-circle" size={32} color="#8c2323" />
                         </TouchableOpacity>
                     )}
-
-
                 </View>
             </View>
 
+            {/* Main Content */}
+            <Animated.View style={[modernRideStyles.fadeContainer, { transform: [{ translateY: slideAnim }] }]}>
+                <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
+                    {/* Hero Section */}
+                    <View style={modernRideStyles.heroSection}>
+                        <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
 
-            <ScrollView
-
-                showsVerticalScrollIndicator={false}
-            >
-                <View style={{ backgroundColor: "#151515", borderWidth: 2, padding: 10}}>
-
-
-                    <View style={{ width: '100%', alignItems: 'center', marginBottom: 8 }}>
-                        <Text
-                            style={[
-                                rideUtilities.title,
-                                {
-                                    color: colors.white,
-                                    marginBottom: 0,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    textAlign: 'center',
-                                    width: '100%',
-                                }
-                            ]}
-                            numberOfLines={1}
-                            ellipsizeMode="tail"
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.7}
-                        >
-                            {rideName}
-                        </Text>
-
-                        <View style={[rideUtilities.formGroup, { alignItems: 'center', marginTop: 8 }]}>
-                            <Text style={rideUtilities.detailText}>{formatDate(date)}</Text>
-                        </View>
-                        <View style={{width: '100%', alignItems: 'center'}}>
-                            {rideNameImageLoading ? (
-                                <ActivityIndicator size="large" color="#fff" />
-                            ) : Array.isArray(rideNameImage) && rideNameImage.length > 0 ? (
-                                <FlatList
-                                    data={rideNameImage}
-                                    horizontal
-                                    pagingEnabled
-                                    keyExtractor={(_, idx) => idx.toString()}
-                                    renderItem={({ item }) => (
-                                        <View style={imageStyles.imageContainer}>
-                                            <Image
-                                                source={{ uri: item.imageUrl }}
-                                                style={imageStyles.image}
-                                                resizeMode="cover"
-                                            />
-                                            {(item.author || item.license) && (
-                                                <Text style={imageStyles.imageMeta}>
-                                                    {item.author ? `Photo: ${item.author}` : ''}
-                                                    {item.author && item.license ? ' | ' : ''}
-                                                    {item.license ? `License: ${item.license}` : ''}
-                                                </Text>
-                                            )}
-                                        </View>
-                                    )}
-                                    showsHorizontalScrollIndicator={false}
-                                />
-                            ) : (
-                                <Text style={{color: '#fff'}}>
-                                    {rideNameImageError || "No location images available"}
-                                </Text>
-                            )}
+                        <View style={modernRideStyles.dateContainer}>
+                            <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
                         </View>
 
-                        <View style={{width: '100%', alignItems: 'center'}}>
-                            {imageLoading ? (
-                                <ActivityIndicator size="large" color="#fff" />
-                            ) : mapImage ? (
-                                <Image
-                                    source={{ uri: mapImage }}
-                                    style={{
-                                        width: '100%',
-                                        height: 200,
-                                        borderRadius: 8,
-                                        borderWidth: 2,
-                                        marginTop: 20
-                                    }}
-                                    resizeMode="cover"
-                                />
-                            ) : (
-                                <Text style={{color: '#fff'}}>No map available</Text>
-                            )}
-                        </View>
-
-
-                    </View>
-                    <View style={{ flexDirection: 'row', width: '100%' }}>
-                        {/* Left Column */}
-                        <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                            <Text style={rideUtilities.detailText}>Owner: {username} </Text>
-                            <Text style={rideUtilities.detailText}>current user: {currentUsername} </Text>
-                            <Text style={rideUtilities.detailText}>{distanceState} km</Text>
-                        </View>
-                        {/* Right Column */}
-                        <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                            <View style={{ alignItems: 'center' }}>
-                                {riderType === 'car' && <FontAwesome name="car" size={24} color="#fff" />}
-                                {riderType === 'motor' && <FontAwesome name="motorcycle" size={24} color="#fff" />}
-                                {riderType === 'bike' && <FontAwesome name="bicycle" size={24} color="#fff" />}
-                                {riderType === 'cafe Racers' && <FontAwesome name="rocket" size={24} color="#fff" />}
+                        {/* Location Images */}
+                        <View style={modernRideStyles.imagesSection}>
+                            <View style={modernRideStyles.locationImagesContainer}>
+                                {rideNameImageLoading ? (
+                                    <View style={modernRideStyles.loadingContainer}>
+                                        <ActivityIndicator size="large" color="#8c2323" />
+                                        <Text style={modernRideStyles.loadingText}>Loading location images...</Text>
+                                    </View>
+                                ) : Array.isArray(rideNameImage) && rideNameImage.length > 0 ? (
+                                    <FlatList
+                                        data={rideNameImage}
+                                        horizontal
+                                        pagingEnabled
+                                        keyExtractor={(_, idx) => idx.toString()}
+                                        renderItem={({ item }) => (
+                                            <View style={modernRideStyles.imageContainer}>
+                                                <Image
+                                                    source={{ uri: item.imageUrl }}
+                                                    style={modernRideStyles.locationImage}
+                                                />
+                                                {(item.author || item.license) && (
+                                                    <View style={modernRideStyles.imageMetaContainer}>
+                                                        <Text style={modernRideStyles.imageMeta}>
+                                                            {item.author ? `Photo: ${item.author}` : ''}
+                                                            {item.author && item.license ? ' | ' : ''}
+                                                            {item.license ? `License: ${item.license}` : ''}
+                                                        </Text>
+                                                    </View>
+                                                )}
+                                            </View>
+                                        )}
+                                        showsHorizontalScrollIndicator={false}
+                                    />
+                                ) : (
+                                    <View style={modernRideStyles.errorContainer}>
+                                        <Text style={modernRideStyles.errorText}>
+                                            {rideNameImageError || "No location images available"}
+                                        </Text>
+                                    </View>
+                                )}
                             </View>
 
+                            {/* Map Image */}
+                            <View style={modernRideStyles.mapContainer}>
+                                {imageLoading ? (
+                                    <View style={[modernRideStyles.loadingContainer, { height: 220 }]}>
+                                        <ActivityIndicator size="large" color="#8c2323" />
+                                        <Text style={modernRideStyles.loadingText}>Loading map...</Text>
+                                    </View>
+                                ) : mapImage ? (
+                                    <Image
+                                        source={{ uri: mapImage }}
+                                        style={modernRideStyles.mapImage}
+                                    />
+                                ) : (
+                                    <View style={[modernRideStyles.errorContainer, { height: 220 }]}>
+                                        <Text style={modernRideStyles.errorText}>No map available</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+
+                        {/* Stats Section */}
+                        <View style={modernRideStyles.statsSection}>
+                            <View style={modernRideStyles.statsLeft}>
+                                <View style={modernRideStyles.statItem}>
+                                    <FontAwesome name="user" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
+                                    <Text style={modernRideStyles.ownerText}>{username}</Text>
+                                </View>
+
+                                <Animated.View style={[modernRideStyles.distanceContainer, modernRideStyles.pulseContainer, { transform: [{ scale: pulseAnim }] }]}>
+                                    <FontAwesome name="road" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
+                                    <Text style={modernRideStyles.distanceText}>{distanceState} km</Text>
+                                </Animated.View>
+                            </View>
+
+                            <View style={modernRideStyles.statsRight}>
+                                <Animated.View style={[modernRideStyles.rideTypeContainer, { transform: [{ scale: pulseAnim }] }]}>
+                                    <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
+                                </Animated.View>
+                            </View>
                         </View>
                     </View>
-                </View>
-                <View style={{ padding: 10 }}>
+
+                    {/* Description Section */}
                     {description && (
-                        <View style={{ marginTop: 10, padding: 5 }}>
-                            <Text style={[utilities.smallText, { lineHeight: 18 }]}>
-                                {description}
-                            </Text>
+                        <View style={modernRideStyles.descriptionSection}>
+                            <Text style={modernRideStyles.descriptionTitle}>About This Ride</Text>
+                            <Text style={modernRideStyles.descriptionText}>{description}</Text>
                         </View>
                     )}
+                </ScrollView>
+            </Animated.View>
+
+            {/* Bottom Navigation */}
+            <View style={modernRideStyles.bottomNav}>
+                <View style={modernRideStyles.bottomNavItem}>
+                    <TouchableOpacity
+                        style={modernRideStyles.bottomNavButton}
+                        onPress={() => setShowParticipantsModal(true)}
+                    >
+                        <Text style={modernRideStyles.bottomNavText}>Riders</Text>
+                    </TouchableOpacity>
                 </View>
 
-
-
-
-
-
-            </ScrollView>
-            <View style={rideUtilities.customBottomContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                        <TouchableOpacity onPress={() => setShowParticipantsModal(true)}>
-                            <Text style={rideUtilities.customBottomText}>Riders</Text>
-
-                        </TouchableOpacity>
-
-                        <ParticipantListModal
-                            visible={showParticipantsModal}
-                            onClose={() => setShowParticipantsModal(false)}
-                            participants={participants}
-                            generatedRidesId={generatedRidesId}
-                            token={token}
-                            onRideSelect={(ride) => {
-                                setShowParticipantsModal(false);
-                            }}
-                            username={username}
-                            currentUsername={currentUsername}
-                        />
-                    </View>
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('RideRoutesPage', {
-                                    startMapImage,
-                                    endMapImage,
-                                    mapImage,
-                                    rideNameImage,
-                                    startingPoint,
-                                    endingPoint,
-                                    rideName,
-                                    locationName,
-                                    riderType,
-                                    date,
-                                    participants,
-                                    description,
-                                    token,
-                                    distance,
-                                    username,
-                                    currentUsername,
-                                    generatedRidesId
-                                })}
-                            >
-                                <Text style={rideUtilities.customBottomText}>Routes</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
+                <View style={modernRideStyles.bottomNavItem}>
+                    <TouchableOpacity
+                        style={modernRideStyles.bottomNavButton}
+                        onPress={() => navigation.navigate('RideRoutesPage', {
+                            startMapImage,
+                            endMapImage,
+                            mapImage,
+                            rideNameImage,
+                            startingPoint,
+                            endingPoint,
+                            rideName,
+                            locationName,
+                            riderType,
+                            date,
+                            participants,
+                            description,
+                            token,
+                            distance,
+                            username,
+                            currentUsername,
+                            generatedRidesId
+                        })}
+                    >
+                        <Text style={modernRideStyles.bottomNavText}>Routes</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-        </View>
 
-
+            {/* Modals */}
+            <ParticipantListModal
+                visible={showParticipantsModal}
+                onClose={() => setShowParticipantsModal(false)}
+                participants={participants}
+                generatedRidesId={generatedRidesId}
+                token={token}
+                onRideSelect={(ride) => {
+                    setShowParticipantsModal(false);
+                }}
+                username={username}
+                currentUsername={currentUsername}
+            />
+        </Animated.View>
     );
 };
 
