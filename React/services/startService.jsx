@@ -62,3 +62,17 @@ export async function getCurrentStartedRides(token) {
     }
     return await response.json();
 }
+
+export async function getStopPointsByRideId(generatedRidesId, token) {
+    const response = await fetch(`${API_BASE_URL}/riders/${generatedRidesId}/stop-points`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    if (!response.ok) {
+        throw new Error('Failed to fetch stop points');
+    }
+    return await response.json();
+}

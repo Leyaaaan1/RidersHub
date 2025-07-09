@@ -115,7 +115,14 @@ return (
                     <FontAwesome name="arrow-left" size={20} color="#fff" style={{ marginRight: 8 }} />
                     <Text style={utilities.buttonText}>Back</Text>
                 </TouchableOpacity>
-                <Text style={utilities.textWhite}>RIDE ROUTE</Text>
+                <TouchableOpacity
+                    style={[utilities.button, { backgroundColor: colors.primary, marginLeft: 8 }]}
+                    onPress={handleCreateRide}
+                    disabled={!startingPoint || !endingPoint || loading}
+                >
+                    <Text style={utilities.buttonText}>{loading ? 'Creating...' : 'Create & Review'}</Text>
+                </TouchableOpacity>
+
             </View>
 
             {/* Search Box */}

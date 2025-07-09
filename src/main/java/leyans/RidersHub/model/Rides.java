@@ -70,7 +70,7 @@ public class Rides {
     private String endingPointName;
 
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "ride_stop_points", joinColumns = @JoinColumn(name = "ride_id"))
     private List<StopPoint> stopPoints = new ArrayList<>();
 

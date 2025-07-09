@@ -13,6 +13,7 @@ import leyans.RidersHub.Service.StartRideService;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
+import leyans.RidersHub.model.StopPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,7 @@ public class RiderController {
 
     private final RiderService riderService;
     private final RidesService ridesService;
+
 
 
 
@@ -80,6 +82,12 @@ public class RiderController {
                 rideRequest.getStopPoints()
         );
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/{generatedRidesId}/stop-points")
+    public List<StopPointDTO> getStopPointsByRideId(@PathVariable Integer generatedRidesId)   {
+        return ridesService.getStopPointsDTOByGeneratedRideId(generatedRidesId);
     }
 
     @GetMapping("/search")

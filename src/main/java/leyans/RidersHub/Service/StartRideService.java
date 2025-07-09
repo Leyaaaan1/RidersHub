@@ -67,7 +67,7 @@ public class StartRideService {
     }
 
 
-    private Rider authenticateAndGetInitiator() throws AccessDeniedException {
+    public Rider authenticateAndGetInitiator() throws AccessDeniedException {
         String username = riderUtil.getCurrentUsername();
         Rider initiator = riderUtil.findRiderByUsername(username);
 
