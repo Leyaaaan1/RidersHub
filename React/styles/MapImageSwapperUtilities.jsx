@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import colors from "./colors";
 
 const mapImageSwapperUtilities = StyleSheet.create({
     container: {
@@ -59,8 +60,10 @@ const mapImageSwapperUtilities = StyleSheet.create({
     tapText: {
         color: '#fff',
         fontSize: 14,
-        fontWeight: '600',
         letterSpacing: 0.2,
+        borderWidth: 1,
+        borderColor: '#fff',
+        borderRadius: 4,
     },
     noMapContainer: {
         height: 200,

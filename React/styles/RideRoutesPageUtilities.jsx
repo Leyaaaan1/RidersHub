@@ -112,7 +112,7 @@ const rideRoutesPageUtilities = StyleSheet.create({
     },
     imageSection: {
         backgroundColor: '#000',
-        paddingTop: 20,
+        paddingBottom: 10,
     },
     sectionHeader: {
         paddingHorizontal: 20,
@@ -171,11 +171,11 @@ const rideRoutesPageUtilities = StyleSheet.create({
     },
     switchButton: {
         backgroundColor: 'rgba(140, 35, 35, 0.2)',
-        paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
         borderWidth: 1,
         borderColor: '#8c2323',
+        padding: 10,
     },
     switchButtonText: {
         color: '#fff',
@@ -199,7 +199,6 @@ const rideRoutesPageUtilities = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: 100,
     },
     imageMetaContainer: {
         position: 'absolute',
@@ -273,13 +272,11 @@ const rideRoutesPageUtilities = StyleSheet.create({
     },
     mapSection: {
         backgroundColor: '#000',
-        marginTop: 32,
     },
     mapContainer: {
         paddingHorizontal: 20,
     },
     stopPointsSection: {
-        marginTop: 32,
         paddingHorizontal: 20,
     },
     stopPointsList: {
@@ -290,8 +287,7 @@ const rideRoutesPageUtilities = StyleSheet.create({
         borderRadius: 16,
         padding: 16,
         marginBottom: 12,
-        borderLeftWidth: 4,
-        borderLeftColor: '#8c2323',
+
     },
     stopPointHeader: {
         flexDirection: 'row',

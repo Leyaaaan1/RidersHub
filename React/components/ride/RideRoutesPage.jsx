@@ -155,18 +155,12 @@ const RideRoutesPage = ({ route }) => {
                                 <Text style={rideRoutesPageUtilities.routePointText} numberOfLines={2}>{endingPoint}</Text>
                             </View>
                         </View>
-                        <View style={rideRoutesPageUtilities.sectionTitleRow}>
-                            <Text style={rideRoutesPageUtilities.sectionTitle}>{currentLabel}</Text>
-                            <TouchableOpacity
-                                style={rideRoutesPageUtilities.switchButton}
-                                onPress={() => setShowStart(!showStart)}
-                            >
-                                <Text style={rideRoutesPageUtilities.switchButtonText}>View {otherLabel}</Text>
-                            </TouchableOpacity>
-                        </View>
+
                     </View>
                 </Animated.View>
             </LinearGradient>
+
+
 
             <RideImagesCarousel
                 images={images}
@@ -174,7 +168,6 @@ const RideRoutesPage = ({ route }) => {
                 imagesError={imagesError}
                 pulseAnim={pulseAnim}
             />
-
             <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
                 <View style={rideRoutesPageUtilities.sectionHeader}>
                 </View>
@@ -191,7 +184,9 @@ const RideRoutesPage = ({ route }) => {
             </Animated.View>
 
             <Animated.View style={[rideRoutesPageUtilities.stopPointsSection, { opacity: fadeAnim }]}>
-
+                <Text style={{ color: '#fff' }}>
+                    <FontAwesome name="map-marker" size={16} color="#fff" /> Stop Points {stopPoints.length > 0 ? `(${stopPoints.length})` : ''}
+                </Text>
                 {stopPointsLoading ? (
                     <View style={rideRoutesPageUtilities.loadingContainer}>
                         <Animated.View style={[rideRoutesPageUtilities.loadingDot, { transform: [{ scale: pulseAnim }] }]} />
@@ -212,20 +207,15 @@ const RideRoutesPage = ({ route }) => {
                                     </View>
                                     <View style={rideRoutesPageUtilities.stopPointInfo}>
                                         <Text style={rideRoutesPageUtilities.stopPointName}>{point.stopName}</Text>
-                                        <Text style={rideRoutesPageUtilities.stopPointCoords}>
-                                            📍 {point.stopLatitude.toFixed(4)}, {point.stopLongitude.toFixed(4)}
-                                        </Text>
+
                                     </View>
                                 </View>
-                                {idx < stopPoints.length - 1 && (
-                                    <View style={rideRoutesPageUtilities.stopPointConnector} />
-                                )}
+
                             </View>
                         ))}
                     </View>
                 ) : (
                     <View style={rideRoutesPageUtilities.emptyStateContainer}>
-                        <Text style={rideRoutesPageUtilities.emptyStateIcon}>📍</Text>
                         <Text style={rideRoutesPageUtilities.emptyStateText}>No stop points on this route</Text>
                     </View>
                 )}
