@@ -278,20 +278,24 @@ const RideStep4 = (props) => {
                 <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
                     {/* Hero Section */}
                     <View style={modernRideStyles.heroSection}>
+                        <View style={{ flex: 2, alignItems: 'center', padding: 10 }}>
+                            <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
+                        </View>
+
                         <View style={[modernRideStyles.statsSection, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
                             {/* Username on the left */}
-                            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
                                 <FontAwesome name="user" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
                                 <Text style={modernRideStyles.ownerText}>{username}</Text>
                             </View>
-                            {/* Ride name in the center */}
-                            <View style={{ flex: 2, alignItems: 'center' }}>
-                                <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
+                            <View style={modernRideStyles.dateContainer}>
+                                <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
                             </View>
-                            {/* Ride type on the right */}
-                            <Animated.View style={[{ transform: [{ scale: pulseAnim }], flex: 1, alignItems: 'center', justifyContent: 'center' }]}>
+
+                            <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', transform: [{ scale: pulseAnim }] }}>
                                 <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
                             </Animated.View>
+
                         </View>
 
 
@@ -337,9 +341,7 @@ const RideStep4 = (props) => {
                                     </View>
                                 )}
                             </View>
-                            <View style={modernRideStyles.dateContainer}>
-                                <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
-                            </View>
+
 
                             {/* Map Image */}
                             <View style={modernRideStyles.mapContainer}>
