@@ -1,26 +1,19 @@
-// React/utils/mapstel.jsx
-const getMapHTML = (latitude, longitude) => `
+const getMapHTML = (latitude, longitude) => {
+    // Safely handle coordinates
+    const lat = parseFloat(latitude) || 7.0731;
+    const lng = parseFloat(longitude) || 125.6128;
+
+    return `
     <!DOCTYPE html>
     <html>
     <head>
+        <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
         <style>
-            /* Base Styles */
-            body { 
-                margin: 0; 
-                padding: 0; 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                transition: background-color 0.3s ease;
-            }
-            
-            #map { 
-                width: 100%; 
-                height: 100vh; 
-            }
-            
-            /* Control Panel */
+            body { margin: 0; padding: 0; height: 100vh; width: 100vw; }
+            #map { width: 100%; height: 100%; }
             .control-panel {
                 position: absolute;
                 left: 20px;
@@ -31,8 +24,6 @@ const getMapHTML = (latitude, longitude) => `
                 flex-direction: column;
                 gap: 8px;
             }
-            
-            /* Button Base Styles */
             .control-btn {
                 width: 40px;
                 height: 40px;
@@ -44,69 +35,71 @@ const getMapHTML = (latitude, longitude) => `
                 justify-content: center;
                 font-size: 18px;
                 font-weight: bold;
-                transition: all 0.2s ease;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
                 background: white;
                 color: #333;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                transition: all 0.3s ease;
             }
-            
             .control-btn:hover {
                 transform: scale(1.05);
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             }
-            
             .control-btn:active {
                 transform: scale(0.95);
             }
-            
-            /* Theme Toggle Button */
             .theme-btn {
                 background: linear-gradient(45deg, #333 50%, #fff 50%);
-                color: #333;
+                position: relative;
+                overflow: hidden;
             }
-            
-            /* Dark theme styles */
-            body.dark-theme {
-                background-color: #121212;
+            .theme-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255,255,255,0.2);
+                opacity: 0;
+                transition: opacity 0.3s ease;
             }
-            
+            .theme-btn:hover::before {
+                opacity: 1;
+            }
+            body.dark-theme { 
+                background-color: #121212; 
+            }
             body.dark-theme .control-btn {
                 background: #2a2a2a;
                 color: #fff;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                box-shadow: 0 2px 8px rgba(255,255,255,0.1);
             }
-            
-            /* Responsive */
-            @media (max-width: 768px) {
-                .control-panel {
-                    left: 10px;
-                }
-                .control-btn {
-                    width: 36px;
-                    height: 36px;
-                    font-size: 16px;
-                }
+            body.dark-theme .control-btn:hover {
+                box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+            }
+            /* Prevent text selection on buttons */
+            .control-btn {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
             }
         </style>
     </head>
     <body>
         <div id="map"></div>
-        
-        <!-- Control Panel -->
         <div class="control-panel">
-            <button id="zoom-in" class="control-btn">+</button>
-            <button id="zoom-out" class="control-btn">−</button>
-            <button id="theme-toggle" class="control-btn theme-btn">🌙</button>
+            <button id="zoom-in" class="control-btn" title="Zoom In">+</button>
+            <button id="zoom-out" class="control-btn" title="Zoom Out">−</button>
+            <button id="theme-toggle" class="control-btn theme-btn" title="Toggle Theme">
+                <div id="theme-icon" style="text-align:center; pointer-events: none;">🌙</div>
+            </button>
         </div>
-        
         <script>
-            // Initialize map
-            const map = L.map('map').setView([${parseFloat(latitude) || 7.0731}, ${parseFloat(longitude) || 125.6128}], 15);
-            
-            // Initialize with light theme
+            const map = L.map('map', { zoomControl: false }).setView([${lat}, ${lng}], 15);
             let isDarkTheme = false;
+            let isThemeButtonPressed = false;
             
-            // Define tile layers for light and dark themes
             const lightTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             });
@@ -115,49 +108,94 @@ const getMapHTML = (latitude, longitude) => `
                 attribution: '&copy; OpenStreetMap contributors &copy; CartoDB'
             });
             
-            // Set initial theme
-            darkTiles.addTo(map);
+            lightTiles.addTo(map);
+            const marker = L.marker([${lat}, ${lng}]).addTo(map);
             
-            // Add marker
-            const marker = L.marker([${parseFloat(latitude) || 7.0731}, ${parseFloat(longitude) || 125.6128}]).addTo(map);
-            
-            // Map click event
+            // Handle map clicks for marker placement
             map.on('click', function(e) {
-                marker.setLatLng(e.latlng);
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                    type: 'mapClick',
-                    lat: e.latlng.lat,
-                    lng: e.latlng.lng
-                }));
+                // Only handle map clicks if theme button wasn't just pressed
+                if (!isThemeButtonPressed) {
+                    marker.setLatLng(e.latlng);
+                    if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'mapClick',
+                            lat: e.latlng.lat,
+                            lng: e.latlng.lng
+                        }));
+                    }
+                }
+                // Reset the flag after a short delay
+                setTimeout(() => {
+                    isThemeButtonPressed = false;
+                }, 100);
             });
             
-            // Control buttons functionality
-            document.getElementById('zoom-in').addEventListener('click', function() {
+            // Zoom controls
+            document.getElementById('zoom-in').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 map.zoomIn();
             });
             
-            document.getElementById('zoom-out').addEventListener('click', function() {
+            document.getElementById('zoom-out').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 map.zoomOut();
             });
             
-            document.getElementById('theme-toggle').addEventListener('click', function() {
+            // Theme toggle with improved event handling
+            document.getElementById('theme-toggle').addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Set flag to prevent map click event
+                isThemeButtonPressed = true;
+                
                 isDarkTheme = !isDarkTheme;
+                const themeIcon = document.getElementById('theme-icon');
                 
                 if (isDarkTheme) {
                     document.body.classList.add('dark-theme');
-                    darkTiles.addTo(map);
-                    lightTiles.remove();
-                    this.textContent = '☀️';
+                    map.removeLayer(lightTiles);
+                    map.addLayer(darkTiles);
+                    themeIcon.innerHTML = '☀️';
                 } else {
                     document.body.classList.remove('dark-theme');
-                    lightTiles.addTo(map);
-                    darkTiles.remove();
-                    this.textContent = '🌙';
+                    map.removeLayer(darkTiles);
+                    map.addLayer(lightTiles);
+                    themeIcon.innerHTML = '🌙';
                 }
+            });
+            
+            // Prevent theme button from triggering map events
+            document.getElementById('theme-toggle').addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+            });
+            
+            document.getElementById('theme-toggle').addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Also prevent zoom buttons from triggering map events
+            document.getElementById('zoom-in').addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+            });
+            
+            document.getElementById('zoom-out').addEventListener('mousedown', function(e) {
+                e.stopPropagation();
+            });
+            
+            document.getElementById('zoom-in').addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            });
+            
+            document.getElementById('zoom-out').addEventListener('touchstart', function(e) {
+                e.stopPropagation();
             });
         </script>
     </body>
     </html>
-`;
+  `;
+};
 
 export default getMapHTML;

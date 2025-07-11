@@ -76,7 +76,11 @@ const RideStep1 = ({
                 <View style={{ marginBottom: 20 }}>
                     <Text style={InputUtilities.label}>Select Date & Time</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <View style={{ flex: 1 }}>
+                        <TouchableOpacity
+                            style={{ flex: 1 }}
+                            onPress={() => setDatePickerOpen(true)}
+                            activeOpacity={0.7}
+                        >
                             {date && (
                                 <View style={InputUtilities.dateDisplay}>
                                     <Text style={InputUtilities.dateText}>
@@ -96,16 +100,6 @@ const RideStep1 = ({
                                     </Text>
                                 </View>
                             )}
-                        </View>
-                        <TouchableOpacity
-                            style={[
-                                InputUtilities.calendarButton,
-                                dateError && InputUtilities.calendarButtonError
-                            ]}
-                            onPress={() => setDatePickerOpen(true)}
-                            activeOpacity={0.7}
-                        >
-                            <FontAwesome name="calendar" size={24} color="#fff" />
                         </TouchableOpacity>
                     </View>
                     {dateError ? <Text style={InputUtilities.errorText}>{dateError}</Text> : null}
