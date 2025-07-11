@@ -1,201 +1,252 @@
-const getMapHTML = (latitude, longitude) => {
-    // Safely handle coordinates
-    const lat = parseFloat(latitude) || 7.0731;
-    const lng = parseFloat(longitude) || 125.6128;
-
+// Updated getMapHTML function that includes route drawing capabilities
+const getMapHTML = (lat, lng, isDark = false) => {
     return `
     <!DOCTYPE html>
     <html>
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Route Map</title>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
         <style>
-            body { margin: 0; padding: 0; height: 100vh; width: 100vw; }
-            #map { width: 100%; height: 100%; }
-            .control-panel {
-                position: absolute;
-                left: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                z-index: 1000;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
+            body, html { 
+                margin: 0; 
+                padding: 0; 
+                height: 100%; 
+                overflow: hidden; 
             }
-            .control-btn {
-                width: 40px;
-                height: 40px;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-                font-weight: bold;
-                background: white;
-                color: #333;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-                transition: all 0.3s ease;
+            #map { 
+                height: 100vh; 
+                width: 100vw; 
             }
-            .control-btn:hover {
-                transform: scale(1.05);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            .leaflet-control-attribution { 
+                display: none !important; 
             }
-            .control-btn:active {
-                transform: scale(0.95);
+            .custom-marker {
+                background: none !important;
+                border: none !important;
             }
-            .theme-btn {
-                background: linear-gradient(45deg, #333 50%, #fff 50%);
-                position: relative;
-                overflow: hidden;
+            ${isDark ? `
+            .leaflet-tile-pane { 
+                filter: invert(1) hue-rotate(180deg); 
             }
-            .theme-btn::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(255,255,255,0.2);
-                opacity: 0;
-                transition: opacity 0.3s ease;
+            .leaflet-marker-icon {
+                filter: invert(1) hue-rotate(180deg);
             }
-            .theme-btn:hover::before {
-                opacity: 1;
-            }
-            body.dark-theme { 
-                background-color: #121212; 
-            }
-            body.dark-theme .control-btn {
-                background: #2a2a2a;
-                color: #fff;
-                box-shadow: 0 2px 8px rgba(255,255,255,0.1);
-            }
-            body.dark-theme .control-btn:hover {
-                box-shadow: 0 4px 12px rgba(255,255,255,0.15);
-            }
-            /* Prevent text selection on buttons */
-            .control-btn {
-                -webkit-user-select: none;
-                -moz-user-select: none;
-                -ms-user-select: none;
-                user-select: none;
-            }
+            ` : ''}
         </style>
     </head>
     <body>
         <div id="map"></div>
-        <div class="control-panel">
-            <button id="zoom-in" class="control-btn" title="Zoom In">+</button>
-            <button id="zoom-out" class="control-btn" title="Zoom Out">−</button>
-            <button id="theme-toggle" class="control-btn theme-btn" title="Toggle Theme">
-                <div id="theme-icon" style="text-align:center; pointer-events: none;">🌙</div>
-            </button>
-        </div>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
         <script>
-            const map = L.map('map', { zoomControl: false }).setView([${lat}, ${lng}], 15);
-            let isDarkTheme = false;
-            let isThemeButtonPressed = false;
+            let map, marker, routePolyline;
+            let startMarker, endMarker, stopMarkers = [];
+            let isDarkMode = ${isDark};
             
-            const lightTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            });
-            
-            const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap contributors &copy; CartoDB'
-            });
-            
-            lightTiles.addTo(map);
-            const marker = L.marker([${lat}, ${lng}]).addTo(map);
-            
-            // Handle map clicks for marker placement
-            map.on('click', function(e) {
-                // Only handle map clicks if theme button wasn't just pressed
-                if (!isThemeButtonPressed) {
-                    marker.setLatLng(e.latlng);
-                    if (window.ReactNativeWebView) {
+            function initMap() {
+                try {
+                    map = L.map('map', {
+                        center: [${lat}, ${lng}],
+                        zoom: 13,
+                        zoomControl: false,
+                        attributionControl: false
+                    });
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: ''
+                    }).addTo(map);
+
+                    marker = L.marker([${lat}, ${lng}], {
+                        draggable: true
+                    }).addTo(map);
+
+                    marker.on('dragend', function(e) {
+                        const position = e.target.getLatLng();
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'markerDrag',
+                            lat: position.lat,
+                            lng: position.lng
+                        }));
+                    });
+
+                    map.on('click', function(e) {
+                        const { lat, lng } = e.latlng;
+                        marker.setLatLng([lat, lng]);
                         window.ReactNativeWebView.postMessage(JSON.stringify({
                             type: 'mapClick',
-                            lat: e.latlng.lat,
-                            lng: e.latlng.lng
+                            lat: lat,
+                            lng: lng
                         }));
+                    });
+
+                    // Notify React Native that map is ready
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'mapReady',
+                        isDarkTheme: isDarkMode
+                    }));
+
+                    console.log('Map initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing map:', error);
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'mapError',
+                        error: error.message
+                    }));
+                }
+            }
+
+            function clearRoute() {
+                try {
+                    if (routePolyline) {
+                        map.removeLayer(routePolyline);
+                        routePolyline = null;
                     }
+                    if (startMarker) {
+                        map.removeLayer(startMarker);
+                        startMarker = null;
+                    }
+                    if (endMarker) {
+                        map.removeLayer(endMarker);
+                        endMarker = null;
+                    }
+                    stopMarkers.forEach(marker => {
+                        if (marker) map.removeLayer(marker);
+                    });
+                    stopMarkers = [];
+                } catch (error) {
+                    console.error('Error clearing route:', error);
                 }
-                // Reset the flag after a short delay
-                setTimeout(() => {
-                    isThemeButtonPressed = false;
-                }, 100);
-            });
-            
-            // Zoom controls
-            document.getElementById('zoom-in').addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                map.zoomIn();
-            });
-            
-            document.getElementById('zoom-out').addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                map.zoomOut();
-            });
-            
-            // Theme toggle with improved event handling
-            document.getElementById('theme-toggle').addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Set flag to prevent map click event
-                isThemeButtonPressed = true;
-                
-                isDarkTheme = !isDarkTheme;
-                const themeIcon = document.getElementById('theme-icon');
-                
-                if (isDarkTheme) {
-                    document.body.classList.add('dark-theme');
-                    map.removeLayer(lightTiles);
-                    map.addLayer(darkTiles);
-                    themeIcon.innerHTML = '☀️';
-                } else {
-                    document.body.classList.remove('dark-theme');
-                    map.removeLayer(darkTiles);
-                    map.addLayer(lightTiles);
-                    themeIcon.innerHTML = '🌙';
+            }
+
+            function drawRoute(coordinates, points) {
+                try {
+                    console.log('Drawing route with', coordinates.length, 'coordinate points');
+                    
+                    // Validate coordinates
+                    if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
+                        throw new Error('Invalid coordinates provided');
+                    }
+
+                    // Clear existing route
+                    clearRoute();
+
+                    // Convert coordinates to Leaflet format [lat, lng]
+                    // Mapbox returns [lng, lat] format, so we need to swap
+                    const latLngs = coordinates.map(coord => {
+                        if (!Array.isArray(coord) || coord.length < 2) {
+                            console.warn('Invalid coordinate:', coord);
+                            return null;
+                        }
+                        return [coord[1], coord[0]]; // Swap lng,lat to lat,lng
+                    }).filter(coord => coord !== null);
+
+                    if (latLngs.length === 0) {
+                        throw new Error('No valid coordinates found');
+                    }
+                    
+                    // Create polyline
+                    routePolyline = L.polyline(latLngs, {
+                        color: '#8c2323',
+                        weight: 4,
+                        opacity: 0.8,
+                        smoothFactor: 1
+                    }).addTo(map);
+
+                    // Add markers for start, stops, and end
+                    if (points && points.start) {
+                        startMarker = L.marker([points.start.lat, points.start.lng], {
+                            icon: L.divIcon({
+                                html: '<div style="background: #22c55e; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">S</div>',
+                                iconSize: [28, 28],
+                                className: 'custom-marker'
+                            })
+                        }).addTo(map);
+                    }
+
+                    if (points && points.end) {
+                        endMarker = L.marker([points.end.lat, points.end.lng], {
+                            icon: L.divIcon({
+                                html: '<div style="background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">E</div>',
+                                iconSize: [28, 28],
+                                className: 'custom-marker'
+                            })
+                        }).addTo(map);
+                    }
+
+                    // Add stop markers
+                    if (points && points.stops && points.stops.length > 0) {
+                        points.stops.forEach((stop, index) => {
+                            const stopMarker = L.marker([stop.lat, stop.lng], {
+                                icon: L.divIcon({
+                                    html: '<div style="background: #f59e0b; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">' + (index + 1) + '</div>',
+                                    iconSize: [24, 24],
+                                    className: 'custom-marker'
+                                })
+                            }).addTo(map);
+                            stopMarkers.push(stopMarker);
+                        });
+                    }
+
+                    // Fit map to show the entire route with padding
+                    const bounds = routePolyline.getBounds();
+                    map.fitBounds(bounds, { 
+                        padding: [50, 50],
+                        maxZoom: 15
+                    });
+
+                    // Hide the original draggable marker when route is shown
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'routeDrawn',
+                        success: true,
+                        pointCount: coordinates.length,
+                        latLngCount: latLngs.length
+                    }));
+
+                } catch (error) {
+                    console.error('Error drawing route:', error);
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'routeDrawError',
+                        error: error.message,
+                        stack: error.stack
+                    }));
+                }
+            }
+
+            // Listen for messages from React Native
+            window.addEventListener('message', function(event) {
+                try {
+                    const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+                    console.log('WebView received message:', data.type);
+                    
+                    if (data.type === 'drawRoute') {
+                        drawRoute(data.coordinates, data.points);
+                    } else if (data.type === 'clearRoute') {
+                        clearRoute();
+                        // Show the original marker again
+                        if (marker && !map.hasLayer(marker)) {
+                            marker.addTo(map);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error handling message:', error);
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'messageError',
+                        error: error.message
+                    }));
                 }
             });
-            
-            // Prevent theme button from triggering map events
-            document.getElementById('theme-toggle').addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-            
-            document.getElementById('theme-toggle').addEventListener('touchstart', function(e) {
-                e.stopPropagation();
-            });
-            
-            // Also prevent zoom buttons from triggering map events
-            document.getElementById('zoom-in').addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-            
-            document.getElementById('zoom-out').addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-            
-            document.getElementById('zoom-in').addEventListener('touchstart', function(e) {
-                e.stopPropagation();
-            });
-            
-            document.getElementById('zoom-out').addEventListener('touchstart', function(e) {
-                e.stopPropagation();
-            });
+
+            // Initialize map when page loads
+            window.addEventListener('load', initMap);
         </script>
     </body>
     </html>
-  `;
+    `;
 };
 
 export default getMapHTML;

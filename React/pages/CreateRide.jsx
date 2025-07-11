@@ -7,7 +7,7 @@ import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
 import { handleWebViewMessage } from '../utils/mapUtils';
 import RideStep4 from "../components/ride/RideStep4";
-
+import { getDirections } from '../services/mapService'; // Add this import
 const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
     const webViewRef = useRef(null);
@@ -170,27 +170,46 @@ const CreateRide = ({ route, navigation }) => {
             stopName: sp.name || sp.stopName
         }));
 
-        const rideData = {
-            ridesName: rideName,
-            locationName: locationName,
-            riderType: riderType || 'CAR',
-            date: date.toISOString(),
-            latitude: parseFloat(latitude) || 0,
-            longitude: parseFloat(longitude) || 0,
-            startLat: parseFloat(startingLatitude) || 0,
-            startLng: parseFloat(startingLongitude) || 0,
-            endLat: parseFloat(endingLatitude) || 0,
-            endLng: parseFloat(endingLongitude) || 0,
-            startingPoint: startingPoint,
-            endingPoint: endingPoint,
-            participants: participantsArray,
-            description: description,
-            mapboxImageUrl: mapboxImageUrl,
-            stopPoints: stopPointsPayload
-        };
-
         try {
-            const result = await createRide(token, rideData);
+            let routeCoordinates = [];
+            try {
+                routeCoordinates = await getDirections(
+                    token,
+                    startingLongitude,
+                    startingLatitude,
+                    endingLongitude,
+                    endingLatitude,
+                    stopPointsPayload
+                );
+            } catch (routeErr) {
+                console.error('Error fetching route:', routeErr);
+                // Continue with ride creation even if route fetch fails
+            }
+
+            // Include routeCoordinates in the ride data
+            const rideData = {
+                ridesName: rideName,
+                locationName: locationName,
+                riderType: riderType || 'CAR',
+                date: date.toISOString(),
+                latitude: parseFloat(latitude) || 0,
+                longitude: parseFloat(longitude) || 0,
+                startLat: parseFloat(startingLatitude) || 0,
+                startLng: parseFloat(startingLongitude) || 0,
+                endLat: parseFloat(endingLatitude) || 0,
+                endLng: parseFloat(endingLongitude) || 0,
+                startingPoint: startingPoint,
+                endingPoint: endingPoint,
+                participants: participantsArray,
+                description: description,
+                mapboxImageUrl: mapboxImageUrl,
+                stopPoints: stopPointsPayload,
+                routeCoordinates: JSON.stringify(routeCoordinates) // Convert to string for API
+            };
+
+            // Make the API call to create the ride
+            const result = await createRide(rideData, token);
+
             if (result && result.generatedRidesId) {
                 setGeneratedRidesId(result.generatedRidesId);
                 navigation.navigate('RideStep4', {
@@ -208,7 +227,6 @@ const CreateRide = ({ route, navigation }) => {
             setLoading(false);
         }
     };
-
     const nextStep = () => { if (currentStep < 4) setCurrentStep(currentStep + 1); };
     const prevStep = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
 

@@ -145,7 +145,8 @@ public class StartRideService {
                 ride.getMagImageStartingLocation(),
                 ride.getMagImageEndingLocation(),
                 ride.getUsername().getUsername(),
-                ridesService.mapStopPointsToDTOs(ride.getStopPoints())
+                ridesService.mapStopPointsToDTOs(ride.getStopPoints()),
+                ride.getRouteCoordinates()
         );
     }
 
@@ -176,6 +177,7 @@ public class StartRideService {
 
 
 }
+
 
 
 

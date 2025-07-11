@@ -37,6 +37,9 @@ public class RideResponseDTO {
 
     private List<StopPointDTO> stopPoints;
 
+    private String routeCoordinates;
+
+
 
 
 
@@ -47,7 +50,8 @@ public class RideResponseDTO {
                            String endingPointName, double endLat, double endLng,
                            String mapImageUrl, String magImageStartingLocation, String magImageEndingLocation,
                            String username,
-                            List<StopPointDTO> stopPoints
+                            List<StopPointDTO> stopPoints,
+                            String routeCoordinates
 
     ) {
         this.generatedRidesId = generatedRidesId;
@@ -72,8 +76,18 @@ public class RideResponseDTO {
         this.magImageEndingLocation = magImageEndingLocation;
         this.username = username;
         this.stopPoints = stopPoints;
+        this.routeCoordinates = routeCoordinates;
 
 
+    }
+
+
+    public String getRouteCoordinates() {
+        return routeCoordinates;
+    }
+
+    public void setRouteCoordinates(String routeCoordinates) {
+        this.routeCoordinates = routeCoordinates;
     }
 
     public List<StopPointDTO> getStopPoints() {
