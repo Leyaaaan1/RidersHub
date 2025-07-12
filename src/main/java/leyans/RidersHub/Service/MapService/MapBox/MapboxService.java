@@ -66,6 +66,7 @@ public class MapboxService {
     }
 
 
+    @Cacheable(value = "mapbox", key = "'route_' + #startPoint.getX() + '_' + #startPoint.getY() + '_' + T(java.util.Objects).hash(#stopPoints) + '_' + #endPoint.getX() + '_' + #endPoint.getY()")
     public List<Coordinate> getRouteCoordinates(org.locationtech.jts.geom.Point startPoint,
                                                 List<StopPoint> stopPoints,
                                                 org.locationtech.jts.geom.Point endPoint) {
