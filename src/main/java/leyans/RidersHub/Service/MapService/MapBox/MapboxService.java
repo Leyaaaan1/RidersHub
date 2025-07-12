@@ -24,7 +24,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.locationtech.jts.geom.Point;
 @Component
 public class MapboxService {
     private final String mapboxToken;
@@ -43,10 +43,10 @@ public class MapboxService {
         this.mapImageService = mapImageService;
         this.rateLimitUtil = rateLimitUtil;
     }
+
     @Cacheable(value = "mapbox", key = "'static_map_' + #lon + '_' + #lat")
     public String getStaticMapImageUrl(double lon, double lat) {
         rateLimitUtil.enforceRateLimitMapBox(RATE_LIMIT_KEY);
-
 
 
         String mapboxUrl = String.format(mapboxUrlTemplate,
@@ -66,63 +66,106 @@ public class MapboxService {
     }
 
 
-
     public List<Coordinate> getRouteCoordinates(org.locationtech.jts.geom.Point startPoint,
                                                 List<StopPoint> stopPoints,
                                                 org.locationtech.jts.geom.Point endPoint) {
         rateLimitUtil.enforceRateLimitMapBox(RATE_LIMIT_KEY);
 
-        StringBuilder coordinatesBuilder = new StringBuilder();
-        // Use longitude (X) and latitude (Y) in the proper order for Mapbox API
-        coordinatesBuilder.append(startPoint.getX()).append(",").append(startPoint.getY());
+        // Check if the direct distance is likely to exceed Mapbox limits
+        double distanceKm = calculateApproximateDistance(
+                startPoint.getY(), startPoint.getX(),
+                endPoint.getY(), endPoint.getX()
+        );
 
-        for (StopPoint stop : stopPoints) {
-            coordinatesBuilder.append(";")
-                    .append(stop.getStopLocation().getX()).append(",")
-                    .append(stop.getStopLocation().getY());
+        if (distanceKm > 400) { // Mapbox typically limits routes to ~400-500km
+            // Create a straight-line fallback route
+            return createStraightLineRoute(startPoint, stopPoints, endPoint);
         }
 
-        coordinatesBuilder.append(";").append(endPoint.getX()).append(",").append(endPoint.getY());
+        // Original code for making Mapbox API call...
+        StringBuilder coordinatesBuilder = new StringBuilder();
+        coordinatesBuilder.append(startPoint.getX()).append(",").append(startPoint.getY());
 
-        // Change "cycling" to "driving" for car routes
-        String profile = "driving";
-        String url = "https://api.mapbox.com/directions/v5/mapbox/" + profile + "/" +
-                coordinatesBuilder.toString() +
-                "?geometries=geojson&access_token=" + mapboxToken;
+        // Add all stop points
+        for (StopPoint stop : stopPoints) {
+            coordinatesBuilder.append(";").append(stop.getStopLocation().getX())
+                    .append(",").append(stop.getStopLocation().getY());
+        }
+
+        // Add end point
+        coordinatesBuilder.append(";").append(endPoint.getX())
+                .append(",").append(endPoint.getY());
+
+        String coordinates = coordinatesBuilder.toString();
+        String url = String.format("https://api.mapbox.com/directions/v5/mapbox/driving/%s?geometries=geojson&access_token=%s",
+                coordinates, mapboxToken);
 
         try {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
-                    .GET()
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String body = response.body();
 
-            // Add better error handling
-            if (body.contains("error") || !body.contains("routes")) {
-                System.err.println("Mapbox API error: " + body);
-                throw new RuntimeException("Invalid response from Mapbox API: " + body);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(response.body());
+
+            List<Coordinate> routeCoordinates = new ArrayList<>();
+            JsonNode routes = rootNode.path("routes");
+
+            if (routes.size() > 0) {
+                JsonNode geometry = routes.get(0).path("geometry");
+                JsonNode coordinates_array = geometry.path("coordinates");
+
+                for (JsonNode coord : coordinates_array) {
+                    double lon = coord.get(0).asDouble();
+                    double lat = coord.get(1).asDouble();
+                    routeCoordinates.add(new Coordinate(lon, lat));
+                }
+
+                return routeCoordinates;
+            } else {
+                // No route found, fallback to straight line
+                return createStraightLineRoute(startPoint, stopPoints, endPoint);
             }
-
-            JSONArray coords = new JSONObject(body)
-                    .getJSONArray("routes")
-                    .getJSONObject(0)
-                    .getJSONObject("geometry")
-                    .getJSONArray("coordinates");
-
-            List<Coordinate> coordinateList = new ArrayList<>();
-            for (int i = 0; i < coords.length(); i++) {
-                JSONArray coordPair = coords.getJSONArray(i);
-                coordinateList.add(new Coordinate(coordPair.getDouble(0), coordPair.getDouble(1)));
-            }
-            return coordinateList;
-
         } catch (Exception e) {
-            System.err.println("Failed to get directions from Mapbox: " + e.getMessage());
+            // If we get the specific Mapbox distance error, use fallback
+            if (e.getMessage() != null && e.getMessage().contains("Route exceeds maximum distance")) {
+                return createStraightLineRoute(startPoint, stopPoints, endPoint);
+            }
             throw new RuntimeException("Failed to get directions from Mapbox", e);
         }
+    }
+
+    // Helper method to calculate straight-line distance between points
+    private double calculateApproximateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Earth's radius in km
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    // Create a straight line route as fallback
+    private List<Coordinate> createStraightLineRoute(Point startPoint, List<StopPoint> stopPoints, Point endPoint) {
+        List<Coordinate> coordinates = new ArrayList<>();
+
+        // Add starting point
+        coordinates.add(new Coordinate(startPoint.getX(), startPoint.getY()));
+
+        // Add stop points
+        for (StopPoint stop : stopPoints) {
+            coordinates.add(new Coordinate(stop.getStopLocation().getX(), stop.getStopLocation().getY()));
+        }
+
+        // Add ending point
+        coordinates.add(new Coordinate(endPoint.getX(), endPoint.getY()));
+
+        return coordinates;
     }
 
 }
