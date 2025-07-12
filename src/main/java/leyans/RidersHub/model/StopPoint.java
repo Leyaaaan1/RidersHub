@@ -1,6 +1,7 @@
 package leyans.RidersHub.model;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import org.locationtech.jts.geom.Point;
 import java.awt.*;
@@ -10,6 +11,7 @@ public class StopPoint {
 
 
     private String stopName;
+    @Column(name = "stop_location", columnDefinition = "geometry(Point,4326)")
     private Point stopLocation;
 
     public StopPoint() {

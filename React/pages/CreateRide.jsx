@@ -7,7 +7,8 @@ import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
 import { handleWebViewMessage } from '../utils/mapUtils';
 import RideStep4 from "../components/ride/RideStep4";
-import { getDirections } from '../services/mapService'; // Add this import
+import { getDirections } from '../services/mapService';
+
 const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
     const webViewRef = useRef(null);
@@ -171,9 +172,10 @@ const CreateRide = ({ route, navigation }) => {
         }));
 
         try {
-            let routeCoordinates = [];
+            let routeData = null;
             try {
-                routeCoordinates = await getDirections(
+                // Get route data from the updated service
+                routeData = await getDirections(
                     token,
                     startingLongitude,
                     startingLatitude,
@@ -181,12 +183,14 @@ const CreateRide = ({ route, navigation }) => {
                     endingLatitude,
                     stopPointsPayload
                 );
+
+                console.log('Route data received:', routeData);
             } catch (routeErr) {
                 console.error('Error fetching route:', routeErr);
                 // Continue with ride creation even if route fetch fails
             }
 
-            // Include routeCoordinates in the ride data
+            // Prepare ride data with route information
             const rideData = {
                 ridesName: rideName,
                 locationName: locationName,
@@ -204,8 +208,11 @@ const CreateRide = ({ route, navigation }) => {
                 description: description,
                 mapboxImageUrl: mapboxImageUrl,
                 stopPoints: stopPointsPayload,
-                routeCoordinates: JSON.stringify(routeCoordinates) // Convert to string for API
+                // Store the GeoJSON string from the route response
+                routeCoordinates: routeData && routeData.geoJson ? routeData.geoJson : null
             };
+
+            console.log('Creating ride with data:', rideData);
 
             // Make the API call to create the ride
             const result = await createRide(rideData, token);
@@ -221,12 +228,14 @@ const CreateRide = ({ route, navigation }) => {
                 Alert.alert('Warning', 'Ride was created but ID is missing');
             }
         } catch (err) {
+            console.error('Error creating ride:', err);
             setError(err.message || 'An error occurred');
             Alert.alert('Error', err.message || 'Failed to create ride');
         } finally {
             setLoading(false);
         }
     };
+
     const nextStep = () => { if (currentStep < 4) setCurrentStep(currentStep + 1); };
     const prevStep = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
 

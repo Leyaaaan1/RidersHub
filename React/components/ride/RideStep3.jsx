@@ -7,26 +7,10 @@ import colors from '../../styles/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
 import { getDirections } from '../../services/mapService';
-const RideStep3 = ({
-                       mapMode, setMapMode, isSearching, searchResults,
-                       handleLocationSelect, webViewRef,
-                       startingLatitude, startingLongitude, endingLatitude, endingLongitude,
-                       handleMessage, startingPoint, setStartingPoint,
-                       endingPoint, setEndingPoint, prevStep, loading, nextStep,
-                       handleCreateRide, handleSearchInputChange, searchQuery,
-                       stopPoints, setStopPoints, token
-                   }) => {
-    const [currentStop, setCurrentStop] = useState(null);
-    const [isAddingStop, setIsAddingStop] = useState(false);
-    const [addingStopLoading, setAddingStopLoading] = useState(false);
-    const [showProgressBar, setShowProgressBar] = useState(true);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const [mapDarkMode, setMapDarkMode] = useState(false);
-
+const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLocationSelect, webViewRef, startingLatitude, startingLongitude, endingLatitude, endingLongitude, handleMessage, startingPoint, setStartingPoint, endingPoint, setEndingPoint, prevStep, loading, nextStep, handleCreateRide, handleSearchInputChange, searchQuery, stopPoints, setStopPoints, token }) => { const [currentStop, setCurrentStop] = useState(null); const [isAddingStop, setIsAddingStop] = useState(false); const [addingStopLoading, setAddingStopLoading] = useState(false); const [showProgressBar, setShowProgressBar] = useState(true); const [isSearchFocused, setIsSearchFocused] = useState(false); const [mapDarkMode, setMapDarkMode] = useState(false);
     const [showAddStopDialog, setShowAddStopDialog] = useState(false);
     const [stopConfirmDialogVisible, setStopConfirmDialogVisible] = useState(false);
     const [selectedStopLocation, setSelectedStopLocation] = useState(null);
-
 
     const startAddStopPoint = () => {
         setMapMode('stop');
@@ -50,6 +34,7 @@ const RideStep3 = ({
             setStopConfirmDialogVisible(true);
         }
     };
+
     const confirmSelectedStop = () => {
         if (!selectedStopLocation) return;
 
@@ -83,10 +68,10 @@ const RideStep3 = ({
         const lon = parseFloat(item.lon);
         if (webViewRef.current) {
             webViewRef.current.injectJavaScript(`
-                map.setView([${lat}, ${lon}], 15);
-                marker.setLatLng([${lat}, ${lon}]);
-                true;
-            `);
+            map.setView([${lat}, ${lon}], 15);
+            marker.setLatLng([${lat}, ${lon}]);
+            true;
+        `);
         }
     };
 
@@ -116,16 +101,14 @@ const RideStep3 = ({
         // Update map view to show selected location
         if (webViewRef.current) {
             webViewRef.current.injectJavaScript(`
-            map.setView([${lat}, ${lon}], 15);
-            L.marker([${lat}, ${lon}]).addTo(map).bindPopup("${item.display_name}").openPopup();
-            true;
-        `);
+        map.setView([${lat}, ${lon}], 15);
+        L.marker([${lat}, ${lon}]).addTo(map).bindPopup("${item.display_name}").openPopup();
+        true;
+    `);
         }
     };
 
-
-
-    // Updated fetchAndDisplayRoute function with better error handling and logging
+// Updated fetchAndDisplayRoute function with new response format handling
     const fetchAndDisplayRoute = async () => {
         if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
             console.log('Missing coordinates, cannot fetch route');
@@ -149,7 +132,8 @@ const RideStep3 = ({
                 stopLatitude: parseFloat(sp.lat || sp.stopLatitude)
             }));
 
-            const routeCoordinates = await getDirections(
+            // Get route data from the updated service
+            const routeData = await getDirections(
                 token,
                 parseFloat(startingLongitude),
                 parseFloat(startingLatitude),
@@ -158,36 +142,16 @@ const RideStep3 = ({
                 stopPointsPayload
             );
 
-            console.log('Route coordinates received:', {
-                isArray: Array.isArray(routeCoordinates),
-                length: routeCoordinates?.length || 0,
-                firstFew: routeCoordinates?.slice(0, 3),
-                type: typeof routeCoordinates
+            console.log('Route data received:', {
+                hasCoordinates: !!routeData.coordinates,
+                coordinateCount: routeData.coordinates?.length || 0,
+                hasGeoJson: !!routeData.geoJson
             });
 
-            // Validate route coordinates
-            if (!routeCoordinates) {
-                console.warn('No route coordinates received');
-                return;
-            }
+            // Use the coordinates from the new response format
+            const coordinates = routeData.coordinates;
 
-            // Handle different response formats
-            let coordinates;
-            if (typeof routeCoordinates === 'string') {
-                try {
-                    coordinates = JSON.parse(routeCoordinates);
-                } catch (parseError) {
-                    console.error('Failed to parse route coordinates:', parseError);
-                    return;
-                }
-            } else if (Array.isArray(routeCoordinates)) {
-                coordinates = routeCoordinates;
-            } else {
-                console.warn('Unknown route coordinates format:', typeof routeCoordinates);
-                return;
-            }
-
-            if (!Array.isArray(coordinates) || coordinates.length === 0) {
+            if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
                 console.warn('No valid route coordinates found');
                 return;
             }
@@ -211,7 +175,7 @@ const RideStep3 = ({
             if (webViewRef.current) {
                 console.log('Sending route data to WebView');
 
-                const routeData = {
+                const routeDisplayData = {
                     type: 'drawRoute',
                     coordinates: validCoordinates,
                     points: {
@@ -232,31 +196,31 @@ const RideStep3 = ({
                 };
 
                 console.log('Route data to send:', {
-                    coordinateCount: routeData.coordinates.length,
-                    startPoint: routeData.points.start,
-                    endPoint: routeData.points.end,
-                    stopCount: routeData.points.stops.length
+                    coordinateCount: routeDisplayData.coordinates.length,
+                    startPoint: routeDisplayData.points.start,
+                    endPoint: routeDisplayData.points.end,
+                    stopCount: routeDisplayData.points.stops.length
                 });
 
                 webViewRef.current.injectJavaScript(`
-                try {
-                    console.log('Injecting route data...');
-                    const data = ${JSON.stringify(routeData)};
-                    console.log('Data to process:', data.type, data.coordinates.length, 'coordinates');
-                    
-                    // Send directly to the window message handler
-                    window.dispatchEvent(new MessageEvent('message', { data }));
-                    
-                    console.log('Route drawing message sent successfully');
-                } catch(e) {
-                    console.error('Error in injected JavaScript:', e);
-                    window.ReactNativeWebView.postMessage(JSON.stringify({
-                        type: 'routeDrawError', 
-                        error: 'JavaScript injection error: ' + e.message
-                    }));
-                }
-                true;
-            `);
+            try {
+                console.log('Injecting route data...');
+                const data = ${JSON.stringify(routeDisplayData)};
+                console.log('Data to process:', data.type, data.coordinates.length, 'coordinates');
+                
+                // Send directly to the window message handler
+                window.dispatchEvent(new MessageEvent('message', { data }));
+                
+                console.log('Route drawing message sent successfully');
+            } catch(e) {
+                console.error('Error in injected JavaScript:', e);
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'routeDrawError', 
+                    error: 'JavaScript injection error: ' + e.message
+                }));
+            }
+            true;
+        `);
             } else {
                 console.warn('WebView reference is not available');
             }
@@ -332,7 +296,6 @@ const RideStep3 = ({
                     fetchAndDisplayRoute();
                     break;
 
-
                 default:
                     // Handle other message types (stop points, map clicks, etc.)
                     if (mapMode === 'stop' && isAddingStop) {
@@ -352,6 +315,7 @@ const RideStep3 = ({
             console.error('Raw message data:', event.nativeEvent.data);
         }
     };
+
     const getPlaceholderText = () => {
         switch (mapMode) {
             case 'starting':
@@ -364,6 +328,7 @@ const RideStep3 = ({
                 return 'Search location';
         }
     };
+
 
     return (
         <View style={rideStepsUtilities.containerWhite}>
