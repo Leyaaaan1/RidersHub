@@ -3,6 +3,7 @@ package leyans.RidersHub.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
@@ -89,8 +90,10 @@ public class Rides {
     @Column(name = "map_ending_url")
     private String magImageEndingLocation;
 
-    @Column(name = "route_coordinates", columnDefinition = "TEXT")
-    private String routeCoordinates;
+
+    @Column(name = "route_path", columnDefinition = "geometry(LineString,4326)")
+    private LineString routePath;
+
 
     public Rides() {
     }
@@ -101,7 +104,7 @@ public class Rides {
                  Rider username, RiderType riderType, Integer distance, LocalDateTime date,
                  String mapImageUrl,
                  String magImageStartingLocation, String magImageEndingLocation,
-                 String routeCoordinates) {
+                 LineString routePath) {
         this.generatedRidesId = generatedRidesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -119,16 +122,16 @@ public class Rides {
         this.mapImageUrl = mapImageUrl;
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
-        this.routeCoordinates = routeCoordinates;
+        this.routePath = routePath;
 
     }
 
-    public String getRouteCoordinates() {
-        return routeCoordinates;
+    public LineString getRoutePath() {
+        return routePath;
     }
 
-    public void setRouteCoordinates(String routeCoordinates) {
-        this.routeCoordinates = routeCoordinates;
+    public void setRoutePath(LineString routePath) {
+        this.routePath = routePath;
     }
 
     public List<StopPoint> getStopPoints() {

@@ -12,6 +12,8 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StopPoint;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,15 +78,18 @@ public class RidesService {
         Point rideLocation = locationService.createPoint(longitude, latitude);
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
+        List<StopPoint> stopPoints = convertStopPointDTOs(stopPointsDto);
 
-        String routeCoordinates = getRouteDirections(startLongitude, startLatitude, endLongitude, endLatitude, stopPointsDto);
+        // Convert JTS Points to AWT Points
 
+
+        List<Coordinate> routeCoordinates = mapboxService.getRouteCoordinates(startPoint, stopPoints, endPoint);
 
         String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
         String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
         String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
 
-        List<StopPoint> stopPoints = convertStopPointDTOs(stopPointsDto);
+        LineString routePath = locationService.createLineStringFromCoordinates(routeCoordinates);
 
         int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
 
@@ -111,7 +117,7 @@ public class RidesService {
         newRide.setMapImageUrl(imageUrl);
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
-        newRide.setRouteCoordinates(routeCoordinates);
+        newRide.setRoutePath(routePath);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -123,33 +129,7 @@ public class RidesService {
         return response;
     }
 
-    @Transactional
-    public String getRouteDirections(double startLon, double startLat,
-                                     double endLon, double endLat,
-                                     List<StopPointDTO> stopPoints) {
-        List<double[]> stops = null;
-        if (stopPoints != null && !stopPoints.isEmpty()) {
-            stops = stopPoints.stream()
-                    .map(stop -> new double[]{stop.getStopLongitude(), stop.getStopLatitude()})
-                    .collect(Collectors.toList());
-        }
 
-        // Get raw route from Mapbox
-        String rawRoute = mapboxService.getDirectionsRoute(startLon, startLat, endLon, endLat, stops);
-
-        // Ensure valid JSON format by cleaning/validating
-        try {
-            // Parse and re-stringify to ensure clean JSON
-            ObjectMapper mapper = new ObjectMapper();
-            Object routeObject = mapper.readValue(rawRoute, Object.class);
-            return mapper.writeValueAsString(routeObject);
-        } catch (Exception e) {
-            // Log the error and return a simple array if parsing fails
-            System.out.println("Error processing route coordinates: " + e.getMessage());
-            e.printStackTrace();
-            return "[]";
-        }
-    }
     @Transactional(readOnly = true)
     public List<StopPointDTO> getStopPointsDTOByGeneratedRideId(Integer generatedRidesId) {
         Rides ride = findRideEntityByGeneratedId(generatedRidesId);
@@ -206,9 +186,16 @@ public class RidesService {
                 ride.getMagImageEndingLocation(),
                 ride.getUsername().getUsername(),
                 mapStopPointsToDTOs(ride.getStopPoints()),
-                ride.getRouteCoordinates()
-        );    }
+                mapCoordinatesToDTOs(ride.getRoutePath())
 
+        );
+    }
+    public List<List<Double>> mapCoordinatesToDTOs(LineString lineString) {
+        if (lineString == null) return null;
+        return Arrays.stream(lineString.getCoordinates())
+                .map(coord -> List.of(coord.x, coord.y))
+                .collect(Collectors.toList());
+    }
     public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {
         return stopPoints.stream()
                 .map(stopPoint -> new StopPointDTO(

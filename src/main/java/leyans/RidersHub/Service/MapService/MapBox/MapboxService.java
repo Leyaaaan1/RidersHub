@@ -3,6 +3,13 @@ package leyans.RidersHub.Service.MapService.MapBox;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.Util.RateLimitUtil;
+import leyans.RidersHub.model.StopPoint;
+import org.cloudinary.json.JSONArray;
+import org.cloudinary.json.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -10,6 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.awt.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -53,50 +66,63 @@ public class MapboxService {
     }
 
 
-    @Cacheable(value = "mapbox", key = "'directions_' + #startLon + '_' + #startLat + '_' + #endLon + '_' + #endLat + '_' + (#stops != null ? #stops.hashCode() : 0)")
-    public String getDirectionsRoute(double startLon, double startLat,
-                                     double endLon, double endLat,
-                                     List<double[]> stops) {
 
+    public List<Coordinate> getRouteCoordinates(org.locationtech.jts.geom.Point startPoint,
+                                                List<StopPoint> stopPoints,
+                                                org.locationtech.jts.geom.Point endPoint) {
         rateLimitUtil.enforceRateLimitMapBox(RATE_LIMIT_KEY);
-        // Build coordinate string
-        StringBuilder coordBuilder = new StringBuilder();
-        coordBuilder.append(startLon).append(",").append(startLat);
-        if (stops != null && !stops.isEmpty()) {
-            for (double[] stop : stops) {
-                coordBuilder.append(";").append(stop[0]).append(",").append(stop[1]);
-            }
+
+        StringBuilder coordinatesBuilder = new StringBuilder();
+        // Use longitude (X) and latitude (Y) in the proper order for Mapbox API
+        coordinatesBuilder.append(startPoint.getX()).append(",").append(startPoint.getY());
+
+        for (StopPoint stop : stopPoints) {
+            coordinatesBuilder.append(";")
+                    .append(stop.getStopLocation().getX()).append(",")
+                    .append(stop.getStopLocation().getY());
         }
-        coordBuilder.append(";").append(endLon).append(",").append(endLat);
 
-        String coordinates = coordBuilder.toString();
+        coordinatesBuilder.append(";").append(endPoint.getX()).append(",").append(endPoint.getY());
 
-        String directionUrl = String.format(
-                "https://api.mapbox.com/directions/v5/mapbox/driving/%s?access_token=%s&geometries=geojson&overview=full",
-                coordinates, mapboxToken
-        );
+        // Change "cycling" to "driving" for car routes
+        String profile = "driving";
+        String url = "https://api.mapbox.com/directions/v5/mapbox/" + profile + "/" +
+                coordinatesBuilder.toString() +
+                "?geometries=geojson&access_token=" + mapboxToken;
 
         try {
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> response = restTemplate.getForEntity(directionUrl, String.class);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(response.getBody());
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String body = response.body();
 
-                // Check if routes exist and are not empty
-                if (root.has("routes") && root.path("routes").isArray() && root.path("routes").size() > 0) {
-                    JsonNode coords = root.path("routes").get(0).path("geometry").path("coordinates");
-                    return coords.toString(); // Return only the coordinates array
-                } else {
-                    return "[]"; // Return empty array if no routes
-                }
-            } else {
-                return "[]"; // Return empty array if request failed
+            // Add better error handling
+            if (body.contains("error") || !body.contains("routes")) {
+                System.err.println("Mapbox API error: " + body);
+                throw new RuntimeException("Invalid response from Mapbox API: " + body);
             }
+
+            JSONArray coords = new JSONObject(body)
+                    .getJSONArray("routes")
+                    .getJSONObject(0)
+                    .getJSONObject("geometry")
+                    .getJSONArray("coordinates");
+
+            List<Coordinate> coordinateList = new ArrayList<>();
+            for (int i = 0; i < coords.length(); i++) {
+                JSONArray coordPair = coords.getJSONArray(i);
+                coordinateList.add(new Coordinate(coordPair.getDouble(0), coordPair.getDouble(1)));
+            }
+            return coordinateList;
+
         } catch (Exception e) {
-            e.printStackTrace(); // Log the detailed error
-            return "[]"; // Return empty array if parsing fails
+            System.err.println("Failed to get directions from Mapbox: " + e.getMessage());
+            throw new RuntimeException("Failed to get directions from Mapbox", e);
         }
     }
+
 }

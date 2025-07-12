@@ -6,11 +6,18 @@ import getMapHTML from '../../utils/mapHTML';
 import colors from '../../styles/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
-import { getDirections } from '../../services/mapService';
-const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLocationSelect, webViewRef, startingLatitude, startingLongitude, endingLatitude, endingLongitude, handleMessage, startingPoint, setStartingPoint, endingPoint, setEndingPoint, prevStep, loading, nextStep, handleCreateRide, handleSearchInputChange, searchQuery, stopPoints, setStopPoints, token }) => { const [currentStop, setCurrentStop] = useState(null); const [isAddingStop, setIsAddingStop] = useState(false); const [addingStopLoading, setAddingStopLoading] = useState(false); const [showProgressBar, setShowProgressBar] = useState(true); const [isSearchFocused, setIsSearchFocused] = useState(false); const [mapDarkMode, setMapDarkMode] = useState(false);
+
+const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLocationSelect, webViewRef, startingLatitude, startingLongitude, endingLatitude, endingLongitude, handleMessage, startingPoint, setStartingPoint, endingPoint, setEndingPoint, prevStep, loading, nextStep, handleCreateRide, handleSearchInputChange, searchQuery, stopPoints, setStopPoints, token }) => {
+    const [currentStop, setCurrentStop] = useState(null);
+    const [isAddingStop, setIsAddingStop] = useState(false);
+    const [addingStopLoading, setAddingStopLoading] = useState(false);
+    const [showProgressBar, setShowProgressBar] = useState(true);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [mapDarkMode, setMapDarkMode] = useState(false);
     const [showAddStopDialog, setShowAddStopDialog] = useState(false);
     const [stopConfirmDialogVisible, setStopConfirmDialogVisible] = useState(false);
     const [selectedStopLocation, setSelectedStopLocation] = useState(null);
+    const [routeCoordinates, setRouteCoordinates] = useState([]);
 
     const startAddStopPoint = () => {
         setMapMode('stop');
@@ -108,192 +115,69 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
         }
     };
 
-// Updated fetchAndDisplayRoute function with new response format handling
-    const fetchAndDisplayRoute = async () => {
-        if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
-            console.log('Missing coordinates, cannot fetch route');
+    // Simplified route display function - backend now handles route calculation
+// Update this function in RideStep3.jsx
+    const displayRouteOnMap = (coordinates) => {
+        if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
+            console.error('Invalid coordinates provided to displayRouteOnMap');
             return;
         }
 
-        try {
-            console.log('Fetching route with params:', {
-                startLong: startingLongitude,
-                startLat: startingLatitude,
-                endLong: endingLongitude,
-                endLat: endingLatitude,
-                stops: stopPoints.length,
-                stopPoints: stopPoints
-            });
+        if (webViewRef.current) {
+            // Format the coordinates properly for the map
+            // Ensure we're sending coordinates in the format the map expects
+            const routeData = {
+                type: 'drawRoute',
+                coordinates: coordinates,
+                points: {
+                    start: { lat: parseFloat(startingLatitude), lng: parseFloat(startingLongitude) },
+                    end: { lat: parseFloat(endingLatitude), lng: parseFloat(endingLongitude) },
+                    stops: stopPoints.map(sp => ({
+                        lat: parseFloat(sp.lat),
+                        lng: parseFloat(sp.lng),
+                        name: sp.name || 'Stop Point'
+                    }))
+                }
+            };
 
-            // Prepare stop points for the API call
-            const stopPointsPayload = stopPoints.map(sp => ({
-                stopName: sp.name || sp.stopName || null,
-                stopLongitude: parseFloat(sp.lng || sp.stopLongitude),
-                stopLatitude: parseFloat(sp.lat || sp.stopLatitude)
-            }));
-
-            // Get route data from the updated service
-            const routeData = await getDirections(
-                token,
-                parseFloat(startingLongitude),
-                parseFloat(startingLatitude),
-                parseFloat(endingLongitude),
-                parseFloat(endingLatitude),
-                stopPointsPayload
-            );
-
-            console.log('Route data received:', {
-                hasCoordinates: !!routeData.coordinates,
-                coordinateCount: routeData.coordinates?.length || 0,
-                hasGeoJson: !!routeData.geoJson
-            });
-
-            // Use the coordinates from the new response format
-            const coordinates = routeData.coordinates;
-
-            if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
-                console.warn('No valid route coordinates found');
-                return;
-            }
-
-            // Validate coordinate format
-            const validCoordinates = coordinates.filter(coord =>
-                Array.isArray(coord) &&
-                coord.length >= 2 &&
-                typeof coord[0] === 'number' &&
-                typeof coord[1] === 'number'
-            );
-
-            if (validCoordinates.length === 0) {
-                console.warn('No valid coordinate pairs found');
-                return;
-            }
-
-            console.log('Valid coordinates:', validCoordinates.length, 'out of', coordinates.length);
-
-            // Send the coordinates to the WebView to draw the route
-            if (webViewRef.current) {
-                console.log('Sending route data to WebView');
-
-                const routeDisplayData = {
-                    type: 'drawRoute',
-                    coordinates: validCoordinates,
-                    points: {
-                        start: {
-                            lat: parseFloat(startingLatitude),
-                            lng: parseFloat(startingLongitude)
-                        },
-                        end: {
-                            lat: parseFloat(endingLatitude),
-                            lng: parseFloat(endingLongitude)
-                        },
-                        stops: stopPoints.map(sp => ({
-                            lat: parseFloat(sp.lat || sp.stopLatitude),
-                            lng: parseFloat(sp.lng || sp.stopLongitude),
-                            name: sp.name || sp.stopName || 'Stop Point'
-                        }))
-                    }
-                };
-
-                console.log('Route data to send:', {
-                    coordinateCount: routeDisplayData.coordinates.length,
-                    startPoint: routeDisplayData.points.start,
-                    endPoint: routeDisplayData.points.end,
-                    stopCount: routeDisplayData.points.stops.length
-                });
-
-                webViewRef.current.injectJavaScript(`
+            webViewRef.current.injectJavaScript(`
             try {
-                console.log('Injecting route data...');
-                const data = ${JSON.stringify(routeDisplayData)};
-                console.log('Data to process:', data.type, data.coordinates.length, 'coordinates');
-                
-                // Send directly to the window message handler
+                const data = ${JSON.stringify(routeData)};
                 window.dispatchEvent(new MessageEvent('message', { data }));
-                
-                console.log('Route drawing message sent successfully');
+                true;
             } catch(e) {
-                console.error('Error in injected JavaScript:', e);
-                window.ReactNativeWebView.postMessage(JSON.stringify({
-                    type: 'routeDrawError', 
-                    error: 'JavaScript injection error: ' + e.message
-                }));
+                console.error('Error displaying route:', e);
+                true;
             }
-            true;
         `);
-            } else {
-                console.warn('WebView reference is not available');
-            }
-        } catch (error) {
-            console.error('Error fetching or displaying route:', error);
-            // You might want to show an error message to the user
         }
     };
-
-// Updated useEffect with better timing and dependencies
-    useEffect(() => {
-        // Only fetch route if we have all required coordinates
-        if (startingLatitude && startingLongitude && endingLatitude && endingLongitude) {
-            console.log('Route dependencies changed, scheduling route fetch...');
-
-            // Clear any existing timeout
-            const timer = setTimeout(() => {
-                console.log('Fetching route after WebView load delay...');
-                fetchAndDisplayRoute();
-            }, 2500); // Slightly longer delay to ensure WebView is ready
-
-            return () => {
-                console.log('Clearing route fetch timeout');
-                clearTimeout(timer);
-            };
-        } else {
-            console.log('Missing required coordinates for route:', {
-                startingLatitude,
-                startingLongitude,
-                endingLatitude,
-                endingLongitude
-            });
-        }
-    }, [startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints, token]);
-
-// Updated onWebViewMessage function with better error handling
+    // Updated onWebViewMessage function
     const onWebViewMessage = (event) => {
         try {
             const data = JSON.parse(event.nativeEvent.data);
-            console.log('WebView message received:', data.type, data);
+            console.log('WebView message received:', data.type);
 
             switch (data.type) {
                 case 'mapReady':
-                    console.log('Map is ready, dark mode:', data.isDarkTheme);
+                    console.log('Map is ready');
                     setMapDarkMode(data.isDarkTheme);
                     break;
 
                 case 'routeDrawn':
-                    console.log('Route drawn successfully with', data.pointCount, 'coordinates,', data.latLngCount, 'valid points');
+                    console.log('Route drawn successfully');
                     break;
 
                 case 'routeDrawError':
                     console.error('Route drawing error:', data.error);
-                    if (data.stack) {
-                        console.error('Error stack:', data.stack);
-                    }
                     break;
 
                 case 'mapError':
-                    console.error('Map initialization error:', data.error);
-                    break;
-
-                case 'messageError':
-                    console.error('Message handling error:', data.error);
+                    console.error('Map error:', data.error);
                     break;
 
                 case 'themeChange':
                     setMapDarkMode(data.isDarkTheme);
-                    break;
-
-                case 'requestRouteRedraw':
-                    console.log('Route redraw requested after map interaction');
-                    fetchAndDisplayRoute();
                     break;
 
                 default:
@@ -304,7 +188,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                         handleMessage(event);
                     }
 
-                    // Preserve theme state if it's included in the message
                     if (data.isDarkTheme !== undefined) {
                         setMapDarkMode(data.isDarkTheme);
                     }
@@ -312,7 +195,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
             }
         } catch (error) {
             console.error('Error parsing WebView message:', error);
-            console.error('Raw message data:', event.nativeEvent.data);
         }
     };
 
@@ -328,7 +210,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                 return 'Search location';
         }
     };
-
 
     return (
         <View style={rideStepsUtilities.containerWhite}>
@@ -543,6 +424,8 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                             </View>
                         )}
                     </View>
+
+                    {/* Add Stop Dialog */}
                     {showAddStopDialog && (
                         <View style={rideStepsUtilities.dialogOverlay}>
                             <View style={rideStepsUtilities.dialogContainer}>
@@ -565,7 +448,7 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                                         style={[rideStepsUtilities.dialogButton, rideStepsUtilities.dialogButtonPrimary]}
                                         onPress={() => {
                                             setShowAddStopDialog(false);
-                                            handleCreateRide();
+                                            handleCreateRide(); // Changed from nextStep() to directly create ride
                                         }}
                                     >
                                         <Text style={rideStepsUtilities.dialogButtonText}>No, Continue</Text>
@@ -606,6 +489,7 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                             </View>
                         </View>
                     )}
+
                     {/* Bottom Row: Stop Points Full Width */}
                     {stopPoints.length > 0 && (
                         <View style={[rideStepsUtilities.modernCard, rideStepsUtilities.fullWidthCard]}>

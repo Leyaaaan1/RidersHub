@@ -36,8 +36,8 @@ public class RideResponseDTO {
     private String username;
 
     private List<StopPointDTO> stopPoints;
+    private List<List<Double>> routeCoordinates;
 
-    private String routeCoordinates;
 
 
 
@@ -50,8 +50,7 @@ public class RideResponseDTO {
                            String endingPointName, double endLat, double endLng,
                            String mapImageUrl, String magImageStartingLocation, String magImageEndingLocation,
                            String username,
-                            List<StopPointDTO> stopPoints,
-                            String routeCoordinates
+                            List<StopPointDTO> stopPoints, List<List<Double>> routeCoordinates
 
     ) {
         this.generatedRidesId = generatedRidesId;
@@ -82,20 +81,20 @@ public class RideResponseDTO {
     }
 
 
-    public String getRouteCoordinates() {
-        return routeCoordinates;
-    }
-
-    public void setRouteCoordinates(String routeCoordinates) {
-        this.routeCoordinates = routeCoordinates;
-    }
-
     public List<StopPointDTO> getStopPoints() {
         return stopPoints;
     }
 
     public void setStopPoints(List<StopPointDTO> stopPoints) {
         this.stopPoints = stopPoints;
+    }
+
+    public List<List<Double>> getRouteCoordinates() {
+        return routeCoordinates;
+    }
+
+    public void setRouteCoordinates(List<List<Double>> routeCoordinates) {
+        this.routeCoordinates = routeCoordinates;
     }
 
     public String getUsername() {

@@ -4,11 +4,10 @@ import leyans.RidersHub.Repository.PsgcDataRepository;
 import leyans.RidersHub.Repository.RiderLocationRepository;
 import leyans.RidersHub.Service.MapService.NominatimService;
 import leyans.RidersHub.model.PsgcData;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class LocationService {
@@ -66,6 +65,13 @@ public class LocationService {
     public int calculateDistance(Point startPoint, Point endPoint) {
         double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
         return (int) Math.round(distanceInMeters / 1000);
+    }
+
+    public LineString createLineStringFromCoordinates(List<Coordinate> coordinates) {
+        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+        LineString line = factory.createLineString(coordinates.toArray(new Coordinate[0]));
+        line.setSRID(4326);
+        return line;
     }
 
 
