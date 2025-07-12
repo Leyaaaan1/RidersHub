@@ -1,6 +1,7 @@
 package leyans.RidersHub.Service;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.StopPointDTO;
@@ -133,9 +134,22 @@ public class RidesService {
                     .collect(Collectors.toList());
         }
 
-        return mapboxService.getDirectionsRoute(startLon, startLat, endLon, endLat, stops);
-    }
+        // Get raw route from Mapbox
+        String rawRoute = mapboxService.getDirectionsRoute(startLon, startLat, endLon, endLat, stops);
 
+        // Ensure valid JSON format by cleaning/validating
+        try {
+            // Parse and re-stringify to ensure clean JSON
+            ObjectMapper mapper = new ObjectMapper();
+            Object routeObject = mapper.readValue(rawRoute, Object.class);
+            return mapper.writeValueAsString(routeObject);
+        } catch (Exception e) {
+            // Log the error and return a simple array if parsing fails
+            System.out.println("Error processing route coordinates: " + e.getMessage());
+            e.printStackTrace();
+            return "[]";
+        }
+    }
     @Transactional(readOnly = true)
     public List<StopPointDTO> getStopPointsDTOByGeneratedRideId(Integer generatedRidesId) {
         Rides ride = findRideEntityByGeneratedId(generatedRidesId);

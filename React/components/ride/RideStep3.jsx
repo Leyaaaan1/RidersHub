@@ -23,6 +23,11 @@ const RideStep3 = ({
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [mapDarkMode, setMapDarkMode] = useState(false);
 
+    const [showAddStopDialog, setShowAddStopDialog] = useState(false);
+    const [stopConfirmDialogVisible, setStopConfirmDialogVisible] = useState(false);
+    const [selectedStopLocation, setSelectedStopLocation] = useState(null);
+
+
     const startAddStopPoint = () => {
         setMapMode('stop');
         setIsAddingStop(true);
@@ -32,20 +37,33 @@ const RideStep3 = ({
     const handleStopMapMessage = async (event) => {
         const data = JSON.parse(event.nativeEvent.data);
         if (data.type === 'mapClick') {
-            setCurrentStop({
-                lat: data.lat,
-                lng: data.lng,
-                name: 'Fetching location name...'
-            });
             setAddingStopLoading(true);
             const stopName = await reverseGeocodeLandmark(token, data.lat, data.lng);
-            setCurrentStop({
+
+            setSelectedStopLocation({
                 lat: data.lat,
                 lng: data.lng,
                 name: stopName || `${data.lat}, ${data.lng}`
             });
+
             setAddingStopLoading(false);
+            setStopConfirmDialogVisible(true);
         }
+    };
+    const confirmSelectedStop = () => {
+        if (!selectedStopLocation) return;
+
+        setStopPoints(prev => [
+            ...prev,
+            {
+                lat: selectedStopLocation.lat,
+                lng: selectedStopLocation.lng,
+                name: selectedStopLocation.name
+            }
+        ]);
+
+        setStopConfirmDialogVisible(false);
+        setSelectedStopLocation(null);
     };
 
     const confirmStopPoint = () => {
@@ -73,8 +91,36 @@ const RideStep3 = ({
     };
 
     const finalizePointSelection = () => {
-        if (mapMode === 'starting' && startingPoint) setMapMode('ending');
-        else if (mapMode === 'ending' && endingPoint) setMapMode('stop');
+        if (mapMode === 'starting' && startingPoint) {
+            setMapMode('ending');
+        }
+        else if (mapMode === 'ending' && endingPoint) {
+            // Show dialog asking if user wants to add stop points
+            setShowAddStopDialog(true);
+        }
+    };
+
+    const handleStopLocationSelect = (item) => {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+
+        setSelectedStopLocation({
+            lat: lat,
+            lng: lon,
+            name: item.display_name
+        });
+
+        // Show confirmation dialog
+        setStopConfirmDialogVisible(true);
+
+        // Update map view to show selected location
+        if (webViewRef.current) {
+            webViewRef.current.injectJavaScript(`
+            map.setView([${lat}, ${lon}], 15);
+            L.marker([${lat}, ${lon}]).addTo(map).bindPopup("${item.display_name}").openPopup();
+            true;
+        `);
+        }
     };
 
 
@@ -281,6 +327,12 @@ const RideStep3 = ({
                     setMapDarkMode(data.isDarkTheme);
                     break;
 
+                case 'requestRouteRedraw':
+                    console.log('Route redraw requested after map interaction');
+                    fetchAndDisplayRoute();
+                    break;
+
+
                 default:
                     // Handle other message types (stop points, map clicks, etc.)
                     if (mapMode === 'stop' && isAddingStop) {
@@ -412,8 +464,13 @@ const RideStep3 = ({
                                     rideStepsUtilities.resultItem,
                                     index === searchResults.length - 1 && rideStepsUtilities.resultItemLast
                                 ]}
-                                onPress={() => handleSelectLocationAndUpdateMap(item)}
-                                disabled={mapMode === 'stop' && isAddingStop}
+                                onPress={() => {
+                                    if (mapMode === 'stop') {
+                                        handleStopLocationSelect(item);
+                                    } else {
+                                        handleSelectLocationAndUpdateMap(item);
+                                    }
+                                }}
                             >
                                 <View style={rideStepsUtilities.resultIconContainer}>
                                     <FontAwesome name="map-marker" size={16} color="#8c2323" />
@@ -521,7 +578,69 @@ const RideStep3 = ({
                             </View>
                         )}
                     </View>
+                    {showAddStopDialog && (
+                        <View style={rideStepsUtilities.dialogOverlay}>
+                            <View style={rideStepsUtilities.dialogContainer}>
+                                <Text style={rideStepsUtilities.dialogTitle}>Add Stop Points?</Text>
+                                <Text style={rideStepsUtilities.dialogText}>
+                                    Would you like to add stop points to your route?
+                                </Text>
+                                <View style={rideStepsUtilities.dialogButtonsContainer}>
+                                    <TouchableOpacity
+                                        style={[rideStepsUtilities.dialogButton, rideStepsUtilities.dialogButtonSecondary]}
+                                        onPress={() => {
+                                            setShowAddStopDialog(false);
+                                            setMapMode('stop')
+                                            startAddStopPoint();
+                                        }}
+                                    >
+                                        <Text style={rideStepsUtilities.dialogButtonTextSecondary}>Yes, Add Stops</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[rideStepsUtilities.dialogButton, rideStepsUtilities.dialogButtonPrimary]}
+                                        onPress={() => {
+                                            setShowAddStopDialog(false);
+                                            handleCreateRide();
+                                        }}
+                                    >
+                                        <Text style={rideStepsUtilities.dialogButtonText}>No, Continue</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    )}
 
+                    {/* Stop Point Confirmation Dialog */}
+                    {stopConfirmDialogVisible && selectedStopLocation && (
+                        <View style={rideStepsUtilities.dialogOverlay}>
+                            <View style={rideStepsUtilities.dialogContainer}>
+                                <Text style={rideStepsUtilities.dialogTitle}>Confirm Stop Point</Text>
+                                <Text style={rideStepsUtilities.dialogText}>
+                                    Add this location as a stop point?
+                                </Text>
+                                <Text style={rideStepsUtilities.locationConfirmText}>
+                                    {selectedStopLocation.name}
+                                </Text>
+                                <View style={rideStepsUtilities.dialogButtonsContainer}>
+                                    <TouchableOpacity
+                                        style={[rideStepsUtilities.dialogButton, rideStepsUtilities.dialogButtonSecondary]}
+                                        onPress={() => {
+                                            setStopConfirmDialogVisible(false);
+                                            setSelectedStopLocation(null);
+                                        }}
+                                    >
+                                        <Text style={rideStepsUtilities.dialogButtonTextSecondary}>Cancel</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[rideStepsUtilities.dialogButton, rideStepsUtilities.dialogButtonPrimary]}
+                                        onPress={confirmSelectedStop}
+                                    >
+                                        <Text style={rideStepsUtilities.dialogButtonText}>Confirm</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                    )}
                     {/* Bottom Row: Stop Points Full Width */}
                     {stopPoints.length > 0 && (
                         <View style={[rideStepsUtilities.modernCard, rideStepsUtilities.fullWidthCard]}>

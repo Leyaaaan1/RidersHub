@@ -32,8 +32,8 @@ const CreateRide = ({ route, navigation }) => {
     const [startingLongitude, setStartingLongitude] = useState('125.6128');
 
     const [endingPoint, setEndingPoint] = useState('');
-    const [endingLatitude, setEndingLatitude] = useState(startingLatitude);
-    const [endingLongitude, setEndingLongitude] = useState(startingLongitude);
+    const [endingLatitude, setEndingLatitude] = useState('7.0731');
+    const [endingLongitude, setEndingLongitude] = useState('125.6128');
 
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);

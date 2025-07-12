@@ -83,11 +83,28 @@ public class MapboxController {
             @RequestBody(required = false) List<StopPointDTO> stopPoints) {
 
         try {
+            // Validate input coordinates
+            if (Double.isNaN(startLon) || Double.isNaN(startLat) ||
+                    Double.isNaN(endLon) || Double.isNaN(endLat)) {
+                return ResponseEntity.badRequest().body("Invalid coordinates");
+            }
+
             String routeCoordinates = ridesService.getRouteDirections(
                     startLon, startLat, endLon, endLat, stopPoints);
 
+            // Ensure we're returning a valid JSON array
+            if (routeCoordinates == null || routeCoordinates.isEmpty()) {
+                return ResponseEntity.ok("[]");
+            }
+
+            // Validate JSON format
+            if (!routeCoordinates.startsWith("[") && !routeCoordinates.endsWith("]")) {
+                routeCoordinates = "[" + routeCoordinates + "]";
+            }
+
             return ResponseEntity.ok(routeCoordinates);
         } catch (Exception e) {
+            e.printStackTrace(); // Log the detailed error
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error fetching route: " + e.getMessage());
         }

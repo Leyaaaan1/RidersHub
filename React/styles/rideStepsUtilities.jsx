@@ -612,6 +612,92 @@ const rideStepsUtilities = StyleSheet.create({
         paddingHorizontal: screenWidth < 375 ? 16 : 20,
         paddingVertical: screenWidth < 375 ? 10 : 12,
     },
+    dialogOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+
+    dialogContainer: {
+        width: '85%',
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+
+    dialogTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#202124',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+
+    dialogText: {
+        fontSize: 16,
+        color: '#5f6368',
+        marginBottom: 16,
+        textAlign: 'center',
+        lineHeight: 22,
+    },
+
+    locationConfirmText: {
+        fontSize: 14,
+        color: '#202124',
+        marginBottom: 16,
+        textAlign: 'center',
+        backgroundColor: '#f1f3f4',
+        padding: 8,
+        borderRadius: 8,
+        fontWeight: '500',
+    },
+
+    dialogButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+
+    dialogButton: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 6,
+    },
+
+    dialogButtonPrimary: {
+        backgroundColor: '#8c2323',
+    },
+
+    dialogButtonSecondary: {
+        backgroundColor: '#ffffff',
+        borderWidth: 1,
+        borderColor: '#dadce0',
+    },
+
+    dialogButtonText: {
+        color: '#ffffff',
+        fontWeight: '500',
+        fontSize: 16,
+    },
+
+    dialogButtonTextSecondary: {
+        color: '#5f6368',
+        fontWeight: '500',
+        fontSize: 16,
+    },
 });
 
 export default rideStepsUtilities;

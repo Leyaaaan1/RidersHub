@@ -59,7 +59,6 @@ public class MapboxService {
                                      List<double[]> stops) {
 
         rateLimitUtil.enforceRateLimitMapBox(RATE_LIMIT_KEY);
-
         // Build coordinate string
         StringBuilder coordBuilder = new StringBuilder();
         coordBuilder.append(startLon).append(",").append(startLat);
@@ -77,15 +76,26 @@ public class MapboxService {
                 coordinates, mapboxToken
         );
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(directionUrl, String.class);
-
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode root = mapper.readTree(response.getBody());
-            JsonNode coords = root.path("routes").get(0).path("geometry").path("coordinates");
-            return coords.toString(); // Return only the coordinates array
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(directionUrl, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode root = mapper.readTree(response.getBody());
+
+                // Check if routes exist and are not empty
+                if (root.has("routes") && root.path("routes").isArray() && root.path("routes").size() > 0) {
+                    JsonNode coords = root.path("routes").get(0).path("geometry").path("coordinates");
+                    return coords.toString(); // Return only the coordinates array
+                } else {
+                    return "[]"; // Return empty array if no routes
+                }
+            } else {
+                return "[]"; // Return empty array if request failed
+            }
         } catch (Exception e) {
+            e.printStackTrace(); // Log the detailed error
             return "[]"; // Return empty array if parsing fails
         }
     }

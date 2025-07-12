@@ -45,6 +45,12 @@ export const getDirections = async (token, startLon, startLat, endLon, endLat, s
         console.log('Raw response:', responseData);
 
         try {
+            // Handle empty responses
+            if (!responseData || responseData.trim() === '') {
+                console.warn('Empty response received');
+                return [];
+            }
+
             // Parse the coordinate array
             const coordinates = JSON.parse(responseData);
 
