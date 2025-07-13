@@ -4,10 +4,8 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, Activit
 import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
-import colors from '../../styles/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
-import { getDirections } from '../../services/mapService';
 
 const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLocationSelect, webViewRef, startingLatitude, startingLongitude, endingLatitude, endingLongitude, handleMessage, startingPoint, setStartingPoint, endingPoint, setEndingPoint, prevStep, loading, nextStep, handleCreateRide, handleSearchInputChange, searchQuery, stopPoints, setStopPoints, token }) => {
     const [currentStop, setCurrentStop] = useState(null);
@@ -19,8 +17,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
     const [showAddStopDialog, setShowAddStopDialog] = useState(false);
     const [stopConfirmDialogVisible, setStopConfirmDialogVisible] = useState(false);
     const [selectedStopLocation, setSelectedStopLocation] = useState(null);
-    const [routeError, setRouteError] = useState(null);
-    const [routeDisplayed, setRouteDisplayed] = useState(false);
 
     const startAddStopPoint = () => {
         setMapMode('stop');
@@ -68,7 +64,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
         setStopConfirmDialogVisible(false);
         setSelectedStopLocation(null);
         // After adding a stop, update the route visualization
-        fetchAndDisplayRoute();
     };
 
     const confirmStopPoint = () => {
@@ -81,7 +76,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
         setCurrentStop(null);
         setMapMode('ending');
         // After adding a stop, update the route visualization
-        fetchAndDisplayRoute();
     };
 
     const handleSelectLocationAndUpdateMap = async (item) => {
@@ -100,16 +94,12 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
     const finalizePointSelection = () => {
         if (mapMode === 'starting' && startingPoint) {
             setMapMode('ending');
-            // If we have both starting and ending points after selecting starting point, show preliminary route
-            if (endingPoint) {
-                fetchAndDisplayRoute();
-            }
+
         }
         else if (mapMode === 'ending' && endingPoint) {
             // Show dialog asking if user wants to add stop points
             setShowAddStopDialog(true);
             // Display route between start and end points
-            fetchAndDisplayRoute();
         }
     };
 
@@ -136,226 +126,7 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
         }
     };
 
-    // Fixed fetchAndDisplayRoute function with proper error handling and validation
-    const fetchAndDisplayRoute = async () => {
-        // Validate coordinates before making API call
-        if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
-            console.log('Missing coordinates, cannot fetch route');
-            return;
-        }
 
-        // Validate coordinate values
-        const startLat = parseFloat(startingLatitude);
-        const startLng = parseFloat(startingLongitude);
-        const endLat = parseFloat(endingLatitude);
-        const endLng = parseFloat(endingLongitude);
-
-        if (isNaN(startLat) || isNaN(startLng) || isNaN(endLat) || isNaN(endLng)) {
-            console.log('Invalid coordinates, cannot fetch route');
-            return;
-        }
-
-        try {
-            console.log('Fetching route with params:', {
-                startLng: startLng,
-                startLat: startLat,
-                endLng: endLng,
-                endLat: endLat,
-                stops: stopPoints.length
-            });
-
-            // Clear previous route error
-            setRouteError(null);
-
-            // Prepare stop points for the API call - match the structure expected by backend
-            const stopPointsPayload = stopPoints.map(sp => ({
-                stopName: sp.name || sp.stopName || null,
-                stopLongitude: parseFloat(sp.lng || sp.stopLongitude || 0),
-                stopLatitude: parseFloat(sp.lat || sp.stopLatitude || 0)
-            }));
-
-            // Validate stop points
-            const validStopPoints = stopPointsPayload.filter(sp =>
-                !isNaN(sp.stopLatitude) && !isNaN(sp.stopLongitude) &&
-                sp.stopLatitude !== 0 && sp.stopLongitude !== 0
-            );
-
-            console.log('Valid stop points:', validStopPoints);
-
-            // Get route data from the service
-            const routeData = await getDirections(
-                token,
-                startLng,
-                startLat,
-                endLng,
-                endLat,
-                validStopPoints
-            );
-
-            console.log('Route data received:', {
-                hasCoordinates: !!routeData.coordinates,
-                coordinateCount: routeData.coordinates?.length || 0,
-                routeData: routeData
-            });
-
-            // Extract coordinates from the response
-            const coordinates = routeData.coordinates || routeData.route?.coordinates;
-
-            if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
-                console.warn('No valid route coordinates found, using fallback');
-                drawFallbackRoute();
-                return;
-            }
-
-            // Validate coordinate format - ensure each coordinate is a valid [lng, lat] pair
-            const validCoordinates = coordinates.filter(coord =>
-                Array.isArray(coord) &&
-                coord.length === 2 &&
-                !isNaN(coord[0]) &&
-                !isNaN(coord[1]) &&
-                coord[0] !== 0 && coord[1] !== 0
-            );
-
-            if (validCoordinates.length === 0) {
-                console.warn('No valid coordinate pairs found, using fallback');
-                drawFallbackRoute();
-                return;
-            }
-
-            console.log('Valid coordinates:', validCoordinates.length, 'out of', coordinates.length);
-
-            // Send the coordinates to the WebView to draw the route
-            if (webViewRef.current) {
-                console.log('Sending route data to WebView');
-                drawRouteOnMap(validCoordinates);
-                setRouteDisplayed(true);
-            } else {
-                console.warn('WebView reference is not available');
-            }
-
-        } catch (error) {
-            console.error('Error fetching route:', error);
-            setRouteError('Unable to fetch route from server. Using direct route.');
-
-            // Show user-friendly error message
-            if (error.message && error.message.includes('500')) {
-                console.log('Server error detected, falling back to direct route');
-            }
-
-            // Always fallback to direct route on error
-            drawFallbackRoute();
-        }
-    };
-
-    // Helper function to draw route on map
-    const drawRouteOnMap = (coordinates) => {
-        const routeDisplayData = {
-            type: 'drawRoute',
-            coordinates: coordinates,
-            points: {
-                start: {
-                    lat: parseFloat(startingLatitude),
-                    lng: parseFloat(startingLongitude)
-                },
-                end: {
-                    lat: parseFloat(endingLatitude),
-                    lng: parseFloat(endingLongitude)
-                },
-                stops: stopPoints.map(sp => ({
-                    lat: parseFloat(sp.lat || sp.stopLatitude || 0),
-                    lng: parseFloat(sp.lng || sp.stopLongitude || 0),
-                    name: sp.name || sp.stopName || 'Stop Point'
-                }))
-            }
-        };
-
-        if (webViewRef.current) {
-            webViewRef.current.injectJavaScript(`
-                try {
-                    console.log('Injecting route data...');
-                    const data = ${JSON.stringify(routeDisplayData)};
-                    console.log('Data to process:', data.type, data.coordinates.length, 'coordinates');
-                    
-                    // Send directly to the window message handler
-                    window.dispatchEvent(new MessageEvent('message', { data }));
-                    
-                    console.log('Route drawing message sent successfully');
-                } catch(e) {
-                    console.error('Error in injected JavaScript:', e);
-                    window.ReactNativeWebView.postMessage(JSON.stringify({
-                        type: 'routeDrawError', 
-                        error: 'JavaScript injection error: ' + e.message
-                    }));
-                }
-                true;
-            `);
-        }
-    };
-
-    // Helper function to create and draw a straight line route as fallback
-    const drawFallbackRoute = () => {
-        console.log('Drawing fallback route...');
-        const fallbackCoordinates = createStraightLineRoute();
-        drawRouteOnMap(fallbackCoordinates);
-        setRouteDisplayed(true);
-    };
-
-    // Helper function to create a straight line route as fallback
-    const createStraightLineRoute = () => {
-        const coordinates = [];
-
-        // Add starting point [longitude, latitude]
-        coordinates.push([parseFloat(startingLongitude), parseFloat(startingLatitude)]);
-
-        // Add stop points in order
-        stopPoints.forEach(stop => {
-            const stopLng = parseFloat(stop.lng || stop.stopLongitude || 0);
-            const stopLat = parseFloat(stop.lat || stop.stopLatitude || 0);
-            if (!isNaN(stopLng) && !isNaN(stopLat) && stopLng !== 0 && stopLat !== 0) {
-                coordinates.push([stopLng, stopLat]);
-            }
-        });
-
-        // Add ending point
-        coordinates.push([parseFloat(endingLongitude), parseFloat(endingLatitude)]);
-
-        console.log('Created fallback route with', coordinates.length, 'points');
-        return coordinates;
-    };
-
-    // Updated useEffect with better timing and dependencies
-    useEffect(() => {
-        // Only fetch route if we have all required coordinates and haven't displayed route yet
-        if (startingLatitude && startingLongitude && endingLatitude && endingLongitude && !routeDisplayed) {
-            console.log('Route dependencies changed, scheduling route fetch...');
-
-            // Clear any existing timeout
-            const timer = setTimeout(() => {
-                console.log('Fetching route after WebView load delay...');
-                fetchAndDisplayRoute();
-            }, 1500); // Reduced delay
-
-            return () => {
-                console.log('Clearing route fetch timeout');
-                clearTimeout(timer);
-            };
-        } else if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
-            console.log('Missing required coordinates for route:', {
-                startingLatitude,
-                startingLongitude,
-                endingLatitude,
-                endingLongitude
-            });
-            setRouteDisplayed(false);
-        }
-    }, [startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints.length, token]);
-
-    // Reset route displayed when coordinates change
-    useEffect(() => {
-        setRouteDisplayed(false);
-    }, [startingLatitude, startingLongitude, endingLatitude, endingLongitude]);
-
-    // Updated onWebViewMessage function with better error handling
     const onWebViewMessage = (event) => {
         try {
             const data = JSON.parse(event.nativeEvent.data);
@@ -365,29 +136,7 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                 case 'mapReady':
                     console.log('Map is ready, dark mode:', data.isDarkTheme);
                     setMapDarkMode(data.isDarkTheme);
-                    // Reset route displayed state when map is ready
-                    setRouteDisplayed(false);
-                    // If we have coordinates already, draw the route when map is ready
-                    if (startingLatitude && startingLongitude && endingLatitude && endingLongitude) {
-                        setTimeout(() => {
-                            fetchAndDisplayRoute();
-                        }, 1000); // Small delay to ensure map is fully loaded
-                    }
                     break;
-
-                case 'routeDrawn':
-                    console.log('Route drawn successfully with', data.pointCount, 'coordinates');
-                    setRouteError(null);
-                    break;
-
-                case 'routeDrawError':
-                    console.error('Route drawing error:', data.error);
-                    if (data.stack) {
-                        console.error('Error stack:', data.stack);
-                    }
-                    setRouteError('Error displaying route on map');
-                    break;
-
                 case 'mapError':
                     console.error('Map initialization error:', data.error);
                     break;
@@ -403,7 +152,6 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                 case 'requestRouteRedraw':
                     console.log('Route redraw requested after map interaction');
                     setRouteDisplayed(false);
-                    fetchAndDisplayRoute();
                     break;
 
                 default:
@@ -465,12 +213,7 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                 />
             </View>
 
-            {/* Error Message if route cannot be displayed */}
-            {routeError && (
-                <View style={rideStepsUtilities.errorContainer}>
-                    <Text style={rideStepsUtilities.errorText}>{routeError}</Text>
-                </View>
-            )}
+
 
             {/* Modern Floating Navbar */}
             <View style={rideStepsUtilities.navbarContainerPrimary}>

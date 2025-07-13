@@ -32,8 +32,8 @@ const CreateRide = ({ route, navigation }) => {
     const [startingLongitude, setStartingLongitude] = useState('125.6128');
 
     const [endingPoint, setEndingPoint] = useState('');
-    const [endingLatitude, setEndingLatitude] = useState('7.0731');
-    const [endingLongitude, setEndingLongitude] = useState('125.6128');
+    const [endingLatitude, setEndingLatitude] = useState(startingLatitude);
+    const [endingLongitude, setEndingLongitude] = useState(startingLongitude);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -43,6 +43,7 @@ const CreateRide = ({ route, navigation }) => {
     const [searchedRiders, setSearchedRiders] = useState([]);
     const [isRiderSearching, setIsRiderSearching] = useState(false);
 
+    const [mapboxImageUrl, setMapboxImageUrl] = useState('');
     const [generatedRidesId, setGeneratedRidesId] = useState(null);
     const [showRideModal, setShowRideModal] = useState(false);
 
@@ -162,84 +163,47 @@ const CreateRide = ({ route, navigation }) => {
                 ? participants.split(',').map(p => p.trim())
                 : []);
 
-        // Prepare stopPoints for backend (matching StopPointDTO structure)
+        // Prepare stopPoints for backend (lat, lng, name)
         const stopPointsPayload = stopPoints.map(sp => ({
             stopLatitude: sp.lat || sp.stopLatitude,
             stopLongitude: sp.lng || sp.stopLongitude,
             stopName: sp.name || sp.stopName
         }));
 
+        const rideData = {
+            ridesName: rideName,
+            locationName: locationName,
+            riderType: riderType || 'CAR',
+            date: date.toISOString(),
+            latitude: parseFloat(latitude) || 0,
+            longitude: parseFloat(longitude) || 0,
+            startLat: parseFloat(startingLatitude) || 0,
+            startLng: parseFloat(startingLongitude) || 0,
+            endLat: parseFloat(endingLatitude) || 0,
+            endLng: parseFloat(endingLongitude) || 0,
+            startingPoint: startingPoint,
+            endingPoint: endingPoint,
+            participants: participantsArray,
+            description: description,
+            mapboxImageUrl: mapboxImageUrl,
+            stopPoints: stopPointsPayload
+        };
+
         try {
-            // Prepare ride data matching the new backend structure
-            const rideData = {
-                generatedRidesId: null, // Let backend generate this
-                creatorUsername: username,
-                ridesName: rideName,
-                locationName: locationName,
-                riderType: riderType || 'CAR',
-                date: date.toISOString(),
-                participantUsernames: participantsArray,
-                description: description,
-                latitude: parseFloat(latitude) || 0,
-                longitude: parseFloat(longitude) || 0,
-                startLatitude: parseFloat(startingLatitude) || 0,
-                startLongitude: parseFloat(startingLongitude) || 0,
-                endLatitude: parseFloat(endingLatitude) || 0,
-                endLongitude: parseFloat(endingLongitude) || 0,
-                stopPointsDto: stopPointsPayload
-            };
-
-            console.log('Creating ride with data:', rideData);
-
-            // Make the API call to create the ride - backend handles everything now
-            const result = await createRide(rideData, token);
-
+            const result = await createRide(token, rideData);
             if (result && result.generatedRidesId) {
                 setGeneratedRidesId(result.generatedRidesId);
-
-                // Check if backend used straight line route (if this info is returned)
-                if (result.usedStraightLineRoute) {
-                    Alert.alert(
-                        'Route Information',
-                        'The route was too long for detailed directions. A simplified route has been created instead.',
-                        [{ text: 'OK' }]
-                    );
-                }
-
                 navigation.navigate('RideStep4', {
                     generatedRidesId: result.generatedRidesId,
-                    rideName,
-                    locationName,
-                    riderType,
-                    date,
-                    startingPoint,
-                    endingPoint,
-                    participants,
-                    description,
-                    token,
-                    username
+                    rideName, locationName, riderType, date, startingPoint, endingPoint, participants, description, token, username
                 });
             } else {
                 setError('Created ride but no ID was returned. Please try again.');
                 Alert.alert('Warning', 'Ride was created but ID is missing');
             }
         } catch (err) {
-            console.error('Error creating ride:', err);
-
-            // Handle different error types
-            if (err.message && err.message.includes('Route exceeds maximum distance')) {
-                setError('The route distance exceeds maximum limitations. Please choose closer destinations or fewer stop points.');
-                Alert.alert(
-                    'Route Too Long',
-                    'The distance between your starting point, stops, and destination exceeds the maximum allowed. Please choose closer locations or fewer stops.'
-                );
-            } else if (err.message && err.message.includes('Failed to save ride')) {
-                setError('Failed to save the ride. Please try again.');
-                Alert.alert('Error', 'Failed to save the ride. Please try again.');
-            } else {
-                setError(err.message || 'An error occurred while creating the ride');
-                Alert.alert('Error', err.message || 'Failed to create ride');
-            }
+            setError(err.message || 'An error occurred');
+            Alert.alert('Error', err.message || 'Failed to create ride');
         } finally {
             setLoading(false);
         }
