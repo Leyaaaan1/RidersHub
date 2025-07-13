@@ -22,12 +22,10 @@ import java.util.stream.Collectors;
 public class MapboxController {
     private final MapboxService mapboxService;
 
-    private final RidesService ridesService;
 
     @Autowired
-    public MapboxController(MapboxService mapboxService, RidesService ridesService) {
+    public MapboxController(MapboxService mapboxService) {
         this.mapboxService = mapboxService;
-        this.ridesService = ridesService;
     }
 
     @GetMapping("/staticImage")

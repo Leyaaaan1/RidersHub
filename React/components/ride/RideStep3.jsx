@@ -1,176 +1,61 @@
-
-import React, {useEffect, useState} from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
-import rideStepsUtilities from '../../styles/rideStepsUtilities';
+import React, { useEffect, useState } from 'react';
+import {
+    View, Text, TextInput, TouchableOpacity,
+    ScrollView, StatusBar, ActivityIndicator
+} from 'react-native';
 import { WebView } from 'react-native-webview';
-import getMapHTML from '../../utils/mapHTML';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { reverseGeocodeLandmark } from '../../services/rideService';
+import rideStepsUtilities from '../../styles/rideStepsUtilities';
+import getMapHTML from '../../utils/mapHTML';
+import * as ride3Utils from './utils/ride3Utils';
 
-const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLocationSelect, webViewRef, startingLatitude, startingLongitude, endingLatitude, endingLongitude, handleMessage, startingPoint, setStartingPoint, endingPoint, setEndingPoint, prevStep, loading, nextStep, handleCreateRide, handleSearchInputChange, searchQuery, stopPoints, setStopPoints, token }) => {
+const RideStep3 = ({
+                       mapMode, setMapMode,
+                       isSearching, searchResults,
+                       handleLocationSelect, webViewRef,
+                       startingLatitude, startingLongitude,
+                       endingLatitude, endingLongitude,
+                       handleMessage, startingPoint, setStartingPoint,
+                       endingPoint, setEndingPoint,
+                       prevStep, loading, handleCreateRide,
+                       handleSearchInputChange, searchQuery,
+                       stopPoints, setStopPoints, token
+                   }) => {
     const [currentStop, setCurrentStop] = useState(null);
     const [isAddingStop, setIsAddingStop] = useState(false);
     const [addingStopLoading, setAddingStopLoading] = useState(false);
-    const [showProgressBar, setShowProgressBar] = useState(true);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [mapDarkMode, setMapDarkMode] = useState(false);
-    const [showAddStopDialog, setShowAddStopDialog] = useState(false);
     const [stopConfirmDialogVisible, setStopConfirmDialogVisible] = useState(false);
     const [selectedStopLocation, setSelectedStopLocation] = useState(null);
-
+    const [routeDisplayed, setRouteDisplayed] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [showProgressBar, setShowProgressBar] = useState(true);
+    const [showAddStopDialog, setShowAddStopDialog] = useState(false);
     const startAddStopPoint = () => {
         setMapMode('stop');
         setIsAddingStop(true);
         setCurrentStop(null);
     };
 
-    const handleStopMapMessage = async (event) => {
-        const data = JSON.parse(event.nativeEvent.data);
-        if (data.type === 'mapClick') {
-            setAddingStopLoading(true);
-            try {
-                const stopName = await reverseGeocodeLandmark(token, data.lat, data.lng);
-                setSelectedStopLocation({
-                    lat: data.lat,
-                    lng: data.lng,
-                    name: stopName || `${data.lat}, ${data.lng}`
-                });
-                setStopConfirmDialogVisible(true);
-            } catch (error) {
-                console.error('Error getting stop location name:', error);
-                setSelectedStopLocation({
-                    lat: data.lat,
-                    lng: data.lng,
-                    name: `${data.lat}, ${data.lng}`
-                });
-                setStopConfirmDialogVisible(true);
-            }
-            setAddingStopLoading(false);
-        }
-    };
 
-    const confirmSelectedStop = () => {
-        if (!selectedStopLocation) return;
-
-        setStopPoints(prev => [
-            ...prev,
-            {
-                lat: selectedStopLocation.lat,
-                lng: selectedStopLocation.lng,
-                name: selectedStopLocation.name
-            }
-        ]);
-
-        setStopConfirmDialogVisible(false);
-        setSelectedStopLocation(null);
-        // After adding a stop, update the route visualization
-    };
-
-    const confirmStopPoint = () => {
-        if (!currentStop) return;
-        setStopPoints(prev => [
-            ...prev,
-            { lat: currentStop.lat, lng: currentStop.lng, name: currentStop.name }
-        ]);
-        setIsAddingStop(false);
-        setCurrentStop(null);
-        setMapMode('ending');
-        // After adding a stop, update the route visualization
-    };
-
-    const handleSelectLocationAndUpdateMap = async (item) => {
-        await handleLocationSelect(item);
-        const lat = parseFloat(item.lat);
-        const lon = parseFloat(item.lon);
-        if (webViewRef.current) {
-            webViewRef.current.injectJavaScript(`
-            map.setView([${lat}, ${lon}], 15);
-            marker.setLatLng([${lat}, ${lon}]);
-            true;
-        `);
-        }
-    };
+    useEffect(() => {
+        ride3Utils.updateRouteVisualization(
+            webViewRef,
+            startingLatitude, startingLongitude,
+            startingPoint,
+            endingLatitude, endingLongitude,
+            endingPoint,
+            stopPoints
+        );
+    }, [startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints]);
 
     const finalizePointSelection = () => {
         if (mapMode === 'starting' && startingPoint) {
             setMapMode('ending');
-
         }
         else if (mapMode === 'ending' && endingPoint) {
             // Show dialog asking if user wants to add stop points
             setShowAddStopDialog(true);
-            // Display route between start and end points
-        }
-    };
-
-    const handleStopLocationSelect = (item) => {
-        const lat = parseFloat(item.lat);
-        const lon = parseFloat(item.lon);
-
-        setSelectedStopLocation({
-            lat: lat,
-            lng: lon,
-            name: item.display_name
-        });
-
-        // Show confirmation dialog
-        setStopConfirmDialogVisible(true);
-
-        // Update map view to show selected location
-        if (webViewRef.current) {
-            webViewRef.current.injectJavaScript(`
-                map.setView([${lat}, ${lon}], 15);
-                L.marker([${lat}, ${lon}]).addTo(map).bindPopup("${item.display_name}").openPopup();
-                true;
-            `);
-        }
-    };
-
-
-    const onWebViewMessage = (event) => {
-        try {
-            const data = JSON.parse(event.nativeEvent.data);
-            console.log('WebView message received:', data.type);
-
-            switch (data.type) {
-                case 'mapReady':
-                    console.log('Map is ready, dark mode:', data.isDarkTheme);
-                    setMapDarkMode(data.isDarkTheme);
-                    break;
-                case 'mapError':
-                    console.error('Map initialization error:', data.error);
-                    break;
-
-                case 'messageError':
-                    console.error('Message handling error:', data.error);
-                    break;
-
-                case 'themeChange':
-                    setMapDarkMode(data.isDarkTheme);
-                    break;
-
-                case 'requestRouteRedraw':
-                    console.log('Route redraw requested after map interaction');
-                    setRouteDisplayed(false);
-                    break;
-
-                default:
-                    // Handle other message types (stop points, map clicks, etc.)
-                    if (mapMode === 'stop' && isAddingStop) {
-                        handleStopMapMessage(event);
-                    } else {
-                        handleMessage(event);
-                    }
-
-                    // Preserve theme state if it's included in the message
-                    if (data.isDarkTheme !== undefined) {
-                        setMapDarkMode(data.isDarkTheme);
-                    }
-                    break;
-            }
-        } catch (error) {
-            console.error('Error parsing WebView message:', error);
-            console.error('Raw message data:', event.nativeEvent.data);
         }
     };
 
@@ -186,30 +71,27 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                 return 'Search location';
         }
     };
+    const onWebViewMessage = (event) =>
+        ride3Utils.onWebViewMessage(
+            event,
+            mapMode, isAddingStop,
+            ride3Utils.handleStopMapMessage,
+            handleMessage,
+            setMapDarkMode,
+            setRouteDisplayed
+        );
 
     return (
         <View style={rideStepsUtilities.containerWhite}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-
-            {/* Full-screen Map */}
-            <View style={{
-                position: 'absolute',
-                top: 0, left: 0, right: 0, bottom: 0, height: '100%'
-            }}>
+            <View style={{ position: 'absolute', top:0,left:0,right:0,bottom:0 }}>
                 <WebView
                     ref={webViewRef}
-                    source={{ html: getMapHTML(
-                            mapMode === 'starting' ? startingLatitude :
-                                mapMode === 'ending' ? endingLatitude :
-                                    (currentStop ? currentStop.lat : startingLatitude),
-                            mapMode === 'starting' ? startingLongitude :
-                                mapMode === 'ending' ? endingLongitude :
-                                    (currentStop ? currentStop.lng : startingLongitude),
-                            mapDarkMode
-                        ) }}
+                    originWhitelist={["*"]}
+                    source={{ html: getMapHTML(startingLatitude, startingLongitude, mapDarkMode) }}
                     style={{ flex: 1 }}
                     onMessage={onWebViewMessage}
-                    javaScriptEnabled={true}
+                    javaScriptEnabled
                 />
             </View>
 
@@ -258,7 +140,7 @@ const RideStep3 = ({ mapMode, setMapMode, isSearching, searchResults, handleLoca
                         onSubmitEditing={() => handleSearchInputChange(searchQuery)}
                         editable={mapMode !== 'stop' || !isAddingStop}
                     />
-                    {searchQuery.length > 0 && (
+                    {searchQuery && searchQuery.length > 0 && (
                         <TouchableOpacity
                             onPress={() => handleSearchInputChange('')}
                             style={{ padding: 4, marginRight: 8 }}

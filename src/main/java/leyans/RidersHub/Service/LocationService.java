@@ -32,6 +32,16 @@ public class LocationService {
         Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
         point.setSRID(4326);
         return point;
+    }   public int calculateDistance(Point startPoint, Point endPoint) {
+        double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
+        return (int) Math.round(distanceInMeters / 1000);
+    }
+
+    public LineString createLineStringFromCoordinates(List<Coordinate> coordinates) {
+        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
+        LineString line = factory.createLineString(coordinates.toArray(new Coordinate[0]));
+        line.setSRID(4326);
+        return line;
     }
 
 
@@ -62,17 +72,7 @@ public class LocationService {
         return landmark;
     }
 
-    public int calculateDistance(Point startPoint, Point endPoint) {
-        double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
-        return (int) Math.round(distanceInMeters / 1000);
-    }
 
-    public LineString createLineStringFromCoordinates(List<Coordinate> coordinates) {
-        GeometryFactory factory = new GeometryFactory(new PrecisionModel(), 4326);
-        LineString line = factory.createLineString(coordinates.toArray(new Coordinate[0]));
-        line.setSRID(4326);
-        return line;
-    }
 
 
 
