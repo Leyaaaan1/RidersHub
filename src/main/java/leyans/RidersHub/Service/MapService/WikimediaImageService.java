@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.DTO.LocationImageDto;
 import leyans.RidersHub.Util.RateLimitUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,25 +18,24 @@ public class WikimediaImageService {
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
-    private final RateLimitUtil rateLimitUtil;
 
-    private static final String WIKIMEDIA_API_BASE = "https://commons.wikimedia.org/w/api.php";
-    private static final String RATE_LIMIT_KEY = "wikimedia_api";
 
-    public WikimediaImageService(RateLimitUtil rateLimitUtil) {
-        this.rateLimitUtil = rateLimitUtil;
-        this.restTemplate = new RestTemplate();
-        this.objectMapper = new ObjectMapper();
+    @Value("${WIKIMEDIA_API_BASE}")
+    private String wikimediaApiBase;
+
+
+    public WikimediaImageService(RestTemplate restTemplate, ObjectMapper objectMapper) {
+        this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
-    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase().trim()")
+
     public List<LocationImageDto> getLocationImage(String locationName) {
-        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
         System.out.println("Fetching images from Wikimedia API for: " + locationName);
         try {
             String enhancedSearchTerm = enhanceSearchForMindanao(locationName);
 
-            String searchUrl = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API_BASE)
+            String searchUrl = UriComponentsBuilder.fromHttpUrl(wikimediaApiBase)
                     .queryParam("action", "query")
                     .queryParam("format", "json")
                     .queryParam("list", "search")
@@ -57,7 +57,7 @@ public class WikimediaImageService {
             List<LocationImageDto> images = new ArrayList<>();
 
             for (String fileName : fileTitles) {
-                String imageInfoUrl = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API_BASE)
+                String imageInfoUrl = UriComponentsBuilder.fromHttpUrl(wikimediaApiBase)
                         .queryParam("action", "query")
                         .queryParam("format", "json")
                         .queryParam("titles", fileName)
@@ -99,7 +99,6 @@ public class WikimediaImageService {
         }
     }
 
-    @Cacheable(value = "locationImages", key = "#locationName.toLowerCase().trim()", condition = "false")
     public List<LocationImageDto> checkCachedLocationImage(String locationName) {
         return null; // This will only return the cached value
     }
