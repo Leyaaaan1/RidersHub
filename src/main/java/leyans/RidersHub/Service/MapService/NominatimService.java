@@ -2,9 +2,7 @@ package leyans.RidersHub.Service.MapService;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import leyans.RidersHub.Util.RateLimitUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -24,35 +22,35 @@ import java.util.Map;
 
 @Component
 public class NominatimService {
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RateLimitUtil rateLimitUtil;
-    private static final String RATE_LIMIT_KEY = "nominatim_api";
+
+    private final RestTemplate restTemplate;
+
 
     @Value("${USER_AGENT}")
     private String userAgent;
 
+    @Value("${NOMINATIM_API_BASE}")
+    private String nominatimApiBase;
 
-    public NominatimService( RateLimitUtil rateLimitUtil) {
-        this.rateLimitUtil = rateLimitUtil;
-        this.restTemplate = new RestTemplate();
+
+    public NominatimService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
-    @Cacheable(value = "geocoding", key = "'barangay_' + #lat + '_' + #lon", unless = "#result == null")
+
     public String getBarangayNameFromCoordinates(double lat, double lon) {
         return getBarangayNameFromCoordinatesInternal(lat, lon);
     }
     private String getBarangayNameFromCoordinatesInternal(double lat, double lon) {
-        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
-        System.out.println(" getBarangayNameFromCoordinatesInternal (cache miss)");
 
-        String url = "https://nominatim.openstreetmap.org/reverse?" +
+        String url = nominatimApiBase + "/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
                 "&zoom=18&addressdetails=1" +
                 "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = createHeaders();
         headers.set("Accept-Language", "en");
         headers.set("User-Agent", userAgent);
 
@@ -76,20 +74,17 @@ public class NominatimService {
         return null;
     }
 
-    @Cacheable(value = "geocoding", key = "'city_' + #lat + '_' + #lon", unless = "#result == null")
     public String getCityOrLandmarkFromCoordinates(double lat, double lon) {
         return getCityOrLandmarkFromCoordinatesInternal(lat, lon);
     }
 
     public String getCityOrLandmarkFromCoordinatesInternal(double lat, double lon) {
-        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
-        System.out.println(" getCityOrLandmarkFromCoordinatesInternal (cache miss)");
-        String url = "https://nominatim.openstreetmap.org/reverse?" +
+        String url = nominatimApiBase + "/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
                 "&zoom=18&addressdetails=1" +
                 "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = createHeaders();
         headers.set("Accept-Language", "en");
         headers.set("User-Agent", userAgent);
 
@@ -132,21 +127,19 @@ public class NominatimService {
         return null;
     }
 
-    @Cacheable(value = "geocoding", key = "'search_' + #query.toLowerCase().trim() + '_' + #limit", unless = "#result == null")
     public List<Map<String, Object>> searchLocation(String query) {
         return searchLocation(query, 5);
     }
 
     public List<Map<String, Object>> searchLocation(String query, int limit) {
-        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
         System.out.println(" searchLocation (cache miss)");
 
-        String url = "https://nominatim.openstreetmap.org/search?" +
+        String url = nominatimApiBase + "/search?" +
                 "q=" + UriUtils.encodeQuery(query, StandardCharsets.UTF_8) +
                 "&countrycodes=ph&format=json&limit=" + limit +
                 "&addressdetails=1&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
 
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = createHeaders();
         headers.set("User-Agent", userAgent);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -160,24 +153,21 @@ public class NominatimService {
         }
     }
 
-    @Cacheable(value = "geocoding", key = "'citylandmark_' + #query?.toLowerCase()?.trim() + '_' + #limit", unless = "#result == null")
     public List<Map<String, Object>> searchCityOrLandmark(String query) {
         return searchCityOrLandmark(query, 5);
 
     }
 
     public List<Map<String, Object>> searchCityOrLandmark(String query, int limit) {
-        rateLimitUtil.freeApiAllowed(RATE_LIMIT_KEY);
 
-        System.out.println(" searchCityOrLandmark (cache miss)");
         try {
             String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
             String url = String.format(
-                    "https://nominatim.openstreetmap.org/search?q=%s&format=jsonv2&addressdetails=1&limit=%d&countrycodes=ph",
-                    encodedQuery, limit * 2
+                    "%s/search?q=%s&format=jsonv2&addressdetails=1&limit=%d&countrycodes=ph",
+                    nominatimApiBase, encodedQuery, limit * 2
             );
 
-            HttpHeaders headers = new HttpHeaders();
+            HttpHeaders headers = createHeaders();
             headers.set("User-Agent", userAgent);
 
             HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -236,6 +226,12 @@ public class NominatimService {
             System.err.println("Nominatim Search Error: " + e.getMessage());
             return Collections.emptyList();
         }
+    }
+    private HttpHeaders createHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept-Language", "en");
+        headers.set("User-Agent", userAgent);
+        return headers;
     }
 
 }

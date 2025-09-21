@@ -89,6 +89,9 @@ public class Rides {
     @Column(name = "map_ending_url")
     private String magImageEndingLocation;
 
+    @Column(name = "route_coordinates", columnDefinition = "TEXT")
+    private String routeCoordinates;
+
     public Rides() {
     }
 
@@ -97,7 +100,8 @@ public class Rides {
                  Point endingLocation, String ridesName, String description,
                  Rider username, RiderType riderType, Integer distance, LocalDateTime date,
                  String mapImageUrl,
-                 String magImageStartingLocation, String magImageEndingLocation) {
+                 String magImageStartingLocation, String magImageEndingLocation,
+                 String routeCoordinates) {
         this.generatedRidesId = generatedRidesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -115,7 +119,16 @@ public class Rides {
         this.mapImageUrl = mapImageUrl;
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
+        this.routeCoordinates = routeCoordinates;
 
+    }
+
+    public String getRouteCoordinates() {
+        return routeCoordinates;
+    }
+
+    public void setRouteCoordinates(String routeCoordinates) {
+        this.routeCoordinates = routeCoordinates;
     }
 
     public List<StopPoint> getStopPoints() {

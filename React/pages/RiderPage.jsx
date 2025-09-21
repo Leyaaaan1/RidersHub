@@ -1,6 +1,15 @@
-
 import React, {useEffect, useState} from "react";
-import {View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert, StatusBar, ScrollView} from 'react-native';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    TextInput,
+    ActivityIndicator,
+    Alert,
+    StatusBar,
+    ScrollView,
+    FlatList
+} from 'react-native';
 import utilities from "../styles/utilities";
 import riderPageUtils from "../styles/riderPageUtils";
 import colors from "../styles/colors";
@@ -13,8 +22,7 @@ import rideUtilities from "../styles/rideUtilities";
 import MyRidesModal from '../components/MyRidesModal';
 import {getCurrentStartedRides,} from "../services/startService";
 import CurrentRideHeader from "../components/CurrentRideHeader";
-
-
+import { modernUtilities } from "../styles/modernUtilities"; // Import separated utilities
 
 
 const RiderPage = ({ route , navigation}) => {
@@ -33,8 +41,6 @@ const RiderPage = ({ route , navigation}) => {
         fetchCurrentRiderType();
     }, [token]);
 
-
-
     const fetchCurrentRiderType = async () => {
         try {
             setLoading(true);
@@ -52,6 +58,7 @@ const RiderPage = ({ route , navigation}) => {
             setLoading(false);
         }
     };
+
     const fetchAndDisplayStartedRides = async (token) => {
         try {
             const rides = await getCurrentStartedRides(token);
@@ -81,85 +88,26 @@ const RiderPage = ({ route , navigation}) => {
             .finally(() => setStartedRidesLoading(false));
     }, [token]);
 
-    return (
-        <View style={utilities.containerWhite}>
-
-            <View style={utilities.navbarContainerPrimary}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 5 }}>
-                    <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                        <Text style={[utilities.textWhite, { fontWeight: 'bold' }]}>{username?.toUpperCase()}</Text>
-                        {loading ? (
-                            <Text style={utilities.textWhite}>Loading...</Text>
-                        ) : (
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <FontAwesome
-                                    name={
-                                        riderType?.riderType === 'car' ? 'car' :
-                                            riderType?.riderType === 'motor' || riderType?.riderType === 'Motorcycle' ? 'motorcycle' :
-                                                riderType?.riderType === 'bike' || riderType?.riderType === 'Bicycle' ? 'bicycle' :
-                                                    riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
-                                    }
-                                    size={16}
-                                    color="#fff"
-                                    style={{ marginRight: 5 }}
-                                />
-                            </View>
-                        )}
-                    </View>
-
-                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                        <TouchableOpacity
-                            style={[
-                                {
-                                    borderStyle: 'dashed',
-                                    borderWidth: 1,
-                                    borderColor: colors.white,
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: 40,
-                                }
-                            ]}
-                            onPress={() => {
-                                if (!token) {
-                                    Alert.alert('Error', 'Authentication token is missing');
-                                    return;
-                                }
-                                navigation.navigate('CreateRide', { token, username });
-                            }}
-                        >
-                            <Text style={[utilities.smallTextBlack, { color: colors.white, textAlign: 'center' }]}>Create</Text>
-                        </TouchableOpacity>
-
-                    </View>
-
-                <View style={{ flex: 1, alignItems: 'flex-end'}}>
-                    <View style={{ width: 150, alignSelf: 'flex-end' }}>
-                        <SearchHeader
-                            token={token}
-                            username={username}
-                            navigation={navigation}
-                        />
-                    </View>
-                </View>
-                </View>
-            </View>
-
-
-            <View style={riderPageUtils.contentContainer}>
+    const renderActiveRidesSection = () => {
+        if (!startedRidesLoading && startedRides.length === 0 && !startedRidesError) {
+            return null;
+        }
+        return (
+            <View>
                 {startedRidesLoading ? (
-                    <ActivityIndicator color={colors.white} size="small" style={{ marginTop: 6 }} />
+                    <View style={modernUtilities.loadingContainer}>
+                        <ActivityIndicator color="#8c2323" size="small" />
+                    </View>
                 ) : startedRidesError ? (
-                    <Text style={utilities.currentRideError}>{startedRidesError}</Text>
+                    <Text style={modernUtilities.errorText}>{startedRidesError}</Text>
                 ) : startedRides.length > 0 ? (
                     startedRides.map((ride, idx) => (
-                        <View
+                        <TouchableOpacity
                             key={idx}
-                            style={utilities.currentRideItem}
-                            onTouchEnd={() => {
+                            style={modernUtilities.activeRideCard}
+                            onPress={() => {
                                 navigation.navigate('StartedRide', {
-                                    generatedRidesId: ride.ridesId, // Pass as generatedRidesId
+                                    generatedRidesId: ride.ridesId,
                                     ridesName: ride.ridesName,
                                     locationName: ride.locationName,
                                     token: token,
@@ -167,26 +115,137 @@ const RiderPage = ({ route , navigation}) => {
                                 });
                             }}
                         >
-                            <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
-                                <Text style={utilities.currentRideValue}>
-                                    {ride.locationName} (ID: {ride.ridesId})
-                                </Text>
-                                <Text style={{ marginLeft: 8, color: 'green', fontWeight: 'bold', fontSize: 12 , padding: 6}}>Active</Text>
-                                <FontAwesome name="circle" size={14} color="green" />
+                            <View style={modernUtilities.activeRideHeader}>
+                                <Text style={modernUtilities.activeRideName}>{ride.ridesName} </Text>
+                                <View style={modernUtilities.activeStatus}>
+                                    <FontAwesome name="circle" size={6} color="#27ae60" />
+                                    <Text style={modernUtilities.activeStatusText}>ACTIVE</Text>
+                                </View>
                             </View>
-                            <View>
-                                <Text style={utilities.currentRideLabelMiddle}>
-                                    Rides Name: <Text style={utilities.currentRideValueMiddle}>{ride.ridesName}</Text>
-                                </Text>
-                            </View>
-                        </View>
+                            <Text style={modernUtilities.activeRideLocation}>{ride.locationName}</Text>
+                            <Text style={modernUtilities.activeRideId}>ID: {ride.ridesId}</Text>
+                        </TouchableOpacity>
                     ))
                 ) : (
-                    <Text style={utilities.currentRideEmpty}>No ongoing ride found.</Text>
+                    <View style={modernUtilities.emptyState}>
+                        <FontAwesome name="bicycle" size={30} color="#bdc3c7" />
+                        <Text style={modernUtilities.emptyStateText}>No ongoing ride found.</Text>
+                    </View>
                 )}
-                <RidesList
-                    token={token}
+            </View>
+        );
+    };
 
+
+    return (
+        <View style={modernUtilities.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#151515" />
+
+            {/* Modern Header */}
+            <View style={modernUtilities.headerContainer}>
+                <View style={modernUtilities.userSection}>
+                    <View style={modernUtilities.userInfo}>
+                        <View style={modernUtilities.avatar}>
+                            <FontAwesome name="user" size={20} color="#fff" />
+                        </View>
+                        <View style={modernUtilities.userDetails}>
+                            <Text style={modernUtilities.welcomeText}>Welcome back,</Text>
+                            <Text style={modernUtilities.usernameText}>{username?.toUpperCase()}</Text>
+                            {loading ? (
+                                <ActivityIndicator color="#fff" size="small" style={{ marginTop: 4 }} />
+                            ) : (
+                                <View style={modernUtilities.riderTypeBadge}>
+                                    <FontAwesome
+                                        name={
+                                            riderType?.riderType === 'car' ? 'car' :
+                                                riderType?.riderType === 'motor' || riderType?.riderType === 'Motorcycle' ? 'motorcycle' :
+                                                    riderType?.riderType === 'bike' || riderType?.riderType === 'Bicycle' ? 'bicycle' :
+                                                        riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
+                                        }
+                                        size={12}
+                                        color="#fff"
+                                        style={{ marginRight: 5 }}
+                                    />
+                                    <Text style={modernUtilities.riderTypeText}>
+                                        {riderType?.riderType}
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+
+                    <View style={modernUtilities.searchContainer}>
+                        <SearchHeader
+                            token={token}
+                            username={username}
+                            navigation={navigation}
+                        />
+                    </View>
+                </View>
+
+                <View style={modernUtilities.quickActions}>
+                    <TouchableOpacity
+                        style={modernUtilities.createButton}
+                        onPress={() => {
+                            if (!token) {
+                                Alert.alert('Error', 'Authentication token is missing');
+                                return;
+                            }
+                            navigation.navigate('CreateRide', { token, username });
+                        }}
+                    >
+                        <FontAwesome name="plus" size={14} color="#8c2323" />
+                        <Text style={modernUtilities.createButtonText}>Create Ride</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            <FlatList
+                data={[]} // No data, only using header
+                ListHeaderComponent={
+                    <>
+                        {renderActiveRidesSection()}
+                        <View style={modernUtilities.feedSection}>
+                            <RidesList
+                                token={token}
+                                onRideSelect={(ride) => {
+                                    navigation.navigate('RideStep4', {
+                                        generatedRidesId: ride.generatedRidesId,
+                                        rideName: ride.ridesName,
+                                        locationName: ride.locationName,
+                                        riderType: ride.riderType,
+                                        distance: ride.distance,
+                                        date: ride.date,
+                                        startingPoint: ride.startingPointName,
+                                        endingPoint: ride.endingPointName,
+                                        participants: ride.participants,
+                                        description: ride.description,
+                                        token: token,
+                                        username: ride.username,
+                                        currentUsername: username
+                                    });
+                                }}
+                            />
+                        </View>
+                    </>
+                }
+                showsVerticalScrollIndicator={false}
+                style={modernUtilities.contentContainer}
+            />
+
+            {/* Modern Bottom Section */}
+            <View style={modernUtilities.bottomContainer}>
+                <TouchableOpacity
+                    style={modernUtilities.myRidesButton}
+                    onPress={() => setMyRidesModalVisible(true)}
+                >
+                    <Text style={modernUtilities.myRidesButtonText}>My Rides</Text>
+                </TouchableOpacity>
+
+                <MyRidesModal
+                    visible={myRidesModalVisible}
+                    onClose={() => setMyRidesModalVisible(false)}
+                    token={token}
                     onRideSelect={(ride) => {
                         navigation.navigate('RideStep4', {
                             generatedRidesId: ride.generatedRidesId,
@@ -204,46 +263,10 @@ const RiderPage = ({ route , navigation}) => {
                             currentUsername: username
                         });
                     }}
-
                 />
-
-            </View>
-            <View style={rideUtilities.customBottomContainer}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-
-                    <View style={{ flex: 1, alignItems: 'center' }}>
-                        <TouchableOpacity onPress={() => setMyRidesModalVisible(true)}>
-                            <Text style={rideUtilities.customBottomText}>My Rides</Text>
-                        </TouchableOpacity>
-
-                        <MyRidesModal
-                            visible={myRidesModalVisible}
-                            onClose={() => setMyRidesModalVisible(false)}
-                            token={token}
-                            onRideSelect={(ride) => {
-                                navigation.navigate('RideStep4', {
-                                    generatedRidesId: ride.generatedRidesId,
-                                    rideName: ride.ridesName,
-                                    locationName: ride.locationName,
-                                    riderType: ride.riderType,
-                                    distance: ride.distance,
-                                    date: ride.date,
-                                    startingPoint: ride.startingPointName,
-                                    endingPoint: ride.endingPointName,
-                                    participants: ride.participants,
-                                    description: ride.description,
-                                    token: token,
-                                    username: ride.username,
-                                    currentUsername: username
-                                });
-                            }}
-                        />
-                    </View>
-                </View>
             </View>
         </View>
     );
 };
-
 
 export default RiderPage;

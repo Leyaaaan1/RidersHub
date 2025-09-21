@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StatusBar, ActivityIndicator } from 'react-native';
-import utilities from '../../styles/utilities';
+import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
 import colors from '../../styles/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
-import ProgressBar from './ProgressBar';
+
 const RideStep3 = ({
                        mapMode, setMapMode, isSearching, searchResults,
                        handleLocationSelect, webViewRef,
@@ -20,6 +20,9 @@ const RideStep3 = ({
     const [isAddingStop, setIsAddingStop] = useState(false);
     const [addingStopLoading, setAddingStopLoading] = useState(false);
     const [showProgressBar, setShowProgressBar] = useState(true);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [mapDarkMode, setMapDarkMode] = useState(false);
+
     const startAddStopPoint = () => {
         setMapMode('stop');
         setIsAddingStop(true);
@@ -68,22 +71,78 @@ const RideStep3 = ({
             `);
         }
     };
+
     const finalizePointSelection = () => {
         if (mapMode === 'starting' && startingPoint) setMapMode('ending');
         else if (mapMode === 'ending' && endingPoint) setMapMode('stop');
     };
 
+    // Simplified onWebViewMessage function without route drawing logic
     const onWebViewMessage = (event) => {
-        if (mapMode === 'stop' && isAddingStop) handleStopMapMessage(event);
-        else handleMessage(event);
+        try {
+            const data = JSON.parse(event.nativeEvent.data);
+            console.log('WebView message received:', data.type, data);
+
+            switch (data.type) {
+                case 'mapReady':
+                    console.log('Map is ready, dark mode:', data.isDarkTheme);
+                    setMapDarkMode(data.isDarkTheme);
+                    break;
+
+                case 'mapError':
+                    console.error('Map initialization error:', data.error);
+                    break;
+
+                case 'messageError':
+                    console.error('Message handling error:', data.error);
+                    break;
+
+                case 'themeChange':
+                    setMapDarkMode(data.isDarkTheme);
+                    break;
+
+                default:
+                    // Handle other message types (stop points, map clicks, etc.)
+                    if (mapMode === 'stop' && isAddingStop) {
+                        handleStopMapMessage(event);
+                    } else {
+                        handleMessage(event);
+                    }
+
+                    // Preserve theme state if it's included in the message
+                    if (data.isDarkTheme !== undefined) {
+                        setMapDarkMode(data.isDarkTheme);
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.error('Error parsing WebView message:', error);
+            console.error('Raw message data:', event.nativeEvent.data);
+        }
     };
 
-return (
+    const getPlaceholderText = () => {
+        switch (mapMode) {
+            case 'starting':
+                return 'Search for starting point';
+            case 'ending':
+                return 'Search for destination';
+            case 'stop':
+                return 'Search for stop point';
+            default:
+                return 'Search location';
+        }
+    };
 
-        <View style={[utilities.containerWhite, { position: 'relative' }]}>
-            <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+    const removeStopPoint = (index) => {
+        setStopPoints(prev => prev.filter((_, i) => i !== index));
+    };
 
-            {/* Map */}
+    return (
+        <View style={rideStepsUtilities.containerWhite}>
+            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+
+            {/* Full-screen Map */}
             <View style={{
                 position: 'absolute',
                 top: 0, left: 0, right: 0, bottom: 0, height: '100%'
@@ -96,7 +155,8 @@ return (
                                     (currentStop ? currentStop.lat : startingLatitude),
                             mapMode === 'starting' ? startingLongitude :
                                 mapMode === 'ending' ? endingLongitude :
-                                    (currentStop ? currentStop.lng : startingLongitude)
+                                    (currentStop ? currentStop.lng : startingLongitude),
+                            mapDarkMode
                         ) }}
                     style={{ flex: 1 }}
                     onMessage={onWebViewMessage}
@@ -104,162 +164,278 @@ return (
                 />
             </View>
 
-            {/* Navbar */}
-            <View style={[utilities.navbarContainerPrimary, {
-                backgroundColor: 'rgba(0, 0, 0, 0.7)', marginTop: 20, top: 0
-            }]}>
+            {/* Modern Floating Navbar */}
+            <View style={rideStepsUtilities.navbarContainerPrimary}>
                 <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}
+                    style={rideStepsUtilities.navButton}
                     onPress={prevStep}
                 >
-                    <FontAwesome name="arrow-left" size={20} color="#fff" style={{ marginRight: 8 }} />
-                    <Text style={utilities.buttonText}>Back</Text>
+                    <FontAwesome name="arrow-left" size={16} color="#5f6368" style={{ marginRight: 6 }} />
+                    <Text style={rideStepsUtilities.buttonTextDark}>Back</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                    style={[utilities.button, { backgroundColor: colors.primary, marginLeft: 8 }]}
+                    style={[rideStepsUtilities.button, rideStepsUtilities.primaryButton,
+                        (!startingPoint || !endingPoint || loading) && rideStepsUtilities.disabledButton]}
                     onPress={handleCreateRide}
                     disabled={!startingPoint || !endingPoint || loading}
                 >
-                    <Text style={utilities.buttonText}>{loading ? 'Creating...' : 'Create & Review'}</Text>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                        <Text style={rideStepsUtilities.buttonText}>Create</Text>
+                    )}
                 </TouchableOpacity>
-
             </View>
 
-            {/* Search Box */}
-            <View style={{
-                position: 'absolute', top: 150, left: 20, right: 20,
-                backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 10, padding: 15, elevation: 5, zIndex: 10
-            }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {/* Modern Search Card */}
+            <View style={rideStepsUtilities.searchContainer}>
+                <View style={[
+                    rideStepsUtilities.searchInputContainer,
+                    isSearchFocused && rideStepsUtilities.searchInputFocused
+                ]}>
+                    <FontAwesome name="search" size={16} color="#5f6368" style={{ marginRight: 12 }} />
                     <TextInput
-                        style={[utilities.inputLocationName, { flex: 1 }]}
+                        style={rideStepsUtilities.inputLocationName}
                         value={searchQuery}
                         onChangeText={handleSearchInputChange}
-                        placeholder={`Search for a ${mapMode === 'starting' ? 'starting' : mapMode === 'ending' ? 'ending' : 'stop'} location`}
-                        placeholderTextColor="#fff"
-                        color="#fff"
+                        placeholder={getPlaceholderText()}
+                        placeholderTextColor="#9aa0a6"
                         returnKeyType="search"
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setIsSearchFocused(false)}
                         onSubmitEditing={() => handleSearchInputChange(searchQuery)}
                         editable={mapMode !== 'stop' || !isAddingStop}
                     />
-                    <TouchableOpacity
-                        onPress={() => handleSearchInputChange(searchQuery)}
-                        style={{
-                            marginLeft: 8, backgroundColor: colors.primary, padding: 8, borderRadius: 6,
-                            justifyContent: 'center', alignItems: 'center'
-                        }}
-                        disabled={mapMode === 'stop' && isAddingStop}
-                    >
-                        <FontAwesome name="search" size={18} color="#fff" />
-                    </TouchableOpacity>
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity
+                            onPress={() => handleSearchInputChange('')}
+                            style={{ padding: 4, marginRight: 8 }}
+                        >
+                            <FontAwesome name="times-circle" size={16} color="#9aa0a6" />
+                        </TouchableOpacity>
+                    )}
                 </View>
-                {isSearching && <Text style={utilities.searchingText}>Searching...</Text>}
+
+                {isSearching && (
+                    <View style={[rideStepsUtilities.loadingContainer, { marginTop: 16 }]}>
+                        <ActivityIndicator size="small" color="#8c2323" />
+                        <Text style={rideStepsUtilities.loadingText}>Finding locations...</Text>
+                    </View>
+                )}
+
                 {searchResults && searchResults.length > 0 && (
                     <ScrollView
-                        style={[utilities.searchResultsList, { maxHeight: 200, backgroundColor: 'white' }]}
+                        style={rideStepsUtilities.searchResultsList}
                         nestedScrollEnabled={true}
+                        showsVerticalScrollIndicator={false}
                     >
-                        {searchResults.map((item) => (
+                        {searchResults.map((item, index) => (
                             <TouchableOpacity
                                 key={item.place_id.toString()}
-                                style={utilities.resultItem}
+                                style={[
+                                    rideStepsUtilities.resultItem,
+                                    index === searchResults.length - 1 && rideStepsUtilities.resultItemLast
+                                ]}
                                 onPress={() => handleSelectLocationAndUpdateMap(item)}
                                 disabled={mapMode === 'stop' && isAddingStop}
                             >
-                                <Text style={[utilities.searchResultName, { color: '#333' }]}>
-                                    {item.display_name.split(',')[0]}
-                                </Text>
-                                <Text style={[utilities.searchResultAddress, { color: '#666' }]}>
-                                    {item.display_name}
-                                </Text>
+                                <View style={rideStepsUtilities.resultIconContainer}>
+                                    <FontAwesome name="map-marker" size={16} color="#8c2323" />
+                                </View>
+                                <View style={rideStepsUtilities.resultTextContainer}>
+                                    <Text style={rideStepsUtilities.searchResultName}>
+                                        {item.display_name.split(',')[0]}
+                                    </Text>
+                                    <Text style={rideStepsUtilities.searchResultAddress}>
+                                        {item.display_name}
+                                    </Text>
+                                </View>
+                                <View style={{justifyContent: 'center'}}>
+                                    <FontAwesome name="chevron-right" size={14} color="#dadce0" />
+                                </View>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
                 )}
             </View>
 
-            {/* Map Instructions */}
-            <Text style={[utilities.mapInstructions, {
-                top: 95, left: 20, right: 20, backgroundColor: colors.primary, padding: 12, borderRadius: 8
-            }]}>
-                {mapMode === 'starting'
-                    ? 'Tap on the map to select starting point'
-                    : mapMode === 'ending'
-                        ? 'Tap on the map to select ending point'
-                        : 'Tap on the map to select a stop point'}
-            </Text>
-
-            {/* Progress Bar */}
-            <View style={{ position: 'absolute', bottom: 200, left: 20, right: 20 }}>
-                <ProgressBar
-                    showProgressBar={showProgressBar}
-                    setShowProgressBar={setShowProgressBar}
-                    startingPoint={startingPoint}
-                    endingPoint={endingPoint}
-                    stopPoints={stopPoints}
-                    isAddingStop={isAddingStop}
-                    currentStop={currentStop}
-                />
+            <View style={{
+                position: 'absolute',
+                top: 120,
+                right: 10,
+                zIndex: 20
+            }}>
+                <TouchableOpacity
+                    style={{
+                        paddingVertical: 6,
+                        paddingHorizontal: 12,
+                        backgroundColor: '#f1f3f4',
+                        borderRadius: 16,
+                        top: 10,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        shadowColor: '#000',
+                        shadowOpacity: 0.1,
+                        shadowRadius: 6,
+                        elevation: 4
+                    }}
+                    onPress={() => setShowProgressBar(prev => !prev)}
+                >
+                    <FontAwesome
+                        name={showProgressBar ? 'eye-slash' : 'eye'}
+                        size={16}
+                        color="#5f6368"
+                        style={{ marginRight: 6 }}
+                    />
+                    <Text style={{ color: '#5f6368' }}>
+                        {showProgressBar ? 'Hide Details' : 'Show Details'}
+                    </Text>
+                </TouchableOpacity>
             </View>
 
-            {/* Stop Point Controls */}
-            {mapMode === 'stop' && (
-                <View style={{ position: 'absolute', bottom: 150, left: 20, right: 20 }}>
-                    {!isAddingStop && (
-                        <TouchableOpacity
-                            style={[utilities.button, { backgroundColor: '#2196F3', marginTop: 8 }]}
-                            onPress={startAddStopPoint}
-                            disabled={mapMode === 'starting' || mapMode === 'ending'}
-                        >
-                            <Text style={utilities.buttonText}>Add Stop Point</Text>
-                        </TouchableOpacity>
-                    )}
-                    {isAddingStop && (
-                        <TouchableOpacity
-                            style={[utilities.button, { backgroundColor: '#4CAF50', marginTop: 8 }]}
-                            onPress={confirmStopPoint}
-                            disabled={!currentStop || addingStopLoading}
-                        >
-                            <Text style={utilities.buttonText}>
-                                {addingStopLoading ? 'Resolving...' : 'Confirm Stop Point'}
-                            </Text>
-                        </TouchableOpacity>
+            {showProgressBar && (
+                <View style={rideStepsUtilities.progressContainer}>
+                    {/* Top Row: Starting and Ending Points in Two Columns */}
+                    <View style={rideStepsUtilities.topRowContainer}>
+                        {/* Starting Point Card */}
+                        {startingPoint && (
+                            <View style={[rideStepsUtilities.modernCard, rideStepsUtilities.halfWidthCard]}>
+                                <View style={rideStepsUtilities.cardHeader}>
+                                    <View style={rideStepsUtilities.headerLeft}>
+                                        <Text style={rideStepsUtilities.cardTitle}>Starting Point</Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={[
+                                            rideStepsUtilities.changeButton,
+                                            mapMode === 'starting' && { borderWidth: 2}
+                                        ]}
+                                        onPress={() => setMapMode('starting')}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text style={rideStepsUtilities.changeButtonText}>Change</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <Text style={rideStepsUtilities.locationText} numberOfLines={2}>
+                                    {startingPoint}
+                                </Text>
+                            </View>
+                        )}
+
+                        {/* Destination Card */}
+                        {endingPoint && (
+                            <View style={[rideStepsUtilities.modernCard, rideStepsUtilities.halfWidthCard]}>
+                                <View style={rideStepsUtilities.cardHeader}>
+                                    <View style={rideStepsUtilities.headerLeft}>
+                                        <Text style={rideStepsUtilities.cardTitle}>Ending Point</Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={[
+                                            rideStepsUtilities.changeButton,
+                                            mapMode === 'ending' && { borderWidth: 2}
+                                        ]}
+                                        onPress={() => setMapMode('ending')}
+                                        activeOpacity={0.7}
+                                    >
+                                        <Text style={rideStepsUtilities.changeButtonText}>Change</Text>
+                                    </TouchableOpacity>
+                                </View>
+                                <Text style={rideStepsUtilities.locationText} numberOfLines={2}>
+                                    {endingPoint}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {/* Bottom Row: Stop Points Full Width */}
+                    {stopPoints.length > 0 && (
+                        <View style={[rideStepsUtilities.modernCard, rideStepsUtilities.fullWidthCard]}>
+                            <View style={rideStepsUtilities.cardHeader}>
+                                <View style={rideStepsUtilities.headerLeft}>
+                                    <Text style={rideStepsUtilities.cardTitle}>
+                                        Stop Points
+                                    </Text>
+                                </View>
+                                <View style={rideStepsUtilities.stopCounter}>
+                                    <Text style={rideStepsUtilities.stopCounterText}>
+                                        {stopPoints.length}
+                                    </Text>
+                                </View>
+                            </View>
+                            <ScrollView
+                                style={rideStepsUtilities.stopScrollView}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={rideStepsUtilities.stopScrollContent}
+                            >
+                                {stopPoints.map((stop, index) => (
+                                    <View key={index} style={rideStepsUtilities.stopItem}>
+                                        <View style={rideStepsUtilities.stopNumber}>
+                                            <Text style={rideStepsUtilities.stopNumberText}>
+                                                {index + 1}
+                                            </Text>
+                                        </View>
+                                        <Text style={rideStepsUtilities.stopName} numberOfLines={1}>
+                                            {stop.name}
+                                        </Text>
+                                        <TouchableOpacity
+                                            style={{ marginLeft: 8, padding: 4 }}
+                                            onPress={() => removeStopPoint(index)}
+                                        >
+                                            <FontAwesome name="times" size={12} color="#999" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                        </View>
                     )}
                 </View>
             )}
 
-            {/* Finalize selection button */}
-            <View style={{
-                position: 'absolute', bottom: 100, left: 20, right: 20,
-                flexDirection: 'row', justifyContent: 'center', alignItems: 'center'
-            }}>
-                {(mapMode === 'starting' || mapMode === 'ending') && (
+            {/* Action Buttons Container */}
+            <View style={rideStepsUtilities.actionButtonsContainer}>
+                {mapMode === 'stop' && !isAddingStop && (
                     <TouchableOpacity
-                        style={[utilities.button, { backgroundColor: colors.primary }]}
-                        onPress={finalizePointSelection}
-                        disabled={(mapMode === 'starting' && !startingPoint) || (mapMode === 'ending' && !endingPoint)}
+                        style={[rideStepsUtilities.button, rideStepsUtilities.secondaryButton]}
+                        onPress={startAddStopPoint}
                     >
-                        <Text style={utilities.buttonText}>
-                            {mapMode === 'starting'
-                                ? 'Confirm Starting Point'
-                                : 'Confirm Ending Point'}
-                        </Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <FontAwesome name="plus" size={14} color="#ffffff" />
+                            <Text style={rideStepsUtilities.buttonText}> Add Stop Point</Text>
+                        </View>
+                    </TouchableOpacity>
+                )}
+
+                {mapMode === 'stop' && isAddingStop && currentStop && (
+                    <TouchableOpacity
+                        style={[rideStepsUtilities.button, rideStepsUtilities.successButton]}
+                        onPress={confirmStopPoint}
+                        disabled={addingStopLoading}
+                    >
+                        {addingStopLoading ? (
+                            <ActivityIndicator size="small" color="#ffffff" />
+                        ) : (
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <FontAwesome name="check" size={14} color="#ffffff" />
+                                <Text style={rideStepsUtilities.buttonText}> Confirm Stop Point</Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 )}
             </View>
 
-            {/* Create ride button at bottom */}
-            <View style={{
-                position: 'absolute', bottom: 20, left: 20, right: 20,
-                flexDirection: 'row', justifyContent: 'center', alignItems: 'center'
-            }}>
-                <TouchableOpacity
-                    style={[utilities.button, { backgroundColor: '#4CAF50' }]}
-                    onPress={handleCreateRide}
-                    disabled={!startingPoint || !endingPoint || loading}
-                >
-                    <Text style={utilities.buttonText}>{loading ? 'Creating...' : 'Create & Review'}</Text>
-                </TouchableOpacity>
+            {/* Main Action Container */}
+            <View style={rideStepsUtilities.mainActionContainer}>
+                {((mapMode === 'starting' && startingPoint) ||
+                    (mapMode === 'ending' && endingPoint)) && (
+                    <TouchableOpacity
+                        style={[rideStepsUtilities.button, rideStepsUtilities.primaryButton]}
+                        onPress={finalizePointSelection}
+                    >
+                        <Text style={rideStepsUtilities.buttonText}>
+                            {mapMode === 'starting' ? 'Continue to Destination' : 'Continue to Stop Points'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );

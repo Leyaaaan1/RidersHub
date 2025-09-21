@@ -11,10 +11,9 @@ import {
     Image,
     StatusBar
 } from 'react-native';
-import utilities from '../../styles/utilities';
+import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
-import colors from "../../styles/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 
@@ -22,17 +21,27 @@ const RideStep2 = ({
                        isSearching, searchResults, searchQuery, setSearchQuery,
                        handleLocationSelect, webViewRef, latitude, longitude,
                        handleMessage, locationName,
-                       prevStep, nextStep, handleSearchInputChange, token
+                       prevStep, nextStep, handleSearchInputChange, token,
                    }) => {
 
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const [mapDarkMode, setMapDarkMode] = useState(false);
 
+    const onWebViewMessage = (event) => {
+        const data = JSON.parse(event.nativeEvent.data);
 
-
+        if (data.type === 'themeChange') {
+            setMapDarkMode(data.isDarkTheme);
+        } else {
+            handleMessage(event);
+        }
+    };
 
     return (
-        <View style={[utilities.containerWhite, { position: 'relative' }]}>
-            <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+        <View style={rideStepsUtilities.containerWhite}>
+            <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
+            {/* Full-screen Map */}
             <View style={{
                 position: 'absolute',
                 top: 0,
@@ -50,117 +59,110 @@ const RideStep2 = ({
                 />
             </View>
 
-            {/* Navbar positioned below status bar */}
-            <View style={[utilities.navbarContainerPrimary, {
-                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                marginTop: 20,
-                top: 0
-            }]}>
-                <Text style={utilities.textWhite}>RIDE LOCATION</Text>
+            {/* Modern Floating Navbar */}
+            <View style={rideStepsUtilities.navbarContainerPrimary}>
+
                 <TouchableOpacity
-                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}
+                    style={rideStepsUtilities.navButton}
+                    onPress={prevStep}
+                >
+                    <FontAwesome name="arrow-left" size={16} color="#5f6368" style={{ marginRight: 6 }} />
+                    <Text style={rideStepsUtilities.buttonTextDark}>Back</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[rideStepsUtilities.navButton, rideStepsUtilities.nextButton]}
                     onPress={nextStep}
                 >
-                    <Text style={utilities.buttonText}>Next</Text>
-                    <FontAwesome name="arrow-right" size={20} color={colors.primary} style={{ marginLeft: 8 }} />
+                    <Text style={rideStepsUtilities.buttonText}>Next</Text>
+                    <FontAwesome name="arrow-right" size={16} color="#ffffff" style={{ marginLeft: 6 }} />
                 </TouchableOpacity>
             </View>
 
-            {/* Search UI overlaid on map */}
-            <View style={{
-                position: 'absolute',
-                top: 110,
-                left: 20,
-                right: 20,
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: 10,
-                padding: 15,
-                elevation: 5
-            }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            {/* Modern Search Card */}
+            <View style={rideStepsUtilities.searchContainer}>
+                <View style={[
+                    rideStepsUtilities.searchInputContainer,
+                    isSearchFocused && rideStepsUtilities.searchInputFocused
+                ]}>
+                    <FontAwesome name="search" size={16} color="#5f6368" style={{ marginRight: 12 }} />
                     <TextInput
-                        style={[utilities.inputLocationName, { flex: 1 }]}
+                        style={rideStepsUtilities.inputLocationName}
                         value={searchQuery}
                         onChangeText={handleSearchInputChange}
-                        placeholder="Search for a location"
-                        placeholderTextColor="#fff"
-                        color="#fff"
+                        placeholder="Where do you want to ride?"
+                        placeholderTextColor="#9aa0a6"
                         returnKeyType="search"
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setIsSearchFocused(false)}
                         onSubmitEditing={() => handleSearchInputChange(searchQuery)}
                     />
-                    <TouchableOpacity
-                        onPress={() => handleSearchInputChange(searchQuery)}
-                        style={{
-                            marginLeft: 8,
-                            backgroundColor: colors.primary,
-                            padding: 8,
-                            borderRadius: 6,
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}
-                    >
-                        <FontAwesome name="search" size={18} color="#fff" />
-                    </TouchableOpacity>
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity
+                            onPress={() => setSearchQuery('')}
+                            style={{ padding: 4, marginRight: 8 }}
+                        >
+                            <FontAwesome name="times-circle" size={16} color="#9aa0a6" />
+                        </TouchableOpacity>
+                    )}
                 </View>
 
                 {isSearching && (
-                    <Text style={utilities.searchingText}>Searching...</Text>
+                    <View style={[rideStepsUtilities.loadingContainer, { marginTop: 16 }]}>
+                        <ActivityIndicator size="small" color="#8c2323" />
+                        <Text style={rideStepsUtilities.loadingText}>Finding locations...</Text>
+                    </View>
                 )}
 
                 {searchResults.length > 0 && (
                     <ScrollView
-                        style={[utilities.searchResultsList, {
-                            maxHeight: 200,
-                            backgroundColor: 'white'
-                        }]}
+                        style={rideStepsUtilities.searchResultsList}
                         nestedScrollEnabled={true}
+                        showsVerticalScrollIndicator={false}
                     >
-                        {searchResults.map((item) => (
+                        {searchResults.map((item, index) => (
                             <TouchableOpacity
                                 key={item.place_id.toString()}
-                                style={utilities.resultItem}
+                                style={[
+                                    rideStepsUtilities.resultItem,
+                                    index === searchResults.length - 1 && rideStepsUtilities.resultItemLast
+                                ]}
                                 onPress={() => { handleLocationSelect(item) }}
                             >
-                                <Text style={[utilities.searchResultName, { color: '#333' }]}>
-                                    {item.display_name.split(',')[0]}
-                                </Text>
-                                <Text style={[utilities.searchResultAddress, { color: '#666' }]}>
-                                    {item.display_name}
-                                </Text>
+                                <View style={rideStepsUtilities.resultIconContainer}>
+                                    <FontAwesome name="map-marker" size={16} color="#8c2323" />
+                                </View>
+                                <View style={rideStepsUtilities.resultTextContainer}>
+                                    <Text style={rideStepsUtilities.searchResultName}>
+                                        {item.display_name.split(',')[0]}
+                                    </Text>
+                                    <Text style={rideStepsUtilities.searchResultAddress}>
+                                        {item.display_name}
+                                    </Text>
+                                </View>
+                                <View style={{justifyContent: 'center'}}>
+                                    <FontAwesome name="chevron-right" size={14} color="#dadce0" />
+                                </View>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
                 )}
             </View>
 
-            {/* Selected location info overlaid at bottom of map */}
+
+            {/* Selected Location Card */}
             {locationName && locationName.trim() && (
-                <View style={{
-                    position: 'absolute',
-                    bottom: 20,
-                    left: 20,
-                    right: 20,
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    borderRadius: 10,
-                    padding: 15
-                }}>
-                    <Text style={[utilities.label, { color: '#fff' }]}>Selected Location</Text>
-                    <Text style={{ color: '#fff', marginTop: 5, textAlign: 'center', fontSize:30 }}>{locationName}</Text>
+                <View style={rideStepsUtilities.locationInfoCard}>
+
+                    <Text style={rideStepsUtilities.locationName}>{locationName}</Text>
+                    <TouchableOpacity
+                        style={[rideStepsUtilities.button, rideStepsUtilities.primaryButton, { marginTop: 16 }]}
+                        onPress={nextStep}
+                    >
+                        <Text style={rideStepsUtilities.buttonText}>Confirm Location</Text>
+                    </TouchableOpacity>
                 </View>
             )}
-
-            {/* Map instruction overlay */}
-            <Text style={[utilities.mapInstructions, {
-                top: 'auto',
-                bottom: locationName ? 140 : 20,
-                left: 20,
-                right: 20,
-                backgroundColor: colors.primary,
-                padding: 12,
-                borderRadius: 8
-            }]}>
-                Tap on the map to select the ride location
-            </Text>
         </View>
     );
 };

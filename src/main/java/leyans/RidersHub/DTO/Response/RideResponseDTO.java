@@ -40,6 +40,8 @@ public class RideResponseDTO {
 
 
 
+
+
     public RideResponseDTO(Integer generatedRidesId , String locationName, String ridesName, RiderType riderType,
                            Integer distance, LocalDateTime
                                    date, double latitude, double longitude, List<String> participants, String description,
@@ -73,8 +75,9 @@ public class RideResponseDTO {
         this.username = username;
         this.stopPoints = stopPoints;
 
-
     }
+
+
 
     public List<StopPointDTO> getStopPoints() {
         return stopPoints;

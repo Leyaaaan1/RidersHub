@@ -19,7 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RidesService {
@@ -74,6 +76,9 @@ public class RidesService {
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
 
+//        String routeCoordinates = getRouteDirections(startLongitude, startLatitude, endLongitude, endLatitude, stopPointsDto);
+
+
         String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
         String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
         String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
@@ -106,6 +111,7 @@ public class RidesService {
         newRide.setMapImageUrl(imageUrl);
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
+//        newRide.setRouteCoordinates(routeCoordinates);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -116,6 +122,9 @@ public class RidesService {
         RideResponseDTO response = mapToResponseDTO(newRide);
         return response;
     }
+
+
+
     @Transactional(readOnly = true)
     public List<StopPointDTO> getStopPointsDTOByGeneratedRideId(Integer generatedRidesId) {
         Rides ride = findRideEntityByGeneratedId(generatedRidesId);
@@ -151,7 +160,6 @@ public class RidesService {
     }
     private RideResponseDTO mapToResponseDTO(Rides ride) {
         return new RideResponseDTO(
-
                 ride.getGeneratedRidesId(),
                 ride.getRidesName(),
                 ride.getLocationName(),
@@ -168,15 +176,12 @@ public class RidesService {
                 ride.getEndingPointName(),
                 ride.getEndingLocation().getY(),
                 ride.getEndingLocation().getX(),
-                ride.getMapImageUrl(), 
-                ride.getMagImageStartingLocation(), 
+                ride.getMapImageUrl(),
+                ride.getMagImageStartingLocation(),
                 ride.getMagImageEndingLocation(),
                 ride.getUsername().getUsername(),
                 mapStopPointsToDTOs(ride.getStopPoints())
-
-
-        );
-    }
+        );    }
 
     public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {
         return stopPoints.stream()

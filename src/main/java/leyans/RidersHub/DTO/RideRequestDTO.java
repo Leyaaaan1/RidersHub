@@ -30,6 +30,7 @@ public class RideRequestDTO {
     private List<StopPointDTO> stopPoints;
 
 
+
     public RideRequestDTO(Integer generatedRidesId, String username, List<String> participants, String description,
                           String ridesName, String locationName,
                           String riderType, Integer distance,
@@ -63,6 +64,8 @@ public class RideRequestDTO {
 
 
     }
+
+
 
     public List<StopPointDTO> getStopPoints() {
         return stopPoints;
