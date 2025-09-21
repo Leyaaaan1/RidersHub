@@ -6,7 +6,7 @@ import getMapHTML from '../../utils/mapHTML';
 import colors from '../../styles/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
-import { getDirections } from '../../services/mapService';
+
 const RideStep3 = ({
                        mapMode, setMapMode, isSearching, searchResults,
                        handleLocationSelect, webViewRef,
@@ -77,176 +77,7 @@ const RideStep3 = ({
         else if (mapMode === 'ending' && endingPoint) setMapMode('stop');
     };
 
-
-
-    // Updated fetchAndDisplayRoute function with better error handling and logging
-    const fetchAndDisplayRoute = async () => {
-        if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
-            console.log('Missing coordinates, cannot fetch route');
-            return;
-        }
-
-        try {
-            console.log('Fetching route with params:', {
-                startLong: startingLongitude,
-                startLat: startingLatitude,
-                endLong: endingLongitude,
-                endLat: endingLatitude,
-                stops: stopPoints.length,
-                stopPoints: stopPoints
-            });
-
-            // Prepare stop points for the API call
-            const stopPointsPayload = stopPoints.map(sp => ({
-                stopName: sp.name || sp.stopName || null,
-                stopLongitude: parseFloat(sp.lng || sp.stopLongitude),
-                stopLatitude: parseFloat(sp.lat || sp.stopLatitude)
-            }));
-
-            const routeCoordinates = await getDirections(
-                token,
-                parseFloat(startingLongitude),
-                parseFloat(startingLatitude),
-                parseFloat(endingLongitude),
-                parseFloat(endingLatitude),
-                stopPointsPayload
-            );
-
-            console.log('Route coordinates received:', {
-                isArray: Array.isArray(routeCoordinates),
-                length: routeCoordinates?.length || 0,
-                firstFew: routeCoordinates?.slice(0, 3),
-                type: typeof routeCoordinates
-            });
-
-            // Validate route coordinates
-            if (!routeCoordinates) {
-                console.warn('No route coordinates received');
-                return;
-            }
-
-            // Handle different response formats
-            let coordinates;
-            if (typeof routeCoordinates === 'string') {
-                try {
-                    coordinates = JSON.parse(routeCoordinates);
-                } catch (parseError) {
-                    console.error('Failed to parse route coordinates:', parseError);
-                    return;
-                }
-            } else if (Array.isArray(routeCoordinates)) {
-                coordinates = routeCoordinates;
-            } else {
-                console.warn('Unknown route coordinates format:', typeof routeCoordinates);
-                return;
-            }
-
-            if (!Array.isArray(coordinates) || coordinates.length === 0) {
-                console.warn('No valid route coordinates found');
-                return;
-            }
-
-            // Validate coordinate format
-            const validCoordinates = coordinates.filter(coord =>
-                Array.isArray(coord) &&
-                coord.length >= 2 &&
-                typeof coord[0] === 'number' &&
-                typeof coord[1] === 'number'
-            );
-
-            if (validCoordinates.length === 0) {
-                console.warn('No valid coordinate pairs found');
-                return;
-            }
-
-            console.log('Valid coordinates:', validCoordinates.length, 'out of', coordinates.length);
-
-            // Send the coordinates to the WebView to draw the route
-            if (webViewRef.current) {
-                console.log('Sending route data to WebView');
-
-                const routeData = {
-                    type: 'drawRoute',
-                    coordinates: validCoordinates,
-                    points: {
-                        start: {
-                            lat: parseFloat(startingLatitude),
-                            lng: parseFloat(startingLongitude)
-                        },
-                        end: {
-                            lat: parseFloat(endingLatitude),
-                            lng: parseFloat(endingLongitude)
-                        },
-                        stops: stopPoints.map(sp => ({
-                            lat: parseFloat(sp.lat || sp.stopLatitude),
-                            lng: parseFloat(sp.lng || sp.stopLongitude),
-                            name: sp.name || sp.stopName || 'Stop Point'
-                        }))
-                    }
-                };
-
-                console.log('Route data to send:', {
-                    coordinateCount: routeData.coordinates.length,
-                    startPoint: routeData.points.start,
-                    endPoint: routeData.points.end,
-                    stopCount: routeData.points.stops.length
-                });
-
-                webViewRef.current.injectJavaScript(`
-                try {
-                    console.log('Injecting route data...');
-                    const data = ${JSON.stringify(routeData)};
-                    console.log('Data to process:', data.type, data.coordinates.length, 'coordinates');
-                    
-                    // Send directly to the window message handler
-                    window.dispatchEvent(new MessageEvent('message', { data }));
-                    
-                    console.log('Route drawing message sent successfully');
-                } catch(e) {
-                    console.error('Error in injected JavaScript:', e);
-                    window.ReactNativeWebView.postMessage(JSON.stringify({
-                        type: 'routeDrawError', 
-                        error: 'JavaScript injection error: ' + e.message
-                    }));
-                }
-                true;
-            `);
-            } else {
-                console.warn('WebView reference is not available');
-            }
-        } catch (error) {
-            console.error('Error fetching or displaying route:', error);
-            // You might want to show an error message to the user
-        }
-    };
-
-// Updated useEffect with better timing and dependencies
-    useEffect(() => {
-        // Only fetch route if we have all required coordinates
-        if (startingLatitude && startingLongitude && endingLatitude && endingLongitude) {
-            console.log('Route dependencies changed, scheduling route fetch...');
-
-            // Clear any existing timeout
-            const timer = setTimeout(() => {
-                console.log('Fetching route after WebView load delay...');
-                fetchAndDisplayRoute();
-            }, 2500); // Slightly longer delay to ensure WebView is ready
-
-            return () => {
-                console.log('Clearing route fetch timeout');
-                clearTimeout(timer);
-            };
-        } else {
-            console.log('Missing required coordinates for route:', {
-                startingLatitude,
-                startingLongitude,
-                endingLatitude,
-                endingLongitude
-            });
-        }
-    }, [startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints, token]);
-
-// Updated onWebViewMessage function with better error handling
+    // Simplified onWebViewMessage function without route drawing logic
     const onWebViewMessage = (event) => {
         try {
             const data = JSON.parse(event.nativeEvent.data);
@@ -256,17 +87,6 @@ const RideStep3 = ({
                 case 'mapReady':
                     console.log('Map is ready, dark mode:', data.isDarkTheme);
                     setMapDarkMode(data.isDarkTheme);
-                    break;
-
-                case 'routeDrawn':
-                    console.log('Route drawn successfully with', data.pointCount, 'coordinates,', data.latLngCount, 'valid points');
-                    break;
-
-                case 'routeDrawError':
-                    console.error('Route drawing error:', data.error);
-                    if (data.stack) {
-                        console.error('Error stack:', data.stack);
-                    }
                     break;
 
                 case 'mapError':
@@ -300,6 +120,7 @@ const RideStep3 = ({
             console.error('Raw message data:', event.nativeEvent.data);
         }
     };
+
     const getPlaceholderText = () => {
         switch (mapMode) {
             case 'starting':
@@ -311,6 +132,10 @@ const RideStep3 = ({
             default:
                 return 'Search location';
         }
+    };
+
+    const removeStopPoint = (index) => {
+        setStopPoints(prev => prev.filter((_, i) => i !== index));
     };
 
     return (
@@ -528,7 +353,7 @@ const RideStep3 = ({
                             <View style={rideStepsUtilities.cardHeader}>
                                 <View style={rideStepsUtilities.headerLeft}>
                                     <Text style={rideStepsUtilities.cardTitle}>
-                                        Stop Point
+                                        Stop Points
                                     </Text>
                                 </View>
                                 <View style={rideStepsUtilities.stopCounter}>
@@ -552,6 +377,12 @@ const RideStep3 = ({
                                         <Text style={rideStepsUtilities.stopName} numberOfLines={1}>
                                             {stop.name}
                                         </Text>
+                                        <TouchableOpacity
+                                            style={{ marginLeft: 8, padding: 4 }}
+                                            onPress={() => removeStopPoint(index)}
+                                        >
+                                            <FontAwesome name="times" size={12} color="#999" />
+                                        </TouchableOpacity>
                                     </View>
                                 ))}
                             </ScrollView>

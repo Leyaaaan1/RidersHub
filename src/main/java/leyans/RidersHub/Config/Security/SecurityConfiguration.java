@@ -44,9 +44,22 @@ public class SecurityConfiguration {
                         .requestMatchers("/riders/login", "/riders/register").permitAll()
                         .requestMatchers(
                                 "/rides/*/start",
-                                "/riders/rider-type", "/riders/all", "/riders/add", "/riders/create","/riders/search", "/riders/*/start",
-                                "/rides/**", " /riders/**" ,"/riders/current-rider-type", "/riders/**",
-                                "/location/**" ,"/participants/**","/join/**","/riders/*/map-image", "/update/**", "/start/**", "/wikimedia"
+                                "/riders/rider-type",
+                                "/riders/all",
+                                "/riders/add",
+                                "/riders/create",
+                                "/riders/search",
+                                "/riders/*/start",
+                                "/rides/**",
+                                "/riders/**",
+                                "/riders/current-rider-type",
+                                "/location/**",
+                                "/participants/**",
+                                "/join/**",
+                                "/riders/*/map-image",
+                                "/update/**",
+                                "/start/**",
+                                "/wikimedia"
                         )
                         .authenticated()
                         .anyRequest().authenticated())

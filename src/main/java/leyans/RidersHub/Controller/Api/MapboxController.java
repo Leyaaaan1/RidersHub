@@ -27,71 +27,14 @@ public class MapboxController {
 
     @GetMapping("/staticImage")
     public ResponseEntity<String> getMapImage(@RequestParam double lon, @RequestParam double lat) {
-        String cachedImageUrl = mapboxService.checkCachedMapImage(lon, lat);
 
-        if (cachedImageUrl != null) {
-            return ResponseEntity.ok(cachedImageUrl);
-        }
+
 
         String imageUrl = mapboxService.getStaticMapImageUrl(lon, lat);
         return ResponseEntity.ok(imageUrl);
     }
 
-    @GetMapping("/directions")
-    public ResponseEntity<String> getDirections(
-            @RequestParam double startLon, @RequestParam double startLat,
-            @RequestParam double endLon, @RequestParam double endLat,
-            @RequestParam(required = false) List<String> stops) {
 
-        // Convert string coordinates to StopPointDTO objects
-        List<StopPointDTO> stopPoints = null;
-        if (stops != null && !stops.isEmpty()) {
-            stopPoints = stops.stream()
-                    .map(coord -> {
-                        String[] parts = coord.split(",");
-                        if (parts.length >= 2) {
-                            try {
-                                return new StopPointDTO(
-                                        null, // stopName is not needed for directions
-                                        Double.parseDouble(parts[0]), // longitude
-                                        Double.parseDouble(parts[1])  // latitude
-                                );
-                            } catch (NumberFormatException e) {
-                                return null;
-                            }
-                        }
-                        return null;
-                    })
-                    .filter(dto -> dto != null)
-                    .collect(Collectors.toList());
-        }
-
-        String routeCoordinates = ridesService.getRouteDirections(
-                startLon, startLat, endLon, endLat, stopPoints);
-
-        return ResponseEntity.ok(routeCoordinates);
-    }
-
-    // Update to support both GET and POST methods
-    @PostMapping("/route-directions")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> getRouteDirections(
-            @RequestParam double startLon,
-            @RequestParam double startLat,
-            @RequestParam double endLon,
-            @RequestParam double endLat,
-            @RequestBody(required = false) List<StopPointDTO> stopPoints) {
-
-        try {
-            String routeCoordinates = ridesService.getRouteDirections(
-                    startLon, startLat, endLon, endLat, stopPoints);
-
-            return ResponseEntity.ok(routeCoordinates);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error fetching route: " + e.getMessage());
-        }
-    }
 
 
 

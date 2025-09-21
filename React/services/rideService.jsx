@@ -95,24 +95,98 @@ export const reverseGeocodeLandmark = async (token, lat, lon) => {
 };
 
 
-export const createRide = async (token, rideData) => {
-    const response = await fetch(`${API_BASE_URL}/riders/create`, {
-        method: 'POST',
-        headers: {
+// Fixed createRide service function with proper error handling
+export const createRide = async (rideData, token) => {
+    try {
+        console.log('=== CREATE RIDE DEBUG ===');
+        console.log('API URL:', `${API_BASE_URL}/riders/create`);
+        console.log('Token (first 20 chars):', token ? token.substring(0, 20) + '...' : 'No token');
+        console.log('Request data:', JSON.stringify(rideData, null, 2));
+
+        // Check if token exists and is valid
+        if (!token) {
+            throw new Error('No authentication token provided. Please log in again.');
+        }
+
+        if (typeof token !== 'string') {
+            console.error('Invalid token type:', typeof token, token);
+            throw new Error('Invalid token format. Please log in again.');
+        }
+
+        // Ensure token doesn't already have Bearer prefix
+        const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+        console.log('Clean token (first 20 chars):', cleanToken ? cleanToken.substring(0, 20) + '...' : 'No clean token');
+
+        const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(rideData)
-    });
+            'Authorization': `Bearer ${cleanToken}`
+        };
 
-    const result = await response.json();
+        console.log('Request headers:', headers);
 
-    if (!response.ok) {
-        throw new Error(result.message || 'Failed to create ride');
+        const response = await fetch(`${API_BASE_URL}/riders/create`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(rideData)
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response statusText:', response.statusText);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+        const responseText = await response.text();
+        console.log('Raw response text:', responseText);
+
+        if (!response.ok) {
+            console.error('HTTP Error:', response.status, responseText);
+            throw new Error(`HTTP ${response.status}: ${responseText || response.statusText}`);
+        }
+
+        if (!responseText || responseText.trim() === '') {
+            console.log('Empty response - assuming success');
+            return { success: true, message: 'Ride created successfully' };
+        }
+
+        let result;
+        try {
+            result = JSON.parse(responseText);
+            console.log('Parsed JSON result:', result);
+        } catch (parseError) {
+            console.error('JSON parse error:', parseError);
+            console.error('Response that failed to parse:', responseText);
+            // If response is successful but not JSON, return success
+            return { success: true, message: 'Ride created successfully', rawResponse: responseText };
+        }
+
+        return result;
+
+    } catch (error) {
+        console.error('=== CREATE RIDE ERROR ===');
+        console.error('Error type:', error.constructor.name);
+        console.error('Error message:', error.message);
+        console.error('Full error:', error);
+
+        // Handle specific error cases
+        if (error.message.includes('Failed to fetch')) {
+            throw new Error('Network connection failed. Please check your internet connection.');
+        }
+
+        if (error.message.includes('403')) {
+            throw new Error('Authentication failed. Please try logging in again.');
+        }
+
+        if (error.message.includes('401')) {
+            throw new Error('Access denied. Please log in again.');
+        }
+
+        if (error.message.includes('500')) {
+            throw new Error('Server error. Please try again later.');
+        }
+
+        // Re-throw original error if we can't handle it
+        throw error;
     }
-
-    return result;
-};
+};// Alternative version using axios (if you're using axios instead of fetch)
 export const searchRiders = async (token, username = '') => {
     const url = `${API_BASE_URL}/riders/search${username.trim() ? `?username=${encodeURIComponent(username.trim())}` : ''}`;
 

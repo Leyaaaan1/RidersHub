@@ -160,7 +160,6 @@ public class NominatimService {
 
     public List<Map<String, Object>> searchCityOrLandmark(String query, int limit) {
 
-        System.out.println(" searchCityOrLandmark (cache miss)");
         try {
             String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
             String url = String.format(

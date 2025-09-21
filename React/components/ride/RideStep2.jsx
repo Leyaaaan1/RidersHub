@@ -14,7 +14,6 @@ import {
 import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
-import colors from "../../styles/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 
