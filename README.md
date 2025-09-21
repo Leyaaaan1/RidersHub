@@ -57,12 +57,12 @@ CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 
+REACT_APP_MAPBOX_TOKEN="your token"
+
 # ==============================================
-# REDIS CACHE CONFIGURATION
+# wikipedia API CONFIGURATION
 # ==============================================
-spring.cache.type=redis
-spring.data.redis.host=${HOST}
-spring.data.redis.port=${PORT}
+WIKIMEDIA_API_BASE = "your token"
 
 # ==============================================
 # NOMINATIM API CONFIGURATION
@@ -86,36 +86,7 @@ MAPBOX_API_KEY=your_mapbox_api_key
 > **Important:** Make sure your .env file is **not committed** to version control.
 
 ### 2. Import PSGC Data
-There are two ways to import PSGC data into the database:
 
-#### Option 1: Use the built-in import script
-Run the following command:
-```bash
-python ./react/utils/import.py
-```
-Ensure your PostgreSQL server is running and credentials match those in your .env file.
-
-#### Option 2: Manually download and import the official PSA dataset
-1. Go to [https://psa.gov.ph/classification/psgc](https://psa.gov.ph/classification/psgc)
-2. Look in the attachments section and download: **"PSGC 1Q 2025 Publication Datafile"**
-3. Open the dataset in your spreadsheet editor or script and ensure the column names are renamed to:
-   - `'10-digit PSGC'` → `psgc_code`
-   - `'Name'` → `name`
-   - `'Correspondence Code'` → `correspondence_code`
-   - `'Geographic Level'` → `geographic_level`
-4. Remove all other columns from the dataset.
-5. Import the cleaned dataset into your PostgreSQL database.
-6. Rename the file to `psgc_data`, also that is the need of the table in the database
-
-### 3. Run Docker Desktop and Docker-compose.yml
-- For redis cache
-
-### 4. Run Spring Boot Backend
-From the root project directory, run the backend:
-```bash
-./mvnw spring-boot:run
-```
-You can also run it using your IDE (e.g., IntelliJ, Eclipse).
 
 ### 5. Install Frontend Dependencies
 Open a new terminal, navigate to the React Native folder, and run:
