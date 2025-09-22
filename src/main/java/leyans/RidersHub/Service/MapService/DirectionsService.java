@@ -34,10 +34,6 @@ public class DirectionsService {
                                      String profile) {
 
         String url = ORS_BASE_URL + "/v2/directions/" + profile;
-
-        System.out.println("ORS API URL: " + url);
-        System.out.println("API Key configured: " + (apiKey != null && !apiKey.isEmpty()));
-
         // Validate coordinates first
         if (!isValidCoordinate(startLng, startLat) || !isValidCoordinate(endLng, endLat)) {
             throw new IllegalArgumentException("Invalid start or end coordinates");
@@ -48,30 +44,17 @@ public class DirectionsService {
                 startLng, startLat, endLng, endLat, stopPoints
         );
 
-        System.out.println("Request coordinates: " + requestBody.get("coordinates"));
 
-        // Set headers - ORS uses Authorization header with API key
         HttpHeaders headers = createHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // OpenRouteService expects the API key directly in Authorization header
-        // No "Bearer" prefix needed
         headers.set("Authorization", apiKey);
-
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-
-            System.out.println("ORS Response Status: " + response.getStatusCode());
-            System.out.println("ORS Response Body (first 200 chars): " +
-                    (response.getBody() != null ? response.getBody().substring(0, Math.min(200, response.getBody().length())) : "null"));
-
             return response.getBody();
 
         } catch (HttpClientErrorException e) {
-            System.err.println("HTTP Error calling ORS API: " + e.getStatusCode());
-            System.err.println("Response body: " + e.getResponseBodyAsString());
 
             // Handle specific error cases
             if (e.getStatusCode().value() == 401 || e.getStatusCode().value() == 403) {
@@ -130,9 +113,6 @@ public class DirectionsService {
         requestBody.put("elevation", false);
         requestBody.put("continue_straight", false);
         requestBody.put("preference", "recommended");
-
-        // Add route summary information
-        requestBody.put("summary", true);
 
         return requestBody;
     }
