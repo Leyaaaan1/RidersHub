@@ -68,15 +68,6 @@ public class DirectionsService {
             System.out.println("ORS API response status: " + response.getStatusCode());
             System.out.println("Response body length: " + (responseBody != null ? responseBody.length() : 0));
 
-            // Add detailed debugging
-            debugORSResponse(responseBody);
-
-            if (responseBody != null && responseBody.contains("\"routes\"")) {
-                System.out.println("✅ ORS API request successful");
-            } else {
-                System.err.println("⚠️ ORS API response may be invalid");
-            }
-
             return responseBody;
 
         } catch (HttpClientErrorException e) {
@@ -96,79 +87,6 @@ public class DirectionsService {
             System.err.println("Error message: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to get route directions: " + e.getMessage(), e);
-        }
-    }
-
-    private void debugORSResponse(String responseBody) {
-        System.out.println("=== ORS RESPONSE DETAILED DEBUG ===");
-
-        if (responseBody == null || responseBody.isEmpty()) {
-            System.out.println("Response is null or empty");
-            return;
-        }
-
-        System.out.println("Response length: " + responseBody.length());
-
-        // Basic structure checks
-        boolean hasRoutes = responseBody.contains("\"routes\"");
-        boolean hasGeometry = responseBody.contains("\"geometry\"");
-        boolean hasCoordinates = responseBody.contains("\"coordinates\"");
-        boolean hasError = responseBody.contains("\"error\"");
-
-        System.out.println("Structure check:");
-        System.out.println("  - Has routes: " + hasRoutes);
-        System.out.println("  - Has geometry: " + hasGeometry);
-        System.out.println("  - Has coordinates: " + hasCoordinates);
-        System.out.println("  - Has error: " + hasError);
-
-        if (hasError) {
-            System.out.println("ERROR DETECTED in ORS response");
-            // Find and print the error section
-            int errorStart = responseBody.indexOf("\"error\"");
-            if (errorStart > -1) {
-                int errorEnd = Math.min(errorStart + 300, responseBody.length());
-                System.out.println("Error section: " + responseBody.substring(errorStart, errorEnd));
-            }
-            return;
-        }
-
-        if (hasRoutes) {
-            // Try to extract and analyze the first route
-            int routesStart = responseBody.indexOf("\"routes\"");
-            if (routesStart > -1) {
-                // Find the geometry section
-                int geometryStart = responseBody.indexOf("\"geometry\"", routesStart);
-                if (geometryStart > -1) {
-                    int geometryEnd = responseBody.indexOf("}", geometryStart);
-                    if (geometryEnd == -1) geometryEnd = geometryStart + 500;
-                    String geometrySection = responseBody.substring(geometryStart, Math.min(geometryEnd + 1, responseBody.length()));
-                    System.out.println("Geometry section: " + geometrySection);
-
-                    // Check for coordinates within geometry
-                    int coordStart = responseBody.indexOf("\"coordinates\"", geometryStart);
-                    if (coordStart > -1 && coordStart < geometryEnd) {
-                        // Find the coordinates array
-                        int coordArrayStart = responseBody.indexOf("[", coordStart);
-                        if (coordArrayStart > -1) {
-                            // Count how many coordinate pairs we have
-                            String coordSection = responseBody.substring(coordArrayStart, Math.min(coordArrayStart + 1000, responseBody.length()));
-                            int coordCount = coordSection.split("\\[").length - 1; // Rough count of coordinate pairs
-                            System.out.println("Estimated coordinate pairs in response: " + (coordCount / 2));
-
-                            // Show first few coordinates
-                            int firstCoordEnd = Math.min(coordArrayStart + 200, responseBody.length());
-                            System.out.println("First coordinates sample: " + responseBody.substring(coordArrayStart, firstCoordEnd));
-                        }
-                    }
-                } else {
-                    System.out.println("No geometry section found in routes");
-                }
-            }
-        } else {
-            System.out.println("No routes found in response");
-            // Print first 500 characters to see what we actually got
-            String preview = responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody;
-            System.out.println("Response preview: " + preview);
         }
     }
 
@@ -197,33 +115,7 @@ public class DirectionsService {
             throw new IllegalArgumentException("Invalid ending coordinates: [" + endLng + ", " + endLat + "]");
         }
 
-        String result = getRouteDirections(startLng, startLat, endLng, endLat, stopPoints, "driving-car");
-
-        // Add response debugging
-        if (result != null) {
-            System.out.println("=== ORS RESPONSE DEBUG ===");
-            System.out.println("Response length: " + result.length());
-
-            // Check if response contains route geometry
-            boolean hasRoutes = result.contains("\"routes\"");
-            boolean hasGeometry = result.contains("\"geometry\"");
-            boolean hasCoordinates = result.contains("\"coordinates\"");
-
-            System.out.println("Has routes: " + hasRoutes);
-            System.out.println("Has geometry: " + hasGeometry);
-            System.out.println("Has coordinates: " + hasCoordinates);
-
-            if (hasGeometry) {
-                // Extract a sample of the geometry to verify format
-                int geometryIndex = result.indexOf("\"geometry\"");
-                if (geometryIndex > -1) {
-                    String geometrySample = result.substring(geometryIndex, Math.min(geometryIndex + 200, result.length()));
-                    System.out.println("Geometry sample: " + geometrySample);
-                }
-            }
-        }
-
-        return result;
+        return getRouteDirections(startLng, startLat, endLng, endLat, stopPoints, "driving-car");
     }
 
     private Map<String, Object> buildDirectionsRequest(double startLng, double startLat,
@@ -256,24 +148,54 @@ public class DirectionsService {
 
         System.out.println("Total waypoints for route: " + coordinates.size());
 
-        // Build request body with correct ORS API parameters
+        // Build request body with correct ORS API v2 parameters
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("coordinates", coordinates);
-        requestBody.put("format", "json");        // Use json format, not geojson
-        requestBody.put("geometry", true);        // Include geometry in response
-        requestBody.put("instructions", false);   // We don't need turn-by-turn instructions
-        requestBody.put("elevation", false);      // We don't need elevation data
-        requestBody.put("continue_straight", false);
+
+        // Correct parameters for ORS API v2
+        requestBody.put("format", "json");
+        requestBody.put("geometry", true);           // Request geometry
+        requestBody.put("instructions", false);     // Don't need turn-by-turn instructions
+        requestBody.put("elevation", false);        // Don't need elevation data
+
+        // Use recommended preference for better routing
         requestBody.put("preference", "recommended");
 
-        // Add options for better routing
+        // Add radiuses to handle routing near coordinates (in meters)
+        List<Integer> radiuses = new ArrayList<>();
+        for (int i = 0; i < coordinates.size(); i++) {
+            radiuses.add(1000); // 1km radius for each waypoint
+        }
+        requestBody.put("radiuses", radiuses);
+
+        // Enhanced options for better routing
         Map<String, Object> options = new HashMap<>();
-        options.put("avoid_features", new ArrayList<>()); // Empty array for no restrictions
+        options.put("avoid_features", Arrays.asList("tollways")); // Avoid toll roads
+        options.put("profile_params", createProfileParams());
         requestBody.put("options", options);
 
         System.out.println("Final request body: " + requestBody);
         return requestBody;
     }
+
+    private Map<String, Object> createProfileParams() {
+        Map<String, Object> profileParams = new HashMap<>();
+
+        // Driving car specific parameters
+        Map<String, Object> restrictions = new HashMap<>();
+        restrictions.put("maximum_speed", 130); // km/h
+        profileParams.put("restrictions", restrictions);
+
+        Map<String, Object> weightings = new HashMap<>();
+        weightings.put("steepness_difficulty", 1);
+        weightings.put("green", 0.4);
+        weightings.put("quiet", 0.8);
+        profileParams.put("weightings", weightings);
+
+        return profileParams;
+    }
+
+
 
     private void handleHttpClientError(HttpClientErrorException e) {
         int statusCode = e.getStatusCode().value();
@@ -290,6 +212,8 @@ public class DirectionsService {
                 throw new RuntimeException("ORS API authentication failed. Please check your API key.");
             case 403:
                 throw new RuntimeException("ORS API access forbidden. Check your API key permissions.");
+            case 404:
+                throw new RuntimeException("ORS API endpoint not found. Check the service URL and profile.");
             case 429:
                 throw new RuntimeException("ORS API rate limit exceeded. Please wait before making more requests.");
             case 500:
@@ -310,7 +234,7 @@ public class DirectionsService {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Set accept header
-        headers.set("Accept", "application/json");
+        headers.set("Accept", "application/json, application/geo+json");
 
         // Set authorization with proper formatting
         if (apiKey != null && !apiKey.trim().isEmpty()) {
@@ -327,7 +251,7 @@ public class DirectionsService {
             headers.set("User-Agent", "RidersHub/1.0 (Route Service)");
         }
 
-        System.out.println("Request headers: " + headers);
+        System.out.println("Request headers configured");
         return headers;
     }
 
@@ -343,32 +267,6 @@ public class DirectionsService {
         }
 
         return isValid;
-    }
-
-    // Method for testing ORS API connectivity
-    public boolean testORSConnection() {
-        try {
-            System.out.println("=== TESTING ORS API CONNECTION ===");
-
-            if (apiKey == null || apiKey.trim().isEmpty()) {
-                System.err.println("❌ No ORS API key configured");
-                return false;
-            }
-
-            // Test with simple coordinates (Davao City area)
-            double testStartLng = 125.6128;
-            double testStartLat = 7.0731;
-            double testEndLng = 125.6200;
-            double testEndLat = 7.0800;
-
-            getRouteDirections(testStartLng, testStartLat, testEndLng, testEndLat, null, "driving-car");
-            System.out.println("✅ ORS API connection test successful");
-            return true;
-
-        } catch (Exception e) {
-            System.err.println("❌ ORS API connection test failed: " + e.getMessage());
-            return false;
-        }
     }
 
 

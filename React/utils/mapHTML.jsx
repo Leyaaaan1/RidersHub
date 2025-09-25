@@ -1,4 +1,4 @@
-// Enhanced getMapHTML function with route drawing capabilities
+// Enhanced getMapHTML function with better ORS API support
 const getMapHTML = (lat, lng, isDark = false) => {
     return `
     <!DOCTYPE html>
@@ -26,11 +26,18 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 background: none !important;
                 border: none !important;
             }
+            .route-popup {
+                font-size: 12px;
+                padding: 5px;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 4px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
             ${isDark ? `
             .leaflet-tile-pane { 
                 filter: invert(1) hue-rotate(180deg); 
             }
-            .leaflet-marker-icon {
+            .leaflet-marker-icon, .custom-marker {
                 filter: invert(1) hue-rotate(180deg);
             }
             ` : ''}
@@ -99,7 +106,7 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             }
 
-            // Function to clear existing route
+            // Enhanced function to clear existing route
             window.clearRoute = function() {
                 try {
                     if (currentRoute) {
@@ -114,47 +121,117 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             };
 
-            // Function to draw route polyline
+            // Enhanced function to draw route polyline with better validation
             window.drawRoute = function(coordinates, options = {}) {
                 try {
-                    console.log('Drawing route with', coordinates.length, 'coordinates');
+                    console.log('=== WEBVIEW ROUTE DRAWING START ===');
+                    console.log('Received coordinates count:', coordinates?.length);
                     
-                    // Validate coordinates
+                    // Enhanced coordinate validation
                     if (!Array.isArray(coordinates) || coordinates.length < 2) {
-                        console.error('Invalid coordinates for route drawing');
+                        console.error('Invalid coordinates for route drawing:', {
+                            isArray: Array.isArray(coordinates),
+                            length: coordinates?.length,
+                            sample: coordinates?.slice(0, 2)
+                        });
                         return false;
                     }
 
-                    // Clear existing route first
+                    // Validate coordinate format and values
+                    const validatedCoords = [];
+                    let invalidCount = 0;
+
+                    coordinates.forEach((coord, index) => {
+                        if (Array.isArray(coord) && coord.length >= 2) {
+                            const lat = parseFloat(coord[0]);
+                            const lng = parseFloat(coord[1]);
+                            
+                            // Check if coordinates are valid numbers and within reasonable bounds
+                            if (!isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng) &&
+                                lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                                validatedCoords.push([lat, lng]);
+                            } else {
+                                invalidCount++;
+                                if (invalidCount <= 5) { // Log first 5 invalid coords
+                                    console.warn('Invalid coordinate at index', index, ':', coord, 
+                                        '-> lat:', lat, 'lng:', lng);
+                                }
+                            }
+                        } else {
+                            invalidCount++;
+                            if (invalidCount <= 5) {
+                                console.warn('Malformed coordinate at index', index, ':', coord);
+                            }
+                        }
+                    });
+
+                    if (invalidCount > 0) {
+                        console.warn('Found', invalidCount, 'invalid coordinates out of', coordinates.length);
+                    }
+
+                    if (validatedCoords.length < 2) {
+                        console.error('Not enough valid coordinates for route:', validatedCoords.length);
+                        return false;
+                    }
+
+                    console.log('Valid coordinates for route:', validatedCoords.length);
+                    console.log('First coordinate:', validatedCoords[0]);
+                    console.log('Last coordinate:', validatedCoords[validatedCoords.length - 1]);
+
+                    // Clear existing route
                     if (currentRoute) {
                         map.removeLayer(currentRoute);
                     }
 
-                    // Default styling options
+                    // Enhanced default styling
                     const defaultOptions = {
                         color: '#1e40af',
-                        weight: 5,
+                        weight: 4,
                         opacity: 0.8,
                         smoothFactor: 1.0,
                         lineJoin: 'round',
                         lineCap: 'round'
                     };
 
-                    // Merge with provided options
                     const routeOptions = { ...defaultOptions, ...options };
 
-                    // Create polyline
-                    currentRoute = L.polyline(coordinates, routeOptions).addTo(map);
+                    // Create polyline with validated coordinates
+                    currentRoute = L.polyline(validatedCoords, routeOptions).addTo(map);
 
-                    // Add popup showing route info
-                    const distance = calculateDistance(coordinates);
-                    currentRoute.bindPopup(\`Route distance: \${distance.toFixed(2)} km\`);
+                    // Calculate route statistics
+                    const routeDistance = calculateDistance(validatedCoords);
+                    console.log('Route distance:', routeDistance.toFixed(2), 'km');
 
-                    console.log('Route drawn successfully with', coordinates.length, 'points');
+                    // Add route click event for debugging
+                    currentRoute.on('click', function(e) {
+                        console.log('Route clicked at:', e.latlng);
+                    });
+
+                    console.log('=== ROUTE DRAWN SUCCESSFULLY ===');
+                    console.log('Route bounds:', currentRoute.getBounds());
+                    
+                    // Send success message back to React Native
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'routeDrawn',
+                        success: true,
+                        coordinateCount: validatedCoords.length,
+                        distance: routeDistance,
+                        bounds: currentRoute.getBounds()
+                    }));
+                    
                     return true;
 
                 } catch (error) {
-                    console.error('Error drawing route:', error);
+                    console.error('=== ROUTE DRAWING ERROR ===');
+                    console.error('Error:', error.message);
+                    console.error('Stack:', error.stack);
+                    
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'routeDrawn',
+                        success: false,
+                        error: error.message
+                    }));
+                    
                     return false;
                 }
             };
@@ -186,7 +263,7 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             };
 
-            // Function to fit route to map view
+            // Enhanced function to fit route to map view
             window.fitRouteToMap = function(coordinates, padding = [20, 20]) {
                 try {
                     if (!Array.isArray(coordinates) || coordinates.length === 0) {
@@ -194,13 +271,20 @@ const getMapHTML = (lat, lng, isDark = false) => {
                         return false;
                     }
 
-                    const bounds = L.latLngBounds(coordinates);
+                    // Use the current route bounds if available, otherwise create from coordinates
+                    let bounds;
+                    if (currentRoute) {
+                        bounds = currentRoute.getBounds();
+                    } else {
+                        bounds = L.latLngBounds(coordinates);
+                    }
+
                     map.fitBounds(bounds, { 
                         padding: padding,
                         maxZoom: 16
                     });
                     
-                    console.log('Map fitted to route bounds');
+                    console.log('Map fitted to route bounds:', bounds);
                     return true;
                 } catch (error) {
                     console.error('Error fitting route to map:', error);
@@ -208,56 +292,66 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             };
 
-            // Function to add route markers (start, end, stops)
+            // Enhanced function to add route markers
             window.addRouteMarkers = function(startCoords, endCoords, stopCoords = []) {
                 try {
+                    console.log('Adding route markers...');
+                    console.log('Start:', startCoords, 'End:', endCoords, 'Stops:', stopCoords);
+                    
                     // Clear existing route markers
                     clearRouteMarkers();
 
-                    // Custom icons for different marker types
-                    const startIcon = L.divIcon({
-                        className: 'custom-marker',
-                        html: '<div style="background: #22c55e; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                        iconSize: [20, 20],
-                        iconAnchor: [10, 10]
-                    });
+                    // Create custom icons
+                    const createMarkerIcon = (color, size = 20) => {
+                        return L.divIcon({
+                            className: 'custom-marker',
+                            html: \`<div style="background: \${color}; width: \${size}px; height: \${size}px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>\`,
+                            iconSize: [size, size],
+                            iconAnchor: [size/2, size/2]
+                        });
+                    };
 
-                    const endIcon = L.divIcon({
-                        className: 'custom-marker',
-                        html: '<div style="background: #ef4444; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                        iconSize: [20, 20],
-                        iconAnchor: [10, 10]
-                    });
-
-                    const stopIcon = L.divIcon({
-                        className: 'custom-marker',
-                        html: '<div style="background: #f59e0b; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>',
-                        iconSize: [16, 16],
-                        iconAnchor: [8, 8]
-                    });
+                    const startIcon = createMarkerIcon('#22c55e', 24); // Green
+                    const endIcon = createMarkerIcon('#ef4444', 24);   // Red
+                    const stopIcon = createMarkerIcon('#f59e0b', 18);  // Amber
 
                     // Add start marker
-                    if (startCoords && startCoords.length >= 2) {
-                        startMarker = L.marker([startCoords[0], startCoords[1]], { icon: startIcon })
-                            .addTo(map)
-                            .bindPopup('Start Point');
+                    if (startCoords && Array.isArray(startCoords) && startCoords.length >= 2) {
+                        startMarker = L.marker([startCoords[0], startCoords[1]], { 
+                            icon: startIcon,
+                            zIndexOffset: 1000
+                        })
+                        .addTo(map)
+                        .bindPopup('<div class="route-popup"><strong>Start Point</strong></div>');
+                        
+                        console.log('Start marker added at:', startCoords);
                     }
 
                     // Add end marker
-                    if (endCoords && endCoords.length >= 2) {
-                        endMarker = L.marker([endCoords[0], endCoords[1]], { icon: endIcon })
-                            .addTo(map)
-                            .bindPopup('End Point');
+                    if (endCoords && Array.isArray(endCoords) && endCoords.length >= 2) {
+                        endMarker = L.marker([endCoords[0], endCoords[1]], { 
+                            icon: endIcon,
+                            zIndexOffset: 1000
+                        })
+                        .addTo(map)
+                        .bindPopup('<div class="route-popup"><strong>End Point</strong></div>');
+                        
+                        console.log('End marker added at:', endCoords);
                     }
 
                     // Add stop markers
                     if (Array.isArray(stopCoords)) {
                         stopCoords.forEach((coord, index) => {
-                            if (coord && coord.length >= 2) {
-                                const stopMarker = L.marker([coord[0], coord[1]], { icon: stopIcon })
-                                    .addTo(map)
-                                    .bindPopup(\`Stop \${index + 1}\`);
+                            if (Array.isArray(coord) && coord.length >= 2) {
+                                const stopMarker = L.marker([coord[0], coord[1]], { 
+                                    icon: stopIcon,
+                                    zIndexOffset: 999
+                                })
+                                .addTo(map)
+                                .bindPopup(\`<div class="route-popup"><strong>Stop \${index + 1}</strong></div>\`);
+                                
                                 stopMarkers.push(stopMarker);
+                                console.log('Stop', index + 1, 'marker added at:', coord);
                             }
                         });
                     }
@@ -283,6 +377,7 @@ const getMapHTML = (lat, lng, isDark = false) => {
                     }
                     stopMarkers.forEach(marker => map.removeLayer(marker));
                     stopMarkers = [];
+                    console.log('Route markers cleared');
                     return true;
                 } catch (error) {
                     console.error('Error clearing route markers:', error);
@@ -290,19 +385,32 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             };
 
-            // Helper function to calculate approximate distance
+            // Enhanced distance calculation
             function calculateDistance(coordinates) {
                 if (!coordinates || coordinates.length < 2) return 0;
                 
                 let totalDistance = 0;
                 for (let i = 1; i < coordinates.length; i++) {
-                    const point1 = L.latLng(coordinates[i-1]);
-                    const point2 = L.latLng(coordinates[i]);
+                    const point1 = L.latLng(coordinates[i-1][0], coordinates[i-1][1]);
+                    const point2 = L.latLng(coordinates[i][0], coordinates[i][1]);
                     totalDistance += point1.distanceTo(point2);
                 }
                 
                 return totalDistance / 1000; // Convert to kilometers
             }
+
+            // Debug function to check map state
+            window.debugMapState = function() {
+                console.log('=== MAP STATE DEBUG ===');
+                console.log('Map center:', map.getCenter());
+                console.log('Map zoom:', map.getZoom());
+                console.log('Has current route:', !!currentRoute);
+                console.log('Route coordinates count:', currentRoute ? currentRoute.getLatLngs().length : 0);
+                console.log('Start marker:', !!startMarker);
+                console.log('End marker:', !!endMarker);
+                console.log('Stop markers:', stopMarkers.length);
+                return true;
+            };
 
             // Initialize map when page loads
             window.addEventListener('load', initMap);

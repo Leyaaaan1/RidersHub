@@ -35,201 +35,194 @@ const RideStep3 = ({
         return () => clearTimeout(timer);
     }, [startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints]);
 
-    // ROUTE DRAWING FUNCTION - Only draws the polygon line
-// Updated drawRoadRoute function for RideStep3.jsx
-// Replace your existing drawRoadRoute function with this enhanced version
-
-// Enhanced drawRoadRoute function with better response handling
-// Replace your existing drawRoadRoute function in RideStep3.jsx with this simplified version
-
     const drawRoadRoute = async () => {
-        if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) return;
+        if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
+            console.log('Missing coordinates for route drawing');
+            return;
+        }
 
-        console.log('Drawing route polygon...');
         setRouteLoading(true);
 
         try {
-            const routeData = {
-                startLng: parseFloat(startingLongitude),
-                startLat: parseFloat(startingLatitude),
-                endLng: parseFloat(endingLongitude),
-                endLat: parseFloat(endingLatitude),
-                stopPoints: stopPoints.map(point => ({
-                    stopLongitude: parseFloat(point.lng),
-                    stopLatitude: parseFloat(point.lat),
-                    stopName: point.name
-                }))
-            };
-
-            console.log('Route data being sent:', routeData);
-            const routeResponse = await RouteService.getRoutePreview(routeData, token);
-
-            console.log('=== ROUTE RESPONSE DEBUG ===');
-            console.log('Full response:', routeResponse);
-
-            let coordinates = null;
-
-            // Extract coordinates from ORS response
-            if (routeResponse?.routes?.[0]?.geometry?.coordinates) {
-                const rawCoordinates = routeResponse.routes[0].geometry.coordinates;
-                console.log('Raw coordinates from ORS:', rawCoordinates.length, 'points');
-                console.log('First raw coordinate:', rawCoordinates[0]);
-                console.log('Last raw coordinate:', rawCoordinates[rawCoordinates.length - 1]);
-
-                // Validate that we have proper coordinate arrays
-                if (Array.isArray(rawCoordinates) && rawCoordinates.length > 1) {
-                    // Convert ORS format [lng, lat] to Leaflet format [lat, lng]
-                    coordinates = rawCoordinates
-                        .filter(coord => Array.isArray(coord) && coord.length >= 2)
-                        .map(coord => [coord[1], coord[0]]); // [lat, lng] for Leaflet
-
-                    console.log('Converted coordinates count:', coordinates.length);
-                    console.log('First converted coordinate:', coordinates[0]);
-                    console.log('Last converted coordinate:', coordinates[coordinates.length - 1]);
-                }
-            } else {
-                console.error('No coordinates found in ORS response');
-                console.log('Response structure check:', {
-                    hasRoutes: !!routeResponse?.routes,
-                    routesLength: routeResponse?.routes?.length,
-                    firstRoute: routeResponse?.routes?.[0],
-                    geometry: routeResponse?.routes?.[0]?.geometry
-                });
-            }
-
-            if (coordinates && coordinates.length > 1 && webViewRef.current) {
-                console.log('Drawing route with', coordinates.length, 'coordinate points');
-
-                // Clear existing route and markers first
+            // Clear existing route first
+            if (webViewRef.current) {
                 webViewRef.current.injectJavaScript(`
                 if (window.clearRoute) {
                     window.clearRoute();
                 }
-                if (window.clearRouteMarkers) {
-                    window.clearRouteMarkers();
+                true;
+            `);
+            }
+
+            // Prepare route data matching backend format
+            const routeData = {
+                startLng: startingLongitude,
+                startLat: startingLatitude,
+                endLng: endingLongitude,
+                endLat: endingLatitude,
+                stopPoints: stopPoints.map(stop => ({
+                    stopLatitude: stop.lat,
+                    stopLongitude: stop.lng,
+                    stopName: stop.name || 'Stop Point'
+                }))
+            };
+
+            // Call your backend route preview API
+            const routeResponse = await RouteService.getRoutePreview(routeData, token);
+
+            if (!routeResponse) {
+                console.error('No response from route service');
+                return;
+            }
+
+            // Parse the response if it's a string
+            let parsedResponse = routeResponse;
+            if (typeof routeResponse === 'string') {
+                try {
+                    parsedResponse = JSON.parse(routeResponse);
+                } catch (e) {
+                    console.error('Failed to parse route response:', e);
+                    return;
+                }
+            }
+
+            // Extract route from ORS response format
+            if (!parsedResponse.routes || parsedResponse.routes.length === 0) {
+                console.error('No routes found in response');
+                return;
+            }
+
+            const route = parsedResponse.routes[0];
+
+            // Handle ORS geometry format
+            let coordinates = null;
+
+            if (route.geometry) {
+                if (typeof route.geometry === 'string') {
+                    // If geometry is encoded polyline string
+                    coordinates = decodePolyline(route.geometry);
+                } else if (route.geometry.coordinates) {
+                    // If geometry is GeoJSON format
+                    coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]); // Convert [lng, lat] to [lat, lng]
+                }
+            }
+
+            if (!coordinates || coordinates.length < 2) {
+                console.error('No valid coordinates found for route drawing');
+                return;
+            }
+
+            // Draw the route polyline on the map
+            if (webViewRef.current) {
+                const coordinatesString = JSON.stringify(coordinates);
+
+                webViewRef.current.injectJavaScript(`
+                try {
+                    const coordinates = ${coordinatesString};
+                    
+                    if (window.drawRoute) {
+                        const success = window.drawRoute(coordinates, {
+                            color: '#1e40af',
+                            weight: 4,
+                            opacity: 0.8
+                        });
+                        
+                        if (success) {
+                            // Add route markers
+                            const startCoords = [${startingLatitude}, ${startingLongitude}];
+                            const endCoords = [${endingLatitude}, ${endingLongitude}];
+                            const stopCoords = ${JSON.stringify(stopPoints.map(stop => [stop.lat, stop.lng]))};
+                            
+                            if (window.addRouteMarkers) {
+                                window.addRouteMarkers(startCoords, endCoords, stopCoords);
+                            }
+                            
+                            // Fit route to map view
+                            if (window.fitRouteToMap) {
+                                window.fitRouteToMap(coordinates, [30, 30]);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error drawing route:', error);
                 }
                 true;
             `);
-
-                // Draw new route polyline with proper coordinates
-                setTimeout(() => {
-                    const routeScript = `
-                    (function() {
-                        try {
-                            console.log('Drawing route polyline with ${coordinates.length} points');
-                            
-                            const routeCoords = ${JSON.stringify(coordinates)};
-                            
-                            if (!routeCoords || routeCoords.length < 2) {
-                                console.error('Invalid coordinates for route drawing');
-                                return false;
-                            }
-                            
-                            // Validate coordinate format
-                            const invalidCoords = routeCoords.filter(coord => 
-                                !Array.isArray(coord) || coord.length < 2 || 
-                                isNaN(coord[0]) || isNaN(coord[1])
-                            );
-                            
-                            if (invalidCoords.length > 0) {
-                                console.error('Found invalid coordinates:', invalidCoords.slice(0, 3));
-                                return false;
-                            }
-                            
-                            console.log('First few coordinates:', routeCoords.slice(0, 3));
-                            console.log('Last few coordinates:', routeCoords.slice(-3));
-                            
-                            // Draw the route polyline
-                            if (window.drawRoute) {
-                                const routeSuccess = window.drawRoute(routeCoords, {
-                                    color: '#1e40af',
-                                    weight: 5,
-                                    opacity: 0.8,
-                                    smoothFactor: 1.0,
-                                    lineJoin: 'round',
-                                    lineCap: 'round'
-                                });
-                                
-                                console.log('Route polyline drawn:', routeSuccess);
-                                
-                                if (routeSuccess) {
-                                    // Add route markers
-                                    const startCoords = [${parseFloat(startingLatitude)}, ${parseFloat(startingLongitude)}];
-                                    const endCoords = [${parseFloat(endingLatitude)}, ${parseFloat(endingLongitude)}];
-                                    const stopCoords = ${JSON.stringify(stopPoints.map(point => [parseFloat(point.lat), parseFloat(point.lng)]))};
-                                    
-                                    if (window.addRouteMarkers) {
-                                        const markersSuccess = window.addRouteMarkers(startCoords, endCoords, stopCoords);
-                                        console.log('Route markers added:', markersSuccess);
-                                    }
-                                    
-                                    // Fit the map to show the entire route
-                                    if (window.fitRouteToMap) {
-                                        setTimeout(() => {
-                                            window.fitRouteToMap(routeCoords, [30, 30]);
-                                        }, 200);
-                                    }
-                                }
-                                
-                                return routeSuccess;
-                            } else {
-                                console.error('drawRoute function not available');
-                                return false;
-                            }
-                        } catch (error) {
-                            console.error('Error drawing route polyline:', error);
-                            return false;
-                        }
-                    })();
-                    true;
-                `;
-
-                    webViewRef.current.injectJavaScript(routeScript);
-                }, 300);
-            } else {
-                console.error('No valid coordinates to draw route, falling back to straight line');
-                drawFallbackStraightLine();
             }
+
         } catch (error) {
-            console.error('Error drawing route polyline:', error);
-            drawFallbackStraightLine();
+            console.error('Error drawing route:', error);
+
+            // Handle specific errors
+            if (error.message?.includes('500')) {
+                console.error('Backend route calculation failed - check ORS API configuration');
+            }
         } finally {
             setRouteLoading(false);
         }
     };
-// Helper function for fallback straight line
-    const drawFallbackStraightLine = () => {
-        if (startingLatitude && startingLongitude && endingLatitude && endingLongitude && webViewRef.current) {
-            console.log('Drawing fallback straight line between points');
-            const fallbackCoords = [
-                [parseFloat(startingLatitude), parseFloat(startingLongitude)],
-                [parseFloat(endingLatitude), parseFloat(endingLongitude)]
-            ];
 
-            const fallbackScript = `
-            if (window.drawRoute) {
-                const coords = ${JSON.stringify(fallbackCoords)};
-                window.drawRoute(coords, {
-                    color: '#dc2626',
-                    weight: 3,
-                    opacity: 0.6,
-                    dashArray: '10, 10'
-                });
-                
-                // Add markers for fallback line
-                const startCoords = [${parseFloat(startingLatitude)}, ${parseFloat(startingLongitude)}];
-                const endCoords = [${parseFloat(endingLatitude)}, ${parseFloat(endingLongitude)}];
-                const stopCoords = ${JSON.stringify(stopPoints.map(point => [parseFloat(point.lat), parseFloat(point.lng)]))};
-                
-                if (window.addRouteMarkers) {
-                    window.addRouteMarkers(startCoords, endCoords, stopCoords);
+// Helper function to decode polyline (if needed)
+    const decodePolyline = (str) => {
+        let index = 0, len = str.length;
+        let lat = 0, lng = 0;
+        let coordinates = [];
+
+        while (index < len) {
+            let b, shift = 0, result = 0;
+            do {
+                b = str.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+
+            let deltaLat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lat += deltaLat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = str.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+
+            let deltaLng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+            lng += deltaLng;
+
+            coordinates.push([lat / 1e5, lng / 1e5]);
+        }
+
+        return coordinates;
+    };
+    const findCoordinatesInObject = (obj, path = '') => {
+        if (!obj || typeof obj !== 'object') return null;
+
+        for (const [key, value] of Object.entries(obj)) {
+            const currentPath = path ? `${path}.${key}` : key;
+
+            // Check if this might be a coordinates array
+            if (Array.isArray(value) && value.length > 0) {
+                // Check if it's a coordinate array (array of [lng, lat] pairs)
+                if (Array.isArray(value[0]) && value[0].length >= 2 &&
+                    typeof value[0][0] === 'number' && typeof value[0][1] === 'number') {
+                    console.log(`Found potential coordinates at path: ${currentPath}`);
+                    console.log('Sample coordinates:', value.slice(0, 3));
+                    return processRawCoordinates(value, currentPath);
                 }
             }
-            true;
-        `;
-            webViewRef.current.injectJavaScript(fallbackScript);
+
+            // Recursively search nested objects
+            if (typeof value === 'object' && !Array.isArray(value)) {
+                const result = findCoordinatesInObject(value, currentPath);
+                if (result) return result;
+            }
         }
-    };    const startAddStopPoint = () => {
+
+        return null;
+    };
+
+    const startAddStopPoint = () => {
         setMapMode('stop');
         setIsAddingStop(true);
         setCurrentStop(null);
