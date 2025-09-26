@@ -8,7 +8,7 @@ import imageStyles from "../../styles/ImageStyles";
 import { getStopPointsByRideId } from '../../services/startService';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import RideImagesCarousel from "../../styles/RideImagesCarousel";
-
+import RouteMapView from '../../utils/RouteMapView';
 
 const RideRoutesPage = ({ route }) => {
     const {
@@ -162,26 +162,31 @@ const RideRoutesPage = ({ route }) => {
 
 
 
+
+            <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
+                <View style={rideRoutesPageUtilities.sectionHeader}>
+                    <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+                        Route Map
+                    </Text>
+                </View>
+                <View style={[rideRoutesPageUtilities.mapContainer, { height: 600 }]}>
+                    <RouteMapView
+                        generatedRidesId={generatedRidesId}
+                        token={token}
+                        startingPoint={startingPoint}
+                        endingPoint={endingPoint}
+                        stopPoints={stopPoints}
+                        style={{ flex: 1, borderRadius: 10 }}
+                        isDark={true}
+                    />
+                </View>
+            </Animated.View>
             <RideImagesCarousel
                 images={images}
                 imagesLoading={imagesLoading}
                 imagesError={imagesError}
                 pulseAnim={pulseAnim}
             />
-            <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
-                <View style={rideRoutesPageUtilities.sectionHeader}>
-                </View>
-                <View style={rideRoutesPageUtilities.mapContainer}>
-                    <MapImageSwapper
-                        startImage={startMapImage}
-                        endImage={endMapImage}
-                        startPoint={startingPoint}
-                        endPoint={endingPoint}
-                        showStart={showStart}
-                        setShowStart={setShowStart}
-                    />
-                </View>
-            </Animated.View>
 
             <Animated.View style={[rideRoutesPageUtilities.stopPointsSection, { opacity: fadeAnim }]}>
                 <Text style={{ color: '#fff' }}>
