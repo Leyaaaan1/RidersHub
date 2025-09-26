@@ -6,6 +6,7 @@ import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
+import leyans.RidersHub.Service.MapService.RouteService;
 import leyans.RidersHub.Util.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,20 +31,17 @@ public class RidesService {
 
     @Autowired
     private final LocationService locationService;
-
     private final RiderService riderService;
-
     private final MapboxService mapboxService;
-
     private final RideParticipantService rideParticipantService;
-
     private final RiderUtil riderUtil;
+    private final RouteService routeService;
 
 
     @Autowired
     public RidesService(RidesRepository ridesRepository,
 
-                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil) {
+                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil, RouteService routeService) {
 
         this.ridesRepository = ridesRepository;
         this.riderService = riderService;
@@ -52,6 +49,7 @@ public class RidesService {
         this.mapboxService = mapboxService;
         this.rideParticipantService = rideParticipantService;
         this.riderUtil = riderUtil;
+        this.routeService = routeService;
     }
 
     @Transactional
@@ -66,7 +64,16 @@ public class RidesService {
         String startImageUrl = mapboxService.getStaticMapImageUrl(startLongitude, startLatitude);
         String endImageUrl = mapboxService.getStaticMapImageUrl(endLongitude, endLatitude);
 
+        List<StopPointDTO> validStopPoints = stopPointsDto.stream()
+                .filter(stop -> stop.getStopLongitude() != 0.0 && stop.getStopLatitude() != 0.0)
+                .collect(Collectors.toList());
 
+        String routeCoordinates = routeService.getRouteDirections(
+                startLongitude, startLatitude,
+                endLongitude, endLatitude,
+                validStopPoints,  // Use filtered list
+                "driving-car"
+        );
 
         Rider creator = riderService.getRiderByUsername(creatorUsername);
         RiderType rideType = riderService.getRiderTypeByName(riderType);
@@ -76,7 +83,6 @@ public class RidesService {
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
 
-//        String routeCoordinates = getRouteDirections(startLongitude, startLatitude, endLongitude, endLatitude, stopPointsDto);
 
 
         String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
@@ -111,7 +117,7 @@ public class RidesService {
         newRide.setMapImageUrl(imageUrl);
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
-//        newRide.setRouteCoordinates(routeCoordinates);
+        newRide.setRouteCoordinates(routeCoordinates);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -180,7 +186,9 @@ public class RidesService {
                 ride.getMagImageStartingLocation(),
                 ride.getMagImageEndingLocation(),
                 ride.getUsername().getUsername(),
+                ride.getRouteCoordinates(),
                 mapStopPointsToDTOs(ride.getStopPoints())
+
         );    }
 
     public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {

@@ -59,7 +59,8 @@ public class SecurityConfiguration {
                                 "/riders/*/map-image",
                                 "/update/**",
                                 "/start/**",
-                                "/wikimedia"
+                                "/wikimedia",
+                                "/routes"
                         )
                         .authenticated()
                         .anyRequest().authenticated())

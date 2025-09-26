@@ -193,36 +193,11 @@ const CreateRide = ({ route, navigation }) => {
         }));
 
         try {
-            // Debug token before API call
-            console.log('=== TOKEN DEBUG ===');
-            console.log('Token value:', token);
-            console.log('Token type:', typeof token);
-            console.log('Token length:', token?.length);
-            console.log('Username:', username);
 
             if (!token) {
                 throw new Error('No authentication token available. Please log in again.');
             }
 
-            console.log('Creating ride with data:', {
-                ridesName: rideName,
-                locationName: locationName,
-                riderType: riderType || 'CAR',
-                date: date.toISOString(),
-                latitude: parseFloat(latitude) || 0,
-                longitude: parseFloat(longitude) || 0,
-                startLat: parseFloat(startingLatitude) || 0,
-                startLng: parseFloat(startingLongitude) || 0,
-                endLat: parseFloat(endingLatitude) || 0,
-                endLng: parseFloat(endingLongitude) || 0,
-                startingPoint: startingPoint,
-                endingPoint: endingPoint,
-                participants: participantsArray,
-                description: description,
-                stopPoints: stopPointsPayload,
-            });
-
-            // Create ride data without route coordinates
             const rideData = {
                 ridesName: rideName,
                 locationName: locationName,
