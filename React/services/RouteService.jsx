@@ -1,112 +1,154 @@
-const API_BASE_URL = 'http://192.168.1.51:8080';
+const DEFAULT_API_URL = 'http://192.168.1.51:8080';
 
 class RouteService {
-
-    static async getRoutePreview(routeData, token) {
+    constructor(baseURL, token) {
+        this.baseURL = baseURL || DEFAULT_API_URL;
+        this.token = token;
+    }
+    /**
+     * Get route preview coordinates from backend
+     * @param {Object} routeData - Route request data
+     * @param {number} routeData.startLat - Starting latitude
+     * @param {number} routeData.startLng - Starting longitude
+     * @param {number} routeData.endLat - Ending latitude
+     * @param {number} routeData.endLng - Ending longitude
+     * @param {Array} routeData.stopPoints - Array of stop points {lat, lng}
+     * @returns {Promise<Array>} Array of coordinates [[lat, lng], ...]
+     */
+    async getRoutePreview(routeData) {
         try {
-            console.log('Calling route preview API with data:', routeData);
+            console.log('=== FRONTEND ROUTE REQUEST ===');
+            console.log('Route data:', routeData);
 
-            // Format stop points to match backend DTO structure
-            const formattedStopPoints = this.formatStopPoints(routeData.stopPoints || []);
+            // Transform stop points to match backend DTO format
+            const stopPoints = routeData.stopPoints?.map(stop => ({
+                stopLatitude: parseFloat(stop.lat),
+                stopLongitude: parseFloat(stop.lng)
+            })) || [];
 
-            const requestData = {
-                startLng: routeData.startLng,
-                startLat: routeData.startLat,
-                endLng: routeData.endLng,
-                endLat: routeData.endLat,
-                stopPoints: formattedStopPoints
+            const requestBody = {
+                startLat: parseFloat(routeData.startLat),
+                startLng: parseFloat(routeData.startLng),
+                endLat: parseFloat(routeData.endLat),
+                endLng: parseFloat(routeData.endLng),
+                stopPoints: stopPoints
             };
 
-            console.log('Formatted request data:', requestData);
+            console.log('Sending request to backend:', requestBody);
 
-            const response = await fetch(`${API_BASE_URL}/route/preview`, {
+            const response = await fetch(`${this.baseURL}/routes/preview`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+                    'Authorization': `Bearer ${this.token}`
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Route preview API error:', response.status, errorText);
-                throw new Error(`Route preview failed: ${response.status} - ${errorText}`);
+                console.error('Backend route error:', response.status, errorText);
+                throw new Error(`Route request failed: ${response.status} - ${errorText}`);
             }
 
-            const responseText = await response.text();
-            console.log('Route preview API response length:', responseText.length);
+            const coordinatesText = await response.text();
+            console.log('Raw coordinates response:', coordinatesText.substring(0, 200) + '...');
 
-            // Parse and validate the JSON response
-            const parsedResponse = JSON.parse(responseText);
-            console.log('Parsed response structure:', {
-                hasRoutes: !!parsedResponse.routes,
-                routesCount: parsedResponse.routes?.length,
-                firstRouteKeys: parsedResponse.routes?.[0] ? Object.keys(parsedResponse.routes[0]) : null
-            });
+            // Parse the JSON array of coordinates
+            const coordinates = JSON.parse(coordinatesText);
 
-            return parsedResponse;
+            if (!Array.isArray(coordinates) || coordinates.length === 0) {
+                console.warn('No route coordinates returned from backend');
+                return [];
+            }
+
+            console.log(`Route preview loaded: ${coordinates.length} coordinates`);
+            return coordinates;
+
         } catch (error) {
-            console.error('Error getting route preview:', error);
+            console.error('Error fetching route preview:', error);
             throw error;
         }
     }
 
-    static formatStopPoints(stopPoints) {
-        if (!Array.isArray(stopPoints)) return [];
-
-        console.log('Formatting stop points:', stopPoints);
-
-        return stopPoints.map((stop, index) => {
-            const formatted = {
-                stopLongitude: stop.lng || stop.stopLongitude || 0,
-                stopLatitude: stop.lat || stop.stopLatitude || 0,
-                stopName: stop.name || stop.stopName || `Stop ${index + 1}`
-            };
-
-            console.log(`Stop ${index + 1} formatted:`, formatted);
-            return formatted;
-        });
-    }
-
-    // Add method for getting detailed route directions (for actual navigation)
-    static async getRouteDirections(routeData, token) {
+    /**
+     * Get full route directions with all details
+     * @param {Object} routeData - Route request data
+     * @returns {Promise<Object>} Full GeoJSON route data
+     */
+    async getRouteDirections(routeData) {
         try {
-            console.log('Calling route directions API with data:', routeData);
+            const stopPoints = routeData.stopPoints?.map(stop => ({
+                stopLatitude: parseFloat(stop.lat),
+                stopLongitude: parseFloat(stop.lng)
+            })) || [];
 
-            const formattedStopPoints = this.formatStopPoints(routeData.stopPoints || []);
-
-            const requestData = {
-                startLng: routeData.startLng,
-                startLat: routeData.startLat,
-                endLng: routeData.endLng,
-                endLat: routeData.endLat,
-                stopPoints: formattedStopPoints
+            const requestBody = {
+                startLat: parseFloat(routeData.startLat),
+                startLng: parseFloat(routeData.startLng),
+                endLat: parseFloat(routeData.endLat),
+                endLng: parseFloat(routeData.endLng),
+                stopPoints: stopPoints
             };
 
-            const response = await fetch(`${API_BASE_URL}/route/directions`, {
+            const response = await fetch(`${this.baseURL}/routes/directions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
+                    'Authorization': `Bearer ${this.token}`
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestBody)
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Route directions API error:', response.status, errorText);
-                throw new Error(`Route directions failed: ${response.status} - ${errorText}`);
+                throw new Error(`Route directions request failed: ${response.status}`);
             }
 
-            const responseText = await response.text();
-            return JSON.parse(responseText);
+            const geoJsonData = await response.json();
+            return geoJsonData;
+
         } catch (error) {
-            console.error('Error getting route directions:', error);
+            console.error('Error fetching route directions:', error);
             throw error;
         }
+    }
+
+    /**
+     * Validate route coordinates
+     * @param {Array} coordinates - Array of coordinate pairs
+     * @returns {boolean} True if coordinates are valid
+     */
+    validateCoordinates(coordinates) {
+        if (!Array.isArray(coordinates) || coordinates.length < 2) {
+            return false;
+        }
+
+        return coordinates.every(coord =>
+            Array.isArray(coord) &&
+            coord.length >= 2 &&
+            typeof coord[0] === 'number' &&
+            typeof coord[1] === 'number' &&
+            coord[0] >= -90 && coord[0] <= 90 && // latitude bounds
+            coord[1] >= -180 && coord[1] <= 180 // longitude bounds
+        );
+    }
+
+    /**
+     * Create route data object from component state
+     * @param {Object} state - Component state with route points
+     * @returns {Object} Route data object
+     */
+    static createRouteData(startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints = []) {
+        return {
+            startLat: startingLatitude,
+            startLng: startingLongitude,
+            endLat: endingLatitude,
+            endLng: endingLongitude,
+            stopPoints: stopPoints.map(stop => ({
+                lat: stop.lat,
+                lng: stop.lng
+            }))
+        };
     }
 }
 

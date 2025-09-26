@@ -5,8 +5,8 @@ import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Service.MapService.DirectionsService;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
+import leyans.RidersHub.Service.MapService.RouteService;
 import leyans.RidersHub.Util.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,13 +35,13 @@ public class RidesService {
     private final MapboxService mapboxService;
     private final RideParticipantService rideParticipantService;
     private final RiderUtil riderUtil;
-    private final DirectionsService directionsService;
+    private final RouteService routeService;
 
 
     @Autowired
     public RidesService(RidesRepository ridesRepository,
 
-                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil, DirectionsService directionsService) {
+                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil, RouteService routeService) {
 
         this.ridesRepository = ridesRepository;
         this.riderService = riderService;
@@ -50,7 +49,7 @@ public class RidesService {
         this.mapboxService = mapboxService;
         this.rideParticipantService = rideParticipantService;
         this.riderUtil = riderUtil;
-        this.directionsService = directionsService;
+        this.routeService = routeService;
     }
 
     @Transactional
@@ -69,7 +68,7 @@ public class RidesService {
                 .filter(stop -> stop.getStopLongitude() != 0.0 && stop.getStopLatitude() != 0.0)
                 .collect(Collectors.toList());
 
-        String routeCoordinates = directionsService.getRouteDirections(
+        String routeCoordinates = routeService.getRouteDirections(
                 startLongitude, startLatitude,
                 endLongitude, endLatitude,
                 validStopPoints,  // Use filtered list
