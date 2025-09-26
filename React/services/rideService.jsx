@@ -333,31 +333,82 @@ export const fetchMyRides = async (token) => {
 };
 
 
-export const getLocationImage = async (rideName, token) => {
+export const getLocationImage = async (locationName, token, retryCount = 0) => {
+    // Skip processing if no location name or token provided
+    if (!locationName || !token) {
+        console.warn("Missing location name or token for image fetch");
+        return [];
+    }
+
+    console.log(`Fetching images for location: ${locationName}`);
+
     try {
-        const response = await fetch(`${API_BASE_URL}/wikimedia/location?locationName=${encodeURIComponent(rideName)}`, {
+        // Make sure token is properly formatted
+        const authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+
+        const response = await fetch(`${API_BASE_URL}/wikimedia/location?locationName=${encodeURIComponent(locationName)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Authorization': authToken,
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache'
             }
         });
 
+        // Log response status for debugging
+        console.log(`Image fetch status: ${response.status} for ${locationName}`);
+
         if (!response.ok) {
-            if (response.status === 404) {
-                return []; // No images found
-            }
             const errorText = await response.text();
-            throw new Error(`Failed to fetch location images: ${response.status} ${errorText}`);
+
+            // Handle specific status codes
+            if (response.status === 404) {
+                console.log(`No images found for ${locationName}`);
+                return []; // Return empty array instead of throwing error
+            }
+
+            if (response.status >= 500) {
+                console.error(`Server error for ${locationName}`);
+                return []; // Return empty array for server errors
+            }
+
+            // For other errors, you can choose to return empty array or throw
+            console.warn(`API returned ${response.status} for ${locationName}, returning empty array`);
+            return [];
         }
 
-        return await response.json(); // Returns an array of LocationImageDto objects
+        // Check if response has content
+        const responseText = await response.text();
+        if (!responseText || responseText.trim() === '') {
+            console.log(`Empty response for ${locationName}`);
+            return [];
+        }
+
+        // Parse JSON
+        try {
+            const imageDataList = JSON.parse(responseText);
+
+            // Validate response is an array
+            if (!Array.isArray(imageDataList)) {
+                console.warn(`Expected array but got ${typeof imageDataList} for ${locationName}`);
+                return [];
+            }
+
+            console.log(`Successfully fetched ${imageDataList.length} images for ${locationName}`);
+            return imageDataList;
+
+        } catch (jsonError) {
+            console.error(`JSON parsing error for ${locationName}:`, jsonError);
+            console.error(`Response text:`, responseText);
+            return [];
+        }
+
     } catch (error) {
-        console.error('Error fetching location images:', error);
-        throw error;
+        console.error(`Network error fetching location images for ${locationName}:`, error);
+        return []; // Return empty array instead of throwing
     }
 };
-
 
 
 

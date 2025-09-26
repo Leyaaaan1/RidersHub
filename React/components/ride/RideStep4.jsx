@@ -119,25 +119,35 @@ const RideStep4 = (props) => {
     const fetchLocationImage = async (rideName) => {
         if (!rideName || !token) {
             console.log("Missing ride name or token for image fetch");
-            return;
+            return [];
         }
 
         try {
             setRideNameImageLoading(true);
             setRideNameImageError(null);
+
             const imageDataList = await getLocationImage(rideName, token);
-            console.log("Location image data list:", imageDataList);
-            setRideNameImage(Array.isArray(imageDataList) ? imageDataList : []);
+
+            // Always set as array, even if empty
+            setRideNameImage(imageDataList);
+
+            if (imageDataList.length === 0) {
+                console.log(`No images found for ${rideName}`);
+            } else {
+                console.log(`Successfully loaded ${imageDataList.length} images for ${rideName}`);
+            }
+
             return imageDataList;
+
         } catch (error) {
-            console.error("Failed to fetch location images:", error);
+            console.error(`Error in fetchLocationImage for ${rideName}:`, error);
             setRideNameImageError(error.message || "Failed to load location images");
-            return null;
+            setRideNameImage([]); // Set empty array on error
+            return [];
         } finally {
             setRideNameImageLoading(false);
         }
     };
-
     const handleJoinRide = () => {
         if (!generatedRidesId || !token) {
             Alert.alert("Error", "Missing ride information. Please try again.");

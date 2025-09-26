@@ -25,7 +25,6 @@ const RideStep3 = ({
     const [mapDarkMode, setMapDarkMode] = useState(false);
     const [routeLoading, setRouteLoading] = useState(false);
 
-    // Create route service instance
     const routeServiceRef = useRef(null);
     useEffect(() => {
         if (token && baseURL) {
@@ -39,7 +38,6 @@ const RideStep3 = ({
             return;
         }
 
-        // Check if we have minimum required coordinates
         if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
             console.log('Missing start or end coordinates for route drawing');
             return;
@@ -48,12 +46,6 @@ const RideStep3 = ({
         setRouteLoading(true);
 
         try {
-            console.log('=== DRAWING ROAD ROUTE ===');
-            console.log('Start:', startingLatitude, startingLongitude);
-            console.log('End:', endingLatitude, endingLongitude);
-            console.log('Stop points:', stopPoints?.length || 0);
-
-            // Create route data object
             const routeData = RouteService.createRouteData(
                 startingLatitude,
                 startingLongitude,
@@ -62,7 +54,6 @@ const RideStep3 = ({
                 stopPoints
             );
 
-            // Get route coordinates from backend
             const routeCoordinates = await routeServiceRef.current.getRoutePreview(routeData);
 
             if (!routeCoordinates || routeCoordinates.length === 0) {
@@ -76,34 +67,23 @@ const RideStep3 = ({
                 return;
             }
 
-            console.log(`Drawing route with ${routeCoordinates.length} coordinates`);
-
-            // Send coordinates to WebView for drawing
             if (webViewRef.current) {
                 const routeScript = `
                     (function() {
                         try {
-                            console.log('Executing route drawing script');
                             const coordinates = ${JSON.stringify(routeCoordinates)};
                             
-                            // Clear existing route first
                             if (window.clearRoute) {
                                 window.clearRoute();
                             }
-                            
-                            // Draw new route
                             if (window.drawRoute) {
                                 const success = window.drawRoute(coordinates, {
                                     color: '#1e40af',
                                     weight: 4,
                                     opacity: 0.8
                                 });
-                                console.log('Route drawing result:', success);
-                            } else {
-                                console.error('drawRoute function not available');
                             }
                             
-                            // Add route markers
                             if (window.addRouteMarkers) {
                                 const startCoords = [${startingLatitude}, ${startingLongitude}];
                                 const endCoords = [${endingLatitude}, ${endingLongitude}];
@@ -112,27 +92,21 @@ const RideStep3 = ({
                                 window.addRouteMarkers(startCoords, endCoords, stopCoords);
                             }
                             
-                            // Fit route to map view
                             if (window.fitRouteToMap) {
                                 window.fitRouteToMap(coordinates);
                             }
                             
                             true; // Return true for successful execution
                         } catch (error) {
-                            console.error('Route drawing script error:', error);
                             false;
                         }
                     })();
                 `;
 
                 webViewRef.current.injectJavaScript(routeScript);
-                console.log('Route drawing script injected into WebView');
-            } else {
-                console.error('WebView ref not available');
             }
 
         } catch (error) {
-            console.error('Error drawing road route:', error);
 
             // Show user-friendly error message
             if (error.message.includes('Route request failed')) {

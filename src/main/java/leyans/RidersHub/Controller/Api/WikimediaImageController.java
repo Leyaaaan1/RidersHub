@@ -17,11 +17,7 @@ public class WikimediaImageController {
 
     @GetMapping("/location")
     public ResponseEntity<List<LocationImageDto>> getLocationImages(@RequestParam String locationName) {
-        List<LocationImageDto> cachedImages = wikimediaImageService.checkCachedLocationImage(locationName);
 
-        if (cachedImages != null && !cachedImages.isEmpty()) {
-            return ResponseEntity.ok(cachedImages);
-        }
 
         List<LocationImageDto> imageDtos = wikimediaImageService.getLocationImage(locationName);
 
