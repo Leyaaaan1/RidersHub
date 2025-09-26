@@ -24,11 +24,10 @@ const RouteMapView = ({
     const getRouteMapHTML = (centerLat = 7.07, centerLng = 125.61) => {
         return `
         <!DOCTYPE html>
-        <html>
         <head>
-            <meta charset="utf-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Route Map</title>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Route Map</title>    
             <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
             <style>
                 body, html { 

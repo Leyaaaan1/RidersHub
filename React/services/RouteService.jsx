@@ -71,6 +71,10 @@ class RouteService {
         }
     }
 
+
+
+
+
     async getSavedRouteCoordinates(generatedRidesId) {
         try {
             const response = await fetch(`${this.baseURL}/routes/coordinate/${generatedRidesId}`, {
@@ -196,43 +200,70 @@ class RouteService {
             return [];
         }
     }
-    /**
-     * Validate route coordinates
-     * @param {Array} coordinates - Array of coordinate pairs
-     * @returns {boolean} True if coordinates are valid
-     */
+
+
     validateCoordinates(coordinates) {
         if (!Array.isArray(coordinates) || coordinates.length < 2) {
             return false;
         }
 
-        return coordinates.every(coord =>
-            Array.isArray(coord) &&
-            coord.length >= 2 &&
-            typeof coord[0] === 'number' &&
-            typeof coord[1] === 'number' &&
-            coord[0] >= -90 && coord[0] <= 90 && // latitude bounds
-            coord[1] >= -180 && coord[1] <= 180 // longitude bounds
-        );
+        return coordinates.every(coord => {
+            return Array.isArray(coord) &&
+                coord.length >= 2 &&
+                typeof coord[0] === 'number' &&
+                typeof coord[1] === 'number' &&
+                !isNaN(coord[0]) && !isNaN(coord[1]) &&
+                Math.abs(coord[0]) <= 180 && Math.abs(coord[1]) <= 90;
+        });
     }
 
     /**
-     * Create route data object from component state
-     * @param {Object} state - Component state with route points
-     * @returns {Object} Route data object
+     * Extract route information from GeoJSON (like distance, duration)
      */
-    static createRouteData(startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints = []) {
+    extractRouteInfo(geoJsonData) {
+        try {
+            if (!geoJsonData) return null;
+
+            let properties = {};
+
+            if (geoJsonData.type === 'FeatureCollection' && geoJsonData.features?.length > 0) {
+                // Get properties from first feature
+                properties = geoJsonData.features[0].properties || {};
+            } else if (geoJsonData.type === 'Feature') {
+                properties = geoJsonData.properties || {};
+            }
+
+            return {
+                distance: properties.distance || properties.summary?.distance || null,
+                duration: properties.duration || properties.summary?.duration || null,
+                summary: properties.summary || null
+            };
+
+        } catch (error) {
+            console.error('Error extracting route info:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Create route data for API calls
+     */
+    static createRouteData(startLat, startLng, endLat, endLng, stopPoints = []) {
+        const waypoints = [
+            [startLng, startLat], // Start point
+            ...stopPoints.map(stop => [stop.lng, stop.lat]), // Stop points
+            [endLng, endLat] // End point
+        ];
+
         return {
-            startLat: startingLatitude,
-            startLng: startingLongitude,
-            endLat: endingLatitude,
-            endLng: endingLongitude,
-            stopPoints: stopPoints.map(stop => ({
-                lat: stop.lat,
-                lng: stop.lng
-            }))
+            coordinates: waypoints,
+            profile: 'driving-car',
+            format: 'geojson',
+            instructions: true,
+            geometry: true
         };
     }
+
 }
 
 export default RouteService;

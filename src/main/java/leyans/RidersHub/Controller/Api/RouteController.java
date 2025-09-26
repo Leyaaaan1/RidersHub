@@ -54,7 +54,6 @@ public class RouteController {
                     .body("[]");
         }
     }
-
     @GetMapping("/coordinate/{generatedRidesId}")
     public ResponseEntity<JsonNode> getRideRoute(@PathVariable Integer generatedRidesId) {
         JsonNode geoJson = routeService.getSavedRouteGeoJson(generatedRidesId);
