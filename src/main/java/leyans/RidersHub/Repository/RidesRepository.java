@@ -22,6 +22,10 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     Optional<Rides> findByGeneratedRidesId(Integer generatedRidesId);
 
 
+    @Query("SELECT r.routeCoordinates FROM Rides r WHERE r.generatedRidesId = :generatedRidesId")
+    String findRouteCoordinatesByGeneratedRidesId(@Param("generatedRidesId") Integer generatedRidesId);
+
+
     Page<Rides> findAll(Pageable pageable);
 
     List<Rides> findByUsername_Username(String username);

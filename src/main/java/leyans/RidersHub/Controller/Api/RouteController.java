@@ -1,5 +1,6 @@
 package leyans.RidersHub.Controller.Api;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import leyans.RidersHub.Service.MapService.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,12 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import leyans.RidersHub.DTO.RouteRequestDTO;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/routes")
 public class RouteController {
 
     @Autowired
-    private RouteService directionsService; // Use your existing service
+    private RouteService routeService; // Use your existing service
 
     /**
      * Get route directions between points using existing DirectionsService
@@ -27,7 +30,7 @@ public class RouteController {
             System.out.println("Stop points: " + (routeRequest.getStopPoints() != null ? routeRequest.getStopPoints().size() : 0));
 
             // Use your existing DirectionsService method
-            String routeGeoJSON = directionsService.getRouteDirections(
+            String routeGeoJSON = routeService.getRouteDirections(
                     routeRequest.getStartLng(),
                     routeRequest.getStartLat(),
                     routeRequest.getEndLng(),
@@ -54,37 +57,13 @@ public class RouteController {
         }
     }
 
-    /**
-     * Get full route directions using existing service
-     */
-    @PostMapping("/directions")
-    public ResponseEntity<String> getRouteDirections(@RequestBody RouteRequestDTO routeRequest) {
-        try {
-            String routeData = directionsService.getRouteDirections(
-                    routeRequest.getStartLng(),
-                    routeRequest.getStartLat(),
-                    routeRequest.getEndLng(),
-                    routeRequest.getEndLat(),
-                    routeRequest.getStopPoints(),
-                    "driving-car"
-            );
-
-            if (routeData != null && !routeData.isEmpty()) {
-                return ResponseEntity.ok(routeData);
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("{\"error\":\"No route found between specified points\"}");
-            }
-        } catch (Exception e) {
-            System.err.println("Error getting route directions: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"error\":\"Failed to get route directions: " + e.getMessage() + "\"}");
-        }
+    @GetMapping("/coordinate/{generatedRidesId}")
+    public ResponseEntity<JsonNode> getRideRoute(@PathVariable Integer generatedRidesId) {
+        JsonNode geoJson = routeService.getSavedRouteGeoJson(generatedRidesId);
+        return ResponseEntity.ok(geoJson);
     }
 
-    /**
-     * Extract coordinates from GeoJSON and return as simple coordinate array
-     */
+
     private String extractCoordinatesFromGeoJSON(String geoJsonRoute) {
         try {
             if (geoJsonRoute == null || geoJsonRoute.trim().isEmpty()) {
