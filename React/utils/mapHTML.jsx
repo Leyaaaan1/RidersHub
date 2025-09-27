@@ -125,7 +125,6 @@ const getMapHTML = (lat, lng, isDark = false) => {
             window.drawRoute = function(coordinates, options = {}) {
                 try {
                     console.log('=== WEBVIEW ROUTE DRAWING START ===');
-                    console.log('Received coordinates count:', coordinates?.length);
                     
                     // Enhanced coordinate validation
                     if (!Array.isArray(coordinates) || coordinates.length < 2) {

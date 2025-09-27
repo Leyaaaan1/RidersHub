@@ -27,6 +27,12 @@ public class RouteController {
             System.out.println("End: " + routeRequest.getEndLat() + ", " + routeRequest.getEndLng());
             System.out.println("Stop points: " + (routeRequest.getStopPoints() != null ? routeRequest.getStopPoints().size() : 0));
 
+            // Validate coordinates
+            if (routeRequest.getStartLat() == 0 || routeRequest.getStartLng() == 0 ||
+                    routeRequest.getEndLat() == 0 || routeRequest.getEndLng() == 0) {
+                return ResponseEntity.badRequest().body("Invalid coordinates: cannot be zero.");
+            }
+
             // Use your existing DirectionsService method
             String routeGeoJSON = routeService.getRouteDirections(
                     routeRequest.getStartLng(),

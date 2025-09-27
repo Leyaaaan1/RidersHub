@@ -92,6 +92,7 @@ public class RouteService {
             throw new RuntimeException("Failed to get route directions: " + e.getMessage(), e);
         }
     }
+
     @Transactional(readOnly = true)
     public JsonNode getSavedRouteGeoJson(Integer generatedRidesId) {
         try {

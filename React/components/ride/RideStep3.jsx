@@ -69,16 +69,6 @@ const RideStep3 = ({
                 console.warn('No route coordinates received from backend');
                 return;
             }
-
-            // Validate coordinates
-            if (!routeServiceRef.current.validateCoordinates(routeCoordinates)) {
-                console.error('Invalid route coordinates received');
-                return;
-            }
-
-            console.log(`Drawing route with ${routeCoordinates.length} coordinates`);
-
-            // Send coordinates to WebView for drawing
             if (webViewRef.current) {
                 const routeScript = `
                     (function() {
