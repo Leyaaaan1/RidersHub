@@ -1,4 +1,4 @@
-// Enhanced getMapHTML function with better ORS API support
+// Enhanced getMapHTML function with GeoJSON ORS API support
 const getMapHTML = (lat, lng, isDark = false) => {
     return `
     <!DOCTYPE html>
@@ -50,6 +50,7 @@ const getMapHTML = (lat, lng, isDark = false) => {
             let map, marker;
             let isDarkMode = ${isDark};
             let currentRoute = null;
+            let currentGeoJsonRoute = null;
             let startMarker = null;
             let endMarker = null;
             let stopMarkers = [];
@@ -106,13 +107,18 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             }
 
-            // Enhanced function to clear existing route
+            // Enhanced function to clear existing routes
             window.clearRoute = function() {
                 try {
                     if (currentRoute) {
                         map.removeLayer(currentRoute);
                         currentRoute = null;
-                        console.log('Route cleared successfully');
+                        console.log('Coordinate route cleared');
+                    }
+                    if (currentGeoJsonRoute) {
+                        map.removeLayer(currentGeoJsonRoute);
+                        currentGeoJsonRoute = null;
+                        console.log('GeoJSON route cleared');
                     }
                     return true;
                 } catch (error) {
@@ -121,10 +127,123 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             };
 
-            // Enhanced function to draw route polyline with better validation
+            // NEW: Function to draw GeoJSON route directly from ORS
+            window.drawGeoJsonRoute = function(geoJsonData, options = {}) {
+                try {
+                    console.log('=== WEBVIEW GEOJSON ROUTE DRAWING START ===');
+                    
+                    // Validate GeoJSON data
+                    if (!geoJsonData || typeof geoJsonData !== 'object') {
+                        console.error('Invalid GeoJSON data:', geoJsonData);
+                        return false;
+                    }
+
+                    if (!geoJsonData.features || !Array.isArray(geoJsonData.features) || geoJsonData.features.length === 0) {
+                        console.error('No features found in GeoJSON data');
+                        return false;
+                    }
+
+                    console.log('GeoJSON features found:', geoJsonData.features.length);
+                    console.log('First feature type:', geoJsonData.features[0].geometry?.type);
+
+                    // Clear existing routes
+                    if (currentGeoJsonRoute) {
+                        map.removeLayer(currentGeoJsonRoute);
+                    }
+                    if (currentRoute) {
+                        map.removeLayer(currentRoute);
+                        currentRoute = null;
+                    }
+
+                    // Enhanced default styling
+                    const defaultOptions = {
+                        color: '#1e40af',
+                        weight: 4,
+                        opacity: 0.8,
+                        smoothFactor: 1.0,
+                        lineJoin: 'round',
+                        lineCap: 'round'
+                    };
+
+                    const routeOptions = { ...defaultOptions, ...options };
+
+                    // Create GeoJSON layer with ORS polyline data
+                    currentGeoJsonRoute = L.geoJSON(geoJsonData, {
+                        style: routeOptions,
+                        onEachFeature: function(feature, layer) {
+                            // Add route properties popup if available
+                            if (feature.properties) {
+                                let popupContent = '<div class="route-popup">';
+                                
+                                if (feature.properties.summary) {
+                                    const summary = feature.properties.summary;
+                                    if (summary.distance) {
+                                        popupContent += \`<strong>Distance:</strong> \${(summary.distance / 1000).toFixed(2)} km<br>\`;
+                                    }
+                                    if (summary.duration) {
+                                        const hours = Math.floor(summary.duration / 3600);
+                                        const minutes = Math.floor((summary.duration % 3600) / 60);
+                                        popupContent += \`<strong>Duration:</strong> \${hours > 0 ? hours + 'h ' : ''}\${minutes}min\`;
+                                    }
+                                }
+                                
+                                popupContent += '</div>';
+                                layer.bindPopup(popupContent);
+                            }
+                        }
+                    }).addTo(map);
+
+                    // Get route statistics
+                    let totalDistance = 0;
+                    let totalDuration = 0;
+                    let coordinateCount = 0;
+
+                    geoJsonData.features.forEach(feature => {
+                        if (feature.properties && feature.properties.summary) {
+                            totalDistance += feature.properties.summary.distance || 0;
+                            totalDuration += feature.properties.summary.duration || 0;
+                        }
+                        if (feature.geometry && feature.geometry.coordinates) {
+                            coordinateCount += feature.geometry.coordinates.length;
+                        }
+                    });
+
+                    console.log('=== GEOJSON ROUTE DRAWN SUCCESSFULLY ===');
+                    console.log('Total distance:', (totalDistance / 1000).toFixed(2), 'km');
+                    console.log('Total duration:', Math.floor(totalDuration / 60), 'minutes');
+                    console.log('Coordinate points:', coordinateCount);
+                    
+                    // Send success message back to React Native
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'routeDrawn',
+                        success: true,
+                        coordinateCount: coordinateCount,
+                        distance: totalDistance / 1000,
+                        duration: totalDuration,
+                        bounds: currentGeoJsonRoute.getBounds()
+                    }));
+                    
+                    return true;
+
+                } catch (error) {
+                    console.error('=== GEOJSON ROUTE DRAWING ERROR ===');
+                    console.error('Error:', error.message);
+                    console.error('Stack:', error.stack);
+                    
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'routeDrawn',
+                        success: false,
+                        error: error.message
+                    }));
+                    
+                    return false;
+                }
+            };
+
+            // Enhanced function to draw route polyline (keep for backward compatibility)
             window.drawRoute = function(coordinates, options = {}) {
                 try {
-                    console.log('=== WEBVIEW ROUTE DRAWING START ===');
+                    console.log('=== WEBVIEW COORDINATE ROUTE DRAWING START ===');
                     
                     // Enhanced coordinate validation
                     if (!Array.isArray(coordinates) || coordinates.length < 2) {
@@ -174,12 +293,14 @@ const getMapHTML = (lat, lng, isDark = false) => {
                     }
 
                     console.log('Valid coordinates for route:', validatedCoords.length);
-                    console.log('First coordinate:', validatedCoords[0]);
-                    console.log('Last coordinate:', validatedCoords[validatedCoords.length - 1]);
 
-                    // Clear existing route
+                    // Clear existing routes
                     if (currentRoute) {
                         map.removeLayer(currentRoute);
+                    }
+                    if (currentGeoJsonRoute) {
+                        map.removeLayer(currentGeoJsonRoute);
+                        currentGeoJsonRoute = null;
                     }
 
                     // Enhanced default styling
@@ -201,13 +322,7 @@ const getMapHTML = (lat, lng, isDark = false) => {
                     const routeDistance = calculateDistance(validatedCoords);
                     console.log('Route distance:', routeDistance.toFixed(2), 'km');
 
-                    // Add route click event for debugging
-                    currentRoute.on('click', function(e) {
-                        console.log('Route clicked at:', e.latlng);
-                    });
-
-                    console.log('=== ROUTE DRAWN SUCCESSFULLY ===');
-                    console.log('Route bounds:', currentRoute.getBounds());
+                    console.log('=== COORDINATE ROUTE DRAWN SUCCESSFULLY ===');
                     
                     // Send success message back to React Native
                     window.ReactNativeWebView.postMessage(JSON.stringify({
@@ -221,9 +336,8 @@ const getMapHTML = (lat, lng, isDark = false) => {
                     return true;
 
                 } catch (error) {
-                    console.error('=== ROUTE DRAWING ERROR ===');
+                    console.error('=== COORDINATE ROUTE DRAWING ERROR ===');
                     console.error('Error:', error.message);
-                    console.error('Stack:', error.stack);
                     
                     window.ReactNativeWebView.postMessage(JSON.stringify({
                         type: 'routeDrawn',
@@ -262,29 +376,55 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 }
             };
 
+            // NEW: Enhanced function to fit GeoJSON route to map view
+            window.fitGeoJsonRouteToMap = function(geoJsonData, padding = [20, 20]) {
+                try {
+                    if (currentGeoJsonRoute) {
+                        map.fitBounds(currentGeoJsonRoute.getBounds(), { 
+                            padding: padding,
+                            maxZoom: 16
+                        });
+                        console.log('Map fitted to GeoJSON route bounds');
+                        return true;
+                    } else if (geoJsonData && geoJsonData.features && geoJsonData.features.length > 0) {
+                        // Create temporary layer to get bounds
+                        const tempLayer = L.geoJSON(geoJsonData);
+                        map.fitBounds(tempLayer.getBounds(), { 
+                            padding: padding,
+                            maxZoom: 16
+                        });
+                        console.log('Map fitted to GeoJSON data bounds');
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    console.error('Error fitting GeoJSON route to map:', error);
+                    return false;
+                }
+            };
+
             // Enhanced function to fit route to map view
             window.fitRouteToMap = function(coordinates, padding = [20, 20]) {
                 try {
-                    if (!Array.isArray(coordinates) || coordinates.length === 0) {
-                        console.error('No coordinates provided for fitting route');
-                        return false;
+                    if (currentGeoJsonRoute) {
+                        return window.fitGeoJsonRouteToMap(null, padding);
+                    } else if (currentRoute) {
+                        map.fitBounds(currentRoute.getBounds(), { 
+                            padding: padding,
+                            maxZoom: 16
+                        });
+                        console.log('Map fitted to coordinate route bounds');
+                        return true;
+                    } else if (Array.isArray(coordinates) && coordinates.length > 0) {
+                        const bounds = L.latLngBounds(coordinates);
+                        map.fitBounds(bounds, { 
+                            padding: padding,
+                            maxZoom: 16
+                        });
+                        console.log('Map fitted to provided coordinates');
+                        return true;
                     }
-
-                    // Use the current route bounds if available, otherwise create from coordinates
-                    let bounds;
-                    if (currentRoute) {
-                        bounds = currentRoute.getBounds();
-                    } else {
-                        bounds = L.latLngBounds(coordinates);
-                    }
-
-                    map.fitBounds(bounds, { 
-                        padding: padding,
-                        maxZoom: 16
-                    });
-                    
-                    console.log('Map fitted to route bounds:', bounds);
-                    return true;
+                    return false;
                 } catch (error) {
                     console.error('Error fitting route to map:', error);
                     return false;
@@ -403,8 +543,8 @@ const getMapHTML = (lat, lng, isDark = false) => {
                 console.log('=== MAP STATE DEBUG ===');
                 console.log('Map center:', map.getCenter());
                 console.log('Map zoom:', map.getZoom());
-                console.log('Has current route:', !!currentRoute);
-                console.log('Route coordinates count:', currentRoute ? currentRoute.getLatLngs().length : 0);
+                console.log('Has coordinate route:', !!currentRoute);
+                console.log('Has GeoJSON route:', !!currentGeoJsonRoute);
                 console.log('Start marker:', !!startMarker);
                 console.log('End marker:', !!endMarker);
                 console.log('Stop markers:', stopMarkers.length);

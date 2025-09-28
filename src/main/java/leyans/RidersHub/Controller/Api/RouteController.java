@@ -1,6 +1,7 @@
 package leyans.RidersHub.Controller.Api;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import leyans.RidersHub.Service.MapService.RouteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ public class RouteController {
      * Returns simplified coordinate array for frontend
      */
     @PostMapping("/preview")
-    public ResponseEntity<String> getRoutePreview(@RequestBody RouteRequestDTO routeRequest) {
+    public ResponseEntity<JsonNode> getRoutePreview(@RequestBody RouteRequestDTO routeRequest) {
         try {
             System.out.println("=== ROUTE PREVIEW REQUEST ===");
             System.out.println("Start: " + routeRequest.getStartLat() + ", " + routeRequest.getStartLng());
@@ -30,10 +31,10 @@ public class RouteController {
             // Validate coordinates
             if (routeRequest.getStartLat() == 0 || routeRequest.getStartLng() == 0 ||
                     routeRequest.getEndLat() == 0 || routeRequest.getEndLng() == 0) {
-                return ResponseEntity.badRequest().body("Invalid coordinates: cannot be zero.");
+                return ResponseEntity.badRequest().body(null);
             }
 
-            // Use your existing DirectionsService method
+            // Get the full GeoJSON from ORS API
             String routeGeoJSON = routeService.getRouteDirections(
                     routeRequest.getStartLng(),
                     routeRequest.getStartLat(),
@@ -44,23 +45,21 @@ public class RouteController {
             );
 
             if (routeGeoJSON != null && !routeGeoJSON.trim().isEmpty()) {
-                // Extract coordinates from GeoJSON and return as simple array
-                String simplifiedCoords = extractCoordinatesFromGeoJSON(routeGeoJSON);
-                System.out.println("Returning simplified coordinates: " + simplifiedCoords.substring(0, Math.min(200, simplifiedCoords.length())) + "...");
-                return ResponseEntity.ok(simplifiedCoords);
+                // Return the full GeoJSON instead of extracted coordinates
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode geoJsonNode = mapper.readTree(routeGeoJSON);
+                System.out.println("Returning full GeoJSON route data");
+                return ResponseEntity.ok(geoJsonNode);
             } else {
                 System.out.println("No route data received from DirectionsService");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("[]");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
         } catch (Exception e) {
             System.err.println("Error in getRoutePreview: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("[]");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    }
-    @GetMapping("/coordinate/{generatedRidesId}")
+    }    @GetMapping("/coordinate/{generatedRidesId}")
     public ResponseEntity<JsonNode> getRideRoute(@PathVariable Integer generatedRidesId) {
         JsonNode geoJson = routeService.getSavedRouteGeoJson(generatedRidesId);
         return ResponseEntity.ok(geoJson);

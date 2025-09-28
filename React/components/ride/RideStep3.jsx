@@ -62,68 +62,68 @@ const RideStep3 = ({
                 stopPoints
             );
 
-            // Get route coordinates from backend
-            const routeCoordinates = await routeServiceRef.current.getRoutePreview(routeData);
+            // Get route GeoJSON from backend
+            const routeGeoJSON = await routeServiceRef.current.getRoutePreview(routeData);
 
-            if (!routeCoordinates || routeCoordinates.length === 0) {
-                console.warn('No route coordinates received from backend');
+            if (!routeGeoJSON || !routeGeoJSON.features || routeGeoJSON.features.length === 0) {
+                console.warn('No valid route GeoJSON received from backend');
                 return;
             }
+
             if (webViewRef.current) {
                 const routeScript = `
-                    (function() {
-                        try {
-                            console.log('Executing route drawing script');
-                            const coordinates = ${JSON.stringify(routeCoordinates)};
-                            
-                            // Clear existing route first
-                            if (window.clearRoute) {
-                                window.clearRoute();
-                            }
-                            
-                            // Draw new route
-                            if (window.drawRoute) {
-                                const success = window.drawRoute(coordinates, {
-                                    color: '#1e40af',
-                                    weight: 4,
-                                    opacity: 0.8
-                                });
-                                console.log('Route drawing result:', success);
-                            } else {
-                                console.error('drawRoute function not available');
-                            }
-                            
-                            // Add route markers
-                            if (window.addRouteMarkers) {
-                                const startCoords = [${startingLatitude}, ${startingLongitude}];
-                                const endCoords = [${endingLatitude}, ${endingLongitude}];
-                                const stopCoords = ${JSON.stringify(stopPoints.map(stop => [stop.lat, stop.lng]))};
-                                
-                                window.addRouteMarkers(startCoords, endCoords, stopCoords);
-                            }
-                            
-                            // Fit route to map view
-                            if (window.fitRouteToMap) {
-                                window.fitRouteToMap(coordinates);
-                            }
-                            
-                            true; // Return true for successful execution
-                        } catch (error) {
-                            console.error('Route drawing script error:', error);
-                            false;
+                (function() {
+                    try {
+                        console.log('Executing route drawing script with GeoJSON');
+                        const geoJsonData = ${JSON.stringify(routeGeoJSON)};
+                        
+                        // Clear existing route first
+                        if (window.clearRoute) {
+                            window.clearRoute();
                         }
-                    })();
-                `;
+                        
+                        // Draw route using GeoJSON
+                        if (window.drawGeoJsonRoute) {
+                            const success = window.drawGeoJsonRoute(geoJsonData, {
+                                color: '#1e40af',
+                                weight: 4,
+                                opacity: 0.8
+                            });
+                            console.log('GeoJSON route drawing result:', success);
+                        } else {
+                            console.error('drawGeoJsonRoute function not available');
+                        }
+                        
+                        // Add route markers
+                        if (window.addRouteMarkers) {
+                            const startCoords = [${startingLatitude}, ${startingLongitude}];
+                            const endCoords = [${endingLatitude}, ${endingLongitude}];
+                            const stopCoords = ${JSON.stringify(stopPoints.map(stop => [stop.lat, stop.lng]))};
+                            
+                            window.addRouteMarkers(startCoords, endCoords, stopCoords);
+                        }
+                        
+                        // Fit route to map view
+                        if (window.fitGeoJsonRouteToMap) {
+                            window.fitGeoJsonRouteToMap(geoJsonData);
+                        }
+                        
+                        true; // Return true for successful execution
+                    } catch (error) {
+                        console.error('Route drawing script error:', error);
+                        false;
+                    }
+                })();
+            `;
 
                 webViewRef.current.injectJavaScript(routeScript);
-                console.log('Route drawing script injected into WebView');
+                console.log('GeoJSON route drawing script injected into WebView');
             } else {
                 console.error('WebView ref not available');
             }
 
         } catch (error) {
             console.error('Error drawing road route:', error);
-
             // Show user-friendly error message
             if (error.message.includes('Route request failed')) {
                 console.error('Backend route service error - check API configuration');
@@ -134,7 +134,6 @@ const RideStep3 = ({
             setRouteLoading(false);
         }
     };
-
     // Auto-draw route when coordinates change
     useEffect(() => {
         const shouldDrawRoute = startingLatitude && startingLongitude &&

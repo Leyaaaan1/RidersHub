@@ -51,26 +51,16 @@ class RouteService {
                 throw new Error(`Route request failed: ${response.status} - ${errorText}`);
             }
 
-            const coordinatesText = await response.text();
-            console.log('Raw coordinates response:', coordinatesText.substring(0, 200) + '...');
-
-            // Parse the JSON array of coordinates
-            const coordinates = JSON.parse(coordinatesText);
-
-            if (!Array.isArray(coordinates) || coordinates.length === 0) {
-                console.warn('No route coordinates returned from backend');
-                return [];
-            }
-
-            console.log(`Route preview loaded: ${coordinates.length} coordinates`);
-            return coordinates;
+            // Return the full GeoJSON object instead of parsing as coordinates
+            const geoJsonData = await response.json();
+            console.log('Route GeoJSON loaded:', geoJsonData);
+            return geoJsonData;
 
         } catch (error) {
             console.error('Error fetching route preview:', error);
             throw error;
         }
     }
-
 
     static createRouteData(startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints = []) {
         return {
