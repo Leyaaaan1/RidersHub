@@ -5,7 +5,7 @@ import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utils/mapHTML';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { reverseGeocodeLandmark } from '../../services/rideService';
-import RouteService from '../../services/RouteService';
+import {createRouteData, getRoutePreview} from '../../services/RouteService';
 
 const RideStep3 = ({
                        mapMode, setMapMode, isSearching, searchResults,
@@ -15,7 +15,6 @@ const RideStep3 = ({
                        endingPoint, setEndingPoint, prevStep, loading, nextStep,
                        handleCreateRide, handleSearchInputChange, searchQuery,
                        stopPoints, setStopPoints, token,
-                       baseURL = 'http://192.168.1.51:8080'
                    }) => {
     const [currentStop, setCurrentStop] = useState(null);
     const [isAddingStop, setIsAddingStop] = useState(false);
@@ -25,21 +24,9 @@ const RideStep3 = ({
     const [mapDarkMode, setMapDarkMode] = useState(false);
     const [routeLoading, setRouteLoading] = useState(false);
 
-    // Create route service instance
-    const routeServiceRef = useRef(null);
-    useEffect(() => {
-        if (token && baseURL) {
-            routeServiceRef.current = new RouteService(baseURL, token);
-        }
-    }, [token, baseURL]);
+
 
     const drawRoadRoute = async () => {
-        if (!routeServiceRef.current) {
-            console.warn('Route service not initialized');
-            return;
-        }
-
-        // Check if we have minimum required coordinates
         if (!startingLatitude || !startingLongitude || !endingLatitude || !endingLongitude) {
             console.log('Missing start or end coordinates for route drawing');
             return;
@@ -48,13 +35,7 @@ const RideStep3 = ({
         setRouteLoading(true);
 
         try {
-            console.log('=== DRAWING ROAD ROUTE ===');
-            console.log('Start:', startingLatitude, startingLongitude);
-            console.log('End:', endingLatitude, endingLongitude);
-            console.log('Stop points:', stopPoints?.length || 0);
-
-            // Create route data object
-            const routeData = RouteService.createRouteData(
+            const routeData = createRouteData(
                 startingLatitude,
                 startingLongitude,
                 endingLatitude,
@@ -62,78 +43,67 @@ const RideStep3 = ({
                 stopPoints
             );
 
-            // Get route coordinates from backend
-            const routeCoordinates = await routeServiceRef.current.getRoutePreview(routeData);
+            const routeGeoJSON = await getRoutePreview(token, routeData);
 
-            if (!routeCoordinates || routeCoordinates.length === 0) {
-                console.warn('No route coordinates received from backend');
+            if (!routeGeoJSON || !routeGeoJSON.features || routeGeoJSON.features.length === 0) {
+                console.warn('No valid route GeoJSON received from backend');
                 return;
             }
 
-            // Validate coordinates
-            if (!routeServiceRef.current.validateCoordinates(routeCoordinates)) {
-                console.error('Invalid route coordinates received');
-                return;
-            }
-
-            console.log(`Drawing route with ${routeCoordinates.length} coordinates`);
-
-            // Send coordinates to WebView for drawing
             if (webViewRef.current) {
                 const routeScript = `
-                    (function() {
-                        try {
-                            console.log('Executing route drawing script');
-                            const coordinates = ${JSON.stringify(routeCoordinates)};
-                            
-                            // Clear existing route first
-                            if (window.clearRoute) {
-                                window.clearRoute();
-                            }
-                            
-                            // Draw new route
-                            if (window.drawRoute) {
-                                const success = window.drawRoute(coordinates, {
-                                    color: '#1e40af',
-                                    weight: 4,
-                                    opacity: 0.8
-                                });
-                                console.log('Route drawing result:', success);
-                            } else {
-                                console.error('drawRoute function not available');
-                            }
-                            
-                            // Add route markers
-                            if (window.addRouteMarkers) {
-                                const startCoords = [${startingLatitude}, ${startingLongitude}];
-                                const endCoords = [${endingLatitude}, ${endingLongitude}];
-                                const stopCoords = ${JSON.stringify(stopPoints.map(stop => [stop.lat, stop.lng]))};
-                                
-                                window.addRouteMarkers(startCoords, endCoords, stopCoords);
-                            }
-                            
-                            // Fit route to map view
-                            if (window.fitRouteToMap) {
-                                window.fitRouteToMap(coordinates);
-                            }
-                            
-                            true; // Return true for successful execution
-                        } catch (error) {
-                            console.error('Route drawing script error:', error);
-                            false;
+                (function() {
+                    try {
+                        console.log('Executing route drawing script with GeoJSON');
+                        const geoJsonData = ${JSON.stringify(routeGeoJSON)};
+                        
+                        // Clear existing route first
+                        if (window.clearRoute) {
+                            window.clearRoute();
                         }
-                    })();
-                `;
+                        
+                        // Draw route using GeoJSON
+                        if (window.drawGeoJsonRoute) {
+                            const success = window.drawGeoJsonRoute(geoJsonData, {
+                                color: '#1e40af',
+                                weight: 4,
+                                opacity: 0.8
+                            });
+                            console.log('GeoJSON route drawing result:', success);
+                        } else {
+                            console.error('drawGeoJsonRoute function not available');
+                        }
+                        
+                        // Add route markers
+                        if (window.addRouteMarkers) {
+                            const startCoords = [${startingLatitude}, ${startingLongitude}];
+                            const endCoords = [${endingLatitude}, ${endingLongitude}];
+                            const stopCoords = ${JSON.stringify(stopPoints.map(stop => [stop.lat, stop.lng]))};
+                            
+                            window.addRouteMarkers(startCoords, endCoords, stopCoords);
+                        }
+                        
+                        // Fit route to map view
+                        if (window.fitGeoJsonRouteToMap) {
+                            window.fitGeoJsonRouteToMap(geoJsonData);
+                        }
+                        
+                        true; // Return true for successful execution
+                    } catch (error) {
+                        console.error('Route drawing script error:', error);
+                        false;
+                    }
+                })();
+            `;
 
                 webViewRef.current.injectJavaScript(routeScript);
-                console.log('Route drawing script injected into WebView');
+                console.log('GeoJSON route drawing script injected into WebView');
             } else {
                 console.error('WebView ref not available');
             }
 
         } catch (error) {
             console.error('Error drawing road route:', error);
-
             // Show user-friendly error message
             if (error.message.includes('Route request failed')) {
                 console.error('Backend route service error - check API configuration');
@@ -144,7 +114,6 @@ const RideStep3 = ({
             setRouteLoading(false);
         }
     };
-
     // Auto-draw route when coordinates change
     useEffect(() => {
         const shouldDrawRoute = startingLatitude && startingLongitude &&

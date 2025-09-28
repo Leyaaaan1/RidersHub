@@ -2,8 +2,10 @@ package leyans.RidersHub.Service.MapService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import leyans.RidersHub.Repository.RidesRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -28,7 +30,10 @@ public class RouteService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public RouteService() {
+    private final RidesRepository ridesRepository;
+
+    public RouteService(RidesRepository ridesRepository) {
+        this.ridesRepository = ridesRepository;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
     }
@@ -88,6 +93,25 @@ public class RouteService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public JsonNode getSavedRouteGeoJson(Integer generatedRidesId) {
+        try {
+            // Get the stored route GeoJSON as String
+            String routeGeoJson = ridesRepository.findRouteCoordinatesByGeneratedRidesId(generatedRidesId);
+
+            if (routeGeoJson == null || routeGeoJson.trim().isEmpty()) {
+                return objectMapper.createObjectNode(); // return empty JSON
+            }
+
+            // Parse into JsonNode so it's valid JSON when returned
+            return objectMapper.readTree(routeGeoJson);
+
+        } catch (Exception e) {
+            System.out.println("Error getting saved route GeoJSON: " + e.getMessage());
+            e.printStackTrace();
+            return objectMapper.createObjectNode(); // return empty JSON on error
+        }
+    }
 
 
 }
