@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
-import RouteService from "../services/RouteService";
+import RouteService, {getRouteCoordinates} from "../services/RouteService";
 
 const RouteMapView = ({
                           generatedRidesId,
@@ -29,17 +29,11 @@ const RouteMapView = ({
 
     const fetchRouteData = async () => {
         try {
-            console.log('=== STARTING ROUTE DATA FETCH ===');
-            console.log('Generated Rides ID:', generatedRidesId);
-            console.log('Token present:', !!token);
-
             setIsLoading(true);
             setError(null);
 
-            const routeService = new RouteService(null, token);
-
-            // Fetch route data
-            const data = await routeService.getRouteCoordinates(generatedRidesId);
+            // Fetch route data with token
+            const data = await getRouteCoordinates(token, generatedRidesId);
 
             if (!data) {
                 throw new Error('No route data received from server');
@@ -55,7 +49,6 @@ const RouteMapView = ({
             const errorMessage = error.message || 'Failed to load route data';
             setError(errorMessage);
 
-            // Show user-friendly alert
             Alert.alert(
                 'Route Loading Error',
                 errorMessage,
@@ -68,7 +61,6 @@ const RouteMapView = ({
             setIsLoading(false);
         }
     };
-
     const createMapHTML = () => {
         // Use CartoDB Positron (white map) tile layer
         const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
