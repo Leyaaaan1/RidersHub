@@ -71,73 +71,7 @@ class RouteService {
         }
     }
 
-    /**
-     * Get full route directions with all details
-     * @param {Object} routeData - Route request data
-     * @returns {Promise<Object>} Full GeoJSON route data
-     */
-    async getRouteDirections(routeData) {
-        try {
-            const stopPoints = routeData.stopPoints?.map(stop => ({
-                stopLatitude: parseFloat(stop.lat),
-                stopLongitude: parseFloat(stop.lng)
-            })) || [];
 
-            const requestBody = {
-                startLat: parseFloat(routeData.startLat),
-                startLng: parseFloat(routeData.startLng),
-                endLat: parseFloat(routeData.endLat),
-                endLng: parseFloat(routeData.endLng),
-                stopPoints: stopPoints
-            };
-
-            const response = await fetch(`${this.baseURL}/routes/directions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Route directions request failed: ${response.status}`);
-            }
-
-            const geoJsonData = await response.json();
-            return geoJsonData;
-
-        } catch (error) {
-            console.error('Error fetching route directions:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Validate route coordinates
-     * @param {Array} coordinates - Array of coordinate pairs
-     * @returns {boolean} True if coordinates are valid
-     */
-    validateCoordinates(coordinates) {
-        if (!Array.isArray(coordinates) || coordinates.length < 2) {
-            return false;
-        }
-
-        return coordinates.every(coord =>
-            Array.isArray(coord) &&
-            coord.length >= 2 &&
-            typeof coord[0] === 'number' &&
-            typeof coord[1] === 'number' &&
-            coord[0] >= -90 && coord[0] <= 90 && // latitude bounds
-            coord[1] >= -180 && coord[1] <= 180 // longitude bounds
-        );
-    }
-
-    /**
-     * Create route data object from component state
-     * @param {Object} state - Component state with route points
-     * @returns {Object} Route data object
-     */
     static createRouteData(startingLatitude, startingLongitude, endingLatitude, endingLongitude, stopPoints = []) {
         return {
             startLat: startingLatitude,
@@ -150,6 +84,71 @@ class RouteService {
             }))
         };
     }
-}
+
+
+    async getRouteCoordinates(generatedRidesId) {
+        try {
+            console.log('=== FETCHING ROUTE COORDINATES ===');
+            console.log('Generated Rides ID:', generatedRidesId);
+            console.log('Base URL:', this.baseURL);
+            console.log('Token present:', !!this.token);
+
+            if (!generatedRidesId) {
+                throw new Error('Generated rides ID is required');
+            }
+
+            const url = `${this.baseURL}/routes/coordinate/${generatedRidesId}`;
+            console.log('Request URL:', url);
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+
+            // Only add Authorization header if token exists
+            if (this.token) {
+                headers['Authorization'] = `Bearer ${this.token}`;
+            }
+
+            console.log('Request headers:', headers);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: headers,
+                timeout: 30000, // 30 seconds timeout
+            });
+
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Backend error response:', errorText);
+                throw new Error(`Failed to fetch route coordinates: ${response.status} - ${errorText}`);
+            }
+
+            const routeData = await response.json();
+            console.log('Route coordinates fetched successfully');
+            console.log('Route data type:', typeof routeData);
+            console.log('Route data structure:', Array.isArray(routeData) ? `Array with ${routeData.length} items` : Object.keys(routeData));
+
+            return routeData;
+
+        } catch (error) {
+            console.error('=== ERROR FETCHING ROUTE COORDINATES ===');
+            console.error('Error type:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Full error:', error);
+
+            // Provide more specific error information
+            if (error.message.includes('Network request failed')) {
+                throw new Error(`Network connection failed. Please check:\n1. Server is running at ${this.baseURL}\n2. Device can reach the server\n3. CORS is configured properly`);
+            } else if (error.message.includes('timeout')) {
+                throw new Error('Request timed out. Server may be slow or unreachable.');
+            } else {
+                throw error;
+            }
+        }
+    }}
 
 export default RouteService;
