@@ -384,6 +384,69 @@ const InputUtilities = {
         fontWeight: '500',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
     },
+
+
+        authContainer: {
+            flex: 1,
+            backgroundColor: '#000000',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+        },
+
+        authTitle: {
+            color: '#ffffff',
+            fontSize: 28,
+            fontWeight: '700',
+            marginBottom: 40,
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+        },
+
+        authInput: {
+            backgroundColor: '#f1f5f9',
+            borderWidth: 2,
+            borderColor: '#e2e8f0',
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 16,
+            color: '#1e293b',
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+            width: 280,
+            marginBottom: 16,
+        },
+
+        authButtonsContainer: {
+            width: 280,
+            marginTop: 20,
+        },
+
+        authToggleButton: {
+            marginTop: 20,
+            alignItems: 'center',
+        },
+
+        authToggleText: {
+            color: '#cbd6e4',
+            fontSize: 16,
+            fontWeight: '500',
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+        },
+
+        authButton: {
+            backgroundColor: '#8c2323',
+            borderRadius: 12,
+            paddingHorizontal: 20,
+            paddingVertical: 14,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#8c2323',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
+            elevation: 3,
+            width: '100%',
+        },
 };
 
 export default InputUtilities;
