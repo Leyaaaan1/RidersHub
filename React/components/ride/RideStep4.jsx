@@ -22,6 +22,8 @@ import { fetchRideMapImage, getRideDetails, getLocationImage } from '../../servi
 import ParticipantListModal from '../ParticipantListModal';
 import useJoinRide from './RideHandler';
 import { startService } from "../../services/startService";
+import rideRoutesPageUtilities from "../../styles/RideRoutesPageUtilities";
+import RouteMapView from "../../utils/RouteMapView";
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +45,7 @@ const RideStep4 = (props) => {
         token = props.token || routeParams.token,
         distance = props.distance || routeParams.distance,
         username = props.username || routeParams.username,
+        stopPoints = props.stopPoints || routeParams.stopPoints,
         currentUsername = props.currentUsername || routeParams.currentUsername,
     } = props;
 
@@ -299,7 +302,24 @@ const RideStep4 = (props) => {
                         </View>
 
 
-
+                        <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
+                            <View style={rideRoutesPageUtilities.sectionHeader}>
+                                <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+                                    Route Map
+                                </Text>
+                            </View>
+                            <View style={[rideRoutesPageUtilities.mapContainer, { height: 600 }]}>
+                                <RouteMapView
+                                    generatedRidesId={generatedRidesId}
+                                    token={token}
+                                    startingPoint={startingPoint}
+                                    endingPoint={endingPoint}
+                                    stopPoints={stopPoints}
+                                    style={{ flex: 1, borderRadius: 10 }}
+                                    isDark={true}
+                                />
+                            </View>
+                        </Animated.View>
                         {/* Location Images */}
                         <View style={modernRideStyles.imagesSection}>
                             <View style={modernRideStyles.locationImagesContainer}>
@@ -344,23 +364,7 @@ const RideStep4 = (props) => {
 
 
                             {/* Map Image */}
-                            <View style={modernRideStyles.mapContainer}>
-                                {imageLoading ? (
-                                    <View style={[modernRideStyles.loadingContainer, { height: 220 }]}>
-                                        <ActivityIndicator size="large" color="#8c2323" />
-                                        <Text style={modernRideStyles.loadingText}>Loading map...</Text>
-                                    </View>
-                                ) : mapImage ? (
-                                    <Image
-                                        source={{ uri: mapImage }}
-                                        style={modernRideStyles.mapImage}
-                                    />
-                                ) : (
-                                    <View style={[modernRideStyles.errorContainer, { height: 220 }]}>
-                                        <Text style={modernRideStyles.errorText}>No map available</Text>
-                                    </View>
-                                )}
-                            </View>
+
                         </View>
 
                         {/* Stats Section */}
