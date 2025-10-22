@@ -279,7 +279,20 @@ const RideStep4 = (props) => {
             {/* Main Content */}
             <Animated.View style={[modernRideStyles.fadeContainer, { transform: [{ translateY: slideAnim }] }]}>
                 <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
-                    {/* Hero Section */}
+                    {/* Full Screen Map Section */}
+                    <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim, width: '100%', height: 400 }]}>
+                        <RouteMapView
+                            generatedRidesId={generatedRidesId}
+                            token={token}
+                            startingPoint={startingPoint}
+                            endingPoint={endingPoint}
+                            stopPoints={stopPoints}
+                            style={{ flex: 1 }}
+                            isDark={true}
+                        />
+                    </Animated.View>
+
+                    {/* Hero Section - Now Below Map */}
                     <View style={modernRideStyles.heroSection}>
                         <View style={{ flex: 2, alignItems: 'center', padding: 10 }}>
                             <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
@@ -295,31 +308,11 @@ const RideStep4 = (props) => {
                                 <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
                             </View>
 
-                            <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', transform: [{ scale: pulseAnim }] }}>
+                            <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', }}>
                                 <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
                             </Animated.View>
-
                         </View>
 
-
-                        <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim }]}>
-                            <View style={rideRoutesPageUtilities.sectionHeader}>
-                                <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
-                                    Route Map
-                                </Text>
-                            </View>
-                            <View style={[rideRoutesPageUtilities.mapContainer, { height: 600 }]}>
-                                <RouteMapView
-                                    generatedRidesId={generatedRidesId}
-                                    token={token}
-                                    startingPoint={startingPoint}
-                                    endingPoint={endingPoint}
-                                    stopPoints={stopPoints}
-                                    style={{ flex: 1, borderRadius: 10 }}
-                                    isDark={true}
-                                />
-                            </View>
-                        </Animated.View>
                         {/* Location Images */}
                         <View style={modernRideStyles.imagesSection}>
                             <View style={modernRideStyles.locationImagesContainer}>
@@ -361,13 +354,7 @@ const RideStep4 = (props) => {
                                     </View>
                                 )}
                             </View>
-
-
-                            {/* Map Image */}
-
                         </View>
-
-                        {/* Stats Section */}
                     </View>
 
                     {/* Description Section */}
@@ -386,7 +373,6 @@ const RideStep4 = (props) => {
                     )}
                 </ScrollView>
             </Animated.View>
-
             {/* Bottom Navigation */}
             <View style={modernRideStyles.bottomNav}>
                 <View style={modernRideStyles.bottomNavItem}>

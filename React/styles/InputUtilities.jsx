@@ -447,6 +447,30 @@ const InputUtilities = {
             elevation: 3,
             width: '100%',
         },
+
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    centered: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    webView: {
+        flex: 1,
+        backgroundColor: 'transparent',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 14,
+        textAlign: 'center',
+    },
+
+    retryText: {
+        fontSize: 14,
+        textAlign: 'center',
+        textDecorationLine: 'underline',
+    },
 };
 
 export default InputUtilities;
