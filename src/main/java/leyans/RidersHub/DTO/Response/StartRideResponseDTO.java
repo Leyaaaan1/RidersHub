@@ -62,6 +62,10 @@ public class StartRideResponseDTO implements Serializable {
         this.estimatedDistance = estimatedDistance;
     }
 
+    public StartRideResponseDTO() {
+
+    }
+
     public double getStartLatitude() {
         return startLatitude;
     }

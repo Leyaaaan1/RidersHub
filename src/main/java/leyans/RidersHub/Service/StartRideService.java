@@ -1,5 +1,6 @@
 package leyans.RidersHub.Service;
 
+import leyans.RidersHub.DTO.ParticipantLocationDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Repository.ParticipantLocationRepository;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class StartRideService {
@@ -28,6 +30,7 @@ public class StartRideService {
     private final RiderUtil riderUtil;
     private final RidesService ridesService;
     private final LocationService locationService;
+
     private final ParticipantLocationRepository participantLocationRepository;
 
     @Autowired
@@ -48,13 +51,9 @@ public class StartRideService {
      */
     @Transactional
     public StartRideResponseDTO startRide(Integer generatedRidesId) throws AccessDeniedException {
-        // 1. Authenticate and get the initiator
         Rider initiator = authenticateAndGetInitiator();
-
-        // 2. Validate and get the ride
         Rides ride = validateAndGetRide(generatedRidesId, initiator);
 
-        // 3. Verify initiator is the ride creator or a participant
         boolean isCreator = ride.getUsername().getUsername().equals(initiator.getUsername());
         boolean isParticipant = ride.getParticipants().stream()
                 .anyMatch(p -> p.getUsername().equals(initiator.getUsername()));
@@ -63,33 +62,35 @@ public class StartRideService {
             throw new AccessDeniedException("Only the ride creator or participants can start the ride");
         }
 
-        // 4. Get starting point from the ride
         Point startingPoint = ride.getStartingLocation();
         if (startingPoint == null) {
             throw new RuntimeException("Ride does not have a valid starting location");
         }
 
-        // 5. Create StartedRide entity
         StartedRide startedRide = new StartedRide();
         startedRide.setRide(ride);
         startedRide.setUsername(initiator);
         startedRide.setStartTime(LocalDateTime.now());
         startedRide.setLocation(startingPoint);
-        startedRide.setParticipants(new ArrayList<>(ride.getParticipants()));
+
+        // Include both participants and creator
+        List<Rider> allParticipants = new ArrayList<>(ride.getParticipants());
+        if (!allParticipants.contains(ride.getUsername())) {
+            allParticipants.add(ride.getUsername());
+        }
+        startedRide.setParticipants(allParticipants);
 
         startedRide = startedRideRepository.save(startedRide);
 
-        // 6. Initialize locations for ALL participants at the starting point
+        // Initialize locations for ALL participants with the SAME starting point
         List<ParticipantLocation> participantLocations = initializeParticipantLocations(
                 startedRide,
-                ride.getParticipants(),
-                startingPoint
+                allParticipants,
+                startingPoint  // All participants start at the same point
         );
 
-        // 7. Build and return response
         return buildStartRideResponse(startedRide, ride, participantLocations);
     }
-
 
     @Transactional
     public void stopRides(Integer generatedRidesId) throws java.nio.file.AccessDeniedException {
@@ -120,24 +121,24 @@ public class StartRideService {
         List<ParticipantLocation> locations = new ArrayList<>();
 
         for (Rider participant : participants) {
-            // Create a new point for each participant (same coordinates as start)
-            Point participantLocation = locationService.createPoint(
-                    startingPoint.getX(),
-                    startingPoint.getY()
+            ParticipantLocation location = new ParticipantLocation();
+            location.setStartedRide(startedRide);
+            location.setRider(participant);
+
+            // Create a new Point instance for each participant with the same coordinates
+            Point participantStartPoint = locationService.createPoint(
+                    startingPoint.getX(),  // longitude
+                    startingPoint.getY()   // latitude
             );
 
-            ParticipantLocation location = new ParticipantLocation(
-                    startedRide,
-                    participant,
-                    participantLocation,
-                    LocalDateTime.now()
-            );
+            // Use the correct setter name from ParticipantLocation entity
+            location.setParticipantLocation(participantStartPoint);  // Changed from setLocation
+            location.setLastUpdate(LocalDateTime.now());  // Changed from setLastUpdated
 
-            locations.add(location);
+            locations.add(participantLocationRepository.save(location));
         }
 
-        // Save all participant locations
-        return participantLocationRepository.saveAll(locations);
+        return locations;
     }
 
     /**
@@ -148,26 +149,44 @@ public class StartRideService {
             Rides ride,
             List<ParticipantLocation> participantLocations) {
 
-        // Extract coordinates from starting point
+        StartRideResponseDTO response = new StartRideResponseDTO();
+        response.setGeneratedRidesId(ride.getGeneratedRidesId());
+        response.setRidesName(ride.getRidesName());
+        response.setLocationName(ride.getLocationName());
+
+        // Get the ride's starting location
         Point startPoint = ride.getStartingLocation();
-        double longitude = startPoint.getX();
-        double latitude = startPoint.getY();
+        if (startPoint != null) {
+            response.setStartLatitude(startPoint.getY());  // latitude
+            response.setStartLongitude(startPoint.getX()); // longitude
+        }
 
-        // Get list of participant usernames
-        List<String> participantUsernames = participantLocations.stream()
-                .map(pl -> pl.getRider().getUsername())
-                .toList();
+        response.setStartPointName(ride.getStartingPointName());
+        response.setLatitude(ride.getLocation().getY());
+        response.setLongitude(ride.getLocation().getX());
+        response.setStartTime(startedRide.getStartTime());
+        response.setInitiator(startedRide.getUsername().getUsername());
+        response.setRouteCoordinates(ride.getRouteCoordinates());
+        response.setEstimatedDistance(ride.getDistance());
 
-        return new StartRideResponseDTO(
-                ride.getGeneratedRidesId(),
-                startedRide.getUsername().getUsername(),
-                ride.getRidesName(),
-                ride.getLocationName(),
-                participantUsernames,
-                longitude,
-                latitude,
-                startedRide.getStartTime()
+        // Map participant locations
+        List<ParticipantLocationDTO> participantDTOs = participantLocations.stream()
+                .map(pl -> new ParticipantLocationDTO(
+                        pl.getRider().getUsername(),
+                        pl.getParticipantLocation().getY(),  // latitude
+                        pl.getParticipantLocation().getX(),  // longitude
+                        pl.getLastUpdate()
+                ))
+                .collect(Collectors.toList());
+
+        response.setParticipants(participantDTOs);
+        response.setParticipantUsernames(
+                participantLocations.stream()
+                        .map(pl -> pl.getRider().getUsername())
+                        .collect(Collectors.toList())
         );
+
+        return response;
     }
 
     /**

@@ -607,11 +607,82 @@ const rideStepsUtilities = StyleSheet.create({
     responsiveText: {
         fontSize: screenWidth < 375 ? 13 : 15,
     },
+    routeInfoContainer: {
+        backgroundColor: '#f8fafc',
+        borderRadius: 8,
+        padding: 12,
+        borderLeftWidth: 4,
+        borderLeftColor: '#1e40af',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    // Route info text styling
+    routeInfoText: {
+        marginLeft: 8,
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#374151',
+    },routeInfoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+
+    routeStatsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingTop: 8,
+    },
+
+    // Individual route stat item
+    routeStatItem: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+
+    // Route stat label
+    routeStatLabel: {
+        fontSize: 12,
+        color: '#6b7280',
+        marginTop: 4,
+        marginBottom: 2,
+    },
+
+    // Route stat value
+    routeStatValue: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#374151',
+    },
+
+    // Info button style (for instruction messages)
+    infoButton: {
+        backgroundColor: '#3b82f6',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#3b82f6',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+
+    // Additional utility styles you might need
+
+
 
     responsiveButton: {
         paddingHorizontal: screenWidth < 375 ? 16 : 20,
         paddingVertical: screenWidth < 375 ? 10 : 12,
     },
+
 });
 
 export default rideStepsUtilities;
