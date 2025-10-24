@@ -57,6 +57,9 @@ const CreateRide = ({ route, navigation }) => {
     // Stop Points State
     const [stopPoints, setStopPoints] = useState([]);
 
+    // Route Information State (for better integration with GeoJSON)
+    const [routeInfo, setRouteInfo] = useState(null);
+
     const handleSearchRiders = (query) => {
         if (query.trim().length >= 2) {
             setIsRiderSearching(true);
@@ -114,6 +117,14 @@ const CreateRide = ({ route, navigation }) => {
                         .catch(err => console.log('Error reverse geocoding:', err));
                 }
             }
+            // Handle route drawing success/error messages from RideStep3
+            else if (data.type === 'routeDrawSuccess' && data.routeInfo) {
+                setRouteInfo(data.routeInfo);
+                console.log('Route info received in CreateRide:', data.routeInfo);
+            } else if (data.type === 'routeDrawError') {
+                console.error('Route drawing failed:', data.error);
+                setError('Failed to calculate route. Please check your points and try again.');
+            }
         } catch (error) {
             console.error('Error handling message:', error);
         }
@@ -142,42 +153,105 @@ const CreateRide = ({ route, navigation }) => {
         const lon = parseFloat(location.lon);
         setLocationSelected(true);
 
-        // Always resolve landmark/famous name
-        const resolvedName = await reverseGeocodeLandmark(token, lat, lon);
+        try {
+            // Always resolve landmark/famous name
+            const resolvedName = await reverseGeocodeLandmark(token, lat, lon);
 
-        if (mapMode === 'location') {
-            setLatitude(lat.toString());
-            setLongitude(lon.toString());
-            setLocationName(resolvedName || location.display_name.split(',')[0]);
-        } else if (mapMode === 'starting') {
-            setStartingLatitude(lat.toString());
-            setStartingLongitude(lon.toString());
-            setStartingPoint(resolvedName || location.display_name.split(',')[0]);
-            setMapMode('ending');
-        } else if (mapMode === 'ending') {
-            setEndingLatitude(lat.toString());
-            setEndingLongitude(lon.toString());
-            setEndingPoint(resolvedName || location.display_name.split(',')[0]);
+            if (mapMode === 'location') {
+                setLatitude(lat.toString());
+                setLongitude(lon.toString());
+                setLocationName(resolvedName || location.display_name.split(',')[0]);
+            } else if (mapMode === 'starting') {
+                setStartingLatitude(lat.toString());
+                setStartingLongitude(lon.toString());
+                setStartingPoint(resolvedName || location.display_name.split(',')[0]);
+                setMapMode('ending');
+            } else if (mapMode === 'ending') {
+                setEndingLatitude(lat.toString());
+                setEndingLongitude(lon.toString());
+                setEndingPoint(resolvedName || location.display_name.split(',')[0]);
+            }
+
+            setSearchQuery(resolvedName || location.display_name);
+            setSearchResults([]);
+            setMapRegion({
+                latitude: lat,
+                longitude: lon,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+            });
+        } catch (error) {
+            console.error('Error in handleLocationSelect:', error);
+            // Fallback to display_name if reverse geocoding fails
+            const fallbackName = location.display_name.split(',')[0];
+
+            if (mapMode === 'location') {
+                setLatitude(lat.toString());
+                setLongitude(lon.toString());
+                setLocationName(fallbackName);
+            } else if (mapMode === 'starting') {
+                setStartingLatitude(lat.toString());
+                setStartingLongitude(lon.toString());
+                setStartingPoint(fallbackName);
+                setMapMode('ending');
+            } else if (mapMode === 'ending') {
+                setEndingLatitude(lat.toString());
+                setEndingLongitude(lon.toString());
+                setEndingPoint(fallbackName);
+            }
+
+            setSearchQuery(fallbackName);
+            setSearchResults([]);
+        }
+    };
+
+    const validateRideData = () => {
+        const errors = [];
+
+        if (!rideName.trim()) errors.push('Ride name is required');
+        if (!startingPoint.trim()) errors.push('Starting point is required');
+        if (!endingPoint.trim()) errors.push('Ending point is required');
+        if (date < new Date()) errors.push('Ride date must be in the future');
+
+        // Validate coordinates
+        const startLat = parseFloat(startingLatitude);
+        const startLng = parseFloat(startingLongitude);
+        const endLat = parseFloat(endingLatitude);
+        const endLng = parseFloat(endingLongitude);
+
+        if (isNaN(startLat) || isNaN(startLng) || isNaN(endLat) || isNaN(endLng)) {
+            errors.push('Invalid coordinates for starting or ending points');
         }
 
-        setSearchQuery(resolvedName || location.display_name);
-        setSearchResults([]);
-        setMapRegion({
-            latitude: lat,
-            longitude: lon,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-        });
+        // Validate stop points if any
+        if (stopPoints.length > 0) {
+            stopPoints.forEach((stop, index) => {
+                if (isNaN(parseFloat(stop.lat)) || isNaN(parseFloat(stop.lng))) {
+                    errors.push(`Invalid coordinates for stop point ${index + 1}`);
+                }
+                if (!stop.name || !stop.name.trim()) {
+                    errors.push(`Stop point ${index + 1} must have a name`);
+                }
+            });
+        }
+
+        return errors;
     };
 
     const handleCreateRide = async () => {
-        if (!rideName.trim()) { setError('Ride name is required'); return; }
-        if (!startingPoint.trim()) { setError('Starting point is required'); return; }
-        if (!endingPoint.trim()) { setError('Ending point is required'); return; }
-        if (date < new Date()) { setError('Ride date must be in the future'); return; }
+        // Clear previous errors
+        setError('');
+
+        // Validate form data
+        const validationErrors = validateRideData();
+        if (validationErrors.length > 0) {
+            const errorMessage = validationErrors.join('\n');
+            setError(errorMessage);
+            Alert.alert('Validation Error', errorMessage);
+            return;
+        }
 
         setLoading(true);
-        setError('');
 
         const participantsArray = Array.isArray(participants)
             ? participants
@@ -185,39 +259,51 @@ const CreateRide = ({ route, navigation }) => {
                 ? participants.split(',').map(p => p.trim())
                 : []);
 
-        // Prepare stopPoints for backend (lat, lng, name)
-        const stopPointsPayload = stopPoints.map(sp => ({
-            stopLatitude: sp.lat || sp.stopLatitude,
-            stopLongitude: sp.lng || sp.stopLongitude,
-            stopName: sp.name || sp.stopName
-        }));
+        // Prepare stopPoints for backend with better validation
+        const stopPointsPayload = stopPoints.map((sp, index) => {
+            const stopLat = parseFloat(sp.lat || sp.stopLatitude);
+            const stopLng = parseFloat(sp.lng || sp.stopLongitude);
+            const stopName = sp.name || sp.stopName || `Stop Point ${index + 1}`;
+
+            return {
+                stopLatitude: stopLat,
+                stopLongitude: stopLng,
+                stopName: stopName.trim()
+            };
+        });
 
         try {
-
             if (!token) {
                 throw new Error('No authentication token available. Please log in again.');
             }
 
             const rideData = {
-                ridesName: rideName,
-                locationName: locationName,
+                ridesName: rideName.trim(),
+                locationName: locationName.trim() || 'Custom Location',
                 riderType: riderType || 'CAR',
                 date: date.toISOString(),
-                latitude: parseFloat(latitude) || 0,
-                longitude: parseFloat(longitude) || 0,
-                startLat: parseFloat(startingLatitude) || 0,
-                startLng: parseFloat(startingLongitude) || 0,
-                endLat: parseFloat(endingLatitude) || 0,
-                endLng: parseFloat(endingLongitude) || 0,
-                startingPoint: startingPoint,
-                endingPoint: endingPoint,
+                latitude: parseFloat(latitude) || 7.0731,
+                longitude: parseFloat(longitude) || 125.6128,
+                startLat: parseFloat(startingLatitude),
+                startLng: parseFloat(startingLongitude),
+                endLat: parseFloat(endingLatitude),
+                endLng: parseFloat(endingLongitude),
+                startingPoint: startingPoint.trim(),
+                endingPoint: endingPoint.trim(),
                 participants: participantsArray,
-                description: description,
+                description: description.trim(),
                 stopPoints: stopPointsPayload,
+                // Include route information if available
+                ...(routeInfo && {
+                    routeDistance: routeInfo.distance,
+                    routeDuration: routeInfo.duration,
+                    routeProvider: routeInfo.provider
+                })
             };
 
+            console.log('Creating ride with data:', rideData);
+
             // Make the API call to create the ride
-            console.log('Making createRide API call...');
             const result = await createRide(rideData, token);
             console.log('CreateRide API response:', result);
 
@@ -242,19 +328,16 @@ const CreateRide = ({ route, navigation }) => {
                 setGeneratedRidesId(generatedId);
                 console.log('Navigating to RideStep4 with ID:', generatedId);
 
-                // Navigate to step 4 or the next screen
+                // Navigate to step 4
                 setCurrentStep(4);
 
-                // Alternative: Direct navigation if you prefer
-                // navigation.navigate('RideStep4', {
-                //     generatedRidesId: generatedId,
-                //     rideName, locationName, riderType, date, startingPoint, endingPoint,
-                //     participants, description, token, username
-                // });
+                // Clear any route errors since we succeeded
+                setError('');
             } else {
                 console.error('No valid ride ID found in response:', result);
-                setError('Ride was created but no ID was returned. Response: ' + JSON.stringify(result));
-                Alert.alert('Warning', 'Ride was created but ID is missing. Please check with support.');
+                const errorMsg = 'Ride was created but no ID was returned. Please contact support.';
+                setError(errorMsg);
+                Alert.alert('Warning', errorMsg);
             }
         } catch (err) {
             console.error('Error creating ride:', err);
@@ -271,6 +354,8 @@ const CreateRide = ({ route, navigation }) => {
                     errorMessage = err.response.data;
                 } else if (err.response.data.message) {
                     errorMessage = err.response.data.message;
+                } else if (err.response.data.error) {
+                    errorMessage = err.response.data.error;
                 } else {
                     errorMessage = JSON.stringify(err.response.data);
                 }
@@ -285,12 +370,25 @@ const CreateRide = ({ route, navigation }) => {
         }
     };
 
-    const nextStep = () => { if (currentStep < 4) setCurrentStep(currentStep + 1); };
-    const prevStep = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
+    const nextStep = () => {
+        // Clear errors when moving to next step
+        setError('');
+        if (currentStep < 4) setCurrentStep(currentStep + 1);
+    };
+
+    const prevStep = () => {
+        // Clear errors when moving to previous step
+        setError('');
+        if (currentStep > 1) setCurrentStep(currentStep - 1);
+    };
 
     const handleSearchInputChange = (text) => {
         setSearchQuery(text);
         if (locationSelected) setLocationSelected(false);
+        // Clear search-related errors
+        if (error.includes('search') || error.includes('location')) {
+            setError('');
+        }
     };
 
     return (
@@ -345,10 +443,10 @@ const CreateRide = ({ route, navigation }) => {
                     searchResults={searchResults}
                     handleLocationSelect={handleLocationSelect}
                     webViewRef={webViewRef}
-                    startingLatitude={startingLatitude}
-                    startingLongitude={startingLongitude}
-                    endingLatitude={endingLatitude}
-                    endingLongitude={endingLongitude}
+                    startingLatitude={parseFloat(startingLatitude)}
+                    startingLongitude={parseFloat(startingLongitude)}
+                    endingLatitude={parseFloat(endingLatitude)}
+                    endingLongitude={parseFloat(endingLongitude)}
                     handleMessage={handleMessage}
                     startingPoint={startingPoint}
                     setStartingPoint={setStartingPoint}
@@ -377,6 +475,7 @@ const CreateRide = ({ route, navigation }) => {
                     token={token}
                     username={username}
                     currentUsername={username}
+                    routeInfo={routeInfo} // Pass route info to step 4
                 />
             )}
         </ScrollView>

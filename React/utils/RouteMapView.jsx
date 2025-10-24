@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
-import RouteService, {getRouteCoordinates} from "../services/RouteService";
+import {getRouteCoordinates} from "../services/RouteService";
 
 const RouteMapView = ({
                           generatedRidesId,

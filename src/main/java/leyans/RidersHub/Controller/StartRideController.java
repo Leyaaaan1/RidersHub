@@ -42,6 +42,20 @@ public class StartRideController {
         }
     }
 
+    @PostMapping("/stop/{generatedRidesId}")
+    public ResponseEntity<Void> stopRide(@PathVariable Integer generatedRidesId) {
+        try {
+            startRideService.stopRides(generatedRidesId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<RideResponseDTO>> getCurrentStartedRides() {

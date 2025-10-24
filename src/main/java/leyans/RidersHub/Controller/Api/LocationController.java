@@ -1,5 +1,6 @@
 package leyans.RidersHub.Controller.Api;
 
+import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.MapService.NominatimService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,12 @@ import java.util.Map;
 public class LocationController {
 
     private final NominatimService nominatimService;
+    private final LocationService locationService;
 
     @Autowired
-    public LocationController(NominatimService nomService) {
+    public LocationController(NominatimService nomService, LocationService locationService) {
         this.nominatimService = nomService;
+        this.locationService = locationService;
     }
     @GetMapping("/search")
     public ResponseEntity<List<Map<String, Object>>> searchLocation(@RequestParam("query") String query) {
@@ -37,17 +40,21 @@ public class LocationController {
     @GetMapping("/reverse")
     public ResponseEntity<String> reverseGeocode(
             @RequestParam("lat") double lat,
-            @RequestParam("lon") double lon) {
-        String name = nominatimService.getBarangayNameFromCoordinates(lat, lon);
-        return ResponseEntity.ok(name);
+            @RequestParam("lon") double lon,
+            @RequestParam(value = "fallback", required = false) String fallback) {
+        // Use LocationUtilityService instead of NominatimService directly
+        String barangayName = locationService.resolveBarangayName(fallback, lat, lon);
+        return ResponseEntity.ok(barangayName);
     }
 
     @GetMapping("/landmark")
     public ResponseEntity<String> getLandmarkOrCity(
             @RequestParam("lat") double lat,
-            @RequestParam("lon") double lon) {
-        String landmark = nominatimService.getCityOrLandmarkFromCoordinates(lat, lon);
-        return ResponseEntity.ok(landmark != null ? landmark : "No landmark found");
+            @RequestParam("lon") double lon,
+            @RequestParam(value = "fallback", required = false) String fallback) {
+        // Use LocationUtilityService to get standardized landmark/city names
+        String landmark = locationService.resolveLandMark(fallback, lat, lon);
+        return ResponseEntity.ok(landmark);
     }
 
 }

@@ -29,7 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        if (path.equals("/riders/login") || path.equals("/riders/register")) {
+        if (path.equals("/riders/login") || path.equals("/riders/register") || path.startsWith("/facebook/login")) {
             filterChain.doFilter(request, response);
             return;
         }

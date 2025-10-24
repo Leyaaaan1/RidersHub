@@ -15,10 +15,6 @@ import java.util.Optional;
 @Repository
 public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
-    // Rides findRidesByRider(Rider rider);
-
-    @Query("SELECT r FROM Rides r LEFT JOIN FETCH r.participants WHERE r.ridesId = :rideId")
-    Optional<Rides> findByIdWithParticipants(@Param("rideId") Integer rideId);
     Optional<Rides> findByGeneratedRidesId(Integer generatedRidesId);
 
     @Query("SELECT r.routeCoordinates FROM Rides r WHERE r.generatedRidesId = :generatedRidesId")
@@ -28,14 +24,10 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
     List<Rides> findByUsername_Username(String username);
 
-
-
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO ride_participants (ride_id, rider_username) VALUES (:rideId, :riderId)", nativeQuery = true)
     void addParticipantToRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
 
-    @Query("SELECT r FROM Rides r LEFT JOIN FETCH r.participants WHERE r.generatedRidesId = :generatedRidesId")
-    Optional<Rides> findRideWithParticipantsById(@Param("generatedRidesId") Integer generatedRidesId);
 
 }

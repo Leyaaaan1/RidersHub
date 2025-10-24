@@ -61,7 +61,10 @@ public class    RiderService {
         }
 
         String encodedPassword = passwordEncoder.encode(password);
-        RiderType riderTypeName = getRiderTypeByName(riderType);
+        RiderType riderTypeName = null;
+        if (riderType != null && !riderType.isEmpty()) {
+            riderTypeName = getRiderTypeByName(riderType);
+        }
         Rider newRider = new Rider();
         newRider.setUsername(username);
         newRider.setPassword(encodedPassword);
