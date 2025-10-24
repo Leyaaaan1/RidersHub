@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import {getRouteCoordinates} from "../services/RouteService";
+import InputUtilities from "../styles/InputUtilities";
 
 const RouteMapView = ({
                           generatedRidesId,
@@ -32,7 +33,6 @@ const RouteMapView = ({
             setIsLoading(true);
             setError(null);
 
-            // Fetch route data with token
             const data = await getRouteCoordinates(token, generatedRidesId);
 
             if (!data) {
@@ -43,12 +43,9 @@ const RouteMapView = ({
             console.log('Route data loaded successfully:', data);
 
         } catch (error) {
-            console.error('=== ERROR IN FETCHROUTEDATA ===');
-            console.error('Error:', error);
 
             const errorMessage = error.message || 'Failed to load route data';
             setError(errorMessage);
-
             Alert.alert(
                 'Route Loading Error',
                 errorMessage,
@@ -410,11 +407,7 @@ const RouteMapView = ({
             }
 
             window.loadRouteData = function(routeData, startPoint, endPoint, stopPoints) {
-                console.log('=== LOADING ROUTE DATA ===');
-                console.log('Route data type:', typeof routeData);
-                console.log('Start point:', startPoint);
-                console.log('End point:', endPoint);
-                console.log('Stop points:', stopPoints);
+    
 
                 window.routeData = routeData;
                 window.startingPoint = startPoint;
@@ -491,9 +484,9 @@ const RouteMapView = ({
 
     if (isLoading) {
         return (
-            <View style={[styles.container, style, styles.centered]}>
+            <View style={[InputUtilities.container, style, InputUtilities.centered]}>
                 <ActivityIndicator size="large" color="#1e40af" />
-                <Text style={[styles.loadingText, { color: isDark ? '#fff' : '#000' }]}>
+                <Text style={[InputUtilities.loadingText, { color: isDark ? '#fff' : '#000' }]}>
                     Loading route...
                 </Text>
             </View>
@@ -502,12 +495,12 @@ const RouteMapView = ({
 
     if (error && !routeData) {
         return (
-            <View style={[styles.container, style, styles.centered]}>
-                <Text style={[styles.errorText, { color: isDark ? '#ff6b6b' : '#dc3545' }]}>
+            <View style={[InputUtilities.container, style, InputUtilities.centered]}>
+                <Text style={[InputUtilities.errorText, { color: isDark ? '#ff6b6b' : '#dc3545' }]}>
                     {error}
                 </Text>
                 <Text
-                    style={[styles.retryText, { color: isDark ? '#4dabf7' : '#007bff' }]}
+                    style={[InputUtilities.retryText, { color: isDark ? '#4dabf7' : '#007bff' }]}
                     onPress={fetchRouteData}
                 >
                     Tap to retry
@@ -517,11 +510,11 @@ const RouteMapView = ({
     }
 
     return (
-        <View style={[styles.container, style]}>
+        <View style={[InputUtilities.container, style]}>
             <WebView
                 ref={webViewRef}
                 source={{ html: createMapHTML() }}
-                style={styles.webView}
+                style={InputUtilities.webView}
                 onLoadEnd={handleWebViewLoad}
                 onMessage={handleWebViewMessage}
                 onError={handleWebViewError}
@@ -539,35 +532,5 @@ const RouteMapView = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    centered: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    webView: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 14,
-        textAlign: 'center',
-    },
-    errorText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginBottom: 10,
-        paddingHorizontal: 20,
-    },
-    retryText: {
-        fontSize: 14,
-        textAlign: 'center',
-        textDecorationLine: 'underline',
-    },
-});
 
 export default RouteMapView;

@@ -474,6 +474,7 @@ const CreateRide = ({ route, navigation }) => {
                     description={description}
                     token={token}
                     username={username}
+                    stopPoints={stopPoints}
                     currentUsername={username}
                     routeInfo={routeInfo} // Pass route info to step 4
                 />
