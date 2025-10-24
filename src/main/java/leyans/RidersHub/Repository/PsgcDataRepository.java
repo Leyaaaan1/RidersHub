@@ -28,8 +28,4 @@ public interface PsgcDataRepository extends JpaRepository<PsgcData, String> {
     List<PsgcData> findByNameIgnoreCase(String name);
 
 
-    @Query("SELECT p FROM PsgcData p WHERE " +
-            "LOWER(p.name) = LOWER(:name) AND " +
-            "(p.geographicLevel = 'City' OR p.geographicLevel = 'Mun')")
-    List<PsgcData> findCityOrMunicipalityByName(@Param("name") String name);
 }

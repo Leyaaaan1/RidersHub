@@ -117,7 +117,8 @@ public class NominatimService {
                         "resort",        // Resorts
                         "camp_site",     // Camping sites
                         "man_made",      // Man-made structures
-                        "shop"           // Notable shops
+                        "shop",           // Notable shops
+                        "beach"
                 };
 
                 for (String key : landmarkKeys) {

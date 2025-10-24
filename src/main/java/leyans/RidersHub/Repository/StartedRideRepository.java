@@ -22,4 +22,5 @@ public interface StartedRideRepository extends JpaRepository<StartedRide, Intege
     Optional<StartedRide> findByRideGeneratedRidesId(Integer generatedRidesId);
 
 
+
 }
