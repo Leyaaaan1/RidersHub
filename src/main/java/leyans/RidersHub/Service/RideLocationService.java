@@ -2,9 +2,8 @@ package leyans.RidersHub.Service;
 
 import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Repository.*;
-import leyans.RidersHub.Util.RiderUtil;
+import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.*;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;

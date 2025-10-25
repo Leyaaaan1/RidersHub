@@ -7,7 +7,7 @@ import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import leyans.RidersHub.Service.MapService.RouteService;
-import leyans.RidersHub.Util.RiderUtil;
+import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
@@ -118,6 +118,7 @@ public class RidesService {
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
         newRide.setRouteCoordinates(routeCoordinates);
+        newRide.setActive(true);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -187,7 +188,9 @@ public class RidesService {
                 ride.getMagImageEndingLocation(),
                 ride.getUsername().getUsername(),
                 ride.getRouteCoordinates(),
-                mapStopPointsToDTOs(ride.getStopPoints())
+
+                mapStopPointsToDTOs(ride.getStopPoints()),
+                ride.getActive()
 
         );    }
 

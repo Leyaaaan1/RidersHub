@@ -49,6 +49,9 @@ const RideStep4 = (props) => {
         currentUsername = props.currentUsername || routeParams.currentUsername,
     } = props;
 
+    console.log("RideStep4 Props:", props);
+    console.log("currentUsername:", currentUsername);
+    console.log("username:", username);
     // Animation values
     const [fadeAnim] = useState(new Animated.Value(0));
     const [slideAnim] = useState(new Animated.Value(50));

@@ -10,6 +10,9 @@ const SearchHeader = ({ token, username, navigation }) => {
     const [searchId, setSearchId] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    console.log('current user:', username);
+
+
 
     const handleSearch = async () => {
         if (!searchId.trim()) {
@@ -34,7 +37,8 @@ const SearchHeader = ({ token, username, navigation }) => {
                 participants: ride.participants,
                 description: ride.description,
                 token: token,
-                username: username
+                username: ride.username,
+                currentUsername: username
             });
         } catch (error) {
             setError(error.message || 'Failed to find ride');

@@ -5,7 +5,7 @@ import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Repository.RideJoinRequestRepository;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Util.RiderUtil;
+import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.RideJoinRequest;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;

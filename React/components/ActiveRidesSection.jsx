@@ -1,3 +1,7 @@
+import {Text, View} from "react-native";
+import {modernUtilities} from "../styles/modernUtilities";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+
 const renderActiveRidesSection = () => {
     if (!startedRidesLoading && startedRides.length === 0 && !startedRidesError) {
         return null;

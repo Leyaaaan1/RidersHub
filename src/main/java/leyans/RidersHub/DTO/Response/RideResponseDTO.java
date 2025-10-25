@@ -39,6 +39,8 @@ public class RideResponseDTO {
 
     private List<StopPointDTO> stopPoints;
 
+    private Boolean active;
+
 
 
 
@@ -51,7 +53,7 @@ public class RideResponseDTO {
                            String endingPointName, double endLat, double endLng,
                            String mapImageUrl, String magImageStartingLocation, String magImageEndingLocation,
                            String username, String routeCoordinates,
-                            List<StopPointDTO> stopPoints
+                            List<StopPointDTO> stopPoints, Boolean active
 
     ) {
         this.generatedRidesId = generatedRidesId;
@@ -77,7 +79,16 @@ public class RideResponseDTO {
         this.username = username;
         this.stopPoints = stopPoints;
         this.routeCoordinates = routeCoordinates;
+        this.active = active;
 
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public String getRouteCoordinates() {

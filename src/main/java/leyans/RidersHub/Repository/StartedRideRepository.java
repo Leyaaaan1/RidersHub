@@ -21,6 +21,7 @@ public interface StartedRideRepository extends JpaRepository<StartedRide, Intege
     boolean existsByUsername(Rider username);
     Optional<StartedRide> findByRideGeneratedRidesId(Integer generatedRidesId);
 
-
+    @Query("SELECT sr FROM StartedRide sr JOIN FETCH sr.ride WHERE sr.ride.generatedRidesId = :generatedRidesId")
+    Optional<StartedRide> findByRideGeneratedRidesIdWithRide(@Param("generatedRidesId") Integer generatedRidesId);
 
 }

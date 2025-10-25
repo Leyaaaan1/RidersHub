@@ -23,6 +23,10 @@ const StartedRide = ({ route }) => {
     const [rideData, setRideData] = useState(null);
     const { generatedRidesId, token } = route.params || {};
 
+    console.log('Generated Rides ID:', generatedRidesId);
+    console.log('Token:', token);
+    console.log('Route Params:', route.params);
+
     useEffect(() => {
         const fetchStartedRide = async () => {
             try {

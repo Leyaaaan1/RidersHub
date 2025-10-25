@@ -10,24 +10,22 @@ import {
     ScrollView,
     FlatList
 } from 'react-native';
-import utilities from "../styles/utilities";
-import riderPageUtils from "../styles/riderPageUtils";
-import colors from "../styles/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {getCurrentRiderType, } from '../services/rideService';
 import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
-import rideUtilities from "../styles/rideUtilities";
 import MyRidesModal from '../components/MyRidesModal';
 import {getCurrentStartedRides,} from "../services/startService";
-import CurrentRideHeader from "../components/CurrentRideHeader";
 import { modernUtilities } from "../styles/modernUtilities"; // Import separated utilities
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const RiderPage = ({ route , navigation}) => {
 
-    const { username, token } = route.params;
+    const [username, setUsername] = useState('');
+    const [token, setToken] = useState('');
+
     const [riderType, setRiderType] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -59,18 +57,41 @@ const RiderPage = ({ route , navigation}) => {
         }
     };
 
+
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                const storedUsername = await AsyncStorage.getItem('username');
+                const storedToken = await AsyncStorage.getItem('userToken');
+
+                if (storedUsername) setUsername(storedUsername);
+                if (storedToken) setToken(storedToken);
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getUserData();
+    }, []);
+
     const fetchAndDisplayStartedRides = async (token) => {
         try {
             const rides = await getCurrentStartedRides(token);
+            console.log('Raw started rides response:', rides);
+
             return rides.map(ride => ({
                 ridesId: ride.generatedRidesId,
                 ridesName: ride.ridesName,
-                locationName: ride.locationName
+                locationName: ride.locationName,
             }));
+
         } catch (error) {
             console.error('Error fetching started rides:', error);
             throw error;
         }
+
     };
 
     useEffect(() => {
