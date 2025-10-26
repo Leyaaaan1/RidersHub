@@ -20,6 +20,7 @@ import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,13 +87,19 @@ public class StartedUtil {
 
     @PreAuthorize("isAuthenticated()")
     @Transactional(readOnly = true)
-    public List<RideResponseDTO> getCurrentStartedRides() throws AccessDeniedException {
+    public RideResponseDTO getStartedRideDetails() throws AccessDeniedException {
+        // Get the authenticated user
         Rider requester = authenticateAndGetInitiator();
-        List<StartedRide> startedRides = riderUtil.findStartedRidesByRider(requester);
 
-        return startedRides.stream()
-                .map(sr -> mapToRideResponseDTO(sr.getRide()))
-                .toList();
+        // Find the started ride by the initiator (username field in StartedRide)
+        Optional<StartedRide> startedRide = startedRideRepository.findByUsernameWithRide(requester);
+
+        if (startedRide.isEmpty()) {
+            throw new IllegalArgumentException("No active ride found for user");
+        }
+
+        // Return the ride details from the started ride
+        return mapToRideResponseDTO(startedRide.get().getRide());
     }
 
     public RideResponseDTO mapToRideResponseDTO(Rides ride) {

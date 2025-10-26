@@ -3,40 +3,35 @@ import {
     View,
     Text,
     TouchableOpacity,
-    TextInput,
     ActivityIndicator,
     Alert,
     StatusBar,
-    ScrollView,
     FlatList
 } from 'react-native';
+
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {getCurrentRiderType, } from '../services/rideService';
 import RidesList from '../components/RidesList';
 import SearchHeader from "../components/SearchHeader";
 import MyRidesModal from '../components/MyRidesModal';
-import {getCurrentStartedRides,} from "../services/startService";
-import { modernUtilities } from "../styles/modernUtilities"; // Import separated utilities
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { modernUtilities } from "../styles/modernUtilities";
+import {getActiveRide} from "../services/startService";
 
 
 const RiderPage = ({ route , navigation}) => {
 
-    const [username, setUsername] = useState('');
-    const [token, setToken] = useState('');
-
+    const { username, token } = route.params;
     const [riderType, setRiderType] = useState(null);
     const [loading, setLoading] = useState(true);
-
     const [myRidesModalVisible, setMyRidesModalVisible] = useState(false);
+    const [activeRide, setActiveRide] = useState(null);
+    const [activeRideLoading, setActiveRideLoading] = useState(false);
 
-    const [startedRides, setStartedRides] = useState([]);
-    const [startedRidesLoading, setStartedRidesLoading] = useState(false);
-    const [startedRidesError, setStartedRidesError] = useState('');
 
     useEffect(() => {
         fetchCurrentRiderType();
+        fetchActiveRide();
     }, [token]);
 
     const fetchCurrentRiderType = async () => {
@@ -56,107 +51,18 @@ const RiderPage = ({ route , navigation}) => {
             setLoading(false);
         }
     };
-
-
-    useEffect(() => {
-        const getUserData = async () => {
-            try {
-                const storedUsername = await AsyncStorage.getItem('username');
-                const storedToken = await AsyncStorage.getItem('userToken');
-
-                if (storedUsername) setUsername(storedUsername);
-                if (storedToken) setToken(storedToken);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        getUserData();
-    }, []);
-
-    const fetchAndDisplayStartedRides = async (token) => {
+    const fetchActiveRide = async () => {
         try {
-            const rides = await getCurrentStartedRides(token);
-            console.log('Raw started rides response:', rides);
-
-            return rides.map(ride => ({
-                ridesId: ride.generatedRidesId,
-                ridesName: ride.ridesName,
-                locationName: ride.locationName,
-            }));
-
+            setActiveRideLoading(true);
+            const result = await getActiveRide(token); // ✅ Just pass the token
+            setActiveRide(result); // The result is already the RideResponseDTO
         } catch (error) {
-            console.error('Error fetching started rides:', error);
-            throw error;
+            console.error('Error fetching active ride:', error);
+            setActiveRide(null); // Set to null if no active ride
+        } finally {
+            setActiveRideLoading(false);
         }
-
     };
-
-    useEffect(() => {
-        if (!token) return;
-        setStartedRidesLoading(true);
-        fetchAndDisplayStartedRides(token)
-            .then(rides => {
-                setStartedRides(rides);
-                setStartedRidesError('');
-            })
-            .catch(err => {
-                setStartedRides([]);
-                setStartedRidesError('Failed to fetch started rides');
-            })
-            .finally(() => setStartedRidesLoading(false));
-    }, [token]);
-
-    const renderActiveRidesSection = () => {
-        if (!startedRidesLoading && startedRides.length === 0 && !startedRidesError) {
-            return null;
-        }
-        return (
-            <View>
-                {startedRidesLoading ? (
-                    <View style={modernUtilities.loadingContainer}>
-                        <ActivityIndicator color="#8c2323" size="small" />
-                    </View>
-                ) : startedRidesError ? (
-                    <Text style={modernUtilities.errorText}>{startedRidesError}</Text>
-                ) : startedRides.length > 0 ? (
-                    startedRides.map((ride, idx) => (
-                        <TouchableOpacity
-                            key={idx}
-                            style={modernUtilities.activeRideCard}
-                            onPress={() => {
-                                navigation.navigate('StartedRide', {
-                                    generatedRidesId: ride.ridesId,
-                                    ridesName: ride.ridesName,
-                                    locationName: ride.locationName,
-                                    token: token,
-                                    username: username
-                                });
-                            }}
-                        >
-                            <View style={modernUtilities.activeRideHeader}>
-                                <Text style={modernUtilities.activeRideName}>{ride.ridesName} </Text>
-                                <View style={modernUtilities.activeStatus}>
-                                    <FontAwesome name="circle" size={6} color="#27ae60" />
-                                    <Text style={modernUtilities.activeStatusText}>ACTIVE</Text>
-                                </View>
-                            </View>
-                            <Text style={modernUtilities.activeRideLocation}>{ride.locationName}</Text>
-                            <Text style={modernUtilities.activeRideId}>ID: {ride.ridesId}</Text>
-                        </TouchableOpacity>
-                    ))
-                ) : (
-                    <View style={modernUtilities.emptyState}>
-                        <FontAwesome name="bicycle" size={30} color="#bdc3c7" />
-                        <Text style={modernUtilities.emptyStateText}>No ongoing ride found.</Text>
-                    </View>
-                )}
-            </View>
-        );
-    };
-
 
     return (
         <View style={modernUtilities.container}>
@@ -220,12 +126,34 @@ const RiderPage = ({ route , navigation}) => {
                     </TouchableOpacity>
                 </View>
             </View>
-
+            <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                    if (!activeRide) return;
+                    navigation.navigate('StartedRide', { activeRide, token, username });
+                }}
+                style={{ marginHorizontal: 16, marginVertical: 8, backgroundColor: '#1e1e1e', borderRadius: 8, padding: 12 }}
+            >
+                <Text style={{ color: '#fff', fontSize: 16, marginBottom: 8 }}>Active Ride</Text>
+                {activeRideLoading ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                ) : activeRide ? (
+                    <View>
+                        <Text style={{ color: '#fff', fontSize: 14 }}>{activeRide.ridesName}</Text>
+                        <View style={{ flexDirection: 'row', marginTop: 4, justifyContent: 'space-between' }}>
+                            <Text style={{ color: '#888', fontSize: 12 }}>{activeRide.locationName}</Text>
+                            <Text style={{ color: '#888', fontSize: 12 }}>{activeRide.riderType}</Text>
+                            <Text style={{ color: '#888', fontSize: 12 }}>{activeRide.distance} km</Text>
+                        </View>
+                    </View>
+                ) : (
+                    <Text style={{ color: '#666', fontSize: 14 }}>No active ride</Text>
+                )}
+            </TouchableOpacity>
             <FlatList
                 data={[]} // No data, only using header
                 ListHeaderComponent={
                     <>
-                        {renderActiveRidesSection()}
                         <View style={modernUtilities.feedSection}>
                             <RidesList
                                 token={token}

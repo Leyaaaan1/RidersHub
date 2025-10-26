@@ -42,6 +42,24 @@ public class StartRideController {
         }
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<RideResponseDTO> getActiveRide() {
+        try {
+            RideResponseDTO rideDetails = startedUtil.getStartedRideDetails();
+            return ResponseEntity.ok(rideDetails);
+        } catch (IllegalArgumentException ex) {
+            // No active ride found for user
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalStateException ex) {
+            // Ride is in conflicting state
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (Exception ex) {
+            // Internal server error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
     @PostMapping("/update/{generatedRidesId}")
     public ResponseEntity<Void> updateRide(@PathVariable Integer generatedRidesId) {
         try {

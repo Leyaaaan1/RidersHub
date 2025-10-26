@@ -44,23 +44,35 @@ export const startService = {
         }
     },
 
-
 };
+export async function getActiveRide(token) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/start/active`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
 
+        if (!response.ok) {
+            const status = response.status;
+            switch (status) {
+                case 404:
+                    throw new Error('No active ride found');
+                case 409:
+                    throw new Error('Ride is in conflicting state');
+                default:
+                    throw new Error('Failed to fetch active ride');
+            }
+        }
 
-export async function getCurrentStartedRides(token) {
-    const response = await fetch(`${API_BASE_URL}/start`, {
-
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch started rides');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching active ride:', error);
+        throw error;
     }
-    return await response.json();
 }
 
 export async function getStopPointsByRideId(generatedRidesId, token) {

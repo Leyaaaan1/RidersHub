@@ -1,146 +1,85 @@
-import React, { useState, useEffect } from 'react';
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    SafeAreaView,
-    StatusBar,
-    ScrollView,
-    Image,
-    ActivityIndicator,
-    PermissionsAndroid, Platform
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import colors from '../styles/colors';
-import styles from '../styles/StartedRideStyles';
-import { getCurrentStartedRides } from "../services/startService";
-import rideUtilities from "../styles/rideUtilities";
+// javascript
+// File: `React/pages/StartedRide.jsx`
+import React from 'react';
+import {View, Text, ScrollView, StatusBar, Animated, TouchableOpacity} from 'react-native';
+import { modernUtilities as styles } from "../styles/modernUtilities";
+import rideRoutesPageUtilities from "../styles/RideRoutesPageUtilities";
+import RouteMapView from "../utilities/route/RouteMapView";
+import rideStepsUtilities from "../styles/rideStepsUtilities";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 const StartedRide = ({ route }) => {
-    const navigation = useNavigation();
-    const [loading, setLoading] = useState(true);
-    const [rideData, setRideData] = useState(null);
-    const { generatedRidesId, token } = route.params || {};
+    const { activeRide, token, username } = route.params || {};
 
-    console.log('Generated Rides ID:', generatedRidesId);
-    console.log('Token:', token);
-    console.log('Route Params:', route.params);
+    if (!activeRide) {
+        return (
+            <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>No ride data available</Text>
+            </View>
+        );
+    }
 
-    useEffect(() => {
-        const fetchStartedRide = async () => {
-            try {
-                const rides = await getCurrentStartedRides(token);
-                const currentRide = Array.isArray(rides)
-                    ? rides.find(r => r.generatedRidesId === generatedRidesId)
-                    : null;
-                setRideData(currentRide);
-            } catch (error) {
-                setRideData(null);
-            } finally {
-                setLoading(false);
-            }
-        };
-        if (token && generatedRidesId) {
-            fetchStartedRide();
-        } else {
-            setLoading(false);
-        }
-    }, [token, generatedRidesId]);
-
-    const handleBack = () => {
-        navigation.goBack();
-    };
-
-    console.log('Ride Data:', rideData);
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar backgroundColor={colors.black} barStyle="light-content" />
-            <View style={styles.header}>
 
-                <View style={{ flex: 1, alignItems: 'flex-start' }}>
-                    <TouchableOpacity
-                        style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 10 }}
-                        onPress={handleBack}
-                    >
-                        <Text style={{ color: '#fff', marginLeft: 5 }}>Back</Text>
+        <View style={styles.contentContainer}>
+            <StatusBar barStyle="light-content" backgroundColor="#151515" />
+
+            <Animated.View style={[rideRoutesPageUtilities.mapSection, { width: '100%', height: 770 }]}>
+                <RouteMapView
+                    generatedRidesId={activeRide.generatedRidesId}
+                    token={token}
+                    startingPoint={activeRide.startingPoint}
+                    endingPoint={activeRide.endingPoint}
+                    stopPoints={activeRide.stopPoints}
+                    style={{ flex: 1 }}
+                    isDark={true}
+                />
+                <View style={[rideStepsUtilities.topRowContainer, { padding: 16, justifyContent: 'center', alignItems: 'center' }]}>
+                    <TouchableOpacity style={rideStepsUtilities.actionButton}>
+                        <FontAwesome name="stop-circle" size={23} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={rideStepsUtilities.actionButton}>
+                        <FontAwesome name="users" size={23} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={rideStepsUtilities.actionButton}>
+                        <FontAwesome name="info-circle" size={23} color="#fff" />
                     </TouchableOpacity>
                 </View>
-                <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center' }}>
+            </Animated.View>
 
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                        <FontAwesome name="location-arrow" size={20} color="#ffd54f" style={[styles.routeIcon, { padding: 4, marginRight: 8 }]} />
-                        <Text
-                            style={[
-                                rideUtilities.title,
-                                {
-                                    color: colors.white,
-                                    marginBottom: 0,
-                                    textAlign: 'center',
-                                    width: 'auto',
-                                }
-                            ]}
-                            numberOfLines={1}
-                            ellipsizeMode="tail"
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.7}
-                        >
-                            {rideData?.locationName?.toUpperCase() || ''}
-                        </Text>
-                    </View>
+            <Text style={styles.activeRideLocation}>{activeRide.ridesName}</Text>
+            <Text style={styles.activeRideName}>{activeRide.locationName}</Text>
 
-                    <Text style={{ color: '#fff', fontSize: 12, opacity: 0.7, marginLeft: 0, textAlign: 'center', width: '100%' }}>
-                        {rideData?.generatedRidesId || ''}
-                    </Text>
-                </View>
-                <View style={{ flex: 1 }} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 }}>
+                <Text style={{ color: '#95a5a6', fontSize: 12 }}>{activeRide.riderType}</Text>
+                <Text style={{ color: '#95a5a6', fontSize: 12 }}>{activeRide.distance} km</Text>
+                <Text style={{ color: '#95a5a6', fontSize: 12 }}>{activeRide.date}</Text>
             </View>
-            <ScrollView style={styles.content}>
-                {loading ? (
-                    <View style={styles.errorContainer}>
-                        <ActivityIndicator color="#fff" size="large" />
-                        <Text style={styles.errorText}>Loading ride details...</Text>
-                    </View>
-                ) : rideData ? (
 
+            <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Starting Point</Text>
+                <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.startingPointName || activeRide.startingPoint || '—'}</Text>
+            </View>
 
-                            <View style={styles.routeCard}>
-                                <Text style={styles.routeTitle}>
-                                    Route Details
-                                </Text>
-                                <View style={styles.routeRow}>
-                                    <FontAwesome name="map-marker" size={24} color="#4fc3f7" style={styles.routeIcon} />
-                                    <Text style={styles.routeText}>
-                                        Starting Point: {rideData?.startingPointName || 'N/A'}
-                                    </Text>
-                                </View>
-                                <View style={styles.routeRow}>
-                                    <FontAwesome name="flag-checkered" size={22} color="#81c784" style={styles.routeIcon} />
-                                    <Text style={styles.routeText}>
-                                        1st Stop: {rideData?.endingPointName || 'N/A'}
-                                    </Text>
-                                </View>
-                                <View style={styles.routeRow}>
-                                    <FontAwesome name="location-arrow" size={20} color="#ffd54f" style={styles.routeIcon} />
-                                    <Text style={styles.routeText}>
-                                        Location: {rideData?.locationName || 'N/A'}
-                                    </Text>
-                                </View>
-                                <View style={styles.routeRow}>
-                                    <FontAwesome name="road" size={20} color="#ff8a65" style={styles.routeIcon} />
-                                    <Text style={styles.routeText}>
-                                        Distance: {rideData?.distance ? `${rideData.distance} km` : 'N/A'}
-                                    </Text>
-                                </View>
+            <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Ending Point</Text>
+                <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.endingPointName || activeRide.endingPoint || '—'}</Text>
+            </View>
 
-                            </View>
-                ) : (
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>Failed to load ride information</Text>
-                    </View>
-                )}
-            </ScrollView>
-        </SafeAreaView>
+            <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Participants</Text>
+                <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.participants ?? '—'}</Text>
+            </View>
+
+            <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Description</Text>
+                <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.description || '—'}</Text>
+            </View>
+
+            <View style={{ paddingVertical: 12, alignItems: 'center' }}>
+                <Text style={{ color: '#95a5a6', fontSize: 12 }}>Ride created by: {activeRide.username || username || '—'}</Text>
+            </View>
+        </View>
     );
 };
 
