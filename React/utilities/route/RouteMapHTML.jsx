@@ -1,3 +1,5 @@
+import routeMapStyles from "./routeMapStyles.js";
+
 export const createMapHTML = () => {
     const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
@@ -7,88 +9,7 @@ export const createMapHTML = () => {
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <style>
-            body {
-                margin: 0;
-                padding: 0;
-                background-color: #fff;
-            }
-            #map {
-                height: 100vh;
-                width: 100vw;
-                border-radius: 10px;
-            }
-            .error-message {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(239, 68, 68, 0.9);
-                color: white;
-                padding: 20px;
-                border-radius: 8px;
-                text-align: center;
-                z-index: 1000;
-                max-width: 80%;
-            }
-            .route-popup {
-                font-size: 14px;
-                padding: 10px;
-                background: rgba(255, 255, 255, 0.98);
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-                border: 2px solid;
-                min-width: 150px;
-            }
-            .route-popup strong {
-                display: block;
-                margin-bottom: 4px;
-                font-size: 15px;
-            }
-            .route-popup b {
-                color: #1e40af;
-            }
-            /* Custom marker styles */
-            .custom-marker {
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                font-size: 16px;
-                color: white;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-                border: 3px solid white;
-                transition: transform 0.2s;
-            }
-            .custom-marker:hover {
-                transform: scale(1.2);
-            }
-            .marker-start {
-                background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            }
-            .marker-stop {
-                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            }
-            .marker-end {
-                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            }
-            .location-name-label {
-                background: white;
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-size: 13px;
-                font-weight: 600;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-                border: 2px solid;
-                white-space: nowrap;
-                max-width: 200px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-        </style>
+        <style>${routeMapStyles}</style>
     </head>
     <body>
         <div id="map"></div>
@@ -98,6 +19,8 @@ export const createMapHTML = () => {
             let routeLayer;
             let geoJsonRouteLayer;
             let markersGroup;
+            let userLocationMarker;
+            let userLocationAccuracyCircle;
 
             function initMap() {
                 try {
@@ -107,7 +30,7 @@ export const createMapHTML = () => {
                         scrollWheelZoom: true,
                         doubleClickZoom: true,
                         touchZoom: true
-                    }).setView(defaultCenter, 15); // Street level zoom
+                    }).setView(defaultCenter, 15);
 
                     L.tileLayer('${tileLayer}', {
                         maxZoom: 19,
@@ -125,6 +48,56 @@ export const createMapHTML = () => {
                 } catch (error) {
                     console.error('Error initializing map:', error);
                     return false;
+                }
+            }
+
+            function updateUserLocation(location) {
+                try {
+                    if (!location || !location.lat || !location.lng) {
+                        console.log('Invalid user location data');
+                        return;
+                    }
+
+                    const latLng = [location.lat, location.lng];
+                    const accuracy = location.accuracy || 50;
+
+                    // Remove existing user location marker
+                    if (userLocationMarker) {
+                        map.removeLayer(userLocationMarker);
+                    }
+                    if (userLocationAccuracyCircle) {
+                        map.removeLayer(userLocationAccuracyCircle);
+                    }
+
+                    // Add accuracy circle
+                    userLocationAccuracyCircle = L.circle(latLng, {
+                        radius: accuracy,
+                        className: 'user-location-accuracy',
+                        interactive: false
+                    }).addTo(map);
+
+                    // Add user location marker
+                    const userIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: '<div class="user-location-marker"></div>',
+                        iconSize: [20, 20],
+                        iconAnchor: [10, 10],
+                        popupAnchor: [0, -10]
+                    });
+
+                    userLocationMarker = L.marker(latLng, { icon: userIcon })
+                        .addTo(map)
+                        .bindPopup(\`
+                            <div class="route-popup" style="border-color: #2563eb;">
+                                <strong>📍 Your Location</strong><br>
+                                <b>Lat:</b> \${location.lat.toFixed(6)}<br>
+                                <b>Lng:</b> \${location.lng.toFixed(6)}
+                            </div>
+                        \`);
+
+                    console.log('User location updated on map:', location);
+                } catch (error) {
+                    console.error('Error updating user location:', error);
                 }
             }
 
@@ -155,7 +128,7 @@ export const createMapHTML = () => {
                         return false;
                     }
 
-                    // Check if routeData is GeoJSON format (has features property)
+                    // Check if routeData is GeoJSON format
                     if (routeData.features && Array.isArray(routeData.features) && routeData.features.length > 0) {
                         console.log('Processing as GeoJSON route data');
                         return displayGeoJsonRoute(routeData);
@@ -175,7 +148,6 @@ export const createMapHTML = () => {
                     console.log('=== DISPLAYING GEOJSON ROUTE ===');
                     console.log('GeoJSON features:', geoJsonData.features.length);
 
-                    // Create GeoJSON layer with enhanced styling
                     geoJsonRouteLayer = L.geoJSON(geoJsonData, {
                         style: {
                             color: '#1e40af',
@@ -186,13 +158,12 @@ export const createMapHTML = () => {
                             lineCap: 'round'
                         },
                         onEachFeature: function(feature, layer) {
-                            // Add route properties popup if available
                             if (feature.properties) {
                                 let popupContent = '<div class="route-popup" style="border-color: #1e40af;">';
                                 
                                 if (feature.properties.summary) {
                                     const summary = feature.properties.summary;
-                                    popupContent += '<strong>📍 Route Information</strong><br>';
+                                    popupContent += '<strong>🗺️ Route Information</strong><br>';
                                     
                                     if (summary.distance) {
                                         const distance = (summary.distance / 1000).toFixed(2);
@@ -207,7 +178,7 @@ export const createMapHTML = () => {
                                         popupContent += \`<b>Duration:</b> \${durationText}\`;
                                     }
                                 } else {
-                                    popupContent += '<strong>📍 Route Information</strong>';
+                                    popupContent += '<strong>🗺️ Route Information</strong>';
                                 }
                                 
                                 popupContent += '</div>';
@@ -216,10 +187,8 @@ export const createMapHTML = () => {
                         }
                     }).addTo(map);
 
-                    // Add route markers first
                     addRouteMarkers();
 
-                    // Center on starting point at street level
                     const startPoint = window.startingPoint;
                     if (startPoint && startPoint.lat && startPoint.lng) {
                         map.setView([startPoint.lat, startPoint.lng], 16, {
@@ -233,7 +202,6 @@ export const createMapHTML = () => {
                         }
                     }
 
-                    // Get route statistics
                     let totalDistance = 0;
                     let totalDuration = 0;
                     let coordinateCount = 0;
@@ -275,7 +243,6 @@ export const createMapHTML = () => {
                     
                     let routeCoordinates = [];
 
-                    // Handle different coordinate data formats
                     if (routeData.coordinates) {
                         routeCoordinates = routeData.coordinates.map(coord =>
                             Array.isArray(coord) ? [coord[1], coord[0]] : [coord.lat, coord.lng]
@@ -291,7 +258,6 @@ export const createMapHTML = () => {
                         return false;
                     }
 
-                    // Create polyline route with enhanced styling
                     routeLayer = L.polyline(routeCoordinates, {
                         color: '#1e40af',
                         weight: 5,
@@ -301,10 +267,8 @@ export const createMapHTML = () => {
                         lineCap: 'round'
                     }).addTo(map);
 
-                    // Add route markers
                     addRouteMarkers();
 
-                    // Center on starting point at street level
                     const startPoint = window.startingPoint;
                     if (startPoint && startPoint.lat && startPoint.lng) {
                         map.setView([startPoint.lat, startPoint.lng], 16, {
@@ -318,7 +282,7 @@ export const createMapHTML = () => {
 
                     console.log('Coordinate route displayed successfully');
                     console.log('Coordinate points:', routeCoordinates.length);
-
+    
                     window.ReactNativeWebView?.postMessage(JSON.stringify({
                         type: 'routeLoaded',
                         message: 'Coordinate route displayed successfully',
@@ -339,7 +303,6 @@ export const createMapHTML = () => {
                     const endPoint = window.endingPoint;
                     const stopPoints = window.stopPoints || [];
 
-                    // Create custom div icon
                     const createCustomMarker = (latLng, className, iconText, color, popupText, labelText) => {
                         const icon = L.divIcon({
                             className: 'custom-div-icon',
@@ -353,7 +316,6 @@ export const createMapHTML = () => {
                             .addTo(markersGroup)
                             .bindPopup(\`<div class="route-popup" style="border-color: \${color};">\${popupText}</div>\`);
 
-                        // Add permanent label with location name
                         if (labelText) {
                             const label = L.tooltip({
                                 permanent: true,
@@ -369,7 +331,6 @@ export const createMapHTML = () => {
                         return marker;
                     };
 
-                    // Add start marker (Green)
                     if (startPoint && startPoint.lat && startPoint.lng) {
                         const name = startPoint.name || startPoint.address || 'Starting Point';
                         createCustomMarker(
@@ -382,7 +343,6 @@ export const createMapHTML = () => {
                         );
                     }
 
-                    // Add stop markers (Orange)
                     stopPoints.forEach((stop, index) => {
                         if (stop.lat && stop.lng) {
                             const name = stop.name || stop.address || \`Stop \${index + 1}\`;
@@ -391,13 +351,12 @@ export const createMapHTML = () => {
                                 'marker-stop',
                                 (index + 1).toString(),
                                 '#d97706',
-                                \`<strong>📍 Stop Point \${index + 1}</strong><br><b>\${name}</b>\`,
+                                \`<strong>🛑 Stop Point \${index + 1}</strong><br><b>\${name}</b>\`,
                                 name
                             );
                         }
                     });
 
-                    // Add end marker (Red)
                     if (endPoint && endPoint.lat && endPoint.lng) {
                         const name = endPoint.name || endPoint.address || 'Ending Point';
                         createCustomMarker(
@@ -432,7 +391,7 @@ export const createMapHTML = () => {
                 }, 5000);
             }
 
-            window.loadRouteData = function(routeData, startPoint, endPoint, stopPoints) {
+            window.loadRouteData = function(routeData, startPoint, endPoint, stopPoints, userLocation) {
                 window.routeData = routeData;
                 window.startingPoint = startPoint;
                 window.endingPoint = endPoint;
@@ -440,10 +399,17 @@ export const createMapHTML = () => {
 
                 if (map) {
                     displayRoute(routeData);
+                    
+                    // Display user location if available
+                    if (userLocation) {
+                        updateUserLocation(userLocation);
+                    }
                 } else {
                     showError('Map not ready for route data');
                 }
             };
+
+            window.updateUserLocation = updateUserLocation;
 
             document.addEventListener('DOMContentLoaded', function() {
                 initMap();
