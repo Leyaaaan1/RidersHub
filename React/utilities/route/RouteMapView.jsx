@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { View, ActivityIndicator, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
 import InputUtilities from "../../styles/InputUtilities";
@@ -20,14 +20,23 @@ const RouteMapView = ({
         isLoading,
         routeData,
         error,
+        userLocation,
         fetchRouteData,
         handleWebViewLoad,
         handleWebViewMessage,
-        handleWebViewError
+        handleWebViewError,
+        updateUserLocationOnMap
     } = useRouteMapLogic(generatedRidesId, token);
 
+    // Update user location on map whenever it changes
+    useEffect(() => {
+        if (userLocation && webViewRef.current) {
+            updateUserLocationOnMap(webViewRef, userLocation);
+        }
+    }, [userLocation]);
+
     const onWebViewLoad = () => {
-        handleWebViewLoad(webViewRef, routeData, startingPoint, endingPoint, stopPoints);
+        handleWebViewLoad(webViewRef, routeData, startingPoint, endingPoint, stopPoints, userLocation);
     };
 
     const onWebViewMessage = (event) => {
