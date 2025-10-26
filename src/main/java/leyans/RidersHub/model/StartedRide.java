@@ -28,8 +28,13 @@ public class StartedRide {
     private LocalDateTime startTime;
 
 
+
+
     @Column(name = "location", columnDefinition = "geometry(Point,4326)")
     private Point location;
+
+
+
 
 
     @ManyToMany
@@ -50,6 +55,8 @@ public class StartedRide {
         this.participants = participants != null ? new ArrayList<>(participants) : new ArrayList<>();
         this.username = username;
     }
+
+
 
 
     public Rider getUsername() {

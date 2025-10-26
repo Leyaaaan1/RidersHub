@@ -8,7 +8,7 @@ import imageStyles from "../../styles/ImageStyles";
 import { getStopPointsByRideId } from '../../services/startService';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import RideImagesCarousel from "../../styles/RideImagesCarousel";
-import RouteMapView from '../../utils/RouteMapView';
+import RouteMapView from '../../utilities/route/RouteMapView';
 
 const RideRoutesPage = ({ route }) => {
     const {

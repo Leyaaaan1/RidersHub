@@ -22,6 +22,8 @@ import { fetchRideMapImage, getRideDetails, getLocationImage } from '../../servi
 import ParticipantListModal from '../ParticipantListModal';
 import useJoinRide from './RideHandler';
 import { startService } from "../../services/startService";
+import rideRoutesPageUtilities from "../../styles/RideRoutesPageUtilities";
+import RouteMapView from "../../utilities/route/RouteMapView";
 
 const { width } = Dimensions.get('window');
 
@@ -43,6 +45,7 @@ const RideStep4 = (props) => {
         token = props.token || routeParams.token,
         distance = props.distance || routeParams.distance,
         username = props.username || routeParams.username,
+        stopPoints = props.stopPoints || routeParams.stopPoints,
         currentUsername = props.currentUsername || routeParams.currentUsername,
     } = props;
 
@@ -276,7 +279,20 @@ const RideStep4 = (props) => {
             {/* Main Content */}
             <Animated.View style={[modernRideStyles.fadeContainer, { transform: [{ translateY: slideAnim }] }]}>
                 <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
-                    {/* Hero Section */}
+                    {/* Full Screen Map Section */}
+                    <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim, width: '100%', height: 400 }]}>
+                        <RouteMapView
+                            generatedRidesId={generatedRidesId}
+                            token={token}
+                            startingPoint={startingPoint}
+                            endingPoint={endingPoint}
+                            stopPoints={stopPoints}
+                            style={{ flex: 1 }}
+                            isDark={true}
+                        />
+                    </Animated.View>
+
+                    {/* Hero Section - Now Below Map */}
                     <View style={modernRideStyles.heroSection}>
                         <View style={{ flex: 2, alignItems: 'center', padding: 10 }}>
                             <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
@@ -292,13 +308,10 @@ const RideStep4 = (props) => {
                                 <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
                             </View>
 
-                            <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', transform: [{ scale: pulseAnim }] }}>
+                            <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', }}>
                                 <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
                             </Animated.View>
-
                         </View>
-
-
 
                         {/* Location Images */}
                         <View style={modernRideStyles.imagesSection}>
@@ -341,29 +354,7 @@ const RideStep4 = (props) => {
                                     </View>
                                 )}
                             </View>
-
-
-                            {/* Map Image */}
-                            <View style={modernRideStyles.mapContainer}>
-                                {imageLoading ? (
-                                    <View style={[modernRideStyles.loadingContainer, { height: 220 }]}>
-                                        <ActivityIndicator size="large" color="#8c2323" />
-                                        <Text style={modernRideStyles.loadingText}>Loading map...</Text>
-                                    </View>
-                                ) : mapImage ? (
-                                    <Image
-                                        source={{ uri: mapImage }}
-                                        style={modernRideStyles.mapImage}
-                                    />
-                                ) : (
-                                    <View style={[modernRideStyles.errorContainer, { height: 220 }]}>
-                                        <Text style={modernRideStyles.errorText}>No map available</Text>
-                                    </View>
-                                )}
-                            </View>
                         </View>
-
-                        {/* Stats Section */}
                     </View>
 
                     {/* Description Section */}
@@ -382,7 +373,6 @@ const RideStep4 = (props) => {
                     )}
                 </ScrollView>
             </Animated.View>
-
             {/* Bottom Navigation */}
             <View style={modernRideStyles.bottomNav}>
                 <View style={modernRideStyles.bottomNavItem}>

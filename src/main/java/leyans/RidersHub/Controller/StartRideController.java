@@ -1,15 +1,13 @@
 package leyans.RidersHub.Controller;
 
-import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
-import leyans.RidersHub.Service.RideLocationService;
 import leyans.RidersHub.Service.StartRideService;
-import org.springframework.beans.factory.annotation.Autowired;
+import leyans.RidersHub.Utility.StartedUtil;
+import leyans.RidersHub.model.StartedRide;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
@@ -20,9 +18,11 @@ import java.util.List;
 public class StartRideController {
 
     private final StartRideService startRideService;
+    private final StartedUtil startedUtil;
 
-    public StartRideController(StartRideService startRideService) {
+    public StartRideController(StartRideService startRideService, StartedUtil startedUtil) {
         this.startRideService = startRideService;
+        this.startedUtil = startedUtil;
     }
 
     @PostMapping("/{generatedRidesId}")
@@ -42,10 +42,28 @@ public class StartRideController {
         }
     }
 
-    @PostMapping("/stop/{generatedRidesId}")
-    public ResponseEntity<Void> stopRide(@PathVariable Integer generatedRidesId) {
+    @GetMapping("/active")
+    public ResponseEntity<RideResponseDTO> getActiveRide() {
         try {
-            startRideService.stopRides(generatedRidesId);
+            RideResponseDTO rideDetails = startedUtil.getStartedRideDetails();
+            return ResponseEntity.ok(rideDetails);
+        } catch (IllegalArgumentException ex) {
+            // No active ride found for user
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalStateException ex) {
+            // Ride is in conflicting state
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (Exception ex) {
+            // Internal server error
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    @PostMapping("/update/{generatedRidesId}")
+    public ResponseEntity<Void> updateRide(@PathVariable Integer generatedRidesId) {
+        try {
+            startRideService.deactivateRide(generatedRidesId);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -55,18 +73,6 @@ public class StartRideController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<RideResponseDTO>> getCurrentStartedRides() {
-        try {
-            List<RideResponseDTO> rides = startRideService.getCurrentStartedRides();
-            return ResponseEntity.ok(rides);
-        } catch (AccessDeniedException e) {
-            return ResponseEntity.status(403).build();
-        }
-    }
-
 
 
 }

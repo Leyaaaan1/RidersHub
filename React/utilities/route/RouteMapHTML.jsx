@@ -1,71 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator, Text } from 'react-native';
-import { WebView } from 'react-native-webview';
-import {getRouteCoordinates} from "../services/RouteService";
+export const createMapHTML = () => {
+    const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
 
-const RouteMapView = ({
-                          generatedRidesId,
-                          token,
-                          startingPoint,
-                          endingPoint,
-                          stopPoints = [],
-                          style,
-                          isDark = false
-                      }) => {
-    const webViewRef = useRef(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [routeData, setRouteData] = useState(null);
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        if (generatedRidesId) {
-            fetchRouteData();
-        } else {
-            console.warn('No generatedRidesId provided');
-            setIsLoading(false);
-            setError('No route ID provided');
-        }
-    }, [generatedRidesId, token]);
-
-    const fetchRouteData = async () => {
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            // Fetch route data with token
-            const data = await getRouteCoordinates(token, generatedRidesId);
-
-            if (!data) {
-                throw new Error('No route data received from server');
-            }
-
-            setRouteData(data);
-            console.log('Route data loaded successfully:', data);
-
-        } catch (error) {
-            console.error('=== ERROR IN FETCHROUTEDATA ===');
-            console.error('Error:', error);
-
-            const errorMessage = error.message || 'Failed to load route data';
-            setError(errorMessage);
-
-            Alert.alert(
-                'Route Loading Error',
-                errorMessage,
-                [
-                    { text: 'Retry', onPress: () => fetchRouteData() },
-                    { text: 'Cancel', style: 'cancel' }
-                ]
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    const createMapHTML = () => {
-        // Use CartoDB Positron (white map) tile layer
-        const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
-        return `
+    return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -96,12 +32,61 @@ const RouteMapView = ({
                 max-width: 80%;
             }
             .route-popup {
-                font-size: 12px;
-                padding: 8px;
-                background: rgba(255, 255, 255, 0.95);
+                font-size: 14px;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.98);
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                border: 2px solid;
+                min-width: 150px;
+            }
+            .route-popup strong {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 15px;
+            }
+            .route-popup b {
+                color: #1e40af;
+            }
+            /* Custom marker styles */
+            .custom-marker {
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 16px;
+                color: white;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                border: 3px solid white;
+                transition: transform 0.2s;
+            }
+            .custom-marker:hover {
+                transform: scale(1.2);
+            }
+            .marker-start {
+                background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            }
+            .marker-stop {
+                background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            }
+            .marker-end {
+                background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            }
+            .location-name-label {
+                background: white;
+                padding: 6px 12px;
                 border-radius: 6px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                border: 1px solid #ddd;
+                font-size: 13px;
+                font-weight: 600;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+                border: 2px solid;
+                white-space: nowrap;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         </style>
     </head>
@@ -122,7 +107,7 @@ const RouteMapView = ({
                         scrollWheelZoom: true,
                         doubleClickZoom: true,
                         touchZoom: true
-                    }).setView(defaultCenter, 12);
+                    }).setView(defaultCenter, 15); // Street level zoom
 
                     L.tileLayer('${tileLayer}', {
                         maxZoom: 19,
@@ -194,8 +179,8 @@ const RouteMapView = ({
                     geoJsonRouteLayer = L.geoJSON(geoJsonData, {
                         style: {
                             color: '#1e40af',
-                            weight: 4,
-                            opacity: 0.8,
+                            weight: 5,
+                            opacity: 0.9,
                             smoothFactor: 1,
                             lineJoin: 'round',
                             lineCap: 'round'
@@ -203,15 +188,15 @@ const RouteMapView = ({
                         onEachFeature: function(feature, layer) {
                             // Add route properties popup if available
                             if (feature.properties) {
-                                let popupContent = '<div class="route-popup">';
+                                let popupContent = '<div class="route-popup" style="border-color: #1e40af;">';
                                 
                                 if (feature.properties.summary) {
                                     const summary = feature.properties.summary;
-                                    popupContent += '<strong>Route Information</strong><br>';
+                                    popupContent += '<strong>📍 Route Information</strong><br>';
                                     
                                     if (summary.distance) {
                                         const distance = (summary.distance / 1000).toFixed(2);
-                                        popupContent += \`<strong>Distance:</strong> \${distance} km<br>\`;
+                                        popupContent += \`<b>Distance:</b> \${distance} km<br>\`;
                                     }
                                     
                                     if (summary.duration) {
@@ -219,10 +204,10 @@ const RouteMapView = ({
                                         const hours = Math.floor(totalMinutes / 60);
                                         const minutes = totalMinutes % 60;
                                         const durationText = hours > 0 ? \`\${hours}h \${minutes}min\` : \`\${minutes}min\`;
-                                        popupContent += \`<strong>Duration:</strong> \${durationText}\`;
+                                        popupContent += \`<b>Duration:</b> \${durationText}\`;
                                     }
                                 } else {
-                                    popupContent += '<strong>Route Information</strong>';
+                                    popupContent += '<strong>📍 Route Information</strong>';
                                 }
                                 
                                 popupContent += '</div>';
@@ -231,11 +216,17 @@ const RouteMapView = ({
                         }
                     }).addTo(map);
 
-                    // Add route markers
+                    // Add route markers first
                     addRouteMarkers();
 
-                    // Fit map to route bounds
-                    if (geoJsonRouteLayer) {
+                    // Center on starting point at street level
+                    const startPoint = window.startingPoint;
+                    if (startPoint && startPoint.lat && startPoint.lng) {
+                        map.setView([startPoint.lat, startPoint.lng], 16, {
+                            animate: true,
+                            duration: 1
+                        });
+                    } else if (geoJsonRouteLayer) {
                         const bounds = geoJsonRouteLayer.getBounds();
                         if (bounds.isValid()) {
                             map.fitBounds(bounds.pad(0.1));
@@ -300,11 +291,11 @@ const RouteMapView = ({
                         return false;
                     }
 
-                    // Create polyline route
+                    // Create polyline route with enhanced styling
                     routeLayer = L.polyline(routeCoordinates, {
                         color: '#1e40af',
-                        weight: 4,
-                        opacity: 0.8,
+                        weight: 5,
+                        opacity: 0.9,
                         smoothFactor: 1,
                         lineJoin: 'round',
                         lineCap: 'round'
@@ -313,8 +304,14 @@ const RouteMapView = ({
                     // Add route markers
                     addRouteMarkers();
 
-                    // Fit map to route bounds
-                    if (routeCoordinates.length > 0) {
+                    // Center on starting point at street level
+                    const startPoint = window.startingPoint;
+                    if (startPoint && startPoint.lat && startPoint.lng) {
+                        map.setView([startPoint.lat, startPoint.lng], 16, {
+                            animate: true,
+                            duration: 1
+                        });
+                    } else if (routeCoordinates.length > 0) {
                         const group = new L.featureGroup([routeLayer]);
                         map.fitBounds(group.getBounds().pad(0.1));
                     }
@@ -342,49 +339,75 @@ const RouteMapView = ({
                     const endPoint = window.endingPoint;
                     const stopPoints = window.stopPoints || [];
 
-                    // Create custom marker icons
-                    const createCircleMarker = (latLng, options, popupText) => {
-                        return L.circleMarker(latLng, options)
+                    // Create custom div icon
+                    const createCustomMarker = (latLng, className, iconText, color, popupText, labelText) => {
+                        const icon = L.divIcon({
+                            className: 'custom-div-icon',
+                            html: \`<div class="custom-marker \${className}">\${iconText}</div>\`,
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 16],
+                            popupAnchor: [0, -16]
+                        });
+
+                        const marker = L.marker(latLng, { icon: icon })
                             .addTo(markersGroup)
-                            .bindPopup(\`<div class="route-popup">\${popupText}</div>\`);
+                            .bindPopup(\`<div class="route-popup" style="border-color: \${color};">\${popupText}</div>\`);
+
+                        // Add permanent label with location name
+                        if (labelText) {
+                            const label = L.tooltip({
+                                permanent: true,
+                                direction: 'top',
+                                offset: [0, -20],
+                                className: 'location-name-label',
+                                opacity: 1
+                            });
+                            label.setContent(\`<span style="color: \${color}; border-color: \${color};">\${labelText}</span>\`);
+                            marker.bindTooltip(label);
+                        }
+
+                        return marker;
                     };
 
-                    // Add start marker
+                    // Add start marker (Green)
                     if (startPoint && startPoint.lat && startPoint.lng) {
-                        createCircleMarker([startPoint.lat, startPoint.lng], {
-                            radius: 8,
-                            fillColor: '#22c55e',
-                            color: '#16a34a',
-                            weight: 3,
-                            opacity: 1,
-                            fillOpacity: 1
-                        }, \`<b>Start:</b><br>\${startPoint.name || 'Starting Point'}\`);
+                        const name = startPoint.name || startPoint.address || 'Starting Point';
+                        createCustomMarker(
+                            [startPoint.lat, startPoint.lng],
+                            'marker-start',
+                            '🚀',
+                            '#16a34a',
+                            \`<strong>🚀 Starting Point</strong><br><b>\${name}</b>\`,
+                            name
+                        );
                     }
 
-                    // Add stop markers
+                    // Add stop markers (Orange)
                     stopPoints.forEach((stop, index) => {
                         if (stop.lat && stop.lng) {
-                            createCircleMarker([stop.lat, stop.lng], {
-                                radius: 6,
-                                fillColor: '#f59e0b',
-                                color: '#d97706',
-                                weight: 2,
-                                opacity: 1,
-                                fillOpacity: 1
-                            }, \`<b>Stop \${index + 1}:</b><br>\${stop.name || stop.address || 'Stop Point'}\`);
+                            const name = stop.name || stop.address || \`Stop \${index + 1}\`;
+                            createCustomMarker(
+                                [stop.lat, stop.lng],
+                                'marker-stop',
+                                (index + 1).toString(),
+                                '#d97706',
+                                \`<strong>📍 Stop Point \${index + 1}</strong><br><b>\${name}</b>\`,
+                                name
+                            );
                         }
                     });
 
-                    // Add end marker
+                    // Add end marker (Red)
                     if (endPoint && endPoint.lat && endPoint.lng) {
-                        createCircleMarker([endPoint.lat, endPoint.lng], {
-                            radius: 8,
-                            fillColor: '#ef4444',
-                            color: '#dc2626',
-                            weight: 3,
-                            opacity: 1,
-                            fillOpacity: 1
-                        }, \`<b>End:</b><br>\${endPoint.name || 'Ending Point'}\`);
+                        const name = endPoint.name || endPoint.address || 'Ending Point';
+                        createCustomMarker(
+                            [endPoint.lat, endPoint.lng],
+                            'marker-end',
+                            '🏁',
+                            '#dc2626',
+                            \`<strong>🏁 Ending Point</strong><br><b>\${name}</b>\`,
+                            name
+                        );
                     }
 
                     console.log('Route markers added successfully');
@@ -410,12 +433,6 @@ const RouteMapView = ({
             }
 
             window.loadRouteData = function(routeData, startPoint, endPoint, stopPoints) {
-                console.log('=== LOADING ROUTE DATA ===');
-                console.log('Route data type:', typeof routeData);
-                console.log('Start point:', startPoint);
-                console.log('End point:', endPoint);
-                console.log('Stop points:', stopPoints);
-
                 window.routeData = routeData;
                 window.startingPoint = startPoint;
                 window.endingPoint = endPoint;
@@ -435,139 +452,4 @@ const RouteMapView = ({
     </body>
     </html>
     `;
-    };
-
-    const handleWebViewLoad = () => {
-        console.log('WebView loaded');
-
-        if (webViewRef.current && routeData) {
-            console.log('Injecting route data into WebView');
-
-            const script = `
-                console.log('Injecting route data...');
-                if (typeof window.loadRouteData === 'function') {
-                    window.loadRouteData(
-                        ${JSON.stringify(routeData)},
-                        ${JSON.stringify(startingPoint)},
-                        ${JSON.stringify(endingPoint)},
-                        ${JSON.stringify(stopPoints)}
-                    );
-                } else {
-                    console.error('loadRouteData function not available');
-                }
-                true;
-            `;
-
-            webViewRef.current.injectJavaScript(script);
-        }
-    };
-
-    const handleWebViewMessage = (event) => {
-        try {
-            const message = JSON.parse(event.nativeEvent.data);
-            console.log('WebView message:', message);
-
-            if (message.type === 'error') {
-                console.error('Map error:', message.message);
-                setError(message.message);
-            } else if (message.type === 'mapReady') {
-                console.log('Map is ready');
-                // Inject route data if available
-                if (routeData) {
-                    handleWebViewLoad();
-                }
-            } else if (message.type === 'routeLoaded') {
-                console.log('Route loaded successfully:', message);
-            }
-        } catch (error) {
-            console.log('Non-JSON WebView message:', event.nativeEvent.data);
-        }
-    };
-
-    const handleWebViewError = (syntheticEvent) => {
-        const { nativeEvent } = syntheticEvent;
-        console.error('WebView error:', nativeEvent);
-    };
-
-    if (isLoading) {
-        return (
-            <View style={[styles.container, style, styles.centered]}>
-                <ActivityIndicator size="large" color="#1e40af" />
-                <Text style={[styles.loadingText, { color: isDark ? '#fff' : '#000' }]}>
-                    Loading route...
-                </Text>
-            </View>
-        );
-    }
-
-    if (error && !routeData) {
-        return (
-            <View style={[styles.container, style, styles.centered]}>
-                <Text style={[styles.errorText, { color: isDark ? '#ff6b6b' : '#dc3545' }]}>
-                    {error}
-                </Text>
-                <Text
-                    style={[styles.retryText, { color: isDark ? '#4dabf7' : '#007bff' }]}
-                    onPress={fetchRouteData}
-                >
-                    Tap to retry
-                </Text>
-            </View>
-        );
-    }
-
-    return (
-        <View style={[styles.container, style]}>
-            <WebView
-                ref={webViewRef}
-                source={{ html: createMapHTML() }}
-                style={styles.webView}
-                onLoadEnd={handleWebViewLoad}
-                onMessage={handleWebViewMessage}
-                onError={handleWebViewError}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-                startInLoadingState={false}
-                mixedContentMode="compatibility"
-                allowsInlineMediaPlaybook={true}
-                mediaPlaybackRequiresUserAction={false}
-                originWhitelist={['*']}
-                allowsFullscreenVideo={false}
-                scalesPageToFit={true}
-            />
-        </View>
-    );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    centered: {
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    webView: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    loadingText: {
-        marginTop: 10,
-        fontSize: 14,
-        textAlign: 'center',
-    },
-    errorText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginBottom: 10,
-        paddingHorizontal: 20,
-    },
-    retryText: {
-        fontSize: 14,
-        textAlign: 'center',
-        textDecorationLine: 'underline',
-    },
-});
-
-export default RouteMapView;

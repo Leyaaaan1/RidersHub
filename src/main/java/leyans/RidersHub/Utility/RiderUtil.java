@@ -1,4 +1,4 @@
-package leyans.RidersHub.Util;
+package leyans.RidersHub.Utility;
 
 import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.Repository.RiderRepository;
@@ -18,6 +18,7 @@ public class RiderUtil {
     private final RidesRepository ridesRepository;
 
     private final StartedRideRepository startedRideRepository;
+
 
     private final RiderRepository riderRepository;
     public RiderUtil(RidesRepository ridesRepository, StartedRideRepository startedRideRepository, RiderRepository riderRepository) {

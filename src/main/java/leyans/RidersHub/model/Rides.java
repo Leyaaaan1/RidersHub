@@ -92,6 +92,12 @@ public class Rides {
     @Column(name = "route_coordinates", columnDefinition = "TEXT")
     private String routeCoordinates;
 
+    @Column(name = "active")
+    private Boolean active;
+
+
+
+
     public Rides() {
     }
 
@@ -101,7 +107,7 @@ public class Rides {
                  Rider username, RiderType riderType, Integer distance, LocalDateTime date,
                  String mapImageUrl,
                  String magImageStartingLocation, String magImageEndingLocation,
-                 String routeCoordinates) {
+                 String routeCoordinates, Boolean active) {
         this.generatedRidesId = generatedRidesId;
         this.locationName = locationName;
         this.ridesName = ridesName;
@@ -120,7 +126,16 @@ public class Rides {
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
         this.routeCoordinates = routeCoordinates;
+        this.active = active;
 
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public String getRouteCoordinates() {

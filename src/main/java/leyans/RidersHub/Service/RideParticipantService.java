@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Util.RiderUtil;
+import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
-import getMapHTML from '../../utils/mapHTML';
+import getMapHTML from '../../utilities/mapHTML';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 

@@ -29,5 +29,12 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     @Query(value = "INSERT INTO ride_participants (ride_id, rider_username) VALUES (:rideId, :riderId)", nativeQuery = true)
     void addParticipantToRide(@Param("rideId") Integer rideId, @Param("riderId") Integer riderId);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Rides r SET r.active = false WHERE r.generatedRidesId = :generatedRidesId")
+    void deactivateRide(@Param("generatedRidesId") Integer generatedRidesId);
+
+
+
 
 }
