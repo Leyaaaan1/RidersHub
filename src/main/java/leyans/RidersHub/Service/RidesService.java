@@ -118,7 +118,7 @@ public class RidesService {
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
         newRide.setRouteCoordinates(routeCoordinates);
-        newRide.setActive(true);
+        newRide.setActive(false);
 
         try {
             newRide = ridesRepository.save(newRide);
