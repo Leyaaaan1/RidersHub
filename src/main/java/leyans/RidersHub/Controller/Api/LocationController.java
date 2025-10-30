@@ -50,10 +50,8 @@ public class LocationController {
     @GetMapping("/landmark")
     public ResponseEntity<String> getLandmarkOrCity(
             @RequestParam("lat") double lat,
-            @RequestParam("lon") double lon,
-            @RequestParam(value = "fallback", required = false) String fallback) {
-        // Use LocationUtilityService to get standardized landmark/city names
-        String landmark = locationService.resolveLandMark(fallback, lat, lon);
+            @RequestParam("lon") double lon) {
+        String landmark = locationService.resolveLandMark(null, lat, lon);
         return ResponseEntity.ok(landmark);
     }
 

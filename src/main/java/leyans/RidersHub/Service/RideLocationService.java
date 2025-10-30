@@ -48,7 +48,7 @@ public class RideLocationService {
             throw new IllegalArgumentException("User is not a participant in this ride");
         }
         Point userPoint = locationService.createPoint(longitude, latitude);
-        String barangayName = locationService.resolveBarangayName(null, latitude, longitude);
+        String barangayName = locationService.resolveBarangayName( null, latitude, longitude);
 
         String locationName = null;
         if (barangayName != null) {

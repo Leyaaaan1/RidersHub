@@ -54,6 +54,7 @@ const CreateRide = ({ route, navigation }) => {
         longitudeDelta: 0.05,
     });
 
+    console.log('CreateRide token:', token);
     // Stop Points State
     const [stopPoints, setStopPoints] = useState([]);
 
@@ -138,29 +139,43 @@ const CreateRide = ({ route, navigation }) => {
     }, [searchQuery, locationSelected, mapMode, token]);
 
     const handleLocationSelect = async (location) => {
+        console.log('Location selected:', location);
         const lat = parseFloat(location.lat);
         const lon = parseFloat(location.lon);
         setLocationSelected(true);
 
-        // Always resolve landmark/famous name
-        const resolvedName = await reverseGeocodeLandmark(token, lat, lon);
+        // Resolve name depending on mode: landmark for 'location', generic reverse for start/end/stop
+        let resolvedName = null;
+        try {
+            if (mapMode === 'location') {
+                // Prefer landmark lookup for general map location selection
+                const { reverseGeocodeLandmark } = await import('../services/rideService');
+                resolvedName = await reverseGeocodeLandmark(token, lat, lon);
+            } else {
+                resolvedName = await reverseGeocode(token, lat, lon);
+            }
+        } catch (err) {
+            console.warn('Reverse geocode failed:', err);
+        }
+
+        const fallbackName = location.display_name ? location.display_name.split(',')[0] : `${lat}, ${lon}`;
 
         if (mapMode === 'location') {
             setLatitude(lat.toString());
             setLongitude(lon.toString());
-            setLocationName(resolvedName || location.display_name.split(',')[0]);
+            setLocationName(resolvedName || fallbackName);
         } else if (mapMode === 'starting') {
             setStartingLatitude(lat.toString());
             setStartingLongitude(lon.toString());
-            setStartingPoint(resolvedName || location.display_name.split(',')[0]);
+            setStartingPoint(resolvedName || fallbackName);
             setMapMode('ending');
         } else if (mapMode === 'ending') {
             setEndingLatitude(lat.toString());
             setEndingLongitude(lon.toString());
-            setEndingPoint(resolvedName || location.display_name.split(',')[0]);
+            setEndingPoint(resolvedName || fallbackName);
         }
 
-        setSearchQuery(resolvedName || location.display_name);
+        setSearchQuery(resolvedName || (location.display_name || fallbackName));
         setSearchResults([]);
         setMapRegion({
             latitude: lat,
@@ -168,8 +183,10 @@ const CreateRide = ({ route, navigation }) => {
             latitudeDelta: 0.01,
             longitudeDelta: 0.01,
         });
-    };
 
+        // Return resolved name (or fallback) for callers to use immediately
+        return resolvedName || fallbackName;
+    };
     const handleCreateRide = async () => {
         if (!rideName.trim()) { setError('Ride name is required'); return; }
         if (!startingPoint.trim()) { setError('Starting point is required'); return; }

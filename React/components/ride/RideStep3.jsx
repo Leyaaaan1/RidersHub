@@ -170,10 +170,35 @@ const RideStep3 = ({
     };
 
     const handleSelectLocationAndUpdateMap = async (item) => {
-        await handleLocationSelect(item);
         const lat = parseFloat(item.lat);
         const lon = parseFloat(item.lng);
 
+        // Call parent handler which now returns the resolved name
+        let resolvedName = null;
+        try {
+            resolvedName = await handleLocationSelect(item);
+        } catch (e) {
+            console.warn('Parent handleLocationSelect failed to return name:', e);
+        }
+
+        // Fallback: if parent didn't return a name, resolve here so UI shows the name immediately
+        if (!resolvedName) {
+            try {
+                const fallback = await reverseGeocode(token, lat, lon);
+                resolvedName = fallback || item.display_name.split(',')[0];
+            } catch (err) {
+                resolvedName = item.display_name.split(',')[0];
+            }
+        }
+
+        // Immediately update local UI state for starting/ending point
+        if (mapMode === 'starting') {
+            setStartingPoint(resolvedName);
+        } else if (mapMode === 'ending') {
+            setEndingPoint(resolvedName);
+        }
+
+        // Center map and update marker
         if (webViewRef.current) {
             webViewRef.current.injectJavaScript(`
             if (window.centerMap && window.updateMarker) {
@@ -189,7 +214,6 @@ const RideStep3 = ({
             setTimeout(() => drawRoadRoute(), 500);
         }
     };
-
     const finalizePointSelection = () => {
         if (mapMode === 'starting' && startingPoint) {
             setMapMode('ending');

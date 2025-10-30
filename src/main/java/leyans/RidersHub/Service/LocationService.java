@@ -1,5 +1,6 @@
 package leyans.RidersHub.Service;
 
+import leyans.RidersHub.DTO.NominatimAddress;
 import leyans.RidersHub.Repository.PsgcDataRepository;
 import leyans.RidersHub.Repository.RiderLocationRepository;
 import leyans.RidersHub.Service.MapService.NominatimService;
@@ -10,6 +11,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -39,45 +41,25 @@ public class LocationService {
 
 
     public String resolveBarangayName(String fallback, double lat, double lon) {
-        return nominatimService.getBarangayNameFromCoordinates(lat, lon)
-                .flatMap(addr -> {
-                    // Only process if it's a barangay result
-                    if (!addr.isBarangay()) {
-                        return Optional.empty();
-                    }
-
-                    // Look up in PSGC database for official standardized name
-                    return psgcDataRepository
-                            .findByBarangayAndCityMunAndProvince(
-                                    addr.barangay(),
-                                    addr.cityMun(),
-                                    addr.province()
-                            )
-                            .map(PsgcData::getName);
-                })
-                .orElse(fallback != null ? fallback : formatCoordinates(lat, lon));
+        String barangay = nominatimService.getBarangayNameFromCoordinates(lat, lon);
+        if (barangay == null) {
+            return fallback != null ? fallback : "Lat: " + lat + ", Lng: " + lon;
+        }
+        return psgcDataRepository.findByNameIgnoreCase(barangay)
+                .stream()
+                .findFirst()
+                .map(PsgcData::getName)
+                .orElse(barangay);
     }
 
 
     public String resolveLandMark(String fallback, double lat, double lon) {
         return nominatimService.getCityOrLandmarkFromCoordinates(lat, lon)
                 .map(addr -> {
-                    // Only process if it's a landmark result
                     if (!addr.isLandmark()) {
                         return fallback != null ? fallback : formatCoordinates(lat, lon);
                     }
-
-                    String landmarkName = addr.landmark();
-
-
-                        return psgcDataRepository.findByNameIgnoreCase(landmarkName)
-                                .stream()
-                                .filter(psgc -> "City".equals(psgc.getGeographicLevel()) ||
-                                        "Mun".equals(psgc.getGeographicLevel()))
-                                .findFirst()
-                                .map(PsgcData::getName)
-                                .orElse(landmarkName); // Use Nominatim result if not in PSGC
-
+                    return addr.landmark(); // Return Nominatim result directly
                 })
                 .orElse(fallback != null ? fallback : formatCoordinates(lat, lon));
     }

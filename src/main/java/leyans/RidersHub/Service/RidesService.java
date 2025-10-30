@@ -149,7 +149,7 @@ public class RidesService {
         if (stopPointsDto == null) return List.of();
         return stopPointsDto.stream()
                 .map(dto -> new StopPoint(
-                        locationService.resolveLandMark(null, dto.getStopLatitude(), dto.getStopLongitude()),
+                        locationService.resolveBarangayName(null, dto.getStopLatitude(), dto.getStopLongitude()),
                         locationService.createPoint( dto.getStopLongitude(), dto.getStopLatitude())
                 ))
                 .toList();

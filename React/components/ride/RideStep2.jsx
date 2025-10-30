@@ -27,15 +27,6 @@ const RideStep2 = ({
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [mapDarkMode, setMapDarkMode] = useState(false);
 
-    const onWebViewMessage = (event) => {
-        const data = JSON.parse(event.nativeEvent.data);
-
-        if (data.type === 'themeChange') {
-            setMapDarkMode(data.isDarkTheme);
-        } else {
-            handleMessage(event);
-        }
-    };
 
     return (
         <View style={rideStepsUtilities.containerWhite}>
