@@ -148,7 +148,6 @@ const CreateRide = ({ route, navigation }) => {
         let resolvedName = null;
         try {
             if (mapMode === 'location') {
-                // Prefer landmark lookup for general map location selection
                 const { reverseGeocodeLandmark } = await import('../services/rideService');
                 resolvedName = await reverseGeocodeLandmark(token, lat, lon);
             } else {
@@ -159,23 +158,33 @@ const CreateRide = ({ route, navigation }) => {
         }
 
         const fallbackName = location.display_name ? location.display_name.split(',')[0] : `${lat}, ${lon}`;
+        const selectedName = resolvedName || fallbackName;
 
         if (mapMode === 'location') {
             setLatitude(lat.toString());
             setLongitude(lon.toString());
-            setLocationName(resolvedName || fallbackName);
+            setLocationName(selectedName);
+
+            // Fetch location images
+            try {
+                const images = await getLocationImage(selectedName, token);
+                setRideNameImage(images);
+            } catch (error) {
+                console.error('Error fetching location images:', error);
+                setRideNameImage([]);
+            }
         } else if (mapMode === 'starting') {
             setStartingLatitude(lat.toString());
             setStartingLongitude(lon.toString());
-            setStartingPoint(resolvedName || fallbackName);
+            setStartingPoint(selectedName);
             setMapMode('ending');
         } else if (mapMode === 'ending') {
             setEndingLatitude(lat.toString());
             setEndingLongitude(lon.toString());
-            setEndingPoint(resolvedName || fallbackName);
+            setEndingPoint(selectedName);
         }
 
-        setSearchQuery(resolvedName || (location.display_name || fallbackName));
+        setSearchQuery(selectedName);
         setSearchResults([]);
         setMapRegion({
             latitude: lat,
@@ -184,9 +193,9 @@ const CreateRide = ({ route, navigation }) => {
             longitudeDelta: 0.01,
         });
 
-        // Return resolved name (or fallback) for callers to use immediately
-        return resolvedName || fallbackName;
+        return selectedName;
     };
+
     const handleCreateRide = async () => {
         if (!rideName.trim()) { setError('Ride name is required'); return; }
         if (!startingPoint.trim()) { setError('Starting point is required'); return; }
