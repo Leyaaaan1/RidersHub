@@ -10,7 +10,313 @@ const modernRideStyles = StyleSheet.create({
         backgroundColor: '#0a0a0a',
     },
 
-    // Header Styles
+    // ===== NEW MODERN HEADER STYLES =====
+    modernHeader: {
+        backgroundColor: '#000',
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderBottomColor: '#1a1a1a',
+    },
+
+    modernBackButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    modernHeaderCenter: {
+        flex: 1,
+        alignItems: 'center',
+        paddingHorizontal: 16,
+    },
+
+    modernHeaderTitle: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginBottom: 2,
+    },
+
+    modernHeaderSubtitle: {
+        color: '#666',
+        fontSize: 11,
+        fontWeight: '500',
+        textAlign: 'center',
+    },
+
+    modernHeaderRight: {
+        alignItems: 'flex-end',
+    },
+
+    modernJoinButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#8c2323',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+    },
+
+    modernJoinButtonText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+
+    modernStartButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#8c2323',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    // ===== HERO CARD STYLES =====
+    heroCard: {
+        backgroundColor: '#111',
+        marginHorizontal: 20,
+        marginTop: 20,
+        marginBottom: 16,
+        borderRadius: 20,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: '#222',
+    },
+
+    heroCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: 20,
+    },
+
+    heroCardTitle: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: '800',
+        marginBottom: 8,
+        letterSpacing: -0.5,
+    },
+
+    heroCardMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+
+    heroCardMetaText: {
+        color: '#8c2323',
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 6,
+    },
+
+    rideTypeBadge: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#8c2323',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    // ===== INFO CARDS =====
+    infoRow: {
+        flexDirection: 'row',
+        gap: 12,
+        marginBottom: 20,
+    },
+
+    infoCard: {
+        flex: 1,
+        backgroundColor: '#0a0a0a',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#222',
+    },
+
+    infoCardLabel: {
+        color: '#888',
+        fontSize: 11,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 4,
+    },
+
+    infoCardValue: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '600',
+        lineHeight: 18,
+    },
+
+    // ===== ROUTE SUMMARY =====
+    routeSummary: {
+        backgroundColor: '#0a0a0a',
+        borderRadius: 12,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#222',
+    },
+
+    routePoint: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+    },
+
+    routePointDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#8c2323',
+        marginTop: 6,
+    },
+
+    routePointLabel: {
+        color: '#666',
+        fontSize: 11,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        marginBottom: 4,
+    },
+
+    routePointText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+
+    routeConnector: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginLeft: 5,
+        paddingVertical: 8,
+    },
+
+    routeConnectorLine: {
+        width: 1,
+        height: 20,
+        backgroundColor: '#333',
+        marginRight: 8,
+    },
+
+    // ===== SECTION STYLES =====
+    sectionContainer: {
+        marginBottom: 16,
+    },
+
+    sectionHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        marginBottom: 16,
+    },
+
+    sectionIndicator: {
+        width: 4,
+        height: 20,
+        backgroundColor: '#8c2323',
+        borderRadius: 2,
+        marginRight: 12,
+    },
+
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#fff',
+        letterSpacing: -0.5,
+        flex: 1,
+    },
+
+    mapBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#10b981',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 12,
+    },
+
+    mapBadgeText: {
+        color: '#fff',
+        fontSize: 10,
+        fontWeight: '700',
+    },
+
+    mapWrapper: {
+        height: 400,
+        marginHorizontal: 20,
+        borderRadius: 16,
+        overflow: 'hidden',
+        backgroundColor: '#111',
+        borderWidth: 1,
+        borderColor: '#222',
+    },
+
+    // ===== DESCRIPTION CARD =====
+    descriptionCard: {
+        backgroundColor: '#111',
+        marginHorizontal: 20,
+        borderRadius: 16,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: '#222',
+    },
+
+    descriptionCardText: {
+        color: '#ccc',
+        fontSize: 15,
+        lineHeight: 24,
+        fontWeight: '400',
+    },
+
+    // ===== MODERN BOTTOM NAV =====
+    modernBottomNav: {
+        backgroundColor: '#000',
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        borderTopWidth: 1,
+        borderTopColor: '#1a1a1a',
+    },
+
+    modernBottomNavButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingVertical: 12,
+    },
+
+    modernBottomNavDivider: {
+        width: 1,
+        height: 24,
+        backgroundColor: '#333',
+    },
+
+    modernBottomNavText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 8,
+    },
+
+    // ===== OLD STYLES (KEPT FOR COMPATIBILITY) =====
     header: {
         backgroundColor: '#1a1a1a',
         paddingVertical: 10,
@@ -95,7 +401,6 @@ const modernRideStyles = StyleSheet.create({
         borderRadius: 25,
     },
 
-    // Main Content Styles
     scrollContent: {
         flex: 1,
     },
@@ -131,7 +436,6 @@ const modernRideStyles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    // Images Section
     imagesSection: {
         marginBottom: 20,
     },
@@ -176,6 +480,10 @@ const modernRideStyles = StyleSheet.create({
         opacity: 0.9,
     },
 
+    imageScrollView: {
+        marginTop: 12,
+    },
+
     mapContainer: {
         borderRadius: 12,
         overflow: 'hidden',
@@ -192,7 +500,6 @@ const modernRideStyles = StyleSheet.create({
         resizeMode: 'cover',
     },
 
-    // Stats Section
     statsSection: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -238,12 +545,10 @@ const modernRideStyles = StyleSheet.create({
 
     distanceContainer: {
         borderRadius: 20,
-
         alignItems: 'center',
         justifyContent: 'center',
         minWidth: 80,
     },
-
 
     distanceText: {
         color: '#8c2323',
@@ -261,7 +566,6 @@ const modernRideStyles = StyleSheet.create({
         borderColor: '#8c2323',
     },
 
-    // Description Section
     descriptionSection: {
         padding: 20,
         backgroundColor: '#0f0f0f',
@@ -282,7 +586,6 @@ const modernRideStyles = StyleSheet.create({
         fontWeight: '400',
     },
 
-    // Bottom Navigation
     bottomNav: {
         backgroundColor: '#1a1a1a',
         paddingVertical: 9,
@@ -313,9 +616,7 @@ const modernRideStyles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 3,
-
-
-},
+    },
 
     bottomNavText: {
         color: '#fff',
@@ -324,7 +625,6 @@ const modernRideStyles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    // Loading States
     loadingContainer: {
         flex: 1,
         alignItems: 'center',
@@ -339,7 +639,6 @@ const modernRideStyles = StyleSheet.create({
         marginTop: 12,
     },
 
-    // Error States
     errorContainer: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -357,7 +656,6 @@ const modernRideStyles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    // Animation Containers
     fadeContainer: {
         flex: 1,
     },
@@ -370,7 +668,6 @@ const modernRideStyles = StyleSheet.create({
         transform: [{ scale: 1 }],
     },
 
-    // Utility Classes
     shadow: {
         elevation: 4,
         shadowColor: '#000',
@@ -387,7 +684,6 @@ const modernRideStyles = StyleSheet.create({
         elevation: 8,
     },
 
-    // Responsive adjustments
     smallScreen: {
         fontSize: 12,
         padding: 8,
