@@ -19,21 +19,39 @@ const StartedRide = ({ route }) => {
         );
     }
 
+    console.log("active", activeRide)
+
     return (
 
         <View style={styles.contentContainer}>
             <StatusBar barStyle="light-content" backgroundColor="#151515" />
 
             <Animated.View style={[rideRoutesPageUtilities.mapSection, { width: '100%', height: 770 }]}>
+                <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                    <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Starting Point</Text>
+                    <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.locationName }</Text>
+                </View>
                 <RouteMapView
-                    generatedRidesId={activeRide.generatedRidesId}
+                    {...activeRide}
                     token={token}
-                    startingPoint={activeRide.startingPoint}
-                    endingPoint={activeRide.endingPoint}
-                    stopPoints={activeRide.stopPoints}
                     style={{ flex: 1 }}
                     isDark={true}
                 />
+                <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                    <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Starting Point</Text>
+                    <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.startingPointName }</Text>
+                </View>
+                <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                    <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Stop Points</Text>
+                    <Text style={{ color: '#ffffff', fontSize: 14 }}>
+                        {activeRide.stopPoints?.[0]?.stopName}
+                    </Text>
+                </View>
+                <View style={{ paddingVertical: 10, borderBottomWidth: 0.5, borderBottomColor: 'rgba(255,255,255,0.03)', marginBottom: 6 }}>
+                    <Text style={{ color: '#7f8c8d', fontSize: 12, marginBottom: 4 }}>Ending Point</Text>
+                    <Text style={{ color: '#ffffff', fontSize: 14 }}>{activeRide.endingPointName }</Text>
+                </View>
+
                 <View style={[rideStepsUtilities.topRowContainer, { padding: 16, justifyContent: 'center', alignItems: 'center' }]}>
                     <TouchableOpacity style={rideStepsUtilities.actionButton}>
                         <FontAwesome name="stop-circle" size={23} color="#fff" />
@@ -45,6 +63,7 @@ const StartedRide = ({ route }) => {
                         <FontAwesome name="info-circle" size={23} color="#fff" />
                     </TouchableOpacity>
                 </View>
+
             </Animated.View>
 
             <Text style={styles.activeRideLocation}>{activeRide.ridesName}</Text>

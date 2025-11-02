@@ -83,6 +83,7 @@ public class StartRideService {
     public void deactivateRide(Integer generatedRidesId) {
         try {
             ridesRepository.deactivateRide(generatedRidesId);
+            startedRideRepository.deleteAll();
         } catch (Exception e) {
             throw new RuntimeException("Failed to deactivate ride: " + e.getMessage());
         }

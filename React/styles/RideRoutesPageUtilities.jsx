@@ -1,3 +1,4 @@
+
 import { StyleSheet, StatusBar, Dimensions } from 'react-native';
 import colors from "./colors";
 

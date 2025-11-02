@@ -118,7 +118,7 @@ public class RidesService {
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
         newRide.setRouteCoordinates(routeCoordinates);
-        newRide.setActive(true);
+        newRide.setActive(false);
 
         try {
             newRide = ridesRepository.save(newRide);
@@ -149,7 +149,7 @@ public class RidesService {
         if (stopPointsDto == null) return List.of();
         return stopPointsDto.stream()
                 .map(dto -> new StopPoint(
-                        locationService.resolveLandMark(null, dto.getStopLatitude(), dto.getStopLongitude()),
+                        locationService.resolveBarangayName(null, dto.getStopLatitude(), dto.getStopLongitude()),
                         locationService.createPoint( dto.getStopLongitude(), dto.getStopLatitude())
                 ))
                 .toList();

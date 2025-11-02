@@ -15,6 +15,8 @@ import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utilities/mapHTML';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import modernRideStyles from "../../styles/modernRideStyles";
+import {getLocationImage} from "../../services/rideService";
 
 
 const RideStep2 = ({
@@ -26,14 +28,28 @@ const RideStep2 = ({
 
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const [mapDarkMode, setMapDarkMode] = useState(false);
+    const [rideNameImage, setRideNameImage] = useState([]);
+    const [rideNameImageLoading, setRideNameImageLoading] = useState(false);
+    const [rideNameImageError, setRideNameImageError] = useState(null);
 
-    const onWebViewMessage = (event) => {
-        const data = JSON.parse(event.nativeEvent.data);
-
-        if (data.type === 'themeChange') {
-            setMapDarkMode(data.isDarkTheme);
+    useEffect(() => {
+        if (locationName && locationName.trim()) {
+            fetchLocationImages(locationName);
         } else {
-            handleMessage(event);
+            setRideNameImage([]);
+        }
+    }, [locationName]);
+    const fetchLocationImages = async (locationName) => {
+        setRideNameImageLoading(true);
+        setRideNameImageError(null);
+        try {
+            const images = await getLocationImage(locationName, token);
+            setRideNameImage(images);
+        } catch (error) {
+            setRideNameImageError(error.message);
+            setRideNameImage([]);
+        } finally {
+            setRideNameImageLoading(false);
         }
     };
 
@@ -41,14 +57,21 @@ const RideStep2 = ({
         <View style={rideStepsUtilities.containerWhite}>
             <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
-            {/* Full-screen Map */}
+            {/* Half-screen Map */}
             <View style={{
                 position: 'absolute',
                 top: 0,
                 left: 0,
                 right: 0,
-                bottom: 0,
-                height: '100%'
+                height: '50%', // Changed to 50% height
+                borderBottomLeftRadius: 20,
+                borderBottomRightRadius: 20,
+                overflow: 'hidden',
+                elevation: 3,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
             }}>
                 <WebView
                     ref={webViewRef}
@@ -59,9 +82,62 @@ const RideStep2 = ({
                 />
             </View>
 
-            {/* Modern Floating Navbar */}
-            <View style={rideStepsUtilities.navbarContainerPrimary}>
+            {/* Images Section - Positioned below map */}
+            <View style={{
+                position: 'absolute',
+                top: '52%', // Position below map with small gap
+                left: 12,
+                right: 12,
+                height: '30%', // Adjust height as needed
+                borderRadius: 20,
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                elevation: 4,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+            }}>
+                {rideNameImageLoading ? (
+                    <View style={modernRideStyles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#8c2323" />
+                        <Text style={modernRideStyles.loadingText}>Loading location images...</Text>
+                    </View>
+                ) : Array.isArray(rideNameImage) && rideNameImage.length > 0 ? (
+                    <FlatList
+                        data={rideNameImage}
+                        horizontal
+                        pagingEnabled
+                        keyExtractor={(_, idx) => idx.toString()}
+                        renderItem={({ item }) => (
+                            <View style={[modernRideStyles.imageContainer, { margin: 8 }]}>
+                                <Image
+                                    source={{ uri: item.imageUrl }}
+                                    style={[modernRideStyles.locationImage, { borderRadius: 16 }]}
+                                />
+                                {(item.author || item.license) && (
+                                    <View style={[modernRideStyles.imageMetaContainer, { borderBottomLeftRadius: 16, borderBottomRightRadius: 16 }]}>
+                                        <Text style={modernRideStyles.imageMeta}>
+                                            {item.author ? `Photo: ${item.author}` : ''}
+                                            {item.author && item.license ? ' | ' : ''}
+                                            {item.license ? `License: ${item.license}` : ''}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        )}
+                        showsHorizontalScrollIndicator={false}
+                    />
+                ) : (
+                    <View style={modernRideStyles.errorContainer}>
+                        <Text style={modernRideStyles.errorText}>
+                            {rideNameImageError || "No location images available"}
+                        </Text>
+                    </View>
+                )}
+            </View>
 
+            {/* Modern Floating Navbar - Kept at top */}
+            <View style={rideStepsUtilities.navbarContainerPrimary}>
                 <TouchableOpacity
                     style={rideStepsUtilities.navButton}
                     onPress={prevStep}
@@ -79,8 +155,8 @@ const RideStep2 = ({
                 </TouchableOpacity>
             </View>
 
-            {/* Modern Search Card */}
-            <View style={rideStepsUtilities.searchContainer}>
+            {/* Modern Search Card - Positioned below navbar */}
+            <View style={[rideStepsUtilities.searchContainer, { top: 90 }]}>
                 <View style={[
                     rideStepsUtilities.searchInputContainer,
                     isSearchFocused && rideStepsUtilities.searchInputFocused
@@ -107,6 +183,7 @@ const RideStep2 = ({
                     )}
                 </View>
 
+                {/* Search Results */}
                 {isSearching && (
                     <View style={[rideStepsUtilities.loadingContainer, { marginTop: 16 }]}>
                         <ActivityIndicator size="small" color="#8c2323" />
@@ -116,7 +193,7 @@ const RideStep2 = ({
 
                 {searchResults.length > 0 && (
                     <ScrollView
-                        style={rideStepsUtilities.searchResultsList}
+                        style={[rideStepsUtilities.searchResultsList, { maxHeight: 200 }]}
                         nestedScrollEnabled={true}
                         showsVerticalScrollIndicator={false}
                     >
@@ -140,20 +217,16 @@ const RideStep2 = ({
                                         {item.display_name}
                                     </Text>
                                 </View>
-                                <View style={{justifyContent: 'center'}}>
-                                    <FontAwesome name="chevron-right" size={14} color="#dadce0" />
-                                </View>
+                                <FontAwesome name="chevron-right" size={14} color="#dadce0" />
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
                 )}
             </View>
 
-
-            {/* Selected Location Card */}
+            {/* Selected Location Card - At bottom */}
             {locationName && locationName.trim() && (
-                <View style={rideStepsUtilities.locationInfoCard}>
-
+                <View style={[rideStepsUtilities.locationInfoCard, { bottom: 32 }]}>
                     <Text style={rideStepsUtilities.locationName}>{locationName}</Text>
                     <TouchableOpacity
                         style={[rideStepsUtilities.button, rideStepsUtilities.primaryButton, { marginTop: 16 }]}
@@ -164,7 +237,6 @@ const RideStep2 = ({
                 </View>
             )}
         </View>
-    );
-};
+    );};
 
 export default RideStep2;

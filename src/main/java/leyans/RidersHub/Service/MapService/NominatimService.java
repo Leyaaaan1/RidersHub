@@ -38,11 +38,47 @@ public class NominatimService {
 
 
 
-    public Optional<NominatimAddress> getBarangayNameFromCoordinates(double lat, double lon) {
+    public String getBarangayNameFromCoordinates(double lat, double lon) {
+        return getBarangayNameFromCoordinatesInternal(lat, lon);
+    }
+    private String getBarangayNameFromCoordinatesInternal(double lat, double lon) {
+
+
         String url = nominatimApiBase + "/reverse?" +
                 "format=json&lat=" + lat + "&lon=" + lon +
                 "&zoom=18&addressdetails=1" +
                 "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
+
+        HttpHeaders headers = createHeaders();
+        headers.set("Accept-Language", "en");
+        headers.set("User-Agent", userAgent);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+            Map<String, Object> body = response.getBody();
+
+            if (body != null && body.containsKey("address")) {
+                Map<String, String> address = (Map<String, String>) body.get("address");
+
+                return address.getOrDefault("village",
+                        address.getOrDefault("neighbourhood",
+                                address.getOrDefault("suburb", null)));
+            }
+        } catch (Exception e) {
+            System.err.println("Nominatim Reverse Error: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+
+
+    public Optional<NominatimAddress> getCityOrLandmarkFromCoordinates(double lat, double lon) {
+        String url = nominatimApiBase + "/reverse?" +
+                "format=json&lat=" + lat + "&lon=" + lon +
+                "&zoom=18&addressdetails=1";
 
         HttpHeaders headers = createHeaders();
         headers.set("Accept-Language", "en");
@@ -56,92 +92,53 @@ public class NominatimService {
             if (body != null && body.containsKey("address")) {
                 Map<String, Object> address = (Map<String, Object>) body.get("address");
 
-                // Get barangay (village, neighbourhood, or suburb)
-                String barangay = (String) address.getOrDefault("village",
-                        address.getOrDefault("neighbourhood",
-                                address.getOrDefault("suburb", null)));
+                // Use the SAME landmark keys as your search function
+                List<String> landmarkKeys = List.of(
+                        "attraction", "tourism", "historic", "leisure", "building",
+                        "stadium", "mall", "theatre", "amenity", "hotel", "resort",
+                        "camp_site", "natural", "park", "museum", "man_made", "shop"
+                );
 
-                // Get city/municipality
-                String city = (String) address.getOrDefault("city",
-                        address.getOrDefault("municipality",
-                                address.getOrDefault("town", null)));
-
-                // Get province (state in OSM)
-                String province = (String) address.getOrDefault("state", null);
-
-                if (barangay != null && city != null && province != null) {
-                    return Optional.of(NominatimAddress.forBarangay(barangay, city, province));
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Nominatim Reverse Error (Barangay): " + e.getMessage());
-        }
-
-        return Optional.empty();
-    }
-
-
-
-    public Optional<NominatimAddress> getCityOrLandmarkFromCoordinates(double lat, double lon) {
-        String url = nominatimApiBase + "/reverse?" +
-                "format=json&lat=" + lat + "&lon=" + lon +
-                "&zoom=18&addressdetails=1" +
-                "&bounded=1&viewbox=125.0,5.5,126.3,7.5&strict_bounds=1";
-
-        HttpHeaders headers = createHeaders();
-        headers.set("Accept-Language", "en");
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        try {
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
-            Map<String, Object> body = response.getBody();
-
-            if (body != null && body.containsKey("address")) {
-                Map<String, String> address = (Map<String, String>) body.get("address");
-
-                // 1. Priority: Try to get landmark/tourist spot/historical site first
-                String[] landmarkKeys = {
-                        "attraction",    // Tourist attractions
-                        "tourism",       // Tourism-related locations
-                        "historic",      // Historical sites
-                        "leisure",       // Parks, recreational areas
-                        "natural",       // Natural landmarks (mountains, waterfalls)
-                        "park",          // Parks
-                        "museum",        // Museums
-                        "stadium",       // Stadiums
-                        "mall",          // Shopping malls
-                        "building",      // Notable buildings
-                        "theatre",       // Theatres
-                        "hotel",         // Hotels/Resorts
-                        "resort",        // Resorts
-                        "camp_site",     // Camping sites
-                        "man_made",      // Man-made structures
-                        "shop",           // Notable shops
-                        "beach"
-                };
-
+                // 1. PRIORITY: Check if it's a landmark (same logic as search)
                 for (String key : landmarkKeys) {
                     if (address.containsKey(key)) {
-                        return Optional.of(NominatimAddress.forLandmark(address.get(key)));
+                        String landmarkName = (String) address.get(key);
+
+                        // If the landmark value is generic, try to get the actual name
+                        if (landmarkName != null && !landmarkName.isEmpty() &&
+                                !landmarkName.equalsIgnoreCase("yes")) {
+                            return Optional.of(NominatimAddress.forLandmark(landmarkName));
+                        }
+
+                        // Fallback to root "name" field if landmark key exists but value is generic
+                        if (body.containsKey("name") && body.get("name") != null) {
+                            String name = (String) body.get("name");
+                            if (!name.isEmpty()) {
+                                return Optional.of(NominatimAddress.forLandmark(name));
+                            }
+                        }
                     }
                 }
 
-                // 2. Fallback to city/town/municipality
-                String city = address.getOrDefault("city",
-                        address.getOrDefault("town",
-                                address.getOrDefault("municipality",
-                                        address.getOrDefault("county", null))));
-
-                if (city != null) {
-                    return Optional.of(NominatimAddress.forLandmark(city));
-                }
-
-                // 3. Last resort: first part of display_name (usually most specific location)
+                // 2. If no landmark found, check display_name first part
                 if (body.containsKey("display_name")) {
                     String displayName = (String) body.get("display_name");
                     String firstPart = displayName.split(",")[0].trim();
-                    return Optional.of(NominatimAddress.forLandmark(firstPart));
+
+                    // Check if first part is NOT a generic city name
+                    String city = (String) address.get("city");
+                    if (city == null || !firstPart.equalsIgnoreCase(city)) {
+                        return Optional.of(NominatimAddress.forLandmark(firstPart));
+                    }
+                }
+
+                // 3. LAST: Fallback to city/town (same as search)
+                if (address.containsKey("city")) {
+                    return Optional.of(NominatimAddress.forLandmark((String) address.get("city")));
+                } else if (address.containsKey("town")) {
+                    return Optional.of(NominatimAddress.forLandmark((String) address.get("town")));
+                } else if (address.containsKey("municipality")) {
+                    return Optional.of(NominatimAddress.forLandmark((String) address.get("municipality")));
                 }
             }
         } catch (Exception e) {

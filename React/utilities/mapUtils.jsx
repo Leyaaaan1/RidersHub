@@ -39,10 +39,9 @@ export const handleWebViewMessage = async (event, state) => {
             let locationName;
             if (mapMode === 'location') {
                 locationName = await reverseGeocodeLandmark(token, data.lat, data.lng);
-            } else {
+            }  else if (mapMode === 'starting' || mapMode === 'ending' || mapMode === 'stop') {
                 locationName = await reverseGeocode(token, data.lat, data.lng);
             }
-
             if (locationName) {
                 if (mapMode === 'location') {
                     setLocationName(locationName);

@@ -82,7 +82,6 @@ const RideStep4 = (props) => {
             }),
         ]).start();
 
-        // Start pulse animation
         const pulseAnimation = Animated.loop(
             Animated.sequence([
                 Animated.timing(pulseAnim, {
@@ -230,34 +229,32 @@ const RideStep4 = (props) => {
 
     return (
         <Animated.View style={[modernRideStyles.container, { opacity: fadeAnim }]}>
-            <StatusBar backgroundColor="#1a1a1a" barStyle="light-content" translucent={false} />
+            <StatusBar backgroundColor="#000" barStyle="light-content" translucent={false} />
 
-            {/* Header */}
-            <View style={modernRideStyles.header}>
-                <View style={modernRideStyles.headerLeft}>
-                    <TouchableOpacity style={modernRideStyles.backButton} onPress={handleBack}>
-                        <FontAwesome name="chevron-left" size={14} color="#fff" />
-                        <Text style={modernRideStyles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
-                </View>
+            {/* Modern Header */}
+            <View style={modernRideStyles.modernHeader}>
+                <TouchableOpacity style={modernRideStyles.modernBackButton} onPress={handleBack}>
+                    <FontAwesome name="arrow-left" size={18} color="#fff" />
+                </TouchableOpacity>
 
-                <View style={modernRideStyles.headerCenter}>
-                    <Text style={modernRideStyles.locationTitle}>
-                        {locationName?.toUpperCase()}
+                <View style={modernRideStyles.modernHeaderCenter}>
+                    <Text style={modernRideStyles.modernHeaderTitle} numberOfLines={1}>
+                        {locationName}
                     </Text>
-                    <Text style={modernRideStyles.rideId}>
-                        {generatedRidesId}
+                    <Text style={modernRideStyles.modernHeaderSubtitle}>
+                        ID: {generatedRidesId}
                     </Text>
                 </View>
 
-                <View style={modernRideStyles.headerRight}>
+                <View style={modernRideStyles.modernHeaderRight}>
                     {username !== currentUsername ? (
-                        <TouchableOpacity style={modernRideStyles.joinButton} onPress={handleJoinRide}>
-                            <Text style={modernRideStyles.joinButtonText}>Join Ride</Text>
+                        <TouchableOpacity style={modernRideStyles.modernJoinButton} onPress={handleJoinRide}>
+                            <FontAwesome name="plus" size={14} color="#fff" style={{ marginRight: 6 }} />
+                            <Text style={modernRideStyles.modernJoinButtonText}>Join</Text>
                         </TouchableOpacity>
                     ) : (
                         <TouchableOpacity
-                            style={modernRideStyles.startButton}
+                            style={modernRideStyles.modernStartButton}
                             onPress={async () => {
                                 try {
                                     await startService.startRide(generatedRidesId, token);
@@ -270,146 +267,139 @@ const RideStep4 = (props) => {
                                 }
                             }}
                         >
-                            <FontAwesome name="play-circle" size={32} color="#8c2323" />
+                            <FontAwesome name="play" size={16} color="#fff" />
                         </TouchableOpacity>
                     )}
                 </View>
             </View>
 
-            {/* Main Content */}
             <Animated.View style={[modernRideStyles.fadeContainer, { transform: [{ translateY: slideAnim }] }]}>
-                <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
-                    {/* Full Screen Map Section */}
-                    <Animated.View style={[rideRoutesPageUtilities.mapSection, { opacity: fadeAnim, width: '100%', height: 400 }]}>
-                        <RouteMapView
-                            generatedRidesId={generatedRidesId}
-                            token={token}
-                            startingPoint={startingPoint}
-                            endingPoint={endingPoint}
-                            stopPoints={stopPoints}
-                            style={{ flex: 1 }}
-                            isDark={true}
-                        />
-                    </Animated.View>
+                    {/* Hero Card */}
+                    <View style={modernRideStyles.sectionContainer}>
 
-                    {/* Hero Section - Now Below Map */}
-                    <View style={modernRideStyles.heroSection}>
-                        <View style={{ flex: 2, alignItems: 'center', padding: 10 }}>
-                            <Text style={modernRideStyles.rideTitle}>{rideName}</Text>
+                        <View style={modernRideStyles.mapWrapper}>
+                            <RouteMapView
+                                generatedRidesId={generatedRidesId}
+                                token={token}
+                                startingPoint={startingPoint}
+                                endingPoint={endingPoint}
+                                stopPoints={stopPoints}
+                                style={{ flex: 1 }}
+                                isDark={true}
+                            />
+                        </View>
+                    </View>
+                    <ScrollView style={modernRideStyles.scrollContent} showsVerticalScrollIndicator={false}>
+
+                    <View style={modernRideStyles.heroCard}>
+                        <View style={modernRideStyles.heroCardHeader}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={modernRideStyles.heroCardTitle}>{rideName}</Text>
+                                <View style={modernRideStyles.heroCardMeta}>
+                                    <FontAwesome name="user-circle" size={14} color="#8c2323" />
+                                    <Text style={modernRideStyles.heroCardMetaText}>{username}</Text>
+                                </View>
+                            </View>
+                            <View style={modernRideStyles.rideTypeBadge}>
+                                <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#fff" />
+                            </View>
                         </View>
 
-                        <View style={[modernRideStyles.statsSection, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}>
-                            {/* Username on the left */}
-                            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                                <FontAwesome name="user" size={16} color="#8c2323" style={modernRideStyles.statIcon} />
-                                <Text style={modernRideStyles.ownerText}>{username}</Text>
+                        {/* Date & Distance Info */}
+                        <View style={modernRideStyles.infoRow}>
+                            <View style={modernRideStyles.infoCard}>
+                                <FontAwesome name="calendar" size={14} color="#8c2323" style={{ marginBottom: 6 }} />
+                                <Text style={modernRideStyles.infoCardLabel}>Date & Time</Text>
+                                <Text style={modernRideStyles.infoCardValue} numberOfLines={2}>
+                                    {formatDate(date)}
+                                </Text>
                             </View>
-                            <View style={modernRideStyles.dateContainer}>
-                                <Text style={modernRideStyles.dateText}>{formatDate(date)}</Text>
+                            <View style={modernRideStyles.infoCard}>
+                                <FontAwesome name="road" size={14} color="#10b981" style={{ marginBottom: 6 }} />
+                                <Text style={modernRideStyles.infoCardLabel}>Distance</Text>
+                                <Text style={modernRideStyles.infoCardValue}>{distanceState} km</Text>
                             </View>
-
-                            <Animated.View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', }}>
-                                <FontAwesome name={getRideTypeIcon(riderType)} size={20} color="#8c2323" />
-                            </Animated.View>
                         </View>
 
-                        {/* Location Images */}
-                        <View style={modernRideStyles.imagesSection}>
-                            <View style={modernRideStyles.locationImagesContainer}>
-                                {rideNameImageLoading ? (
-                                    <View style={modernRideStyles.loadingContainer}>
-                                        <ActivityIndicator size="large" color="#8c2323" />
-                                        <Text style={modernRideStyles.loadingText}>Loading location images...</Text>
-                                    </View>
-                                ) : Array.isArray(rideNameImage) && rideNameImage.length > 0 ? (
-                                    <FlatList
-                                        data={rideNameImage}
-                                        horizontal
-                                        pagingEnabled
-                                        keyExtractor={(_, idx) => idx.toString()}
-                                        renderItem={({ item }) => (
-                                            <View style={modernRideStyles.imageContainer}>
-                                                <Image
-                                                    source={{ uri: item.imageUrl }}
-                                                    style={modernRideStyles.locationImage}
-                                                />
-                                                {(item.author || item.license) && (
-                                                    <View style={modernRideStyles.imageMetaContainer}>
-                                                        <Text style={modernRideStyles.imageMeta}>
-                                                            {item.author ? `Photo: ${item.author}` : ''}
-                                                            {item.author && item.license ? ' | ' : ''}
-                                                            {item.license ? `License: ${item.license}` : ''}
-                                                        </Text>
-                                                    </View>
-                                                )}
-                                            </View>
-                                        )}
-                                        showsHorizontalScrollIndicator={false}
-                                    />
-                                ) : (
-                                    <View style={modernRideStyles.errorContainer}>
-                                        <Text style={modernRideStyles.errorText}>
-                                            {rideNameImageError || "No location images available"}
-                                        </Text>
-                                    </View>
-                                )}
+                        {/* Route Summary */}
+                        <View style={modernRideStyles.routeSummary}>
+                            <View style={modernRideStyles.routePoint}>
+                                <View style={modernRideStyles.routePointDot} />
+                                <View style={{ flex: 1 }}>
+                                    <Text style={modernRideStyles.routePointLabel}>From</Text>
+                                    <Text style={modernRideStyles.routePointText}>{startingPoint}</Text>
+                                </View>
+                            </View>
+
+                            <View style={modernRideStyles.routeConnector}>
+                                <View style={modernRideStyles.routeConnectorLine} />
+                                <FontAwesome name="long-arrow-down" size={16} color="#666" />
+                            </View>
+
+                            <View style={modernRideStyles.routePoint}>
+                                <View style={[modernRideStyles.routePointDot, { backgroundColor: '#10b981' }]} />
+                                <View style={{ flex: 1 }}>
+                                    <Text style={modernRideStyles.routePointLabel}>To</Text>
+                                    <Text style={modernRideStyles.routePointText}>{endingPoint}</Text>
+                                </View>
                             </View>
                         </View>
                     </View>
 
+                    {/* Map Section */}
+
                     {/* Description Section */}
                     {description && (
-                        <View style={modernRideStyles.descriptionSection}>
-                            <Text style={modernRideStyles.descriptionTitle}>
-                                About This Ride{'  '}
-                                <FontAwesome name="road" size={14} color="#8c2323" />
-                                <Text style={modernRideStyles.distanceContainer}>
-                                    {' '}
-                                    <Text style={modernRideStyles.distanceText}>{distance} km</Text>
-                                </Text>
-                            </Text>
-                            <Text style={modernRideStyles.descriptionText}>{description}</Text>
+                        <View style={modernRideStyles.sectionContainer}>
+                            <View style={modernRideStyles.sectionHeaderRow}>
+                                <View style={modernRideStyles.sectionIndicator} />
+                                <Text style={modernRideStyles.sectionTitle}>About This Ride</Text>
+                            </View>
+                            <View style={modernRideStyles.descriptionCard}>
+                                <Text style={modernRideStyles.descriptionCardText}>{description}</Text>
+                            </View>
                         </View>
                     )}
                 </ScrollView>
             </Animated.View>
-            {/* Bottom Navigation */}
-            <View style={modernRideStyles.bottomNav}>
-                <View style={modernRideStyles.bottomNavItem}>
-                    <TouchableOpacity
-                        style={modernRideStyles.bottomNavButton}
-                        onPress={() => setShowParticipantsModal(true)}
-                    >
-                        <Text style={modernRideStyles.bottomNavText}>Riders</Text>
-                    </TouchableOpacity>
-                </View>
 
-                <View style={modernRideStyles.bottomNavItem}>
-                    <TouchableOpacity
-                        style={modernRideStyles.bottomNavButton}
-                        onPress={() => navigation.navigate('RideRoutesPage', {
-                            startMapImage,
-                            endMapImage,
-                            mapImage,
-                            rideNameImage,
-                            startingPoint,
-                            endingPoint,
-                            rideName,
-                            locationName,
-                            riderType,
-                            date,
-                            participants,
-                            description,
-                            token,
-                            distance,
-                            username,
-                            currentUsername,
-                            generatedRidesId
-                        })}
-                    >
-                        <Text style={modernRideStyles.bottomNavText}>Routes</Text>
-                    </TouchableOpacity>
-                </View>
+            {/* Modern Bottom Navigation */}
+            <View style={modernRideStyles.modernBottomNav}>
+                <TouchableOpacity
+                    style={modernRideStyles.modernBottomNavButton}
+                    onPress={() => setShowParticipantsModal(true)}
+                >
+                    <FontAwesome name="users" size={18} color="#fff" />
+                    <Text style={modernRideStyles.modernBottomNavText}>Riders</Text>
+                </TouchableOpacity>
+
+                <View style={modernRideStyles.modernBottomNavDivider} />
+
+                <TouchableOpacity
+                    style={modernRideStyles.modernBottomNavButton}
+                    onPress={() => navigation.navigate('RideRoutesPage', {
+                        startMapImage,
+                        endMapImage,
+                        mapImage,
+                        rideNameImage,
+                        startingPoint,
+                        endingPoint,
+                        rideName,
+                        locationName,
+                        riderType,
+                        date,
+                        participants,
+                        description,
+                        token,
+                        distance,
+                        username,
+                        currentUsername,
+                        generatedRidesId
+                    })}
+                >
+                    <FontAwesome name="map-marker" size={18} color="#fff" />
+                    <Text style={modernRideStyles.modernBottomNavText}>Routes</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Modals */}

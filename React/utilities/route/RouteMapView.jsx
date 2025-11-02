@@ -12,7 +12,8 @@ const RouteMapView = ({
                           endingPoint,
                           stopPoints = [],
                           style,
-                          isDark = false
+                          isDark = false,
+                          ...restProps
                       }) => {
     const webViewRef = useRef(null);
 
@@ -27,6 +28,20 @@ const RouteMapView = ({
         handleWebViewError,
         updateUserLocationOnMap
     } = useRouteMapLogic(generatedRidesId, token);
+
+    useEffect(() => {
+        console.log('RouteMapView props:', {
+            generatedRidesId,
+            token,
+            startingPoint,
+            endingPoint,
+            stopPoints,
+            style,
+            isDark,
+            spreadProps: restProps
+        });
+    }, []);
+
 
     // Update user location on map whenever it changes
     useEffect(() => {

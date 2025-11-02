@@ -2,7 +2,6 @@ import routeMapStyles from "./routeMapStyles.js";
 
 export const createMapHTML = () => {
     const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
     return `
     <!DOCTYPE html>
     <html>
@@ -21,6 +20,8 @@ export const createMapHTML = () => {
             let markersGroup;
             let userLocationMarker;
             let userLocationAccuracyCircle;
+            
+        
 
             function initMap() {
                 try {

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import leyans.RidersHub.Config.Security.SecurityUtils;
 import leyans.RidersHub.DTO.*;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
+import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
 import leyans.RidersHub.model.RiderType;
@@ -25,14 +26,17 @@ public class RiderController {
     private final RiderService riderService;
     private final RidesService ridesService;
 
+    private final LocationService locationService;
+
 
 
 
 
     @Autowired
-    public RiderController(RiderService riderService, RidesService ridesService) {
+    public RiderController(RiderService riderService, RidesService ridesService, LocationService locationService) {
         this.riderService = riderService;
         this.ridesService = ridesService;
+        this.locationService = locationService;
     }
 
     @PostMapping("/rider-type")
