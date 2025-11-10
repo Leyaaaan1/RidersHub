@@ -1,10 +1,9 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.51:8080/riders';
-
+const BASE_URL = 'http://192.168.240.99:8080';
 export const loginUser = async (username, password) => {
     try {
-        const response = await fetch(`${BASE_URL}/login`, {
+        const response = await fetch(`${BASE_URL}/riders/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -12,7 +11,7 @@ export const loginUser = async (username, password) => {
 
         const result = await response.json();
 
-        if (response.ok) {
+        if (response.   ok) {
             return { success: true, data: result };
         } else {
             return { success: false, message: result.message || 'Login failed' };

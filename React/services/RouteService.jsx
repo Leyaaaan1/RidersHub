@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://192.168.1.51:8080';
+const API_BASE_URL = 'http://192.168.240.99:8080';
 
 export async function getRoutePreview(token, routeData) {
     try {

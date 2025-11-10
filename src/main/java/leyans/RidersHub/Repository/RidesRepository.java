@@ -37,4 +37,6 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
 
 
+
+
 }

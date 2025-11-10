@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, FlatList, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { fetchMyRides } from '../services/rideService';
 import { joinService } from '../services/joinService';
-import colors from "../styles/colors";
+import { styles } from '../styles/ParticipantListModalStyles';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
-const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId, token, onRideSelect, username, currentUsername }) => {
+const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId, token, username, currentUsername }) => {
     const [rides, setRides] = useState([]);
     const [joinRequests, setJoinRequests] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('participants');
+
+    console.log('Current Username:', participants, generatedRidesId, token, username, currentUsername);
+    console.log('Current participants:', participants);
 
     useEffect(() => {
         if (visible && activeTab === 'rides') {
@@ -36,6 +39,7 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
             setLoading(false);
         }
     };
+    console.log('Generated Rides ID:', rides);
 
     const loadJoinRequests = async () => {
         setLoading(true);
@@ -85,12 +89,12 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
         </View>
     );
 
-    const renderParticipantItem = (participant, index) => {
-        const participantName = typeof participant === 'object' ? participant.username : participant;
+    const renderParticipantItem = ({ item, index }) => {
+        const participantName = typeof item === 'object' ? item.username : item;
         const isOwner = participantName === username;
 
         return (
-            <View key={index} style={styles.participantCard}>
+            <View style={styles.participantCard}>
                 <View style={styles.participantNumber}>
                     <Text style={styles.participantNumberText}>{index + 1}</Text>
                 </View>
@@ -170,39 +174,41 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
 
                     {/* Content */}
                     <View style={styles.contentContainer}>
-                        {loading ? (
-                            <View style={styles.loadingContainer}>
-                                <ActivityIndicator size="large" color="#8c2323" />
-                                <Text style={styles.loadingText}>Loading...</Text>
-                            </View>
-                        ) : error ? (
-                            <View style={styles.errorContainer}>
-                                <FontAwesome name="exclamation-circle" size={32} color="#8c2323" />
-                                <Text style={styles.errorText}>{error}</Text>
-                            </View>
-                        ) : (
-                            <>
-                                {activeTab === 'participants' && (
-                                    <View style={styles.participantsContainer}>
-                                        {Array.isArray(participants) && participants.length > 0 ? (
-                                            <View style={styles.participantsList}>
-                                                {participants.map((participant, index) =>
-                                                    renderParticipantItem(participant, index)
-                                                )}
-                                            </View>
-                                        ) : (
-                                            <View style={styles.emptyState}>
-                                                <FontAwesome name="users" size={48} color="#333" />
-                                                <Text style={styles.emptyStateText}>No riders yet</Text>
-                                                <Text style={styles.emptyStateSubtext}>
-                                                    Be the first to join this ride
-                                                </Text>
-                                            </View>
-                                        )}
+                        {activeTab === 'participants' && (
+                            <View style={styles.participantsContainer}>
+                                {Array.isArray(participants) && participants.length > 0 ? (
+                                    <FlatList
+                                        data={participants}
+                                        renderItem={renderParticipantItem}
+                                        keyExtractor={(item, index) => `participant-${index}`}
+                                        contentContainerStyle={styles.participantsList}
+                                        showsVerticalScrollIndicator={false}
+                                    />
+                                ) : (
+                                    <View style={styles.emptyState}>
+                                        <FontAwesome name="users" size={48} color="#333" />
+                                        <Text style={styles.emptyStateText}>No riders yet</Text>
+                                        <Text style={styles.emptyStateSubtext}>
+                                            Be the first to join this ride
+                                        </Text>
                                     </View>
                                 )}
+                            </View>
+                        )}
 
-                                {activeTab === 'requests' && (
+                        {activeTab === 'requests' && (
+                            <>
+                                {loading ? (
+                                    <View style={styles.loadingContainer}>
+                                        <ActivityIndicator size="large" color="#8c2323" />
+                                        <Text style={styles.loadingText}>Loading...</Text>
+                                    </View>
+                                ) : error ? (
+                                    <View style={styles.errorContainer}>
+                                        <FontAwesome name="exclamation-circle" size={32} color="#8c2323" />
+                                        <Text style={styles.errorText}>{error}</Text>
+                                    </View>
+                                ) : (
                                     <FlatList
                                         data={joinRequests}
                                         renderItem={renderRequestItem}
@@ -227,246 +233,5 @@ const ParticipantListModal = ({ visible, onClose, participants, generatedRidesId
         </Modal>
     );
 };
-
-const styles = StyleSheet.create({
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        justifyContent: 'flex-end',
-    },
-    modalContainer: {
-        backgroundColor: '#0a0a0a',
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        paddingBottom: 20,
-        maxHeight: '85%',
-        borderTopWidth: 1,
-        borderTopColor: '#222',
-    },
-    modalHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#1a1a1a',
-    },
-    modalTitle: {
-        color: '#fff',
-        fontSize: 22,
-        fontWeight: '700',
-        marginBottom: 4,
-    },
-    modalSubtitle: {
-        color: '#666',
-        fontSize: 13,
-        fontWeight: '500',
-    },
-    closeButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    tabContainer: {
-        flexDirection: 'row',
-        paddingHorizontal: 20,
-        paddingTop: 16,
-        gap: 12,
-    },
-    tab: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 12,
-        backgroundColor: '#111',
-        borderWidth: 1,
-        borderColor: '#222',
-    },
-    tabActive: {
-        backgroundColor: 'rgba(140, 35, 35, 0.1)',
-        borderColor: '#8c2323',
-    },
-    tabText: {
-        color: '#666',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    tabTextActive: {
-        color: '#8c2323',
-    },
-    tabBadge: {
-        backgroundColor: '#333',
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        marginLeft: 8,
-    },
-    tabBadgeText: {
-        color: '#fff',
-        fontSize: 11,
-        fontWeight: '700',
-    },
-    contentContainer: {
-        flex: 1,
-        paddingHorizontal: 20,
-        paddingTop: 20,
-    },
-    participantsContainer: {
-        flex: 1,
-    },
-    participantsList: {
-        gap: 8,
-    },
-    participantCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#111',
-        borderRadius: 12,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#222',
-    },
-    participantNumber: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: '#8c2323',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 12,
-    },
-    participantNumberText: {
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    participantInfo: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    participantName: {
-        color: '#fff',
-        fontSize: 15,
-        fontWeight: '600',
-    },
-    ownerBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(251, 191, 36, 0.1)',
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        gap: 4,
-    },
-    ownerBadgeText: {
-        color: '#fbbf24',
-        fontSize: 10,
-        fontWeight: '700',
-        textTransform: 'uppercase',
-    },
-    requestCard: {
-        backgroundColor: '#111',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 8,
-        borderWidth: 1,
-        borderColor: '#222',
-    },
-    requestCardContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-    },
-    requestUserInfo: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-    },
-    avatarPlaceholder: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#222',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    requestUsername: {
-        color: '#fff',
-        fontSize: 15,
-        fontWeight: '600',
-        marginBottom: 2,
-    },
-    requestDate: {
-        color: '#666',
-        fontSize: 12,
-        fontWeight: '500',
-    },
-    acceptButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#8c2323',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        gap: 6,
-    },
-    acceptButtonText: {
-        color: '#fff',
-        fontSize: 13,
-        fontWeight: '600',
-    },
-    loadingContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 60,
-    },
-    loadingText: {
-        color: '#666',
-        fontSize: 14,
-        fontWeight: '500',
-        marginTop: 12,
-    },
-    errorContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 60,
-    },
-    errorText: {
-        color: '#8c2323',
-        fontSize: 14,
-        fontWeight: '500',
-        textAlign: 'center',
-        marginTop: 12,
-    },
-    emptyState: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 60,
-    },
-    emptyStateText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-        marginTop: 16,
-        marginBottom: 8,
-    },
-    emptyStateSubtext: {
-        color: '#666',
-        fontSize: 13,
-        fontWeight: '500',
-        textAlign: 'center',
-    },
-});
 
 export default ParticipantListModal;
