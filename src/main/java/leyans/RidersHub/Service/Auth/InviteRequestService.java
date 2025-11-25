@@ -45,7 +45,7 @@ public class InviteRequestService {
 
 
     @Transactional
-    public InviteRequest generateInviteRequestsForRide(Integer generatedRideId, String username, InviteRequest.InviteType inviteType) {
+    public InviteRequest generateInvite(Integer generatedRideId, String username, String qr, String link   ) {
 
         Rides ride = riderUtil.findRideById(generatedRideId);
 
@@ -56,15 +56,33 @@ public class InviteRequestService {
 
         InviteRequest inviteRequest = new InviteRequest(ride, creator, InviteRequest.InviteStatus.PENDING, createdAt, expiresAt);
 
+
         if (inviteType == InviteRequest.InviteType.qr) {
-            String urlToken = baseUrl + "/sample/sample" + inviteRequest.getInviteToken();
+            String urlToken = baseUrl + "/qr/" + inviteRequest.getInviteToken();
             String qrCodeBase64 = generateQRCodeBase64(urlToken);
             inviteRequest.setQrCodeBase64(qrCodeBase64);
-
+        } else {
+            inviteRequest.setInviteType(InviteRequest.InviteType.link);
+            String urlToken = baseUrl + "/link/" + inviteRequest.getInviteToken();
         }
         return inviteRequestRepository.save(inviteRequest);
 
 
+    }
+
+    @Transactional
+    public void expireInvite(String token) {
+        InviteRequest inviteRequest = inviteRequestRepository.findByInviteToken(token)
+                .orElseThrow(() -> new RuntimeException("Invite not found"));
+
+        String currentUsername = riderUtil.getCurrentUsername();
+
+        if (!inviteRequest.getUsername().getUsername().equals(currentUsername)) {
+            throw new RuntimeException("Only creator can expire invite links");
+        }
+
+        inviteRequest.setInviteStatus(InviteRequest.InviteStatus.EXPIRED);
+        inviteRequestRepository.save(inviteRequest);
     }
 
     private String generateQRCodeBase64(String urlToken) {

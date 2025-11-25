@@ -37,9 +37,13 @@ public class InviteRequest {
     @Column(name = "inviteStatus", nullable = false)
     private InviteStatus inviteStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "inviteType", nullable = false)
-    private InviteType inviteType;
+    @Column(name = "qr", nullable = false)
+    private String qr;
+
+    @Column(name = "link", nullable = false)
+    private String link;
+
+
 
     @Column(name = "createdAt", nullable = false)
     private LocalDateTime createdAt;
@@ -63,11 +67,9 @@ public class InviteRequest {
     public enum InviteStatus {
         PENDING,
         ACCEPTED,
-        DECLINED
-    }
-    public enum InviteType {
-        qr,
-        link
+        DECLINED,
+
+        EXPIRED
     }
 
 
@@ -77,17 +79,33 @@ public class InviteRequest {
         this.inviteStatus = InviteStatus.PENDING;
     }
 
-
-    public InviteRequest(Integer inviteId, String inviteToken, Rides rides, Rider username, LocalDateTime createdAt, LocalDateTime expiresAt, String qrCodeBase64, InviteType inviteType, InviteStatus inviteStatus) {
+    public InviteRequest(Integer inviteId, String inviteToken, Rides rides, Rider username, InviteStatus inviteStatus, String qr, String link, LocalDateTime createdAt, LocalDateTime expiresAt, String qrCodeBase64) {
         this.inviteId = inviteId;
         this.inviteToken = inviteToken;
         this.rides = rides;
         this.username = username;
+        this.inviteStatus = inviteStatus;
+        this.qr = qr;
+        this.link = link;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
         this.qrCodeBase64 = qrCodeBase64;
-        this.inviteType = inviteType;
-        this.inviteStatus = inviteStatus;
+    }
+
+    public String getQr() {
+        return qr;
+    }
+
+    public void setQr(String qr) {
+        this.qr = qr;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 
     public Integer getInviteId() {
@@ -130,13 +148,7 @@ public class InviteRequest {
         this.inviteStatus = inviteStatus;
     }
 
-    public InviteType getInviteType() {
-        return inviteType;
-    }
 
-    public void setInviteType(InviteType inviteType) {
-        this.inviteType = inviteType;
-    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

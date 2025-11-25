@@ -5,6 +5,7 @@ import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Repository.RidesRepository;
+import leyans.RidersHub.Service.Auth.InviteRequestService;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import leyans.RidersHub.Service.MapService.RouteService;
 import leyans.RidersHub.Utility.RiderUtil;
@@ -12,6 +13,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StopPoint;
+import leyans.RidersHub.model.auth.InviteRequest;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,12 +38,13 @@ public class RidesService {
     private final RideParticipantService rideParticipantService;
     private final RiderUtil riderUtil;
     private final RouteService routeService;
+    private final InviteRequestService inviteRequestService;
 
 
     @Autowired
     public RidesService(RidesRepository ridesRepository,
 
-                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil, RouteService routeService) {
+                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil, RouteService routeService, InviteRequestService inviteRequestService) {
 
         this.ridesRepository = ridesRepository;
         this.riderService = riderService;
@@ -50,6 +53,7 @@ public class RidesService {
         this.rideParticipantService = rideParticipantService;
         this.riderUtil = riderUtil;
         this.routeService = routeService;
+        this.inviteRequestService = inviteRequestService;
     }
 
     @Transactional
@@ -120,8 +124,11 @@ public class RidesService {
         newRide.setRouteCoordinates(routeCoordinates);
         newRide.setActive(false);
 
+
+
         try {
             newRide = ridesRepository.save(newRide);
+            inviteRequestService.generateInvite(newRide.getGeneratedRidesId(), newRide.getUsername(), );
         } catch (Exception ex) {
             throw new RuntimeException("Failed to save ride: " + ex.getMessage(), ex);
         }
