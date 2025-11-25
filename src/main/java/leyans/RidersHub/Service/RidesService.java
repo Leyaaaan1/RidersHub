@@ -128,7 +128,11 @@ public class RidesService {
 
         try {
             newRide = ridesRepository.save(newRide);
-            inviteRequestService.generateInvite(newRide.getGeneratedRidesId(), newRide.getUsername(), );
+
+            inviteRequestService.generateInviteForNewRide(
+                    newRide.getGeneratedRidesId(),
+                    creator
+            );
         } catch (Exception ex) {
             throw new RuntimeException("Failed to save ride: " + ex.getMessage(), ex);
         }

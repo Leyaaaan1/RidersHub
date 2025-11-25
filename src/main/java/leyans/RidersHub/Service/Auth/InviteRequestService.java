@@ -13,7 +13,10 @@ import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.auth.InviteRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +29,7 @@ import java.util.Base64;
 public class InviteRequestService {
 
     private final InviteRequestRepository inviteRequestRepository;
-    private final RidesService ridesService;
 
-    private final RiderRepository riderRepository;
 
     private final RiderUtil riderUtil;
 
@@ -36,53 +37,30 @@ public class InviteRequestService {
     private String baseUrl;
 
 
-    public InviteRequestService(InviteRequestRepository inviteRequestRepository, RidesService ridesService, RiderRepository riderRepository, RiderUtil riderUtil) {
+    public InviteRequestService(InviteRequestRepository inviteRequestRepository, RiderUtil riderUtil) {
         this.inviteRequestRepository = inviteRequestRepository;
-        this.ridesService = ridesService;
-        this.riderRepository = riderRepository;
         this.riderUtil = riderUtil;
     }
 
-
     @Transactional
-    public InviteRequest generateInvite(Integer generatedRideId, String username, String qr, String link   ) {
+    public InviteRequest generateInviteForNewRide(Integer generatedRidesId, Rider creator) {
+        Rides ride = riderUtil.findRideById(generatedRidesId);
 
-        Rides ride = riderUtil.findRideById(generatedRideId);
-
-        Rider creator = riderUtil.findRiderByUsername(username);
-
+        LocalDateTime expiresAt = LocalDateTime.now().plusDays(30);
         LocalDateTime createdAt = LocalDateTime.now();
-        LocalDateTime expiresAt = createdAt.plusDays(10);
 
-        InviteRequest inviteRequest = new InviteRequest(ride, creator, InviteRequest.InviteStatus.PENDING, createdAt, expiresAt);
+        // Create invite link
+        InviteRequest inviteLink = new InviteRequest(ride, creator, createdAt,expiresAt );
 
+        // Generate URL
+        String inviteUrl = baseUrl + "/invite/link/" + inviteLink.getInviteToken();
+        inviteLink.setInviteLink(inviteUrl);
 
-        if (inviteType == InviteRequest.InviteType.qr) {
-            String urlToken = baseUrl + "/qr/" + inviteRequest.getInviteToken();
-            String qrCodeBase64 = generateQRCodeBase64(urlToken);
-            inviteRequest.setQrCodeBase64(qrCodeBase64);
-        } else {
-            inviteRequest.setInviteType(InviteRequest.InviteType.link);
-            String urlToken = baseUrl + "/link/" + inviteRequest.getInviteToken();
-        }
-        return inviteRequestRepository.save(inviteRequest);
+        // Generate QR code from URL
+        String qrCodeBase64 = generateQRCodeBase64(inviteUrl);
+        inviteLink.setQrCodeBase64(qrCodeBase64);
 
-
-    }
-
-    @Transactional
-    public void expireInvite(String token) {
-        InviteRequest inviteRequest = inviteRequestRepository.findByInviteToken(token)
-                .orElseThrow(() -> new RuntimeException("Invite not found"));
-
-        String currentUsername = riderUtil.getCurrentUsername();
-
-        if (!inviteRequest.getUsername().getUsername().equals(currentUsername)) {
-            throw new RuntimeException("Only creator can expire invite links");
-        }
-
-        inviteRequest.setInviteStatus(InviteRequest.InviteStatus.EXPIRED);
-        inviteRequestRepository.save(inviteRequest);
+        return inviteRequestRepository.save(inviteLink);
     }
 
     private String generateQRCodeBase64(String urlToken) {

@@ -40,8 +40,8 @@ public class InviteRequest {
     @Column(name = "qr", nullable = false)
     private String qr;
 
-    @Column(name = "link", nullable = false)
-    private String link;
+    @Column(name = "invite_link", nullable = false)
+    private String inviteLink;
 
 
 
@@ -63,6 +63,9 @@ public class InviteRequest {
         this.expiresAt = expiresAt;
     }
 
+    public InviteRequest(Rides ride, Rider creator, LocalDateTime createdAt, LocalDateTime expiresAt) {
+    }
+
 
     public enum InviteStatus {
         PENDING,
@@ -79,14 +82,13 @@ public class InviteRequest {
         this.inviteStatus = InviteStatus.PENDING;
     }
 
-    public InviteRequest(Integer inviteId, String inviteToken, Rides rides, Rider username, InviteStatus inviteStatus, String qr, String link, LocalDateTime createdAt, LocalDateTime expiresAt, String qrCodeBase64) {
+    public InviteRequest(Integer inviteId, String inviteToken, Rides rides, Rider username, InviteStatus inviteStatus, String qr, LocalDateTime createdAt, LocalDateTime expiresAt, String qrCodeBase64, String inviteLink) {
         this.inviteId = inviteId;
         this.inviteToken = inviteToken;
         this.rides = rides;
         this.username = username;
         this.inviteStatus = inviteStatus;
-        this.qr = qr;
-        this.link = link;
+        this.inviteLink = inviteLink;
         this.createdAt = createdAt;
         this.expiresAt = expiresAt;
         this.qrCodeBase64 = qrCodeBase64;
@@ -100,12 +102,12 @@ public class InviteRequest {
         this.qr = qr;
     }
 
-    public String getLink() {
-        return link;
+    public String getInviteLink() {
+        return inviteLink;
     }
 
-    public void setLink(String link) {
-        this.link = link;
+    public void setInviteLink(String inviteLink) {
+        this.inviteLink = inviteLink;
     }
 
     public Integer getInviteId() {
