@@ -1,5 +1,5 @@
-const API_BASE_URL = 'http://192.168.1.51:8080';
-console.log('Using API URL:', API_BASE_URL);
+const API_BASE_URL = 'http://192.168.240.99:8080';
+
 
 export const searchLocation = async (token, query) => {
     try {

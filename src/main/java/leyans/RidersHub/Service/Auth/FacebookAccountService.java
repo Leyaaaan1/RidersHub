@@ -2,7 +2,7 @@ package leyans.RidersHub.Service.Auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import leyans.RidersHub.Repository.FacebookAccountRepository;
+import leyans.RidersHub.Repository.Auth.FacebookAccountRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.auth.FacebookAccount;

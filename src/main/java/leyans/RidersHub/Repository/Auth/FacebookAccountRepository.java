@@ -1,4 +1,4 @@
-package leyans.RidersHub.Repository;
+package leyans.RidersHub.Repository.Auth;
 
 import leyans.RidersHub.model.auth.FacebookAccount;
 import org.springframework.data.jpa.repository.JpaRepository;

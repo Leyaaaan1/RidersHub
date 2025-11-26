@@ -13,9 +13,7 @@ import rideRoutesPageUtilities from "../../styles/RideRoutesPageUtilities";
 import LinearGradient from 'react-native-linear-gradient';
 import { getStopPointsByRideId } from '../../services/startService';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
-import modernRideStyles from "../../styles/modernRideStyles";
 
-const { width } = Dimensions.get('window');
 
 const RideRoutesPage = ({ route }) => {
     const {
@@ -23,7 +21,22 @@ const RideRoutesPage = ({ route }) => {
         generatedRidesId,
         endingPoint,
         token,
+        startMapImage,
+        endMapImage,
+        mapImage,
+        rideNameImage,
+        rideName,
+        locationName,
+        riderType,
+        date,
+        participants,
+        description,
+        distance,
+        username,
+        currentUsername,
     } = route.params;
+
+    console.log("sample", route.params);
 
     const [startingPointImages, setStartingPointImages] = useState([]);
     const [endingPointImages, setEndingPointImages] = useState([]);
@@ -38,11 +51,6 @@ const RideRoutesPage = ({ route }) => {
     const [stopPointImages, setStopPointImages] = useState({});
 
     // Placeholder direction images
-    const directionImages = [
-        { id: 1, url: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800", step: "Head north on main road" },
-        { id: 2, url: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800", step: "Turn right at intersection" },
-        { id: 3, url: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800", step: "Continue to destination" }
-    ];
 
     const fetchStopPointImage = async (stopName) => {
         try {
@@ -116,10 +124,6 @@ const RideRoutesPage = ({ route }) => {
                 <View style={rideRoutesPageUtilities.header}>
                     <View style={rideRoutesPageUtilities.headerContent}>
                         {/* Status Badge */}
-                        <View style={rideRoutesPageUtilities.routeStatusContainer}>
-                            <View style={rideRoutesPageUtilities.statusDot} />
-                            <Text style={rideRoutesPageUtilities.statusText}>INACTIVE ROUTE</Text>
-                        </View>
 
                         {/* Route Points Display */}
                         <View style={{ marginTop: 24 }}>
@@ -231,73 +235,7 @@ const RideRoutesPage = ({ route }) => {
                 )}
             </View>
 
-            {/* Direction Images Section (Placeholder) */}
-            <View style={[rideRoutesPageUtilities.imageSection, { marginTop: 24 }]}>
-                <View style={rideRoutesPageUtilities.sectionHeader}>
-                    <View style={rideRoutesPageUtilities.sectionTitleRow}>
-                        <View style={[rideRoutesPageUtilities.sectionIndicator, { backgroundColor: '#10b981' }]} />
-                        <Text style={rideRoutesPageUtilities.sectionTitle}>Turn-by-Turn Directions</Text>
-                        <View style={rideRoutesPageUtilities.mapBadge}>
-                            <Text style={rideRoutesPageUtilities.mapBadgeText}>{directionImages.length} STEPS</Text>
-                        </View>
-                    </View>
-                </View>
 
-                <View style={{ paddingHorizontal: 20 }}>
-                    {directionImages.map((direction, idx) => (
-                        <View key={direction.id} style={[rideRoutesPageUtilities.imageCard, { marginBottom: 16, marginHorizontal: 0 }]}>
-                            <Image
-                                source={{ uri: direction.url }}
-                                style={[rideRoutesPageUtilities.image, { height: 200 }]}
-                            />
-                            <View style={rideRoutesPageUtilities.imageCounter}>
-                                <Text style={rideRoutesPageUtilities.imageCounterText}>
-                                    {idx + 1}/{directionImages.length}
-                                </Text>
-                            </View>
-                            <View style={rideRoutesPageUtilities.imageMetaContainer}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{
-                                        width: 24,
-                                        height: 24,
-                                        borderRadius: 12,
-                                        backgroundColor: '#8c2323',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        marginRight: 12
-                                    }}>
-                                        <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>{idx + 1}</Text>
-                                    </View>
-                                    <Text style={[rideRoutesPageUtilities.imageMeta, { fontSize: 14 }]}>{direction.step}</Text>
-                                </View>
-                            </View>
-                        </View>
-                    ))}
-                </View>
-
-                {/* Info Banner */}
-                <View style={{
-                    marginHorizontal: 20,
-                    backgroundColor: '#111',
-                    borderRadius: 12,
-                    padding: 16,
-                    borderWidth: 1,
-                    borderColor: '#333',
-                    marginTop: 8
-                }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                        <FontAwesome name="info-circle" size={18} color="#666" style={{ marginRight: 12, marginTop: 2 }} />
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600', marginBottom: 4 }}>
-                                Direction Images
-                            </Text>
-                            <Text style={{ color: '#888', fontSize: 12 }}>
-                                These are placeholder images. Direction photos will be available once connected to the backend.
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            </View>
         </ScrollView>
     );
 };

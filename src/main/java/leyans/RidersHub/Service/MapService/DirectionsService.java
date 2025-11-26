@@ -23,10 +23,10 @@ public class DirectionsService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${ORS_API:}")
+    @Value("${ORS_API_KEY:}")
     private String apiKey;
 
-    @Value("${USER_AGENT:RidersHub/1.0}")
+    @Value("${USER_AGENT}")
     private String userAgent;
 
     public DirectionsService(RestTemplate restTemplate) {

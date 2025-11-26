@@ -98,8 +98,9 @@ public class    RiderService {
         return type;
     }
 
-
-
+//    public Rides getParicipantRideById(Integer generatedRidesId) {
+//
+//    }
 }
 
 
