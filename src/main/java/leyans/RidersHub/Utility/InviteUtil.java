@@ -26,7 +26,7 @@ public class InviteUtil {
         Rides ride = riderUtil.findRideById(generatedRidesId);
         InviteRequest invite = inviteRequestRepository.findByRide(ride)
                 .orElseThrow(() -> new EntityNotFoundException("Invite not found for ride ID: " + generatedRidesId));
-        return invite.getQr(); // Return the Cloudinary URL
+        return invite.getQr();
     }
 
     public String getInviteLink(Integer generatedRidesId) {
