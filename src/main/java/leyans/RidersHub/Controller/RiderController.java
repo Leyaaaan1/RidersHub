@@ -55,27 +55,39 @@ public class RiderController {
 
     @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<RideResponseDTO> createRide(@RequestBody RideRequestDTO rideRequest) {
-        String username = SecurityUtils.getCurrentUsername();
+    public ResponseEntity<?> createRide(@Valid @RequestBody RideRequestDTO rideRequest) {
+        try {
+            String username = SecurityUtils.getCurrentUsername();
 
-        RideResponseDTO response = ridesService.createRide(
-                rideRequest.getGeneratedRidesId(),
-                username,
-                rideRequest.getRidesName(),
-                rideRequest.getLocationName(),
-                rideRequest.getRiderType(),
-                rideRequest.getDate(),
-                rideRequest.getParticipants(),
-                rideRequest.getDescription(),
-                rideRequest.getLatitude(),
-                rideRequest.getLongitude(),
-                rideRequest.getStartLat(),
-                rideRequest.getStartLng(),
-                rideRequest.getEndLat(),
-                rideRequest.getEndLng(),
-                rideRequest.getStopPoints()
-        );
-        return ResponseEntity.ok(response);
+            RideResponseDTO response = ridesService.createRide(
+                    rideRequest.getGeneratedRidesId(),
+                    username,
+                    rideRequest.getRidesName(),
+                    rideRequest.getLocationName(),
+                    rideRequest.getRiderType(),
+                    rideRequest.getDate(),
+                    rideRequest.getParticipants(),
+                    rideRequest.getDescription(),
+                    rideRequest.getLatitude(),
+                    rideRequest.getLongitude(),
+                    rideRequest.getStartLat(),
+                    rideRequest.getStartLng(),
+                    rideRequest.getEndLat(),
+                    rideRequest.getEndLng(),
+                    rideRequest.getStopPoints()
+            );
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Related entity not found: " + e.getMessage());
+        }  catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid request: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating ride: " + e.getMessage());
+        }
     }
 
 

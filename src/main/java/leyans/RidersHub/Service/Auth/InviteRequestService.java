@@ -46,13 +46,15 @@ public class InviteRequestService {
     }
 
     @Transactional
-    public InviteRequest generateInviteForNewRide(Integer generatedRidesId, Rider creator) {
+    public InviteRequest generateInviteForNewRide(Integer generatedRidesId,
+                                                  Rider creator,
+                                                  InviteRequest.InviteStatus inviteStatus,
+                                                  LocalDateTime createdAt,
+                                                  LocalDateTime expiresAt) {
         Rides ride = riderUtil.findRideById(generatedRidesId);
 
-        LocalDateTime expiresAt = LocalDateTime.now().plusDays(30);
-        LocalDateTime createdAt = LocalDateTime.now();
-
-        InviteRequest inviteLink = new InviteRequest(ride, creator, createdAt, expiresAt);
+        // Use the constructor that accepts inviteStatus so fields are initialized (it calls this())
+        InviteRequest inviteLink = new InviteRequest(ride, creator, inviteStatus, createdAt, expiresAt);
 
         String inviteUrl = baseUrl + "/invite/link/" + inviteLink.getInviteToken();
         inviteLink.setInviteLink(inviteUrl);

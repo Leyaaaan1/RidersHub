@@ -98,8 +98,8 @@ public class RidesService {
         int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
 
         Rides newRide = new Rides();
-        newRide.setStopPoints(stopPoints);
         newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : generateUniqueRideId());
+        newRide.setStopPoints(stopPoints);
         newRide.setRidesName(ridesName);
         newRide.setDescription(description);
         newRide.setRiderType(rideType);
@@ -131,7 +131,10 @@ public class RidesService {
 
             inviteRequestService.generateInviteForNewRide(
                     newRide.getGeneratedRidesId(),
-                    creator
+                    creator,
+                    InviteRequest.InviteStatus.PENDING,
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusMonths(1)
             );
         } catch (Exception ex) {
             throw new RuntimeException("Failed to save ride: " + ex.getMessage(), ex);
