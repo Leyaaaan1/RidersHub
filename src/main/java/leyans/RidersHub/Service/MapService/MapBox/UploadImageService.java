@@ -10,13 +10,13 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Service
-public class MapImageService {
+public class UploadImageService {
 
     private final Cloudinary cloudinary;
     private final RestTemplate restTemplate;
 
     @Autowired
-    public MapImageService(Cloudinary cloudinary) {
+    public UploadImageService(Cloudinary cloudinary) {
         this.cloudinary = cloudinary;
         this.restTemplate = new RestTemplate();
 
@@ -41,5 +41,18 @@ public class MapImageService {
             e.printStackTrace(); // Add this for more detailed error information
         }
         return null;
+    }
+
+    public String uploadQrCodeBase64(String base64Qr, String folder) {
+        try {
+            String payload = base64Qr.startsWith("data:") ? base64Qr : ("data:image/png;base64," + base64Qr);
+            Map uploadResult = cloudinary.uploader().upload(payload, ObjectUtils.asMap(
+                    "resource_type", "image",
+                    "folder", folder != null ? folder : "qr_codes"
+            ));
+            return uploadResult.get("secure_url").toString();
+        } catch (Exception e) {
+            throw new RuntimeException("QR upload failed: " + e.getMessage(), e);
+        }
     }
 }

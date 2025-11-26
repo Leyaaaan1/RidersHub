@@ -18,6 +18,8 @@ public interface InviteRequestRepository extends JpaRepository <InviteRequest, I
 
     List<InviteRequest> findByRideAndStatus(Rides generatedRidesId, InviteRequest.InviteStatus status);
 
+    Optional<InviteRequest> findByRide(Rides generatedRidesId);
+
 
 
 

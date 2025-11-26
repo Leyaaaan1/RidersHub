@@ -8,6 +8,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import leyans.RidersHub.Repository.Auth.InviteRequestRepository;
 import leyans.RidersHub.Repository.RiderRepository;
+import leyans.RidersHub.Service.MapService.MapBox.UploadImageService;
 import leyans.RidersHub.Service.RidesService;
 import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.Rider;
@@ -29,6 +30,7 @@ import java.util.Base64;
 public class InviteRequestService {
 
     private final InviteRequestRepository inviteRequestRepository;
+    private final UploadImageService uploadImageService;
 
 
     private final RiderUtil riderUtil;
@@ -37,8 +39,9 @@ public class InviteRequestService {
     private String baseUrl;
 
 
-    public InviteRequestService(InviteRequestRepository inviteRequestRepository, RiderUtil riderUtil) {
+    public InviteRequestService(InviteRequestRepository inviteRequestRepository, UploadImageService uploadImageService, RiderUtil riderUtil) {
         this.inviteRequestRepository = inviteRequestRepository;
+        this.uploadImageService = uploadImageService;
         this.riderUtil = riderUtil;
     }
 
@@ -49,16 +52,16 @@ public class InviteRequestService {
         LocalDateTime expiresAt = LocalDateTime.now().plusDays(30);
         LocalDateTime createdAt = LocalDateTime.now();
 
-        // Create invite link
-        InviteRequest inviteLink = new InviteRequest(ride, creator, createdAt,expiresAt );
+        InviteRequest inviteLink = new InviteRequest(ride, creator, createdAt, expiresAt);
 
-        // Generate URL
         String inviteUrl = baseUrl + "/invite/link/" + inviteLink.getInviteToken();
         inviteLink.setInviteLink(inviteUrl);
 
-        // Generate QR code from URL
         String qrCodeBase64 = generateQRCodeBase64(inviteUrl);
         inviteLink.setQrCodeBase64(qrCodeBase64);
+
+        String cloudinaryUrl = uploadImageService.uploadQrCodeBase64(qrCodeBase64, "ride_invites");
+        inviteLink.setQr(cloudinaryUrl);
 
         return inviteRequestRepository.save(inviteLink);
     }
