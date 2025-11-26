@@ -22,7 +22,7 @@ public class InviteRequest {
     @Column(name = "invite_id")
     private Integer inviteId;
 
-    @Column(name = "inviteToken", nullable = false, unique = true)
+    @Column(name = "inviteToken",  unique = true)
     private String inviteToken;
 
     @ManyToOne
@@ -34,21 +34,21 @@ public class InviteRequest {
     private Rider username;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "inviteStatus", nullable = false)
+    @Column(name = "inviteStatus")
     private InviteStatus inviteStatus;
 
-    @Column(name = "qr", nullable = false)
+    @Column(name = "qr")
     private String qr;
 
-    @Column(name = "invite_link", nullable = false)
+    @Column(name = "invite_link" )
     private String inviteLink;
 
 
 
-    @Column(name = "createdAt", nullable = false)
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
 
-    @Column(name = "expiresAt", nullable = false)
+    @Column(name = "expiresAt")
     private LocalDateTime expiresAt;
 
     @Column(name = "qr_code_base64", columnDefinition = "TEXT")
