@@ -10,6 +10,7 @@ import leyans.RidersHub.Repository.Auth.InviteRequestRepository;
 import leyans.RidersHub.Repository.RiderRepository;
 import leyans.RidersHub.Service.MapService.MapBox.UploadImageService;
 import leyans.RidersHub.Service.RidesService;
+import leyans.RidersHub.Utility.InviteUtil;
 import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
@@ -32,6 +33,8 @@ public class InviteRequestService {
     private final InviteRequestRepository inviteRequestRepository;
     private final UploadImageService uploadImageService;
 
+    private final InviteUtil inviteUtil;
+
 
     private final RiderUtil riderUtil;
 
@@ -39,9 +42,10 @@ public class InviteRequestService {
     private String baseUrl;
 
 
-    public InviteRequestService(InviteRequestRepository inviteRequestRepository, UploadImageService uploadImageService, RiderUtil riderUtil) {
+    public InviteRequestService(InviteRequestRepository inviteRequestRepository, UploadImageService uploadImageService, InviteUtil inviteUtil, RiderUtil riderUtil) {
         this.inviteRequestRepository = inviteRequestRepository;
         this.uploadImageService = uploadImageService;
+        this.inviteUtil = inviteUtil;
         this.riderUtil = riderUtil;
     }
 
@@ -87,5 +91,29 @@ public class InviteRequestService {
         }
 
 
+
+    }
+
+    @Transactional(readOnly = true)
+    public String getInviteUrlByRideId(Integer generatedRidesId) {
+        InviteRequest invite = inviteUtil.findInviteByRideId(generatedRidesId);
+        inviteUtil.validateInviteNotExpired(invite);
+        return invite.getInviteLink();
+    }
+
+
+    @Transactional(readOnly = true)
+    public String getQrCodeUrlByRideId(Integer generatedRidesId) {
+        InviteRequest invite = inviteUtil.findInviteByRideId(generatedRidesId);
+        inviteUtil.validateInviteNotExpired(invite);
+        return invite.getQr();
+    }
+
+
+    @Transactional(readOnly = true)
+    public String getQrCodeBase64ByRideId(Integer rideId) {
+        InviteRequest invite = inviteUtil.findInviteByRideId(rideId);
+        inviteUtil.validateInviteNotExpired(invite);
+        return invite.getQrCodeBase64();
     }
 }
