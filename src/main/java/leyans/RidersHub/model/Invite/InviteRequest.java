@@ -1,10 +1,9 @@
-package leyans.RidersHub.model.auth;
+package leyans.RidersHub.model.Invite;
 
 
 import jakarta.persistence.*;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
-import org.apache.logging.log4j.util.PerformanceSensitive;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

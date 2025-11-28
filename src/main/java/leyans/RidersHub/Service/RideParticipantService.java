@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 public class RideParticipantService {
 
     private final RidesRepository ridesRepository;
-    private final RiderRepository riderRepository;
-
     @Autowired
     private final RiderUtil riderUtil;
 
@@ -27,10 +25,9 @@ public class RideParticipantService {
 
 
     @Autowired
-    public RideParticipantService(RidesRepository ridesRepository, RiderRepository riderRepository, RiderUtil riderUtil) {
+    public RideParticipantService(RidesRepository ridesRepository, RiderUtil riderUtil) {
         this.ridesRepository = ridesRepository;
 
-        this.riderRepository = riderRepository;
         this.riderUtil = riderUtil;
     }
 

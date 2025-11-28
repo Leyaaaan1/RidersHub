@@ -3,12 +3,9 @@ package leyans.RidersHub.Utility;
 
 import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.Repository.Auth.InviteRequestRepository;
-import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Service.Auth.InviteRequestService;
-import leyans.RidersHub.model.Rides;
-import leyans.RidersHub.model.auth.InviteRequest;
+import leyans.RidersHub.model.Invite.InviteRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -26,7 +23,10 @@ public class InviteUtil {
     }
 
 
-
+    public InviteRequest findInviteByToken(String inviteToken) {
+        return inviteRequestRepository.findByInviteToken(inviteToken)
+                .orElseThrow(() -> new EntityNotFoundException("Invite not found for token: " + inviteToken));
+    }
 
     public InviteRequest findInviteByRideId(Integer generatedRidesId) {
         return inviteRequestRepository.findByRides_GeneratedRidesId(generatedRidesId)

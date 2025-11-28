@@ -13,7 +13,7 @@ import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StopPoint;
-import leyans.RidersHub.model.auth.InviteRequest;
+import leyans.RidersHub.model.Invite.InviteRequest;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
