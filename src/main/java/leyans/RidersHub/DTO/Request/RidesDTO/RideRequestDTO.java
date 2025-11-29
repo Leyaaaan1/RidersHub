@@ -1,24 +1,21 @@
-package leyans.RidersHub.DTO.Response;
-
-import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
-import leyans.RidersHub.model.RiderType;
+package leyans.RidersHub.DTO.Request.RidesDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class RideResponseDTO {
-
+public class RideRequestDTO {
 
     private Integer generatedRidesId;
-
+    private String username;
     private String ridesName;
     private String locationName;
     private String riderType;
     private Integer distance;
+
     private LocalDateTime date;
     private double latitude;
     private double longitude;
-    List<String> participants;
+    private List<String> participants;
     private String description;
     String startingPointName;
     double startLat;
@@ -26,45 +23,35 @@ public class RideResponseDTO {
     String endingPointName;
     double endLat;
     double endLng;
-
     private String mapImageUrl;
     private String magImageStartingLocation;
     private String magImageEndingLocation;
-
-    private String username;
     private String routeCoordinates;
-
-
     private List<StopPointDTO> stopPoints;
 
-    private Boolean active;
 
 
-
-
-
-
-    public RideResponseDTO(Integer generatedRidesId , String locationName, String ridesName, RiderType riderType,
-                           Integer distance, LocalDateTime
-                                   date, double latitude, double longitude, List<String> participants, String description,
-                           String startingPointName, double startLat, double startLng,
-                           String endingPointName, double endLat, double endLng,
-                           String mapImageUrl, String magImageStartingLocation, String magImageEndingLocation,
-                           String username, String routeCoordinates,
-                            List<StopPointDTO> stopPoints, Boolean active
-
-    ) {
+    public RideRequestDTO(Integer generatedRidesId, String username, List<String> participants, String description,
+                          String ridesName, String locationName,
+                          String riderType, Integer distance,
+                          LocalDateTime date, double latitude, double longitude,
+                          String startingPointName, double startLat,double startLng,
+            String endingPointName, double endLat, double endLng,
+                          String mapImageUrl,
+                          String magImageStartingLocation, String magImageEndingLocation,
+                          String routeCoordinates,
+                          List<StopPointDTO> stopPoints) {
         this.generatedRidesId = generatedRidesId;
-        this.locationName = locationName;
+        this.username = username;
         this.ridesName = ridesName;
-        this.riderType = riderType.getRiderType();
+        this.description = description;
+        this.locationName = locationName;
+        this.riderType = riderType;
         this.distance = distance;
-
         this.date = date;
         this.latitude = latitude;
         this.longitude = longitude;
         this.participants = participants;
-        this.description = description;
         this.startingPointName = startingPointName;
         this.startLat = startLat;
         this.startLng = startLng;
@@ -74,19 +61,10 @@ public class RideResponseDTO {
         this.mapImageUrl = mapImageUrl;
         this.magImageStartingLocation = magImageStartingLocation;
         this.magImageEndingLocation = magImageEndingLocation;
-        this.username = username;
         this.stopPoints = stopPoints;
         this.routeCoordinates = routeCoordinates;
-        this.active = active;
 
-    }
 
-    public Boolean getActive() {
-        return active;
-    }
-
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 
     public String getRouteCoordinates() {
@@ -103,14 +81,6 @@ public class RideResponseDTO {
 
     public void setStopPoints(List<StopPointDTO> stopPoints) {
         this.stopPoints = stopPoints;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getMagImageStartingLocation() {
@@ -211,6 +181,14 @@ public class RideResponseDTO {
 
 
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getRidesName() {
         return ridesName;
     }
@@ -267,4 +245,6 @@ public class RideResponseDTO {
     public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
+
+
 }

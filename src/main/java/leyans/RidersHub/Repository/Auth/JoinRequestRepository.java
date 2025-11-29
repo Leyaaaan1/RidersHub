@@ -1,7 +1,7 @@
 package leyans.RidersHub.Repository.Auth;
 
 
-import leyans.RidersHub.model.Invite.JoinRequest;
+import leyans.RidersHub.model.Interaction.JoinRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,14 +16,12 @@ public interface JoinRequestRepository extends JpaRepository<JoinRequest, Intege
     @Query("SELECT j FROM JoinRequest j WHERE j.inviteToken = :inviteToken AND j.requester.username = :username")
     Optional<JoinRequest> findByInviteTokenAndRequester(@Param("inviteToken") String inviteToken, @Param("username") String username);
 
-    @Query("SELECT j FROM JoinRequest j WHERE j.generatedRidesId.generatedRidesId = :rideId")
+
+    @Query("SELECT j FROM JoinRequest j WHERE j.generatedRidesId.generatedRidesId = :generatedRidesId")
     List<JoinRequest> findByRideId(@Param("generatedRidesId") Integer generatedRidesId);
 
-    @Query("SELECT j FROM JoinRequest j WHERE j.generatedRidesId.generatedRidesId = :rideId AND j.joinStatus = :status")
-    List<JoinRequest> findByRideIdAndStatus(@Param("generatedRidesId") Integer generatedRidesId,
-                                            @Param("status") JoinRequest.JoinStatus status);
+    @Query("SELECT j FROM JoinRequest j WHERE j.generatedRidesId.generatedRidesId = :generatedRidesId AND j.joinStatus = :status")
+    List<JoinRequest> findByRideIdAndStatus(@Param("generatedRidesId") Integer generatedRidesId, @Param("status") JoinRequest.JoinStatus status);
 
-    @Query("SELECT j FROM JoinRequest j WHERE j.requester.username = :username")
-    List<JoinRequest> findByRequester(@Param("username") String username);
 
 }

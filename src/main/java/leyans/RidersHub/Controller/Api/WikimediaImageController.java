@@ -1,6 +1,6 @@
 package leyans.RidersHub.Controller.Api;
 
-import leyans.RidersHub.DTO.LocationImageDto;
+import leyans.RidersHub.DTO.Request.LocationDTO.LocationImageDto;
 import leyans.RidersHub.Service.MapService.WikimediaImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

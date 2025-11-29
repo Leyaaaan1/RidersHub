@@ -1,6 +1,6 @@
 package leyans.RidersHub.Service.MapService;
 
-import leyans.RidersHub.DTO.StopPointDTO;
+import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

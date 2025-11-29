@@ -1,6 +1,6 @@
 package leyans.RidersHub.Service;
 
-import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.DTO.Request.LocationDTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Repository.*;
 import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.*;

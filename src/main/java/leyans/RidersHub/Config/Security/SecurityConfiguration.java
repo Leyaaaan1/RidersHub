@@ -61,7 +61,8 @@ public class SecurityConfiguration {
                                 "/start/**",
                                 "/wikimedia",
                                 "/routes",
-                                "/invite/**"
+                                "/invite/**",
+                                "/join/**"
                         )
                         .authenticated()
                         .anyRequest().authenticated())

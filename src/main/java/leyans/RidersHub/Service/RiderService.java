@@ -1,20 +1,16 @@
 package leyans.RidersHub.Service;
 
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import leyans.RidersHub.DTO.RiderDTO;
+import leyans.RidersHub.DTO.Request.RiderDTO.RiderDTO;
 import leyans.RidersHub.Repository.RiderTypeRepository;
-import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
-import leyans.RidersHub.model.Rides;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import leyans.RidersHub.Repository.RiderRepository;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,12 +70,7 @@ public class    RiderService {
         return riderRepository.save(newRider);
     }
 
-    public List<String> findUsernamesContaining(String username) {
-        List<RiderDTO> riders = riderRepository.searchByUsername(username);
-        return riders.stream()
-                .map(RiderDTO::getUsername)
-                .collect(Collectors.toList());
-    }
+
 
 
     public Rider getRiderByUsername(String username) {

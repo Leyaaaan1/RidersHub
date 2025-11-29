@@ -1,6 +1,5 @@
 package leyans.RidersHub.Service;
 
-import leyans.RidersHub.DTO.NominatimAddress;
 import leyans.RidersHub.Repository.PsgcDataRepository;
 import leyans.RidersHub.Repository.RiderLocationRepository;
 import leyans.RidersHub.Service.MapService.NominatimService;
@@ -10,9 +9,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LocationService {

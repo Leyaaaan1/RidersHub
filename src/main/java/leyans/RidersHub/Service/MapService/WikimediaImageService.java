@@ -2,7 +2,7 @@ package leyans.RidersHub.Service.MapService;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import leyans.RidersHub.DTO.LocationImageDto;
+import leyans.RidersHub.DTO.Request.LocationDTO.LocationImageDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
