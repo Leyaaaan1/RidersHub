@@ -1,6 +1,6 @@
 package leyans.RidersHub.Repository;
 
-import leyans.RidersHub.DTO.RiderDTO;
+import leyans.RidersHub.DTO.Request.RiderDTO.RiderDTO;
 import leyans.RidersHub.model.Rider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,10 +14,6 @@ import java.util.Optional;
 public interface RiderRepository extends JpaRepository<Rider, Integer> {
 
     Rider findByUsername(String username);
-
-    @Query("SELECT new leyans.RidersHub.DTO.RiderDTO(r.username) FROM Rider r WHERE LOWER(r.username) LIKE LOWER(CONCAT('%', :username, '%'))")
-    List<RiderDTO> searchByUsername(@Param("username") String username);
-    Optional<Rider> findByUsernameAfter(String username);
 
 
 

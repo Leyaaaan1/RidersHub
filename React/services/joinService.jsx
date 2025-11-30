@@ -1,6 +1,8 @@
 
-const API_BASE_URL = 'http://192.168.240.99:8080';
+import { BASE_URL  } from '@env';
 
+// Use API_BASE_URL instead of hardcoded value
+const API_BASE_URL = BASE_URL  || 'http://localhost:8080';
 export const joinService = {
     createJoinRequest: async (generatedRidesId, token) => {
         try {

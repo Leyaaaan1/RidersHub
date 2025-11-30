@@ -1,9 +1,13 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.240.99:8080';
+
+import { BASE_URL   } from '@env';
+
+
+const API_BASE_URL = BASE_URL   || 'http://localhost:8080';
 export const loginUser = async (username, password) => {
     try {
-        const response = await fetch(`${BASE_URL}/riders/login`, {
+        const response = await fetch(`${API_BASE_URL}/riders/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -25,7 +29,7 @@ export const loginUser = async (username, password) => {
 
 export const registerUser = async (username, password, riderType) => {
     try {
-        const response = await fetch(`${BASE_URL}/register`, {
+        const response = await fetch(`${API_BASE_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password, riderType }),

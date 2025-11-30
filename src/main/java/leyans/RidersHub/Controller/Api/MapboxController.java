@@ -1,16 +1,10 @@
 package leyans.RidersHub.Controller.Api;
 
-import leyans.RidersHub.DTO.StopPointDTO;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import leyans.RidersHub.Service.RidesService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/location")

@@ -1,6 +1,6 @@
 package leyans.RidersHub.Service;
 
-import leyans.RidersHub.DTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.DTO.Request.LocationDTO.LocationUpdateRequestDTO;
 import leyans.RidersHub.Repository.*;
 import leyans.RidersHub.Utility.RiderUtil;
 import leyans.RidersHub.model.*;
@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RideLocationService {
 
-    private final StartedRideRepository startedRideRepo;
     private final RiderLocationRepository locationRepo;
 
     private final PsgcDataRepository psgcDataRepository;
@@ -27,9 +27,7 @@ public class RideLocationService {
 
 
     @Autowired
-    public RideLocationService(StartedRideRepository startedRideRepo,
-                               RiderLocationRepository locationRepo, PsgcDataRepository psgcDataRepository, LocationService locationService, RiderUtil riderUtil) {
-        this.startedRideRepo = startedRideRepo;
+    public RideLocationService(RiderLocationRepository locationRepo, PsgcDataRepository psgcDataRepository, LocationService locationService, RiderUtil riderUtil) {
         this.locationRepo = locationRepo;
         this.psgcDataRepository = psgcDataRepository;
         this.locationService = locationService;
@@ -39,7 +37,6 @@ public class RideLocationService {
 
     @Transactional
     public LocationUpdateRequestDTO updateLocation(Integer generatedRidesId, double latitude, double longitude) {
-
         StartedRide started = riderUtil.findStartedRideByRideId(generatedRidesId);
         String username = riderUtil.getCurrentUsername();
         Rider rider = riderUtil.findRiderByUsername(username);
@@ -47,8 +44,13 @@ public class RideLocationService {
         if (!started.getParticipants().contains(rider)) {
             throw new IllegalArgumentException("User is not a participant in this ride");
         }
+
         Point userPoint = locationService.createPoint(longitude, latitude);
-        String barangayName = locationService.resolveBarangayName( null, latitude, longitude);
+        if (userPoint == null) {
+            throw new IllegalArgumentException("User location point cannot be null");
+        }
+
+        String barangayName = locationService.resolveBarangayName(null, latitude, longitude);
 
         String locationName = null;
         if (barangayName != null) {
@@ -57,21 +59,11 @@ public class RideLocationService {
                     .findFirst()
                     .map(PsgcData::getName)
                     .orElse(barangayName);
-
-            //If the barangay exists in the PSGC (Philippine Standard Geographic Code) database, it uses the standardized/official name
-            //If the barangay isn't in the database, it defaults to using the original detected name
-            //If no barangay was detected at all (null), the locationName remains null
         }
 
         Point startPoint = started.getLocation();
         double distanceMeters = locationRepo.getDistanceBetweenPoints(userPoint, startPoint);
 
-
-        if (userPoint == null) {
-            throw new IllegalArgumentException("User location point cannot be null");
-        }
-
-// Create and populate the rider location
         RiderLocation loc = new RiderLocation();
         loc.setStartedRide(started);
         loc.setUsername(rider);
@@ -88,7 +80,7 @@ public class RideLocationService {
             throw new RuntimeException("Failed to save rider location", e);
         }
 
-        LocationUpdateRequestDTO locationDTO = new LocationUpdateRequestDTO(
+        return new LocationUpdateRequestDTO(
                 generatedRidesId,
                 username,
                 latitude,
@@ -97,12 +89,31 @@ public class RideLocationService {
                 distanceMeters,
                 loc.getTimestamp()
         );
+    }
 
+    @Transactional(readOnly = true)
+    public List<LocationUpdateRequestDTO> getLatestParticipantLocations(Integer generatedRidesId) {
+        List<RiderLocation> locations = locationRepo.findLatestLocationPerParticipant(generatedRidesId);
 
-        return locationDTO;
+        return locations.stream().map(loc -> {
+            Point p = loc.getLocation();
+            double lon = p.getX();
+            double lat = p.getY();
+            String username = loc.getUsername().getUsername();
+            return new LocationUpdateRequestDTO(
+                    generatedRidesId,
+                    username,
+                    lat,
+                    lon,
+                    loc.getLocationName(),
+                    loc.getDistanceMeters(),
+                    loc.getTimestamp()
+            );
+        }).collect(Collectors.toList());
     }
 
 
 
 
-    }
+
+}

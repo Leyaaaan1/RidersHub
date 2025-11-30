@@ -1,10 +1,10 @@
 package leyans.RidersHub.Controller;
 
 import leyans.RidersHub.Config.Security.SecurityUtils;
-import leyans.RidersHub.DTO.JoinRequestCreateDto;
+import leyans.RidersHub.DTO.Request.JoinDTO.JoinRequestCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
-import leyans.RidersHub.Service.RideJoinRequestService;
+import leyans.RidersHub.Service.InteractionRequest.RideJoinRequestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

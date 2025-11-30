@@ -12,7 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpClientErrorException;
-import leyans.RidersHub.DTO.StopPointDTO;
+import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

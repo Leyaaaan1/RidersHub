@@ -1,8 +1,6 @@
 package leyans.RidersHub.DTO.Response;
 
-import jakarta.persistence.Column;
-import leyans.RidersHub.DTO.StopPointDTO;
-import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 import leyans.RidersHub.model.RiderType;
 
 import java.time.LocalDateTime;

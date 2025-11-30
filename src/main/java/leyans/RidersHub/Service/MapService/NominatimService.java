@@ -2,7 +2,7 @@ package leyans.RidersHub.Service.MapService;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import leyans.RidersHub.DTO.NominatimAddress;
+import leyans.RidersHub.DTO.Request.LocationDTO.NominatimAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;

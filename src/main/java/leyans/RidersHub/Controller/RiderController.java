@@ -2,7 +2,9 @@ package leyans.RidersHub.Controller;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import leyans.RidersHub.Config.Security.SecurityUtils;
-import leyans.RidersHub.DTO.*;
+import leyans.RidersHub.DTO.Request.RiderDTO.RiderTypeRequest;
+import leyans.RidersHub.DTO.Request.RidesDTO.RideRequestDTO;
+import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.RiderService;
@@ -16,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -96,13 +97,6 @@ public class RiderController {
         return ridesService.getStopPointsDTOByGeneratedRideId(generatedRidesId);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<String>> searchRiders(@RequestParam(value = "username", required = false) String searchTerm) {
-
-        String searchUsername = searchTerm != null ? searchTerm : "None";
-        List<String> usernames = riderService.findUsernamesContaining(searchUsername);
-        return ResponseEntity.ok(usernames);
-    }
 
 
     @GetMapping("/{generatedRidesId}/map-image")

@@ -1,7 +1,6 @@
 package leyans.RidersHub.Repository.Auth;
 
-import leyans.RidersHub.model.Rides;
-import leyans.RidersHub.model.auth.InviteRequest;
+import leyans.RidersHub.model.Interaction.InviteRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,8 +13,14 @@ import java.util.Optional;
 
 public interface InviteRequestRepository extends JpaRepository <InviteRequest, Integer> {
 
+
+    @Query("SELECT i FROM InviteRequest i WHERE i.inviteToken = :inviteToken")
+    Optional<InviteRequest> findByInviteToken(@Param("inviteToken") String inviteToken);
+
+
+
     @Query("SELECT i FROM InviteRequest i WHERE i.rides.generatedRidesId = :generatedRidesId")
-    Optional<InviteRequest> findByRides_GeneratedRidesId(@Param("generatedRidesId") Integer generatedRidesId);
+    List<InviteRequest> findByRides_GeneratedRidesId(@Param("generatedRidesId") Integer generatedRidesId);
 
 
 
