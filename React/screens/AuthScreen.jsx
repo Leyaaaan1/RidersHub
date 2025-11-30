@@ -4,6 +4,7 @@ import InputUtilities from "../styles/InputUtilities";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginUser, registerUser, loginWithFacebook } from '../services/authService';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import { BASE_URL  } from '@env';
 
 const AuthForm = ({
                       isLogin,
@@ -89,6 +90,9 @@ const AuthScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [riderType, setRiderType] = useState('');
 
+
+    const API_BASE_URL = BASE_URL  || 'http://localhost:8080';
+    console.log(API_BASE_URL)
     // Regular username/password auth
     const handleAuth = async () => {
         try {
