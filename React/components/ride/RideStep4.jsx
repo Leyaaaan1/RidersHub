@@ -67,6 +67,8 @@ const RideStep4 = (props) => {
 
     const { loading: joiningRide, joinRide } = useJoinRide();
 
+    console.log("ride", props);
+
     // Start animations on component mount
     useEffect(() => {
         Animated.parallel([
@@ -297,7 +299,7 @@ const RideStep4 = (props) => {
                                 <Text style={modernRideStyles.heroCardTitle}>{rideName}</Text>
                                 <View style={modernRideStyles.heroCardMeta}>
                                     <FontAwesome name="user-circle" size={14} color="#8c2323" />
-                                    <Text style={modernRideStyles.heroCardMetaText}>{username}</Text>
+                                    <Text style={modernRideStyles.heroCardMetaText}>{String(username || '').toUpperCase()}</Text>
                                 </View>
                             </View>
                             <View style={modernRideStyles.rideTypeBadge}>
@@ -307,56 +309,46 @@ const RideStep4 = (props) => {
 
                         {/* Date & Distance Info */}
                         <View style={modernRideStyles.infoRow}>
-                            <View style={modernRideStyles.infoCard}>
-                                <FontAwesome name="calendar" size={14} color="#8c2323" style={{ marginBottom: 6 }} />
-                                <Text style={modernRideStyles.infoCardLabel}>Date & Time</Text>
-                                <Text style={modernRideStyles.infoCardValue} numberOfLines={2}>
-                                    {formatDate(date)}
-                                </Text>
-                            </View>
-                            <View style={modernRideStyles.infoCard}>
-                                <FontAwesome name="road" size={14} color="#10b981" style={{ marginBottom: 6 }} />
-                                <Text style={modernRideStyles.infoCardLabel}>Distance</Text>
-                                <Text style={modernRideStyles.infoCardValue}>{distanceState} km</Text>
+                            <View style={[modernRideStyles.infoCard, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
+                                <View style={{ flex: 1, paddingRight: 10 }}>
+                                    <FontAwesome name="calendar" size={14} color="#8c2323" style={{ marginBottom: 6 }} />
+                                    <Text style={modernRideStyles.infoCardLabel}>Date & Time</Text>
+                                    <Text style={modernRideStyles.infoCardValue} numberOfLines={2}>
+                                        {formatDate(date)}
+                                    </Text>
+                                </View>
+                                <View style={{ alignItems: 'flex-end' }}>
+                                    <FontAwesome name="road" size={14} color="#10b981" style={{ marginBottom: 6 }} />
+                                    <Text style={modernRideStyles.infoCardLabel}>Distance</Text>
+                                    <Text style={modernRideStyles.infoCardValue}>{distance} km</Text>
+                                </View>
                             </View>
                         </View>
-
                         {/* Route Summary */}
-                        <View style={modernRideStyles.routeSummary}>
-                            <View style={modernRideStyles.routePoint}>
-                                <View style={modernRideStyles.routePointDot} />
-                                <View style={{ flex: 1 }}>
-                                    <Text style={modernRideStyles.routePointLabel}>From</Text>
-                                    <Text style={modernRideStyles.routePointText}>{startingPoint}</Text>
+                        <View style={{ flexDirection: 'column', width: '100%', alignItems: 'flex-start' }}>
+                            <View style={[modernRideStyles.infoCard, { width: '100%', marginBottom: 8 }]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                                    <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>From</Text>
                                 </View>
+                                <Text style={modernRideStyles.routePointText}>{startingPoint}</Text>
                             </View>
 
-                            <View style={modernRideStyles.routeConnector}>
-                                <View style={modernRideStyles.routeConnectorLine} />
-                                <FontAwesome name="long-arrow-down" size={16} color="#666" />
-                            </View>
-
-                            <View style={modernRideStyles.routePoint}>
-                                <View style={[modernRideStyles.routePointDot, { backgroundColor: '#10b981' }]} />
-                                <View style={{ flex: 1 }}>
-                                    <Text style={modernRideStyles.routePointLabel}>To</Text>
-                                    <Text style={modernRideStyles.routePointText}>{endingPoint}</Text>
+                            <View style={[modernRideStyles.infoCard, { width: '100%' }]}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                                    <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>To</Text>
                                 </View>
+                                <Text style={modernRideStyles.routePointText}>{endingPoint}</Text>
                             </View>
                         </View>
                     </View>
 
-                    {/* Map Section */}
-
-                    {/* Description Section */}
                     {description && (
                         <View style={modernRideStyles.sectionContainer}>
-                            <View style={modernRideStyles.sectionHeaderRow}>
-                                <View style={modernRideStyles.sectionIndicator} />
-                                <Text style={modernRideStyles.sectionTitle}>About This Ride</Text>
-                            </View>
+
                             <View style={modernRideStyles.descriptionCard}>
+                                <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>Description</Text>
                                 <Text style={modernRideStyles.descriptionCardText}>{description}</Text>
+
                             </View>
                         </View>
                     )}

@@ -20,21 +20,21 @@ public class InviteRequestController {
     }
 
 
-    @GetMapping("/{rideId}/qr-url")
-    public ResponseEntity<String> getQrCodeUrl(@PathVariable Integer rideId) {
-        String qrUrl = participantUtil.getQrCodeUrlByRideId(rideId);
+    @GetMapping("/{generatedRidesId}/qr-url")
+    public ResponseEntity<String> getQrCodeUrl(@PathVariable Integer generatedRidesId) {
+        String qrUrl = participantUtil.getQrCodeUrlByRideId(generatedRidesId);
         return ResponseEntity.ok(qrUrl);
     }
 
-    @GetMapping("/{rideId}/qr-base64")
-    public ResponseEntity<String> getQrCodeBase64(@PathVariable Integer rideId) {
-        String qrBase64 = participantUtil.getQrCodeBase64ByRideId(rideId);
+    @GetMapping("/{generatedRidesId}/qr-base64")
+    public ResponseEntity<String> getQrCodeBase64(@PathVariable Integer generatedRidesId) {
+        String qrBase64 = participantUtil.getQrCodeBase64ByRideId(generatedRidesId);
         return ResponseEntity.ok(qrBase64);
     }
 
-    @GetMapping("/{rideId}/invites")
-    public ResponseEntity<String> getInviteUDetailsUrl(@PathVariable Integer rideId) {
-        String inviteDetails = participantUtil.getInviteUrlByRideId(rideId);
+    @GetMapping("/{generatedRidesId}/invites")
+    public ResponseEntity<String> getInviteUDetailsUrl(@PathVariable Integer generatedRidesId) {
+        String inviteDetails = participantUtil.getInviteUrlByRideId(generatedRidesId);
         return ResponseEntity.ok(inviteDetails);
     }
 }

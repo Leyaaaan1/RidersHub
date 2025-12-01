@@ -101,7 +101,7 @@ const modernRideStyles = StyleSheet.create({
 
     heroCardTitle: {
         color: '#fff',
-        fontSize: 24,
+        fontSize: 13,
         fontWeight: '800',
         marginBottom: 8,
         letterSpacing: -0.5,
@@ -121,10 +121,6 @@ const modernRideStyles = StyleSheet.create({
     },
 
     rideTypeBadge: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: '#8c2323',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -232,13 +228,7 @@ const modernRideStyles = StyleSheet.create({
         marginRight: 12,
     },
 
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: -0.5,
-        flex: 1,
-    },
+
 
     mapBadge: {
         flexDirection: 'row',
@@ -256,7 +246,7 @@ const modernRideStyles = StyleSheet.create({
     },
 
     mapWrapper: {
-        height: 400,
+        height: 350,
         marginHorizontal: 20,
         borderRadius: 16,
         overflow: 'hidden',

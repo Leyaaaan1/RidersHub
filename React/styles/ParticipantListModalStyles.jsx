@@ -4,14 +4,14 @@ export const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        justifyContent: 'center', // Changed from 'flex-end' to 'center'
-        alignItems: 'center', // Added to center horizontally
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     modalContainer: {
         backgroundColor: '#0a0a0a',
-        borderRadius: 24, // Changed to have all corners rounded
+        borderRadius: 24,
         padding: 20,
-        width: '90%', // Added to control width
+        width: '90%',
         maxHeight: '85%',
         borderWidth: 1,
         borderColor: '#222',
@@ -43,6 +43,76 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+
+    // QR Code Section
+    qrCodeSection: {
+        backgroundColor: '#111',
+        borderRadius: 16,
+        padding: 20,
+        marginHorizontal: 20,
+        marginTop: 16,
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#222',
+        alignItems: 'center',
+    },
+    qrCodeTitle: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+        marginBottom: 12,
+    },
+    qrCodeContainer: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    qrCodeImage: {
+        width: 200,
+        height: 200,
+        borderRadius: 8,
+    },
+    qrCodePlaceholder: {
+        width: 200,
+        height: 200,
+        backgroundColor: '#f1f5f9',
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    qrCodePlaceholderText: {
+        color: '#64748b',
+        fontSize: 12,
+        fontWeight: '500',
+        marginTop: 8,
+    },
+    qrCodeActions: {
+        flexDirection: 'row',
+        marginTop: 16,
+        gap: 12,
+    },
+    qrActionButton: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#8c2323',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        gap: 8,
+    },
+    qrActionButtonSecondary: {
+        backgroundColor: '#222',
+    },
+    qrActionButtonText: {
+        color: '#fff',
+        fontSize: 13,
+        fontWeight: '600',
+    },
+
     tabContainer: {
         flexDirection: 'row',
         paddingHorizontal: 20,
@@ -95,7 +165,6 @@ export const styles = StyleSheet.create({
     },
     participantsList: {
         paddingBottom: 8,
-
     },
     participantCard: {
         flexDirection: 'row',
@@ -184,6 +253,38 @@ export const styles = StyleSheet.create({
         color: '#666',
         fontSize: 12,
         fontWeight: '500',
+    },
+    requestStatus: {
+        fontSize: 11,
+        fontWeight: '600',
+        textTransform: 'uppercase',
+        marginTop: 4,
+    },
+    statusPending: {
+        color: '#f59e0b',
+    },
+    statusApproved: {
+        color: '#10b981',
+    },
+    statusRejected: {
+        color: '#ef4444',
+    },
+    requestActions: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    actionButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    approveButton: {
+        backgroundColor: '#10b981',
+    },
+    rejectButton: {
+        backgroundColor: '#ef4444',
     },
     acceptButton: {
         flexDirection: 'row',
