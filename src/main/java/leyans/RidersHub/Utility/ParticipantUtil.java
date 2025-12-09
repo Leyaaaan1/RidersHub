@@ -89,6 +89,15 @@ public class ParticipantUtil {
 //    }
 
     @Transactional(readOnly = true)
+    public boolean hasJoinRequest(Integer rideId, String username) {
+        riderUtil.findRideById(rideId); // validate ride existence
+        return joinRequestRepository.findByRideId(rideId)
+                .stream()
+                .anyMatch(joinRequest -> joinRequest.getRequester().getUsername().equals(username));
+    }
+
+
+    @Transactional(readOnly = true)
     public List<JoinerDto> listJoinersByRideIdAndStatus(Integer rideId, JoinRequest.JoinStatus status) {
         Rides ride = riderUtil.findRideById(rideId);
         return joinRequestRepository.findByRideIdAndStatus(rideId, status).stream()

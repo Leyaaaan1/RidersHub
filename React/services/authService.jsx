@@ -29,7 +29,7 @@ export const loginUser = async (username, password) => {
 
 export const registerUser = async (username, password, riderType) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/register`, {
+        const response = await fetch(`${API_BASE_URL}/riders/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password, riderType }),

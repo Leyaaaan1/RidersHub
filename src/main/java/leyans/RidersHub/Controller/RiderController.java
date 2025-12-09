@@ -27,17 +27,15 @@ public class RiderController {
     private final RiderService riderService;
     private final RidesService ridesService;
 
-    private final LocationService locationService;
 
 
 
 
 
     @Autowired
-    public RiderController(RiderService riderService, RidesService ridesService, LocationService locationService) {
+    public RiderController(RiderService riderService, RidesService ridesService) {
         this.riderService = riderService;
         this.ridesService = ridesService;
-        this.locationService = locationService;
     }
 
     @PostMapping("/rider-type")

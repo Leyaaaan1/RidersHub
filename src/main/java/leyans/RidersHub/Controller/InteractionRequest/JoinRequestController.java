@@ -21,6 +21,21 @@ public class JoinRequestController {
         this.participantUtil = participantUtil;
     }
 
+
+    @PostMapping("/request")
+    public ResponseEntity<?> submitJoinRequest(
+            @RequestParam String inviteToken,
+            @RequestParam String username) {
+        try {
+            JoinRequest created = joinRequestService.joinRideByToken(inviteToken, username);
+            return ResponseEntity.ok(created);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to submit join request: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/{inviteToken}")
     public ResponseEntity<JoinRequest> joinByInviteToken(
             @PathVariable String inviteToken,

@@ -13,10 +13,11 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 
 import {getCurrentRiderType, } from '../services/rideService';
 import RidesList from '../components/RidesList';
-import SearchHeader from "../components/SearchHeader";
+import SearchHeader from "../components/ride/util/SearchHeader";
 import MyRidesModal from '../components/MyRidesModal';
 import { modernUtilities } from "../styles/modernUtilities";
 import {getActiveRide} from "../services/startService";
+import ScannerHeader from '../components/ride/util/SqannerHeader';
 
 
 const RiderPage = ({ route , navigation}) => {
@@ -54,7 +55,7 @@ const RiderPage = ({ route , navigation}) => {
     const fetchActiveRide = async () => {
         try {
             setActiveRideLoading(true);
-            const result = await getActiveRide(token); // ✅ Just pass the token
+            const result = await getActiveRide(token); //  Just pass the token
             setActiveRide(result); // The result is already the RideResponseDTO
         } catch (error) {
             console.error('Error fetching active ride:', error);
@@ -107,6 +108,12 @@ const RiderPage = ({ route , navigation}) => {
                             username={username}
                             navigation={navigation}
                         />
+                      <ScannerHeader
+                        token={token}
+                        username={username}
+                        navigation={navigation}
+                      />
+
                     </View>
                 </View>
 

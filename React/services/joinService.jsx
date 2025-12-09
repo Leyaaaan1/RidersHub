@@ -5,27 +5,57 @@ const API_BASE_URL = BASE_URL || 'http://localhost:8080';
 
 export const joinService = {
 
-    joinRideByToken: async (inviteToken, username, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/join/${inviteToken}?username=${username}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+  joinRideByToken: async (inviteToken, username, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/join/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          inviteToken: inviteToken,
+          username: username,
+        }),
+      });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error: ${response.status}`);
-            }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error: ${response.status}`);
+      }
 
-            return await response.json();
-        } catch (error) {
-            console.error('Error joining ride by token:', error);
-            throw error;
-        }
-    },
+      return await response.json();
+    } catch (error) {
+      console.error('Error joining ride by token:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Alternative method using path parameter
+   * Endpoint: POST /join/request/{inviteToken}
+   */
+  joinRideByTokenPath: async (inviteToken, username, token) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/join/request/${inviteToken}?username=${username}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error joining ride by token:', error);
+      throw error;
+    }
+  },
 
 
     getJoinRequestsByRide: async (generatedRidesId, token) => {
