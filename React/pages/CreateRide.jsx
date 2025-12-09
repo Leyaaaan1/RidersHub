@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
+import { ScrollView, Alert } from 'react-native';
 import utilities from '../styles/utilities';
-import { searchLocation, searchCityOrLandmark, createRide, searchRiders, reverseGeocodeLandmark } from '../services/rideService';
+import {
+  searchLocation,
+  searchCityOrLandmark,
+  createRide,
+  reverseGeocodeLandmark,
+  reverseGeocode,
+  getLocationImage,
+} from '../services/rideService';
 import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
-import { handleWebViewMessage } from '../utilities/mapUtils';
-import RideStep4 from "../components/ride/RideStep4";
+import RideStep4 from '../components/ride/RideStep4';
 
 const CreateRide = ({ route, navigation }) => {
     const { token, username } = route.params;
@@ -39,43 +45,26 @@ const CreateRide = ({ route, navigation }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
 
-    const [riderSearchQuery, setRiderSearchQuery] = useState('');
-    const [searchedRiders, setSearchedRiders] = useState([]);
-    const [isRiderSearching, setIsRiderSearching] = useState(false);
 
     const [generatedRidesId, setGeneratedRidesId] = useState(null);
-    const [showRideModal, setShowRideModal] = useState(false);
+  const [ setRideNameImage] = useState([]);
 
     const [mapMode, setMapMode] = useState('starting');
-    const [mapRegion, setMapRegion] = useState({
-        latitude: 7.0731,
-        longitude: 125.6128,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
+    const [setMapRegion] = useState({
+      latitude: 7.0731,
+      longitude: 125.6128,
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
     });
 
     console.log('CreateRide token:', token);
     // Stop Points State
     const [stopPoints, setStopPoints] = useState([]);
 
-    const handleSearchRiders = (query) => {
-        if (query.trim().length >= 2) {
-            setIsRiderSearching(true);
-            searchRiders(token, query)
-                .then(data => {
-                    if (Array.isArray(data)) setSearchedRiders(data);
-                    else setSearchedRiders([]);
-                })
-                .catch(() => setSearchedRiders([]))
-                .finally(() => setIsRiderSearching(false));
-        } else {
-            setSearchedRiders([]);
-        }
-    };
 
     useEffect(() => {
-        if (currentStep === 2) setMapMode('location');
-        else if (currentStep === 3) setMapMode('starting');
+        if (currentStep === 2) {setMapMode('location');}
+        else if (currentStep === 3) {setMapMode('starting');}
     }, [currentStep]);
 
     const handleMessage = (event) => {
@@ -92,7 +81,7 @@ const CreateRide = ({ route, navigation }) => {
                     // Reverse geocode to get location name
                     reverseGeocodeLandmark(token, lat, lng)
                         .then(name => {
-                            if (name) setLocationName(name);
+                            if (name) {setLocationName(name);}
                         })
                         .catch(err => console.log('Error reverse geocoding:', err));
                 } else if (mapMode === 'starting') {
@@ -101,7 +90,7 @@ const CreateRide = ({ route, navigation }) => {
                     // Reverse geocode to get starting point name
                     reverseGeocodeLandmark(token, lat, lng)
                         .then(name => {
-                            if (name) setStartingPoint(name);
+                            if (name) {setStartingPoint(name);}
                         })
                         .catch(err => console.log('Error reverse geocoding:', err));
                 } else if (mapMode === 'ending') {
@@ -110,7 +99,7 @@ const CreateRide = ({ route, navigation }) => {
                     // Reverse geocode to get ending point name
                     reverseGeocodeLandmark(token, lat, lng)
                         .then(name => {
-                            if (name) setEndingPoint(name);
+                            if (name) {setEndingPoint(name);}
                         })
                         .catch(err => console.log('Error reverse geocoding:', err));
                 }
@@ -141,7 +130,7 @@ const CreateRide = ({ route, navigation }) => {
     const handleLocationSelect = async (location) => {
         console.log('Location selected:', location);
         const lat = parseFloat(location.lat);
-        const lon = parseFloat(location.lon);
+        const lon = parseFloat(location.lng);
         setLocationSelected(true);
 
         // Resolve name depending on mode: landmark for 'location', generic reverse for start/end/stop
@@ -215,7 +204,7 @@ const CreateRide = ({ route, navigation }) => {
         const stopPointsPayload = stopPoints.map(sp => ({
             stopLatitude: sp.lat || sp.stopLatitude,
             stopLongitude: sp.lng || sp.stopLongitude,
-            stopName: sp.name || sp.stopName
+            stopName: sp.name || sp.stopName,
         }));
 
         try {
@@ -287,7 +276,7 @@ const CreateRide = ({ route, navigation }) => {
             console.error('Error details:', {
                 message: err.message,
                 response: err.response?.data,
-                status: err.response?.status
+                status: err.response?.status,
             });
 
             let errorMessage = 'An error occurred while creating the ride.';
@@ -311,13 +300,10 @@ const CreateRide = ({ route, navigation }) => {
         }
     };
 
-    const nextStep = () => { if (currentStep < 4) setCurrentStep(currentStep + 1); };
-    const prevStep = () => { if (currentStep > 1) setCurrentStep(currentStep - 1); };
+    const nextStep = () => { if (currentStep < 4) {setCurrentStep(currentStep + 1);} };
+    const prevStep = () => { if (currentStep > 1) {setCurrentStep(currentStep - 1);} };
 
-    const handleSearchInputChange = (text) => {
-        setSearchQuery(text);
-        if (locationSelected) setLocationSelected(false);
-    };
+
 
     return (
         <ScrollView contentContainerStyle={utilities.container}>
@@ -330,11 +316,6 @@ const CreateRide = ({ route, navigation }) => {
                     setRiderType={setRiderType}
                     participants={participants}
                     setParticipants={setParticipants}
-                    riderSearchQuery={riderSearchQuery}
-                    setRiderSearchQuery={setRiderSearchQuery}
-                    searchedRiders={searchedRiders}
-                    isRiderSearching={isRiderSearching}
-                    handleSearchRiders={handleSearchRiders}
                     description={description}
                     setDescription={setDescription}
                     setDate={setDate}
@@ -349,7 +330,6 @@ const CreateRide = ({ route, navigation }) => {
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                     handleLocationSelect={handleLocationSelect}
-                    handleSearchInputChange={handleSearchInputChange}
                     webViewRef={webViewRef}
                     latitude={latitude}
                     longitude={longitude}
@@ -380,7 +360,6 @@ const CreateRide = ({ route, navigation }) => {
                     setStartingPoint={setStartingPoint}
                     endingPoint={endingPoint}
                     setEndingPoint={setEndingPoint}
-                    handleSearchInputChange={handleSearchInputChange}
                     prevStep={prevStep}
                     nextStep={nextStep}
                     handleCreateRide={handleCreateRide}

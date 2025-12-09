@@ -83,9 +83,7 @@ const modernRideStyles = StyleSheet.create({
     // ===== HERO CARD STYLES =====
     heroCard: {
         backgroundColor: '#111',
-        marginHorizontal: 20,
-        marginTop: 20,
-        marginBottom: 16,
+      margin: 8,
         borderRadius: 20,
         padding: 20,
         borderWidth: 1,
@@ -96,7 +94,6 @@ const modernRideStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
-        marginBottom: 20,
     },
 
     heroCardTitle: {
@@ -117,7 +114,6 @@ const modernRideStyles = StyleSheet.create({
         color: '#8c2323',
         fontSize: 14,
         fontWeight: '600',
-        marginLeft: 6,
     },
 
     rideTypeBadge: {
@@ -151,8 +147,10 @@ const modernRideStyles = StyleSheet.create({
     },
 
     infoCardValue: {
-        color: '#fff',
+        color: '#8c2323',
         fontSize: 13,
+      fontStyle: 'italic',
+
         fontWeight: '600',
         lineHeight: 18,
     },
@@ -210,7 +208,7 @@ const modernRideStyles = StyleSheet.create({
 
     // ===== SECTION STYLES =====
     sectionContainer: {
-        marginBottom: 16,
+        marginBottom: 8,
     },
 
     sectionHeaderRow: {
@@ -247,29 +245,24 @@ const modernRideStyles = StyleSheet.create({
 
     mapWrapper: {
         height: 350,
-        marginHorizontal: 20,
         borderRadius: 16,
         overflow: 'hidden',
-        backgroundColor: '#111',
-        borderWidth: 1,
-        borderColor: '#222',
     },
 
     // ===== DESCRIPTION CARD =====
     descriptionCard: {
-        backgroundColor: '#111',
-        marginHorizontal: 20,
-        borderRadius: 16,
-        padding: 20,
-        borderWidth: 1,
-        borderColor: '#222',
+        borderRadius: 8,
+        padding: 8,
+
+
     },
 
     descriptionCardText: {
         color: '#ccc',
         fontSize: 15,
-        lineHeight: 24,
         fontWeight: '400',
+      justifyContent: 'space-between',
+      fontStyle: 'italic',
     },
 
     // ===== MODERN BOTTOM NAV =====

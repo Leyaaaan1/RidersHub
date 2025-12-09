@@ -21,29 +21,17 @@ const RideRoutesPage = ({ route }) => {
         generatedRidesId,
         endingPoint,
         token,
-        startMapImage,
-        endMapImage,
-        mapImage,
-        rideNameImage,
-        rideName,
-        locationName,
-        riderType,
-        date,
-        participants,
-        description,
-        distance,
-        username,
-        currentUsername,
+
     } = route.params;
 
-    console.log("sample", route.params);
+    console.log('sample', route.params);
 
-    const [startingPointImages, setStartingPointImages] = useState([]);
-    const [endingPointImages, setEndingPointImages] = useState([]);
-    const [startingPointImageLoading, setStartingPointImageLoading] = useState(false);
-    const [endingPointImageLoading, setEndingPointImageLoading] = useState(false);
-    const [startingPointImageError, setStartingPointImageError] = useState(null);
-    const [endingPointImageError, setEndingPointImageError] = useState(null);
+    const [ setStartingPointImages] = useState([]);
+    const [ setEndingPointImages] = useState([]);
+    const [ setStartingPointImageLoading] = useState(false);
+    const [ setEndingPointImageLoading] = useState(false);
+    const [ setStartingPointImageError] = useState(null);
+    const [ setEndingPointImageError] = useState(null);
 
     const [stopPoints, setStopPoints] = useState([]);
     const [stopPointsLoading, setStopPointsLoading] = useState(false);
@@ -52,6 +40,7 @@ const RideRoutesPage = ({ route }) => {
 
     // Placeholder direction images
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
     const fetchStopPointImage = async (stopName) => {
         try {
             const images = await getLocationImage(stopName, token);
@@ -62,6 +51,7 @@ const RideRoutesPage = ({ route }) => {
         }
     };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
     const fetchPointImages = async (start, end) => {
         try {
             setStartingPointImageLoading(true);
@@ -98,7 +88,7 @@ const RideRoutesPage = ({ route }) => {
                 }
                 setStopPointImages(imagesMap);
             } catch (err) {
-                setStopPointsError(err.message || "Failed to load stop points");
+                setStopPointsError(err.message || 'Failed to load stop points');
             } finally {
                 setStopPointsLoading(false);
             }
@@ -106,11 +96,11 @@ const RideRoutesPage = ({ route }) => {
         if (generatedRidesId && token) {
             fetchStopPoints();
         }
-    }, [token, generatedRidesId]);
+    }, [token, generatedRidesId, fetchStopPointImage]);
 
     useEffect(() => {
         fetchPointImages(startingPoint, endingPoint);
-    }, [startingPoint, endingPoint, token]);
+    }, [startingPoint, endingPoint, token, fetchPointImages]);
 
     return (
         <ScrollView style={rideRoutesPageUtilities.scrollView} contentContainerStyle={{ paddingBottom: 30 }}>

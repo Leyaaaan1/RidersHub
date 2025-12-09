@@ -10,20 +10,12 @@ export const styles = StyleSheet.create({
     modalContainer: {
         backgroundColor: '#0a0a0a',
         borderRadius: 24,
-        padding: 20,
         width: '90%',
         maxHeight: '85%',
         borderWidth: 1,
         borderColor: '#222',
     },
-    modalHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: '#1a1a1a',
-    },
+
     modalTitle: {
         color: '#fff',
         fontSize: 22,
@@ -36,12 +28,9 @@ export const styles = StyleSheet.create({
         fontWeight: '500',
     },
     closeButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.1)',
         alignItems: 'center',
         justifyContent: 'center',
+        marginLeft: 'auto',
     },
 
     // QR Code Section

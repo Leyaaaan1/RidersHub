@@ -1,4 +1,4 @@
-import { BASE_URL  } from '@env';
+import {BASE_URL} from '@env';
 
 // Use API_BASE_URL instead of hardcoded value
 const API_BASE_URL = BASE_URL  || 'http://localhost:8080';
@@ -9,8 +9,8 @@ export const searchLocation = async (token, query) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -31,8 +31,8 @@ export const searchCityOrLandmark = async (token, query) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -49,24 +49,29 @@ export const searchCityOrLandmark = async (token, query) => {
 
 export const reverseGeocode = async (token, lat, lon) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/location/reverse?lat=${lat}&lon=${lon}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+      const response = await fetch(
+        `${API_BASE_URL}/location/reverse?lat=${lat}&lon=${lon}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to reverse geocode: ${response.status} ${errorText}`);
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to reverse geocode: ${response.status} ${errorText}`,
+        );
+      }
 
-        // Since the backend returns a String for reverse geocoding
-        const result = await response.text();
-        return result;
+      // Since the backend returns a String for reverse geocoding
+
+      return await response.text();
     } catch (err) {
-        console.error("Reverse geocode fetch failed:", err);
+        console.error('Reverse geocode fetch failed:', err);
         return null;
     }
 };
@@ -78,8 +83,8 @@ export const reverseGeocodeLandmark = async (token, lat, lon) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -87,11 +92,10 @@ export const reverseGeocodeLandmark = async (token, lat, lon) => {
             throw new Error(`Failed to reverse geocode: ${response.status} ${errorText}`);
         }
 
-        // Since the backend returns a String for reverse geocoding
-        const result = await response.text();
-        return result;
+        // Since the backend returns a String for reverse geocodin
+        return await response.text();
     } catch (err) {
-        console.error("Reverse geocode fetch failed:", err);
+        console.error('Reverse geocode fetch failed:', err);
         return null;
     }
 };
@@ -121,7 +125,7 @@ export const createRide = async (rideData, token) => {
 
         const headers = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${cleanToken}`
+            'Authorization': `Bearer ${cleanToken}`,
         };
 
         console.log('Request headers:', headers);
@@ -129,7 +133,7 @@ export const createRide = async (rideData, token) => {
         const response = await fetch(`${API_BASE_URL}/riders/create`, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify(rideData)
+            body: JSON.stringify(rideData),
         });
 
         console.log('Response status:', response.status);
@@ -199,8 +203,8 @@ export const searchRiders = async (token, username = '') => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -221,8 +225,8 @@ export const getCurrentRiderType = async (token) => {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
+                'Content-Type': 'application/json',
+            },
         });
 
         if (response.ok) {
@@ -244,8 +248,8 @@ export const fetchRideMapImage = async (generatedRidesId, token) => {
     try {
         const response = await fetch(`${API_BASE_URL}/riders/${generatedRidesId}/map-image`, {
             headers: token ? {
-                'Authorization': `Bearer ${token}`
-            } : {}
+                'Authorization': `Bearer ${token}`,
+            } : {},
         });
 
         if (!response.ok) {
@@ -253,10 +257,10 @@ export const fetchRideMapImage = async (generatedRidesId, token) => {
         }
 
         const imageUrl = await response.text();
-        console.log("Map image URL fetched from backend:", imageUrl);
+        console.log('Map image URL fetched from backend:', imageUrl);
         return imageUrl;
     } catch (error) {
-        console.error("Error fetching ride map image:", error);
+        console.error('Error fetching ride map image:', error);
         throw error;
     }
 };
@@ -268,8 +272,8 @@ export const getRideDetails = async (generatedRidesId, token) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -294,8 +298,8 @@ export const fetchRides = async (token, page = 0, size = 5) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -317,8 +321,8 @@ export const fetchMyRides = async (token) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
@@ -341,8 +345,8 @@ export const getLocationImage = async (rideName, token) => {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Authorization': `Bearer ${token}`,
+            },
         });
 
         if (!response.ok) {
