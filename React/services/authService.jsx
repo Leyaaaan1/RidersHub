@@ -48,6 +48,7 @@ export const registerUser = async (username, password, riderType) => {
     }
 };
 
+/*
 export const loginWithFacebook = async (facebookAccessToken) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/facebook/login`, {
@@ -70,3 +71,4 @@ export const loginWithFacebook = async (facebookAccessToken) => {
         };
     }
 };
+*/

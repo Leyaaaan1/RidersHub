@@ -65,45 +65,5 @@ public class RouteController {
         return ResponseEntity.ok(geoJson);
     }
 
-    /**
-     * Extract coordinates from GeoJSON and return as simple coordinate array
-     */
-    private String extractCoordinatesFromGeoJSON(String geoJsonRoute) {
-        try {
-            if (geoJsonRoute == null || geoJsonRoute.trim().isEmpty()) {
-                return "[]";
-            }
 
-            // Parse the GeoJSON string to extract coordinates
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            com.fasterxml.jackson.databind.JsonNode rootNode = mapper.readTree(geoJsonRoute);
-
-            com.fasterxml.jackson.databind.JsonNode featuresNode = rootNode.get("features");
-            if (featuresNode != null && featuresNode.isArray() && featuresNode.size() > 0) {
-                com.fasterxml.jackson.databind.JsonNode geometry = featuresNode.get(0).get("geometry");
-                com.fasterxml.jackson.databind.JsonNode coordinates = geometry.get("coordinates");
-
-                // Convert GeoJSON coordinates [lng, lat] to [lat, lng] format for frontend
-                java.util.List<double[]> coordList = new java.util.ArrayList<>();
-                if (coordinates.isArray()) {
-                    for (com.fasterxml.jackson.databind.JsonNode coord : coordinates) {
-                        if (coord.isArray() && coord.size() >= 2) {
-                            // Convert from [lng, lat] to [lat, lng]
-                            coordList.add(new double[]{
-                                    coord.get(1).asDouble(), // latitude
-                                    coord.get(0).asDouble()  // longitude
-                            });
-                        }
-                    }
-                }
-
-                return mapper.writeValueAsString(coordList);
-            }
-
-            return "[]";
-        } catch (Exception e) {
-            System.err.println("Error extracting coordinates from GeoJSON: " + e.getMessage());
-            return "[]";
-        }
-    }
 }

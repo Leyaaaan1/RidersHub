@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,30 +7,23 @@ import {
   Alert,
   ActivityIndicator,
   Linking,
+  StyleSheet,
 } from 'react-native';
-import { RNCamera } from 'react-native-camera';
+import { Camera, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {joinService} from '../../../services/joinService';
-import {scannerStyle} from '../../../styles/ScannerStyle';
-import { PermissionsAndroid } from 'react-native';
+import { joinService } from '../../../services/joinService';
+import { scannerStyle } from '../../../styles/ScannerStyle';
 
 const ScannerHeader = ({ token, username }) => {
-  const [hasPermission, setHasPermission] = useState(null);
   const [scannerVisible, setScannerVisible] = useState(false);
   const [scanning, setScanning] = useState(true);
   const [processing, setProcessing] = useState(false);
 
+  const { hasPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice('back');
 
-  useEffect(() => {
-    (async () => {
-      const permission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA
-      );
-      setHasPermission(permission === PermissionsAndroid.RESULTS.GRANTED);
-    })();
-  }, []);
-  const handleBarCodeScanned = async ({data}) => {
-    if (!scanning || processing) {return;}
+  const handleBarCodeScanned = useCallback(async (data) => {
+    if (!scanning || processing || !data) return;
 
     setScanning(false);
     setProcessing(true);
@@ -63,7 +56,7 @@ const ScannerHeader = ({ token, username }) => {
       setScannerVisible(false);
 
       Alert.alert(
-        '✅ Request Submitted',
+        'Request Submitted',
         'Your join request has been submitted! Waiting for the ride creator to approve.',
         [
           {
@@ -97,27 +90,40 @@ const ScannerHeader = ({ token, username }) => {
       setProcessing(false);
       setScanning(true);
     }
-  };
+  }, [scanning, processing, username, token]);
 
-  const openScanner = () => {
-    if (hasPermission === null) {
-      Alert.alert('Permission Required', 'Requesting camera permission...');
-      return;
-    }
-    if (hasPermission === false) {
-      Alert.alert(
-        'Camera Permission Required',
-        'Please enable camera permission in your device settings to scan QR codes.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: () => Linking.openSettings() },
-        ]
-      );
-      return;
+  // Use the built-in code scanner
+  const codeScanner = useCodeScanner({
+    codeTypes: ['qr'],
+    onCodeScanned: (codes) => {
+      if (codes.length > 0 && scanning && !processing) {
+        handleBarCodeScanned(codes[0].value);
+      }
+    },
+  });
+
+  const openScanner = async () => {
+    if (!hasPermission) {
+      const granted = await requestPermission();
+      if (!granted) {
+        Alert.alert(
+          'Camera Permission Required',
+          'Please enable camera permission in your device settings to scan QR codes.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
     }
     setScannerVisible(true);
     setScanning(true);
   };
+
+  if (!device) {
+    return null;
+  }
 
   return (
     <>
@@ -153,26 +159,28 @@ const ScannerHeader = ({ token, username }) => {
           </View>
 
           <View style={scannerStyle.cameraContainer}>
-            <RNCamera
-              style={scannerStyle.camera}
-              type={RNCamera.Constants.Type.back}
-              onBarCodeRead={scanning ? handleBarCodeScanned : undefined}
-              barCodeTypes={[RNCamera.Constants.BarCodeType.qr]}
-            >
-              <View style={scannerStyle.scanFrame}>
-                <View style={scannerStyle.scanCorner} />
-                <View style={[scannerStyle.scanCorner, scannerStyle.scanCornerTopRight]} />
-                <View style={[scannerStyle.scanCorner, scannerStyle.scanCornerBottomLeft]} />
-                <View style={[scannerStyle.scanCorner, scannerStyle.scanCornerBottomRight]} />
-              </View>
+            {scannerVisible && hasPermission && device && (
+              <Camera
+                style={StyleSheet.absoluteFill}
+                device={device}
+                isActive={scannerVisible}
+                codeScanner={codeScanner}
+              />
+            )}
 
-              {processing && (
-                <View style={scannerStyle.processingOverlay}>
-                  <ActivityIndicator size="large" color="#fff" />
-                  <Text style={scannerStyle.processingText}>Processing...</Text>
-                </View>
-              )}
-            </RNCamera>
+            <View style={scannerStyle.scanFrame}>
+              <View style={scannerStyle.scanCorner} />
+              <View style={[scannerStyle.scanCorner, scannerStyle.scanCornerTopRight]} />
+              <View style={[scannerStyle.scanCorner, scannerStyle.scanCornerBottomLeft]} />
+              <View style={[scannerStyle.scanCorner, scannerStyle.scanCornerBottomRight]} />
+            </View>
+
+            {processing && (
+              <View style={scannerStyle.processingOverlay}>
+                <ActivityIndicator size="large" color="#fff" />
+                <Text style={scannerStyle.processingText}>Processing...</Text>
+              </View>
+            )}
           </View>
 
           <View style={scannerStyle.instructionsContainer}>
