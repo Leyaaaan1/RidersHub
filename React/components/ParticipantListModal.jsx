@@ -370,6 +370,12 @@ const ParticipantListModal = ({
           </View>
 
           <View style={styles.contentContainer}>
+            {!isOwner && (
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <FontAwesome name="times" size={20} color="#fff" />
+              </TouchableOpacity>
+            )}
+
             {state.activeTab === 'participants' && (
               <View style={styles.participantsContainer}>
                 {Array.isArray(participants) && participants.length > 0 ? (

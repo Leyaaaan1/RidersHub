@@ -5,84 +5,42 @@ const API_BASE_URL = BASE_URL || 'http://localhost:8080';
 
 export const joinService = {
 
-  joinRideByToken: async (inviteToken, username, token) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/join/request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          inviteToken: inviteToken,
-          username: username,
-        }),
-      });
+    joinRideByToken: async (inviteToken, token) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/join-request/${inviteToken}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error: ${response.status}`);
-      }
+        if (!response.ok) {
+          const contentType = response.headers.get('content-type');
+          let errorMessage;
 
-      return await response.json();
-    } catch (error) {
-      console.error('Error joining ride by token:', error);
-      throw error;
-    }
-  },
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData;
+          } else {
+            errorMessage = await response.text();
+          }
 
-  /**
-   * Alternative method using path parameter
-   * Endpoint: POST /join/request/{inviteToken}
-   */
-  joinRideByTokenPath: async (inviteToken, username, token) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/join/request/${inviteToken}?username=${username}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Error: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error joining ride by token:', error);
-      throw error;
-    }
-  },
-
-
-    getJoinRequestsByRide: async (generatedRidesId, token) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/join/${generatedRidesId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `Error: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error fetching join requests:', error);
-            throw error;
+          throw new Error(errorMessage || `Error: ${response.status}`);
         }
+
+        return await response.json();
+      } catch (error) {
+        console.error('Error joining ride by token:', error);
+        throw error;
+      }
     },
+
+
 
     getJoinersByRide: async (generatedRidesId, token, status = null) => {
         try {
-            let url = `${API_BASE_URL}/join/${generatedRidesId}/joiners`;
+            let url = `${API_BASE_URL}/join-request/${generatedRidesId}/joiners`;
 
             if (status) {
                 url += `?status=${status}`;
@@ -92,8 +50,8 @@ export const joinService = {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
+                    'Authorization': `Bearer ${token}`,
+                },
             });
 
             if (!response.ok) {
@@ -108,25 +66,17 @@ export const joinService = {
         }
     },
 
-
-    getPendingJoiners: async (generatedRidesId, token) => {
-        return await joinService.getJoinersByRide(generatedRidesId, token, 'PENDING');
-    },
-
-
-    getApprovedJoiners: async (generatedRidesId, token) => {
-        return await joinService.getJoinersByRide(generatedRidesId, token, 'APPROVED');
-    },
+  
 
 
     approveJoinRequest: async (joinId, token) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/join/approve/${joinId}`, {
+            const response = await fetch(`${API_BASE_URL}/join-request/approve/${joinId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
+                    'Authorization': `Bearer ${token}`,
+                },
             });
 
             if (!response.ok) {
@@ -144,12 +94,12 @@ export const joinService = {
 
     rejectJoinRequest: async (joinId, token) => {
         try {
-            const response = await fetch(`${API_BASE_URL}/join/reject/${joinId}`, {
+            const response = await fetch(`${API_BASE_URL}/join-request/reject/${joinId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
+                    'Authorization': `Bearer ${token}`,
+                },
             });
 
             if (!response.ok) {

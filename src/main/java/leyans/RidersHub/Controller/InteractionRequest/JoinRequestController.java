@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/join")
+@RequestMapping("/join-request")
 public class JoinRequestController {
 
     private final JoinRequestService joinRequestService;
@@ -22,34 +22,23 @@ public class JoinRequestController {
     }
 
 
-    @PostMapping("/request")
-    public ResponseEntity<?> submitJoinRequest(
-            @RequestParam String inviteToken,
-            @RequestParam String username) {
+    @PostMapping("/{inviteToken}")
+    public ResponseEntity<?> joinViaInvite(@PathVariable String inviteToken) {
         try {
-            JoinRequest created = joinRequestService.joinRideByToken(inviteToken, username);
+            JoinRequest created = joinRequestService.joinRideByToken(inviteToken);
             return ResponseEntity.ok(created);
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to submit join request: " + e.getMessage());
         }
     }
 
-    @PostMapping("/{inviteToken}")
-    public ResponseEntity<JoinRequest> joinByInviteToken(
-            @PathVariable String inviteToken,
-            @RequestParam String username) {
-
-        JoinRequest created = joinRequestService.joinRideByToken(inviteToken, username);
-        return ResponseEntity.ok(created);
-    }
 
     @GetMapping("/{generatedRidesId}")
     public ResponseEntity<List<JoinRequest>> listJoinRequestsByRide(@PathVariable Integer generatedRidesId) {
         List<JoinRequest> joinRequests = participantUtil.listJoinRequestsByRideId(generatedRidesId);
         return ResponseEntity.ok(joinRequests);
     }
+
 
 
     @GetMapping("/{generatedRidesId}/joiners")
@@ -72,4 +61,8 @@ public class JoinRequestController {
         JoinRequest rejected = joinRequestService.rejectJoinRequest(joinId);
         return ResponseEntity.ok(rejected);
     }
+
+
+
+
 }

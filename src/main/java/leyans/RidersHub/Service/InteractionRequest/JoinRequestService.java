@@ -33,25 +33,23 @@ public class JoinRequestService {
 
 
     @Transactional
-    public JoinRequest joinRideByToken(String inviteToken, String username) {
-        // 1. Validate invite exists and is not expired
+    public JoinRequest joinRideByToken(String inviteToken) {
+        String username = riderUtil.getCurrentUsername();
+
         InviteRequest invite = participantUtil.findInviteByToken(inviteToken);
         participantUtil.validateInviteNotExpired(invite);
 
         Rides ride = invite.getRides();
         Rider requester = riderUtil.findRiderByUsername(username);
 
-        // 2. Check if user is already the ride creator
         if (ride.getUsername().getUsername().equals(username)) {
             throw new IllegalStateException("You are the creator of this ride");
         }
 
-        // 3. Check if user is already a participant
         if (participantUtil.hasJoinRequest(ride.getGeneratedRidesId(), username)) {
             throw new IllegalStateException("You are already a participant in this ride");
         }
 
-        // 4. Check if join request already exists
         joinRequestRepository.findByInviteTokenAndRequester(inviteToken, username)
                 .ifPresent(existing -> {
                     if (existing.getJoinStatus() == JoinRequest.JoinStatus.PENDING) {
@@ -61,11 +59,9 @@ public class JoinRequestService {
                     }
                 });
 
-        // 5. Create new PENDING join request
         JoinRequest joinRequest = new JoinRequest(ride, requester, inviteToken);
         return joinRequestRepository.save(joinRequest);
     }
-
     @Transactional(readOnly = true)
     public List<JoinerDto> listJoinersByRide(Integer generatedRidesId, JoinRequest.JoinStatus status) {
         if (status != null) {

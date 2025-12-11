@@ -52,6 +52,7 @@ const ScannerHeader = ({ token, username }) => {
         username,
         token,
       );
+      console.log('Join ride result:', result);
 
       setScannerVisible(false);
 

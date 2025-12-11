@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/invite")
+@RequestMapping("/invite-request")
 public class InviteRequestController {
 
     private final ParticipantUtil participantUtil;
@@ -18,7 +18,6 @@ public class InviteRequestController {
     public InviteRequestController(ParticipantUtil participantUtil) {
         this.participantUtil = participantUtil;
     }
-
 
     @GetMapping("/{generatedRidesId}/qr-url")
     public ResponseEntity<String> getQrCodeUrl(@PathVariable Integer generatedRidesId) {
@@ -37,4 +36,6 @@ public class InviteRequestController {
         String inviteDetails = participantUtil.getInviteUrlByRideId(generatedRidesId);
         return ResponseEntity.ok(inviteDetails);
     }
+
+
 }

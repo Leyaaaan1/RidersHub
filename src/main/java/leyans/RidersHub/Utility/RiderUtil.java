@@ -7,6 +7,7 @@ import leyans.RidersHub.Repository.StartedRideRepository;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StartedRide;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -41,14 +42,23 @@ public class RiderUtil {
         return rider;
     }
 
+
     public StartedRide findStartedRideByRideId(Integer generatedRidesId) {
         return startedRideRepository.findByRideGeneratedRidesId(generatedRidesId)
                 .orElseThrow(() -> new EntityNotFoundException("Started ride not found with ride ID: " + generatedRidesId));
     }
 
     public String getCurrentUsername() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Getting current username - Auth: " + authentication);
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User not authenticated");
+        }
+
+        return authentication.getName();
     }
+
 
     public List<StartedRide> findStartedRidesByRider(Rider rider) {
         return startedRideRepository.findAll().stream()

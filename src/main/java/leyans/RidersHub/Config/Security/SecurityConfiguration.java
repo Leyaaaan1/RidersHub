@@ -55,14 +55,15 @@ public class SecurityConfiguration {
                                 "/riders/current-rider-type",
                                 "/location/**",
                                 "/participants/**",
-                                "/join/**",
                                 "/riders/*/map-image",
                                 "/update/**",
                                 "/start/**",
                                 "/wikimedia",
                                 "/routes",
                                 "/invite/**",
-                                "/join/**"
+                                "/join/**",
+                                "/join-request/**",
+                                "/invite-request/**"
                         )
                         .authenticated()
                         .anyRequest().authenticated())
