@@ -71,6 +71,8 @@ public class RideParticipantService {
         }
     }
 
+
+
 //    public List<Rider> getRideParticipants(Integer generatedRidesId) {
 //        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
 //                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));

@@ -1,10 +1,9 @@
 // React/components/SearchHeader.jsx
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
-import colors from "../styles/colors";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import { getRideDetails } from '../services/rideService';
-import riderPageUtils from "../styles/riderPageUtils";
+import colors from '../../../styles/colors';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { getRideDetails } from '../../../services/rideService';
 
 const SearchHeader = ({ token, username, navigation }) => {
     const [searchId, setSearchId] = useState('');
@@ -34,7 +33,7 @@ const SearchHeader = ({ token, username, navigation }) => {
                 participants: ride.participants,
                 description: ride.description,
                 token: token,
-                username: username
+                username: username,
             });
         } catch (error) {
             setError(error.message || 'Failed to find ride');
@@ -55,7 +54,7 @@ const SearchHeader = ({ token, username, navigation }) => {
                         borderRadius: 5,
                         padding: 10,
                         marginRight: 10,
-                        color: '#fff'
+                        color: '#fff',
                     }}
                     placeholder="Ride ID"
                     placeholderTextColor="#fff"
@@ -78,6 +77,8 @@ const SearchHeader = ({ token, username, navigation }) => {
                         <FontAwesome name="search" size={18} color="#fff" />
                     )}
                 </TouchableOpacity>
+
+
             </View>
             {error ? (
                 <Text style={{ color: colors.primary, marginTop: 5 }}>{error}</Text>

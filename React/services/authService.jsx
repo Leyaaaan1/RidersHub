@@ -29,7 +29,7 @@ export const loginUser = async (username, password) => {
 
 export const registerUser = async (username, password, riderType) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/register`, {
+        const response = await fetch(`${API_BASE_URL}/riders/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password, riderType }),
@@ -48,6 +48,7 @@ export const registerUser = async (username, password, riderType) => {
     }
 };
 
+/*
 export const loginWithFacebook = async (facebookAccessToken) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/facebook/login`, {
@@ -70,3 +71,4 @@ export const loginWithFacebook = async (facebookAccessToken) => {
         };
     }
 };
+*/

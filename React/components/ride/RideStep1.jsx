@@ -8,8 +8,7 @@ import InputUtilities from "../../styles/InputUtilities";
 
 const RideStep1 = ({
                        error, rideName, setRideName, riderType, setRiderType,
-                       participants, setParticipants, description, riderSearchQuery, setRiderSearchQuery,
-                       searchedRiders, date, setDate, isRiderSearching, handleSearchRiders, setDescription, nextStep
+                       participants, setParticipants, description, date, setDate, isRiderSearching, handleSearchRiders, setDescription, nextStep,
                    }) => {
 
     const [datePickerOpen, setDatePickerOpen] = useState(false);
@@ -196,98 +195,6 @@ const RideStep1 = ({
                 </View>
             </View>
 
-            {/* Riders Section */}
-            <View style={InputUtilities.cardContainer}>
-                <Text style={InputUtilities.sectionTitle}>Who's Joining?</Text>
-                <Text style={InputUtilities.label}>Search and add riders to your adventure</Text>
-
-                <TextInput
-                    style={[
-                        InputUtilities.inputCenter,
-                        focusedInput === 'riders' && InputUtilities.inputCenterFocused
-                    ]}
-                    value={riderSearchQuery}
-                    onChangeText={(text) => {
-                        setRiderSearchQuery(text);
-                        handleSearchRiders(text);
-                    }}
-                    onFocus={() => setFocusedInput('riders')}
-                    onBlur={() => setFocusedInput(null)}
-                    placeholder="Search for riders..."
-                    placeholderTextColor="#94a3b8"
-                />
-
-                {isRiderSearching && (
-                    <ActivityIndicator size="small" color="#8c2323" style={{marginVertical: 16}} />
-                )}
-
-                {/* Search Results */}
-                {searchedRiders.length > 0 && riderSearchQuery.trim() !== '' && (
-                    <View style={InputUtilities.searchResultsList}>
-                        <ScrollView style={{ maxHeight: 200 }}>
-                            {searchedRiders.map((username, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={InputUtilities.searchResultItem}
-                                    onPress={() => {
-                                        try {
-                                            const participantsList = participants ? participants.split(',').map(p => p.trim()) : [];
-                                            if (!participantsList.includes(username)) {
-                                                setParticipants(participants ?
-                                                    `${participants}, ${username}` :
-                                                    username);
-                                            }
-                                            setRiderSearchQuery('');
-                                            handleSearchRiders('');
-                                        } catch (error) {
-                                            console.error('Error selecting participant:', error);
-                                        }
-                                    }}
-                                >
-                                    <Text style={InputUtilities.searchResultName}>{username}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                )}
-
-                {/* Selected Participants */}
-                {participants && (
-                    <View style={InputUtilities.participantsTable}>
-                        <View style={InputUtilities.tableHeader}>
-                            <Text style={InputUtilities.tableHeaderText}>Selected Riders</Text>
-                        </View>
-                        <ScrollView style={{maxHeight: participants.split(',').length > 4 ? 200 : 'auto'}}>
-                            {participants.split(',').map((participant, index) => (
-                                participant.trim() && (
-                                    <View key={index} style={[
-                                        InputUtilities.tableRow,
-                                        index % 2 === 0 ? InputUtilities.tableRowEven : InputUtilities.tableRowOdd
-                                    ]}>
-                                        <Text style={InputUtilities.participantName}>{participant.trim()}</Text>
-                                        <TouchableOpacity
-                                            style={{ padding: 8 }}
-                                            onPress={() => {
-                                                const updated = participants.split(',')
-                                                    .filter(p => p.trim() !== participant.trim())
-                                                    .join(', ');
-                                                setParticipants(updated);
-                                            }}
-                                        >
-                                            <FontAwesome name="times-circle" size={20} color="#ef4444" />
-                                        </TouchableOpacity>
-                                    </View>
-                                )
-                            ))}
-                        </ScrollView>
-                        {(!participants || participants.trim() === '') && (
-                            <View style={{ padding: 20, alignItems: 'center' }}>
-                                <Text style={InputUtilities.label}>No riders added yet</Text>
-                            </View>
-                        )}
-                    </View>
-                )}
-            </View>
 
             {/* Description Section */}
             <View style={InputUtilities.cardContainer}>

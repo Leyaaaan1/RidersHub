@@ -36,48 +36,7 @@ public class RiderLocationController {
     }
 
 
-    //use started ride id to update,
-//    @PostMapping("/update/{generatedRidesId}")
-//    public ResponseEntity<LocationUpdateRequestDTO> updateParticipantLocation(
-//            @PathVariable Integer generatedRidesId,
-//            @RequestBody Map<String, Double> coordinates) {
-//
-//        double latitude = coordinates.get("latitude");
-//        double longitude = coordinates.get("longitude");
-//
-//        // This already updates the authenticated user's location
-//        LocationUpdateRequestDTO response = rideLocationService.updateLocation(generatedRidesId, latitude, longitude);
-//        return ResponseEntity.ok(response);
-//    }
-//
-//
-//    @GetMapping("/test/auth")
-//    public ResponseEntity<String> testAuth() {
-//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-//        return ResponseEntity.ok("Authenticated as: " + username);
-//    }
-
-//    @GetMapping("/rider/{username}")
-//    public ResponseEntity<LocationUpdateRequestDTO> getRiderLocation(@PathVariable String username) {
-//        LocationUpdateRequestDTO location = rideLocationService.getRiderLocation(username);
-//        return ResponseEntity.ok(location);
-//    }
 }
-
-   /* @PostMapping("/update/{rideId}/{username}")
-    public ResponseEntity<LocationUpdateRequestDTO> updateLocation(
-            @PathVariable Integer rideId,
-            @PathVariable String username,
-            @RequestBody Map<String, Double> coordinates) {
-
-        double latitude = coordinates.get("latitude");
-        double longitude = coordinates.get("longitude");
-
-        LocationUpdateRequestDTO response = rideLocationService.updateLocation(rideId, username, latitude, longitude);
-*/
-
-
-//        @GetMapping("/rider/{rideId}")
 
 
 

@@ -65,7 +65,7 @@ export const modernUtilities = {
     },
     searchContainer: {
         height: 50,
-        width: 120,
+        width: 150,
         borderWidth: 1,
         borderRadius: 25,
     },
