@@ -39,6 +39,8 @@ const RideStep4 = (props) => {
     currentUsername = props.currentUsername || routeParams.currentUsername,
   } = props;
 
+  console.log('RideStep4 props:', props);
+
   const [state, setState] = useState({
     mapImage: null,
     startMapImage: null,

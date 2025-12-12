@@ -33,13 +33,15 @@ public class StartedUtil {
     private final StartedRideRepository startedRideRepository;
 
     private final RidesService ridesService;
+    private final RidesUtil ridesUtil;
 
-    public StartedUtil(RiderUtil riderUtil, ParticipantLocationRepository participantLocationRepository, LocationService locationService, StartedRideRepository startedRideRepository, RidesService ridesService) {
+    public StartedUtil(RiderUtil riderUtil, ParticipantLocationRepository participantLocationRepository, LocationService locationService, StartedRideRepository startedRideRepository, RidesService ridesService, RidesUtil ridesUtil) {
         this.riderUtil = riderUtil;
         this.participantLocationRepository = participantLocationRepository;
         this.locationService = locationService;
         this.startedRideRepository = startedRideRepository;
         this.ridesService = ridesService;
+        this.ridesUtil = ridesUtil;
     }
 
 
@@ -125,7 +127,7 @@ public class StartedUtil {
                 ride.getMagImageEndingLocation(),
                 ride.getUsername().getUsername(),
                 ride.getRouteCoordinates(),
-                ridesService.mapStopPointsToDTOs(ride.getStopPoints()),
+                ridesUtil.mapStopPointsToDTOs(ride.getStopPoints()),
                 ride.getActive()
         );
     }
@@ -175,27 +177,5 @@ public class StartedUtil {
         return response;
     }
 
-    public Rides validateAndGetRide(Integer generatedRidesId, Rider initiator) throws AccessDeniedException {
-        Rides ride = riderUtil.findRideById(generatedRidesId);
 
-        if (ride == null) {
-            throw new RuntimeException("Ride not found with ID: " + generatedRidesId);
-        }
-
-        if (ride.getUsername() == null) {
-            throw new RuntimeException("Ride does not have a valid creator");
-        }
-
-        // Check if the ride is already started
-        if (startedRideRepository.existsByRide(ride)) {
-            throw new IllegalStateException("This ride has already been started");
-        }
-
-        // Check if the initiator already has an ongoing ride
-        if (startedRideRepository.existsByUsername(initiator)) {
-            throw new IllegalStateException("You already have a ride in progress");
-        }
-
-        return ride;
-    }
 }

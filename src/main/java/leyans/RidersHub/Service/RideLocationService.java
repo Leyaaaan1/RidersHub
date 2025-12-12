@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +55,7 @@ public class RideLocationService {
 
         String locationName = null;
         if (barangayName != null) {
-            List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
+            Optional<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
             locationName = psgcDataList.stream()
                     .findFirst()
                     .map(PsgcData::getName)

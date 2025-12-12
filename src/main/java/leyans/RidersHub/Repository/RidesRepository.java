@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import leyans.RidersHub.model.Rides;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -35,6 +36,29 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     void deactivateRide(@Param("generatedRidesId") Integer generatedRidesId);
 
 
+
+    @Query("SELECT r FROM Rides r WHERE r.active = true ORDER BY r.date DESC")
+    Page<Rides> findAllActiveSummary(Pageable pageable);
+
+    /**
+     * Use for detail views - loads everything needed
+     * Single query with all relationships
+     */
+    @EntityGraph(attributePaths = {
+            "username",
+            "riderType",
+            "participants",
+            "stopPoints"
+    })
+    @Query("SELECT r FROM Rides r WHERE r.generatedRidesId = :generatedRidesId")
+    Optional<Rides> findByGeneratedRidesIdWithDetails(@Param("generatedRidesId") Integer generatedRidesId);
+
+    /**
+     * Use for map display - only spatial data
+     */
+    @Query("SELECT r.generatedRidesId, r.ridesName, r.location, r.startingLocation, " +
+            "r.endingLocation FROM Rides r WHERE r.active = true")
+    List<Object[]> findAllActiveLocations();
 
 
 

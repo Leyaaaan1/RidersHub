@@ -13,8 +13,12 @@ import java.util.List;
 @Entity
 @Table(name = "event_rides",
         indexes = {
-                @Index(name = "idx_generated_rides_id", columnList = "generatedRidesId")
-        })
+                @Index(name = "idx_generated_rides_id", columnList = "generatedRidesId"),
+                @Index(name = "idx_rides_username_date", columnList = "username, ride_date, active"),
+                @Index(name = "idx_rides_date", columnList = "ride_date"),
+                @Index(name = "idx_rides_active", columnList = "active")
+        }
+)
 public class Rides {
 
     @Id
@@ -36,19 +40,19 @@ public class Rides {
     @Column(name = "description")
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     private Rider username;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rider_type", referencedColumnName = "rider_type", nullable = false)
     private RiderType riderType;
 
     @Column(name = "distance")
     private Integer distance;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "ride_participants",
             joinColumns = @JoinColumn(name = "ride_id"),
@@ -70,7 +74,7 @@ public class Rides {
     private String endingPointName;
 
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "ride_stop_points", joinColumns = @JoinColumn(name = "ride_id"))
     private List<StopPoint> stopPoints = new ArrayList<>();
 
@@ -80,15 +84,19 @@ public class Rides {
     @Column(name = "location", columnDefinition = "geometry(Point,4326)")
     private Point location;
 
-    @Column(name = "map_image_url")
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "map_image_url", length = 500)
     private String mapImageUrl;
 
-    @Column(name = "map_starting_url")
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "map_starting_url", length = 500)
     private String magImageStartingLocation;
 
-    @Column(name = "map_ending_url")
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "map_ending_url", length = 500)
     private String magImageEndingLocation;
 
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "route_coordinates", columnDefinition = "TEXT")
     private String routeCoordinates;
 
