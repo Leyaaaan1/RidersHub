@@ -14,6 +14,7 @@ public interface RiderLocationRepository extends JpaRepository<RiderLocation, In
     @Query(value = "SELECT ST_DistanceSphere(:pointA, :pointB)", nativeQuery = true)
     double getDistanceBetweenPoints(@Param("pointA") Point pointA, @Param("pointB") Point pointB);
 
+
     @Query("SELECT rl FROM RiderLocation rl " +
             "WHERE rl.startedRide.id = :rideId " +
             "AND rl.timestamp = (" +
@@ -21,5 +22,13 @@ public interface RiderLocationRepository extends JpaRepository<RiderLocation, In
             "   WHERE r.startedRide.id = :rideId AND r.username = rl.username" +
             ")")
     List<RiderLocation> findLatestLocationPerParticipant(@Param("rideId") Integer rideId);
+
+    @Query(value = """
+             SELECT DISTINCT ON (username) *
+             FROM rider_location
+             WHERE started_ride_id = :rideId
+             ORDER BY username, timestamp DESC
+                 """, nativeQuery = true)
+    List<RiderLocation> findLatestLocationPerParticipantOptimized(@Param("rideId") Integer rideId);
 
 }

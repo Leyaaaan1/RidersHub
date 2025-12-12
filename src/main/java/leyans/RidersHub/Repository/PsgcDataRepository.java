@@ -21,6 +21,9 @@ public interface PsgcDataRepository extends JpaRepository<PsgcData, String> {
             nativeQuery = true)
     Optional<PsgcData> findByNameIgnoreCase(@Param("name") String name);
 
+    Optional<PsgcData> findFirstByNameIgnoreCaseOptimized(@Param("name") String name);
+
+
     /**
      * Batch lookup for multiple barangay names
      * Used for stop points processing

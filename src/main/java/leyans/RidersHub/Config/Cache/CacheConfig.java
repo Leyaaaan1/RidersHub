@@ -1,12 +1,9 @@
 package leyans.RidersHub.Config.Cache;
 
-
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCache;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,21 +17,6 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
-        cacheManager.setCaffeine(caffeineCacheBuilder());
-        return cacheManager;
-    }
-
-    private Caffeine<Object, Object> caffeineCacheBuilder() {
-        return Caffeine.newBuilder()
-                .initialCapacity(100)
-                .maximumSize(10_000)
-                .expireAfterWrite(1, TimeUnit.HOURS)
-                .recordStats();
-    }
-
-    @Bean
-    public CacheManager specificCacheManager() {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
         cacheManager.setCaches(Arrays.asList(
                 new CaffeineCache("nominatimReverse",
@@ -65,6 +47,14 @@ public class CacheConfig {
                         Caffeine.newBuilder()
                                 .maximumSize(10000)
                                 .expireAfterWrite(24, TimeUnit.HOURS)
+                                .recordStats()
+                                .build()),
+                // Default cache for any other caching needs
+                new CaffeineCache("default",
+                        Caffeine.newBuilder()
+                                .initialCapacity(100)
+                                .maximumSize(10000)
+                                .expireAfterWrite(1, TimeUnit.HOURS)
                                 .recordStats()
                                 .build())
         ));

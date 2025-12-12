@@ -42,7 +42,7 @@ public class RidesService {
 
     @Autowired
     public RidesService(LocationService locationService, RiderService riderService, MapboxService mapboxService,
-                        RideParticipantService rideParticipantService, RouteService routeService, RidesUtil ridesUtil, Executor externalApiExecutor) {
+                        RideParticipantService rideParticipantService, RouteService routeService, RidesUtil ridesUtil, @Qualifier("externalApiExecutor") Executor externalApiExecutor) {
 
         this.riderService = riderService;
         this.locationService = locationService;

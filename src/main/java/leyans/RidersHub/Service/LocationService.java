@@ -8,6 +8,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,30 +37,39 @@ public class LocationService {
     }
 
 
+    @Cacheable(value = "nominatimReverse",
+            key = "'barangay:' + #lat + ',' + #lon",
+            unless = "#result == null")
     public String resolveBarangayName(String fallback, double lat, double lon) {
         String barangay = nominatimService.getBarangayNameFromCoordinates(lat, lon);
         if (barangay == null) {
-            return fallback != null ? fallback : "Lat: " + lat + ", Lng: " + lon;
+            return fallback != null ? fallback : formatCoordinates(lat, lon);
         }
-        return psgcDataRepository.findByNameIgnoreCase(barangay)
-                .stream()
-                .findFirst()
+
+        // Use optimized repository method
+        return psgcDataRepository.findFirstByNameIgnoreCaseOptimized(barangay)
                 .map(PsgcData::getName)
                 .orElse(barangay);
     }
 
 
+    @Cacheable(value = "nominatimReverse",
+            key = "'landmark:' + #lat + ',' + #lon",
+            unless = "#result == null")
     public String resolveLandMark(String fallback, double lat, double lon) {
         return nominatimService.getCityOrLandmarkFromCoordinates(lat, lon)
                 .map(addr -> {
                     if (!addr.isLandmark()) {
                         return fallback != null ? fallback : formatCoordinates(lat, lon);
                     }
-                    return addr.landmark(); // Return Nominatim result directly
+                    return addr.landmark();
                 })
                 .orElse(fallback != null ? fallback : formatCoordinates(lat, lon));
     }
 
+
+    @Cacheable(value = "distances",
+            key = "#startPoint.toString() + '->' + #endPoint.toString()")
     public int calculateDistance(Point startPoint, Point endPoint) {
         double distanceInMeters = riderLocationRepository.getDistanceBetweenPoints(startPoint, endPoint);
         return (int) Math.round(distanceInMeters / 1000);
