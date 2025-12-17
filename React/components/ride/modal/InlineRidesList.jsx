@@ -99,12 +99,11 @@ const InlineRidesList = ({
   const renderRideItem = ({ item }) => (
     <TouchableWithoutFeedback onPress={() => onRideSelect && onRideSelect(item)}>
       <View style={{
-        backgroundColor: "#151515",
+        backgroundColor: '#151515',
         padding: 15,
         borderRadius: 12,
         marginBottom: 15,
-        borderLeftWidth: 3,
-        borderLeftColor: colors.primary,
+
       }}>
         {/* Header with Location Name */}
         <Text style={[utilities.titleText, { fontSize: 22, textAlign: 'center', marginBottom: 5 }]}>
@@ -122,7 +121,7 @@ const InlineRidesList = ({
               paddingHorizontal: 8,
               paddingVertical: 2,
               borderRadius: 4,
-              marginLeft: 8
+              marginLeft: 8,
             }}>
               <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>
                 INACTIVE

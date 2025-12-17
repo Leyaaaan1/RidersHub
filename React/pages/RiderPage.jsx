@@ -88,69 +88,53 @@ const RiderPage = ({ route , navigation}) => {
       <StatusBar barStyle="light-content" backgroundColor="#151515" />
 
       {/* Modern Header */}
-      <View style={modernUtilities.headerContainer}>
-        <View style={modernUtilities.userSection}>
-          <View style={modernUtilities.userInfo}>
-            <View style={modernUtilities.avatar}>
-              <FontAwesome name="user" size={20} color="#fff" />
-            </View>
-            <View style={modernUtilities.userDetails}>
-              <Text style={modernUtilities.welcomeText}>Welcome back,</Text>
-              <Text style={modernUtilities.usernameText}>{username?.toUpperCase()}</Text>
-              {loading ? (
-                <ActivityIndicator color="#fff" size="small" style={{ marginTop: 4 }} />
-              ) : (
-                <View style={modernUtilities.riderTypeBadge}>
-                  <FontAwesome
-                    name={
-                      riderType?.riderType === 'car' ? 'car' :
-                        riderType?.riderType === 'motor' || riderType?.riderType === 'Motorcycle' ? 'motorcycle' :
-                          riderType?.riderType === 'bike' || riderType?.riderType === 'Bicycle' ? 'bicycle' :
-                            riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
-                    }
-                    size={12}
-                    color="#fff"
-                    style={{ marginRight: 5 }}
-                  />
-                  <Text style={modernUtilities.riderTypeText}>
-                    {riderType?.riderType}
-                  </Text>
-                </View>
-              )}
-            </View>
+      <View style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 5,
+      }}>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+          <View style={modernUtilities.avatar}>
+            <FontAwesome name="user" size={20} color="#fff" />
           </View>
-
-          <View style={modernUtilities.searchContainer}>
-            <SearchHeader
-              token={token}
-              username={username}
-              navigation={navigation}
-            />
-            <ScannerHeader
-              token={token}
-              username={username}
-              navigation={navigation}
-            />
+          <View styl  e={{ flex: 1 }}>
+            <Text
+              style={[modernUtilities.usernameText, { flexShrink: 1 }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+              minimumFontScale={0.6}
+            >
+              {username?.toUpperCase()}
+            </Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" style={{ marginTop: 4 }} />
+            ) : (
+              <View style={modernUtilities.riderTypeBadge}>
+                <FontAwesome
+                  name={
+                    riderType?.riderType === 'car' ? 'car' :
+                      riderType?.riderType === 'motor' || riderType?.riderType === 'Motorcycle' ? 'motorcycle' :
+                        riderType?.riderType === 'bike' || riderType?.riderType === 'Bicycle' ? 'bicycle' :
+                          riderType?.riderType === 'cafe Racers' ? 'rocket' : 'user'
+                  }
+                  size={12}
+                  color="#fff"
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={modernUtilities.riderTypeText}>
+                  {riderType?.riderType}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
-        <View style={modernUtilities.quickActions}>
-          <TouchableOpacity
-            style={modernUtilities.createButton}
-            onPress={() => {
-              if (!token) {
-                Alert.alert('Error', 'Authentication token is missing');
-                return;
-              }
-              navigation.navigate('CreateRide', { token, username });
-            }}
-          >
-            <FontAwesome name="plus" size={14} color="#8c2323" />
-            <Text style={modernUtilities.createButtonText}>Create Ride</Text>
-          </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <SearchHeader token={token} username={username} navigation={navigation} />
+          <ScannerHeader token={token} username={username} navigation={navigation} />
         </View>
       </View>
-
       {/* Active Ride Section */}
       <TouchableOpacity
         activeOpacity={0.8}

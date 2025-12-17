@@ -1,8 +1,8 @@
 import routeMapStyles from "./routeMapStyles.js";
 
 export const createMapHTML = () => {
-    const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    return `
+  const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -21,8 +21,6 @@ export const createMapHTML = () => {
             let userLocationMarker;
             let userLocationAccuracyCircle;
             
-        
-
             function initMap() {
                 try {
                     const defaultCenter = [8.2280, 125.5428];
@@ -73,7 +71,11 @@ export const createMapHTML = () => {
                     // Add accuracy circle
                     userLocationAccuracyCircle = L.circle(latLng, {
                         radius: accuracy,
-                        className: 'user-location-accuracy',
+                        color: '#2563eb',
+                        fillColor: '#2563eb',
+                        fillOpacity: 0.15,
+                        weight: 2,
+                        opacity: 0.3,
                         interactive: false
                     }).addTo(map);
 
@@ -86,7 +88,10 @@ export const createMapHTML = () => {
                         popupAnchor: [0, -10]
                     });
 
-                    userLocationMarker = L.marker(latLng, { icon: userIcon })
+                    userLocationMarker = L.marker(latLng, { 
+                        icon: userIcon,
+                        zIndexOffset: 1000 
+                    })
                         .addTo(map)
                         .bindPopup(\`
                             <div class="route-popup" style="border-color: #2563eb;">
@@ -188,7 +193,10 @@ export const createMapHTML = () => {
                         }
                     }).addTo(map);
 
-                    addRouteMarkers();
+                    // Add markers AFTER route is displayed
+                    setTimeout(() => {
+                        addRouteMarkers();
+                    }, 100);
 
                     const startPoint = window.startingPoint;
                     if (startPoint && startPoint.lat && startPoint.lng) {
@@ -268,7 +276,10 @@ export const createMapHTML = () => {
                         lineCap: 'round'
                     }).addTo(map);
 
-                    addRouteMarkers();
+                    // Add markers AFTER route is displayed
+                    setTimeout(() => {
+                        addRouteMarkers();
+                    }, 100);
 
                     const startPoint = window.startingPoint;
                     if (startPoint && startPoint.lat && startPoint.lng) {
@@ -300,40 +311,54 @@ export const createMapHTML = () => {
 
             function addRouteMarkers() {
                 try {
+                    console.log('=== ADDING ROUTE MARKERS ===');
                     const startPoint = window.startingPoint;
                     const endPoint = window.endingPoint;
                     const stopPoints = window.stopPoints || [];
 
+                    console.log('Start Point:', startPoint);
+                    console.log('End Point:', endPoint);
+                    console.log('Stop Points:', stopPoints);
+
                     const createCustomMarker = (latLng, className, iconText, color, popupText, labelText) => {
+                        console.log('Creating marker at:', latLng, 'with label:', labelText);
+                        
                         const icon = L.divIcon({
                             className: 'custom-div-icon',
                             html: \`<div class="custom-marker \${className}">\${iconText}</div>\`,
-                            iconSize: [32, 32],
-                            iconAnchor: [16, 16],
-                            popupAnchor: [0, -16]
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20],
+                            popupAnchor: [0, -20]
                         });
 
-                        const marker = L.marker(latLng, { icon: icon })
+                        const marker = L.marker(latLng, { 
+                            icon: icon,
+                            zIndexOffset: 500 
+                        })
                             .addTo(markersGroup)
                             .bindPopup(\`<div class="route-popup" style="border-color: \${color};">\${popupText}</div>\`);
 
+                        // Always show label
                         if (labelText) {
-                            const label = L.tooltip({
+                            const tooltip = L.tooltip({
                                 permanent: true,
-                                direction: 'top',
-                                offset: [0, -20],
+                                direction: 'bottom',
+                                offset: [0, 20],
                                 className: 'location-name-label',
                                 opacity: 1
                             });
-                            label.setContent(\`<span style="color: \${color}; border-color: \${color};">\${labelText}</span>\`);
-                            marker.bindTooltip(label);
+                            tooltip.setContent(\`<span style="background: \${color}; color: white; border-color: \${color};">\${labelText}</span>\`);
+                            marker.bindTooltip(tooltip).openTooltip();
                         }
 
+                        console.log('Marker created successfully');
                         return marker;
                     };
 
+                    // Add starting point marker
                     if (startPoint && startPoint.lat && startPoint.lng) {
                         const name = startPoint.name || startPoint.address || 'Starting Point';
+                        console.log('Adding start marker:', name);
                         createCustomMarker(
                             [startPoint.lat, startPoint.lng],
                             'marker-start',
@@ -342,11 +367,15 @@ export const createMapHTML = () => {
                             \`<strong>🚀 Starting Point</strong><br><b>\${name}</b>\`,
                             name
                         );
+                    } else {
+                        console.warn('No valid starting point data');
                     }
 
+                    // Add stop points markers
                     stopPoints.forEach((stop, index) => {
-                        if (stop.lat && stop.lng) {
+                        if (stop && stop.lat && stop.lng) {
                             const name = stop.name || stop.address || \`Stop \${index + 1}\`;
+                            console.log('Adding stop marker:', index + 1, name);
                             createCustomMarker(
                                 [stop.lat, stop.lng],
                                 'marker-stop',
@@ -355,11 +384,15 @@ export const createMapHTML = () => {
                                 \`<strong>🛑 Stop Point \${index + 1}</strong><br><b>\${name}</b>\`,
                                 name
                             );
+                        } else {
+                            console.warn('Invalid stop point at index:', index);
                         }
                     });
 
+                    // Add ending point marker
                     if (endPoint && endPoint.lat && endPoint.lng) {
                         const name = endPoint.name || endPoint.address || 'Ending Point';
+                        console.log('Adding end marker:', name);
                         createCustomMarker(
                             [endPoint.lat, endPoint.lng],
                             'marker-end',
@@ -368,9 +401,12 @@ export const createMapHTML = () => {
                             \`<strong>🏁 Ending Point</strong><br><b>\${name}</b>\`,
                             name
                         );
+                    } else {
+                        console.warn('No valid ending point data');
                     }
 
                     console.log('Route markers added successfully');
+                    console.log('Total markers:', markersGroup.getLayers().length);
                 } catch (error) {
                     console.error('Error adding route markers:', error);
                 }
@@ -393,6 +429,13 @@ export const createMapHTML = () => {
             }
 
             window.loadRouteData = function(routeData, startPoint, endPoint, stopPoints, userLocation) {
+                console.log('=== LOADING ROUTE DATA ===');
+                console.log('Route Data:', routeData);
+                console.log('Start Point:', startPoint);
+                console.log('End Point:', endPoint);
+                console.log('Stop Points:', stopPoints);
+                console.log('User Location:', userLocation);
+                
                 window.routeData = routeData;
                 window.startingPoint = startPoint;
                 window.endingPoint = endPoint;
@@ -413,6 +456,7 @@ export const createMapHTML = () => {
             window.updateUserLocation = updateUserLocation;
 
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM Content Loaded - Initializing map');
                 initMap();
             });
         </script>

@@ -38,7 +38,7 @@ const RouteMapView = ({
             stopPoints,
             style,
             isDark,
-            spreadProps: restProps
+            spreadProps: restProps,
         });
     }, []);
 
