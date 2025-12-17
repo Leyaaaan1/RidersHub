@@ -55,7 +55,7 @@ public class RideLocationService {
 
         String locationName = null;
         if (barangayName != null) {
-            Optional<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
+            List<PsgcData> psgcDataList = psgcDataRepository.findByNameIgnoreCase(barangayName);
             locationName = psgcDataList.stream()
                     .findFirst()
                     .map(PsgcData::getName)

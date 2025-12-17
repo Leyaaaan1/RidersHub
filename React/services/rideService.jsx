@@ -193,31 +193,7 @@ export const createRide = async (rideData, token) => {
         throw error;
     }
 };// Alternative version using axios (if you're using axios instead of fetch)
-export const searchRiders = async (token, username = '') => {
-    const url = `${API_BASE_URL}/riders/search${username.trim() ? `?username=${encodeURIComponent(username.trim())}` : ''}`;
 
-    console.log('Searching riders with URL:', url);
-
-    try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Failed to search riders: ${response.status} ${errorText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Network error details:', error);
-        throw error;
-    }
-};
 
 export const getCurrentRiderType = async (token) => {
     try {
@@ -292,7 +268,7 @@ export const getRideDetails = async (generatedRidesId, token) => {
     }
 };
 
-export const fetchRides = async (token, page = 0, size = 5) => {
+export const fetchRides = async (token, page = 0, size = 10) => {
     try {
         const response = await fetch(`${API_BASE_URL}/riders/rides?page=${page}&size=${size}`, {
             method: 'GET',
@@ -308,16 +284,19 @@ export const fetchRides = async (token, page = 0, size = 5) => {
             throw new Error(`Failed to fetch rides: ${errorText}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('API Response (All Rides):', data);
+        console.log('Total rides:', data.totalElements);
+        return data;
     } catch (error) {
         console.error('Failed to fetch rides:', error);
         throw error;
     }
 };
 
-export const fetchMyRides = async (token) => {
+export const fetchMyRides = async (token, page = 0, size = 10) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/riders/my-rides`, {
+        const response = await fetch(`${API_BASE_URL}/riders/my-rides?page=${page}&size=${size}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -331,7 +310,10 @@ export const fetchMyRides = async (token) => {
             throw new Error(`Failed to fetch my rides: ${errorText}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('API Response (My Rides):', data);
+        console.log('My rides count:', data.totalElements);
+        return data;
     } catch (error) {
         console.error('Failed to fetch my rides:', error);
         throw error;

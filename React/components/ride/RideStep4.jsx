@@ -12,7 +12,7 @@ import modernRideStyles from '../../styles/modernRideStyles';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { fetchRideMapImage, getRideDetails, getLocationImage } from '../../services/rideService';
-import ParticipantListModal from '../ParticipantListModal';
+import ParticipantListModal from './modal/ParticipantListModal';
 import useJoinRide from './RideHandler';
 import { startService } from '../../services/startService';
 import RouteMapView from '../../utilities/route/RouteMapView';

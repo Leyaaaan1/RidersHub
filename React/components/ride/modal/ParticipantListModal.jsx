@@ -11,10 +11,10 @@ import {
   Image,
   Share,
 } from 'react-native';
-import { fetchMyRides } from '../services/rideService';
-import { joinService } from '../services/joinService';
-import { inviteService } from '../services/inviteService';
-import { styles } from '../styles/ParticipantListModalStyles';
+import { fetchMyRides } from '../../../services/rideService';
+import { joinService } from '../../../services/joinService';
+import { inviteService } from '../../../services/inviteService';
+import { styles } from '../../../styles/ParticipantListModalStyles';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 const ParticipantListModal = ({

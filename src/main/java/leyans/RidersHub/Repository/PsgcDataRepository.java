@@ -11,15 +11,15 @@ import java.util.Optional;
 public interface PsgcDataRepository extends JpaRepository<PsgcData, String> {
 
 
-    // List<PsgcData> findByNameIgnoreCase(String name);
+     List<PsgcData> findByNameIgnoreCase(String name);
 
     /**
      * Optimized single lookup with index hint
      * Changed from List to Optional - more efficient
      */
-    @Query(value = "SELECT * FROM psgc_data WHERE LOWER(name) = LOWER(:name) LIMIT 1",
-            nativeQuery = true)
-    Optional<PsgcData> findByNameIgnoreCase(@Param("name") String name);
+//    @Query(value = "SELECT * FROM psgc_data WHERE LOWER(name) = LOWER(:name) LIMIT 1",
+//            nativeQuery = true)
+//    Optional<PsgcData> findByNameIgnoreCase(@Param("name") String name);
 
     /**
      * Batch lookup for multiple barangay names

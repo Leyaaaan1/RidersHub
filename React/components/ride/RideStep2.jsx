@@ -1,5 +1,5 @@
 // React/components/ride/RideStep2.jsx
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
     View,
     Text,
@@ -9,14 +9,14 @@ import {
     ScrollView,
     ActivityIndicator,
     Image,
-    StatusBar
+    StatusBar,
 } from 'react-native';
 import rideStepsUtilities from '../../styles/rideStepsUtilities';
 import { WebView } from 'react-native-webview';
 import getMapHTML from '../../utilities/mapHTML';
-import FontAwesome from "react-native-vector-icons/FontAwesome";
-import modernRideStyles from "../../styles/modernRideStyles";
-import {getLocationImage} from "../../services/rideService";
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import modernRideStyles from '../../styles/modernRideStyles';
+import {getLocationImage} from '../../services/rideService';
 
 
 const RideStep2 = ({
@@ -27,31 +27,40 @@ const RideStep2 = ({
                    }) => {
 
     const [isSearchFocused, setIsSearchFocused] = useState(false);
-    const [mapDarkMode, setMapDarkMode] = useState(false);
     const [rideNameImage, setRideNameImage] = useState([]);
     const [rideNameImageLoading, setRideNameImageLoading] = useState(false);
     const [rideNameImageError, setRideNameImageError] = useState(null);
 
-    useEffect(() => {
-        if (locationName && locationName.trim()) {
-            fetchLocationImages(locationName);
-        } else {
-            setRideNameImage([]);
-        }
-    }, [locationName]);
-    const fetchLocationImages = async (locationName) => {
-        setRideNameImageLoading(true);
-        setRideNameImageError(null);
-        try {
+  const fetchLocationImages = useCallback(async (locationName) => {
+          setRideNameImageLoading(true);
+          setRideNameImageError(null);
+          try {
             const images = await getLocationImage(locationName, token);
             setRideNameImage(images);
-        } catch (error) {
+          } catch (error) {
             setRideNameImageError(error.message);
             setRideNameImage([]);
-        } finally {
+          } finally {
             setRideNameImageLoading(false);
-        }
-    };
+          }
+        }, [token]);
+
+        useEffect(() => {
+          if (locationName && locationName.trim()) {
+            fetchLocationImages(locationName);
+          } else {
+            setRideNameImage([]);
+          }
+        }, [locationName, fetchLocationImages]);
+
+
+    useEffect(() => {
+      if (locationName && locationName.trim()) {
+        fetchLocationImages(locationName);
+      } else {
+        setRideNameImage([]);
+      }
+    }, [locationName, fetchLocationImages]);
 
     return (
         <View style={rideStepsUtilities.containerWhite}>
@@ -130,7 +139,7 @@ const RideStep2 = ({
                 ) : (
                     <View style={modernRideStyles.errorContainer}>
                         <Text style={modernRideStyles.errorText}>
-                            {rideNameImageError || "No location images available"}
+                            {rideNameImageError || 'No location images available'}
                         </Text>
                     </View>
                 )}
@@ -159,7 +168,7 @@ const RideStep2 = ({
             <View style={[rideStepsUtilities.searchContainer, { top: 90 }]}>
                 <View style={[
                     rideStepsUtilities.searchInputContainer,
-                    isSearchFocused && rideStepsUtilities.searchInputFocused
+                    isSearchFocused && rideStepsUtilities.searchInputFocused,
                 ]}>
                     <FontAwesome name="search" size={16} color="#5f6368" style={{ marginRight: 12 }} />
                     <TextInput
@@ -202,9 +211,9 @@ const RideStep2 = ({
                                 key={item.place_id.toString()}
                                 style={[
                                     rideStepsUtilities.resultItem,
-                                    index === searchResults.length - 1 && rideStepsUtilities.resultItemLast
+                                    index === searchResults.length - 1 && rideStepsUtilities.resultItemLast,
                                 ]}
-                                onPress={() => { handleLocationSelect(item) }}
+                                onPress={() => { handleLocationSelect(item); }}
                             >
                                 <View style={rideStepsUtilities.resultIconContainer}>
                                     <FontAwesome name="map-marker" size={16} color="#8c2323" />

@@ -6,9 +6,7 @@ import org.hibernate.type.SqlTypes;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "event_rides",
@@ -58,8 +56,7 @@ public class Rides {
             joinColumns = @JoinColumn(name = "ride_id"),
             inverseJoinColumns = @JoinColumn(name = "rider_username")
     )
-    private List<Rider> participants = new ArrayList<>();
-
+    private Set<Rider> participants = new HashSet<>();
 
     @Column(name = "startingLocation", columnDefinition = "geometry(Point,4326)")
     private Point startingLocation;
@@ -243,11 +240,11 @@ public class Rides {
         this.location = location;
     }
 
-    public List<Rider> getParticipants() {
+    public Set<Rider> getParticipants() {
         return participants;
     }
 
-    public void setParticipants(List<Rider> participants) {
+    public void setParticipants(Set<Rider> participants) {
         this.participants = participants;
     }
 

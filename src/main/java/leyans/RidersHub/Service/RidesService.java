@@ -204,7 +204,6 @@ public class RidesService {
         newRide.setRiderType(rideType);
         newRide.setUsername(creator);
         newRide.setDistance(calculatedDistance);
-        newRide.setParticipants(participants);
         newRide.setLocationName(resolvedLocationName);
         newRide.setLocation(rideLocation);
         newRide.setStartingLocation(startPoint);

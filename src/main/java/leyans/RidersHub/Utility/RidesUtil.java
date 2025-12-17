@@ -89,12 +89,11 @@ public class RidesUtil {
         return mapToResponseDTO(ride);
     }
 
-    @Transactional
-    public List<RideResponseDTO> findRidesByUsername(String username) {
-        List<Rides> rides = ridesRepository.findByUsername_Username(username);
-        return rides.stream()
-                .map(this::mapToResponseDTO)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<RideResponseDTO> findRidesByUsernamePaginated(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Rides> ridesPage = ridesRepository.findByUsername_UsernamePaginated(username, pageable);
+        return ridesPage.map(this::mapToResponseDTO);
     }
 
     @Transactional(readOnly = true)
@@ -104,12 +103,12 @@ public class RidesUtil {
         return ridesPage.map(this::mapToResponseDTO);
     }
 
-
     @Transactional
     public Rides findRideEntityByGeneratedId(Integer generatedRidesId) {
         return ridesRepository.findByGeneratedRidesId(generatedRidesId)
                 .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
     }
+
 
     public RideResponseDTO mapToResponseDTO(Rides ride) {
         return new RideResponseDTO(

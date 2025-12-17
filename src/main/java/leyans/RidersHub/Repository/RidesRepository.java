@@ -23,7 +23,7 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
     Page<Rides> findAll(Pageable pageable);
 
-    List<Rides> findByUsername_Username(String username);
+//    List<Rides> findByUsername_Username(String username);
 
     @Modifying
     @Transactional
@@ -36,10 +36,26 @@ public interface RidesRepository extends JpaRepository<Rides, Integer> {
     void deactivateRide(@Param("generatedRidesId") Integer generatedRidesId);
 
 
+    @Query("SELECT r FROM Rides r " +
+            "LEFT JOIN FETCH r.username " +
+            "LEFT JOIN FETCH r.riderType " +
+            "WHERE r.username.username = :username " +
+            "ORDER BY r.generatedRidesId DESC")
+    Page<Rides> findByUsername_UsernamePaginated(@Param("username") String username, Pageable pageable);
 
-    @Query("SELECT r FROM Rides r WHERE r.active = true ORDER BY r.date DESC")
+    @Query("SELECT r FROM Rides r " +
+            "LEFT JOIN FETCH r.username " +
+            "LEFT JOIN FETCH r.riderType " +
+            "ORDER BY r.generatedRidesId DESC")
     Page<Rides> findAllActiveSummary(Pageable pageable);
 
+
+//    @Query("SELECT r FROM Rides r " +
+//            "LEFT JOIN FETCH r.username " +
+//            "LEFT JOIN FETCH r.riderType " +
+//            "WHERE (r.active = true OR r.active IS NULL) " +
+//            "ORDER BY r.date DESC")
+//    Page<Rides> findAllActiveSummary(Pageable pageable);
     /**
      * Use for detail views - loads everything needed
      * Single query with all relationships
