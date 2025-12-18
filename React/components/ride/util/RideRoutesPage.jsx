@@ -8,10 +8,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { getLocationImage } from '../../services/rideService';
-import rideRoutesPageUtilities from '../../styles/RideRoutesPageUtilities';
+import { getLocationImage } from '../../../services/rideService';
+import rideRoutesPageUtilities from '../../../styles/RideRoutesPageUtilities';
 import LinearGradient from 'react-native-linear-gradient';
-import { getStopPointsByRideId } from '../../services/startService';
+import { getStopPointsByRideId } from '../../../services/startService';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 

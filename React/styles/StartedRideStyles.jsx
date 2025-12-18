@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
 
   },
 
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -35,10 +36,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
     textAlign: 'center',
-    flex: 2,
+
   },
   headerRight: {
     width: 50,
@@ -87,6 +86,108 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+
+  routeInfoScrollContainer: {
+    maxHeight: 300, // Fixed height - adjust as needed
+  },
+
+  routeInfoScrollContent: {
+    paddingBottom: 12,
+  },
+
+  // Participants Section
+  participantsContainer: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+
+  participantsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  participantsTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#fff',
+    letterSpacing: 1,
+  },
+
+  participantItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+
+  participantAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(139, 92, 246, 0.3)',
+    borderWidth: 2,
+    borderColor: 'rgba(139, 92, 246, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+
+  participantInitial: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
+
+  participantInfo: {
+    flex: 1,
+  },
+
+  participantName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 2,
+  },
+
+  participantStatus: {
+    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.6)',
+  },
+
+  participantStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+  },
+
+  participantStatusActive: {
+    backgroundColor: '#10b981', // Green for active
+    shadowColor: '#10b981',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+  },
+
+  emptyParticipants: {
+    alignItems: 'center',
+    paddingVertical: 24,
+  },
+
+  emptyParticipantsText: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.4)',
+    marginTop: 8,
+  },
+
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
