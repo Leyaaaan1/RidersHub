@@ -1,35 +1,31 @@
 package leyans.RidersHub.Service;
 
 
-import jakarta.persistence.EntityNotFoundException;
 import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
-import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Service.InteractionRequest.InviteRequestService;
 import leyans.RidersHub.Service.InteractionRequest.RideParticipantService;
 import leyans.RidersHub.Service.MapService.MapBox.MapboxService;
 import leyans.RidersHub.Service.MapService.RouteService;
-import leyans.RidersHub.Utility.RiderUtil;
+import leyans.RidersHub.Utility.RidesUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.RiderType;
 import leyans.RidersHub.model.Rides;
 import leyans.RidersHub.model.StopPoint;
-import leyans.RidersHub.model.Interaction.InviteRequest;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Service
 public class RidesService {
 
-    private final RidesRepository ridesRepository;
 
 
     @Autowired
@@ -37,48 +33,151 @@ public class RidesService {
     private final RiderService riderService;
     private final MapboxService mapboxService;
     private final RideParticipantService rideParticipantService;
-    private final RiderUtil riderUtil;
     private final RouteService routeService;
-    private final InviteRequestService inviteRequestService;
 
+    private final RidesUtil ridesUtil;
+
+    @Qualifier("externalApiExecutor")
+    private final Executor externalApiExecutor;
 
     @Autowired
-    public RidesService(RidesRepository ridesRepository,
+    public RidesService(LocationService locationService, RiderService riderService, MapboxService mapboxService,
+                        RideParticipantService rideParticipantService, RouteService routeService, RidesUtil ridesUtil, Executor externalApiExecutor) {
 
-                        LocationService locationService, RiderService riderService, MapboxService mapboxService, RideParticipantService rideParticipantService, RiderUtil riderUtil, RouteService routeService, InviteRequestService inviteRequestService) {
-
-        this.ridesRepository = ridesRepository;
         this.riderService = riderService;
         this.locationService = locationService;
         this.mapboxService = mapboxService;
         this.rideParticipantService = rideParticipantService;
-        this.riderUtil = riderUtil;
         this.routeService = routeService;
-        this.inviteRequestService = inviteRequestService;
+        this.ridesUtil = ridesUtil;
+        this.externalApiExecutor = externalApiExecutor;
+    }
+    private static class ApiFutures {
+        CompletableFuture<String> mainImageFuture;
+        CompletableFuture<String> startImageFuture;
+        CompletableFuture<String> endImageFuture;
+        CompletableFuture<String> routeFuture;
+        CompletableFuture<String> mainLocationFuture;
+        CompletableFuture<String> startLocationFuture;
+        CompletableFuture<String> endLocationFuture;
+        List<CompletableFuture<RidesUtil.GeocodeResult>> stopPointFutures;
     }
 
-    @Transactional
-    public RideResponseDTO createRide( Integer generatedRidesId, String creatorUsername, String ridesName, String locationName, String riderType, LocalDateTime date,
-                                      List<String> participantUsernames, String description,
-                                      double latitude, double longitude, double startLatitude,
-                                      double startLongitude, double endLatitude, double endLongitude,
-                                       List<StopPointDTO> stopPointsDto
-                                       ) {
-
-        String imageUrl = mapboxService.getStaticMapImageUrl(longitude, latitude);
-        String startImageUrl = mapboxService.getStaticMapImageUrl(startLongitude, startLatitude);
-        String endImageUrl = mapboxService.getStaticMapImageUrl(endLongitude, endLatitude);
+    public RideResponseDTO createRide(
+            Integer generatedRidesId, String creatorUsername, String ridesName,
+            String locationName, String riderType, LocalDateTime date,
+            List<String> participantUsernames, String description,
+            double latitude, double longitude,
+            double startLatitude, double startLongitude,
+            double endLatitude, double endLongitude,
+            List<StopPointDTO> stopPointsDto) {
 
         List<StopPointDTO> validStopPoints = stopPointsDto.stream()
                 .filter(stop -> stop.getStopLongitude() != 0.0 && stop.getStopLatitude() != 0.0)
                 .collect(Collectors.toList());
 
-        String routeCoordinates = routeService.getRouteDirections(
-                startLongitude, startLatitude,
-                endLongitude, endLatitude,
-                validStopPoints,  // Use filtered list
-                "driving-car"
+        ApiFutures futures = prepareApiFutures(validStopPoints, latitude, longitude, startLatitude, startLongitude, endLatitude, endLongitude, locationName);
+
+        awaitApiFuturesAndCollect(futures);
+
+        return buildAndSaveRide(
+                generatedRidesId, creatorUsername, ridesName, riderType, date, participantUsernames,
+                description, latitude, longitude, startLatitude, startLongitude, endLatitude, endLongitude,
+                futures
         );
+    }
+
+    private ApiFutures prepareApiFutures(List<StopPointDTO> validStopPoints,
+                                         double latitude, double longitude,
+                                         double startLatitude, double startLongitude,
+                                         double endLatitude, double endLongitude,
+                                         String locationName) {
+        ApiFutures f = new ApiFutures();
+
+        f.mainImageFuture = CompletableFuture.supplyAsync(
+                () -> mapboxService.getStaticMapImageUrl(longitude, latitude),
+                externalApiExecutor
+        );
+        f.startImageFuture = CompletableFuture.supplyAsync(
+                () -> mapboxService.getStaticMapImageUrl(startLongitude, startLatitude),
+                externalApiExecutor
+        );
+        f.endImageFuture = CompletableFuture.supplyAsync(
+                () -> mapboxService.getStaticMapImageUrl(endLongitude, endLatitude),
+                externalApiExecutor
+        );
+        f.routeFuture = CompletableFuture.supplyAsync(
+                () -> routeService.getRouteDirections(
+                        startLongitude, startLatitude,
+                        endLongitude, endLatitude,
+                        validStopPoints,
+                        "driving-car"
+                ),
+                externalApiExecutor
+        );
+        f.mainLocationFuture = CompletableFuture.supplyAsync(
+                () -> locationService.resolveLandMark(locationName, latitude, longitude),
+                externalApiExecutor
+        );
+        f.startLocationFuture = CompletableFuture.supplyAsync(
+                () -> locationService.resolveBarangayName(null, startLatitude, startLongitude),
+                externalApiExecutor
+        );
+        f.endLocationFuture = CompletableFuture.supplyAsync(
+                () -> locationService.resolveBarangayName(null, endLatitude, endLongitude),
+                externalApiExecutor
+        );
+
+        f.stopPointFutures = validStopPoints.stream()
+                .map(dto -> CompletableFuture.supplyAsync(
+                        () -> new RidesUtil.GeocodeResult(
+                                dto.getStopLatitude(),
+                                dto.getStopLongitude(),
+                                locationService.resolveBarangayName(null, dto.getStopLatitude(), dto.getStopLongitude())
+                        ),
+                        externalApiExecutor
+                ))
+                .collect(Collectors.toList());
+
+        return f;
+    }
+
+    private void awaitApiFuturesAndCollect(ApiFutures f) {
+        try {
+            CompletableFuture<Void> allApiCalls = CompletableFuture.allOf(
+                    f.mainImageFuture, f.startImageFuture, f.endImageFuture,
+                    f.routeFuture, f.mainLocationFuture, f.startLocationFuture, f.endLocationFuture,
+                    CompletableFuture.allOf(f.stopPointFutures.toArray(new CompletableFuture[0]))
+            );
+
+            allApiCalls.get(30, TimeUnit.SECONDS);
+        } catch (TimeoutException e) {
+            throw new RuntimeException("API calls timed out after 30 seconds", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error during parallel API calls: " + e.getMessage(), e);
+        }
+    }
+
+    // 3) Build Rides object from futures results and save
+    private RideResponseDTO buildAndSaveRide(
+            Integer generatedRidesId, String creatorUsername, String ridesName,
+            String riderType, LocalDateTime date, List<String> participantUsernames, String description,
+            double latitude, double longitude,
+            double startLatitude, double startLongitude,
+            double endLatitude, double endLongitude,
+            ApiFutures f) {
+
+        String imageUrl = f.mainImageFuture.join();
+        String startImageUrl = f.startImageFuture.join();
+        String endImageUrl = f.endImageFuture.join();
+        String routeCoordinates = f.routeFuture.join();
+        String resolvedLocationName = f.mainLocationFuture.join();
+        String startLocationName = f.startLocationFuture.join();
+        String endLocationName = f.endLocationFuture.join();
+
+        List<RidesUtil.GeocodeResult> geocodedStops = f.stopPointFutures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
 
         Rider creator = riderService.getRiderByUsername(creatorUsername);
         RiderType rideType = riderService.getRiderTypeByName(riderType);
@@ -88,170 +187,43 @@ public class RidesService {
         Point startPoint = locationService.createPoint(startLongitude, startLatitude);
         Point endPoint = locationService.createPoint(endLongitude, endLatitude);
 
-
-
-        String resolvedLocationName = locationService.resolveLandMark(locationName, latitude, longitude);
-        String startLocationName = locationService.resolveBarangayName(null, startLatitude, startLongitude);
-        String endLocationName = locationService.resolveBarangayName(null, endLatitude, endLongitude);
-
-        List<StopPoint> stopPoints = convertStopPointDTOs(stopPointsDto);
+        List<StopPoint> stopPoints = geocodedStops.stream()
+                .map(result -> new StopPoint(
+                        result.name(),
+                        locationService.createPoint(result.longitude(), result.latitude())
+                ))
+                .collect(Collectors.toList());
 
         int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
 
         Rides newRide = new Rides();
-        newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : generateUniqueRideId());
+        newRide.setGeneratedRidesId(generatedRidesId != null ? generatedRidesId : ridesUtil.generateUniqueRideId());
         newRide.setStopPoints(stopPoints);
         newRide.setRidesName(ridesName);
         newRide.setDescription(description);
         newRide.setRiderType(rideType);
         newRide.setUsername(creator);
         newRide.setDistance(calculatedDistance);
-        newRide.setParticipants(participants);
-
         newRide.setLocationName(resolvedLocationName);
         newRide.setLocation(rideLocation);
-
         newRide.setStartingLocation(startPoint);
         newRide.setStartingPointName(startLocationName);
-
         newRide.setEndingLocation(endPoint);
         newRide.setEndingPointName(endLocationName);
-
         newRide.setDate(date);
-
         newRide.setMapImageUrl(imageUrl);
         newRide.setMagImageStartingLocation(startImageUrl);
         newRide.setMagImageEndingLocation(endImageUrl);
         newRide.setRouteCoordinates(routeCoordinates);
         newRide.setActive(false);
 
+        Rides savedRide = ridesUtil.saveRideWithTransaction(newRide, creator);
 
-
-        try {
-            newRide = ridesRepository.save(newRide);
-
-            inviteRequestService.generateInviteForNewRide(
-                    newRide.getGeneratedRidesId(),
-                    creator,
-                    InviteRequest.InviteStatus.PENDING,
-                    LocalDateTime.now(),
-                    LocalDateTime.now().plusMonths(1)
-            );
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to save ride: " + ex.getMessage(), ex);
-        }
-
-        RideResponseDTO response = mapToResponseDTO(newRide);
-        return response;
+        return ridesUtil.mapToResponseDTO(savedRide);
     }
 
 
 
-    @Transactional(readOnly = true)
-    public List<StopPointDTO> getStopPointsDTOByGeneratedRideId(Integer generatedRidesId) {
-        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
-        String currentUsername = riderUtil.getCurrentUsername();
-        boolean isOwner = ride.getUsername().getUsername().equals(currentUsername);
-        boolean isParticipant = ride.getParticipants().stream()
-                .anyMatch(rider -> rider.getUsername().equals(currentUsername));
-        if (!isOwner && !isParticipant) {
-            throw new org.springframework.security.access.AccessDeniedException("Access denied: not owner or participant");
-        }
-        return mapStopPointsToDTOs(ride.getStopPoints());
-    }
-
-    private List<StopPoint> convertStopPointDTOs(List<StopPointDTO> stopPointsDto) {
-        if (stopPointsDto == null) return List.of();
-        return stopPointsDto.stream()
-                .map(dto -> new StopPoint(
-                        locationService.resolveBarangayName(null, dto.getStopLatitude(), dto.getStopLongitude()),
-                        locationService.createPoint( dto.getStopLongitude(), dto.getStopLatitude())
-                ))
-                .toList();
-    }
-    private int generateUniqueRideId() {
-        int randomFourDigitNumber;
-        boolean idExists;
-
-        do {
-            randomFourDigitNumber = 1000 + (int)(Math.random() * 9000);
-            idExists = ridesRepository.findByGeneratedRidesId(randomFourDigitNumber).isPresent();
-        } while (idExists);
-
-        return randomFourDigitNumber;
-    }
-    private RideResponseDTO mapToResponseDTO(Rides ride) {
-        return new RideResponseDTO(
-                ride.getGeneratedRidesId(),
-                ride.getRidesName(),
-                ride.getLocationName(),
-                ride.getRiderType(),
-                ride.getDistance(),
-                ride.getDate(),
-                ride.getLocation().getY(),
-                ride.getLocation().getX(),
-                ride.getParticipants().stream().map(Rider::getUsername).toList(),
-                ride.getDescription(),
-                ride.getStartingPointName(),
-                ride.getStartingLocation().getY(),
-                ride.getStartingLocation().getX(),
-                ride.getEndingPointName(),
-                ride.getEndingLocation().getY(),
-                ride.getEndingLocation().getX(),
-                ride.getMapImageUrl(),
-                ride.getMagImageStartingLocation(),
-                ride.getMagImageEndingLocation(),
-                ride.getUsername().getUsername(),
-                ride.getRouteCoordinates(),
-
-                mapStopPointsToDTOs(ride.getStopPoints()),
-                ride.getActive()
-
-        );    }
-
-    public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {
-        return stopPoints.stream()
-                .map(stopPoint -> new StopPointDTO(
-                        stopPoint.getStopName(),
-                        stopPoint.getStopLocation().getX(),
-                        stopPoint.getStopLocation().getY()
-                ))
-                .toList();
-    }
-    @Transactional
-    public String getRideMapImageUrlById(Integer generatedRidesId) {
-        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
-        return ride.getMapImageUrl();
-    }
-
-    @Transactional
-    public RideResponseDTO findRideByGeneratedId(Integer generatedRidesId) {
-        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
-        return mapToResponseDTO(ride);
-    }
-
-    @Transactional
-    public List<RideResponseDTO> findRidesByUsername(String username) {
-        List<Rides> rides = ridesRepository.findByUsername_Username(username);
-        return rides.stream()
-                .map(this::mapToResponseDTO)
-                .toList();
-    }
-
-
-
-    public Page<RideResponseDTO> getPaginatedRides(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Rides> ridesPage = ridesRepository.findAll(pageable);
-        return ridesPage.map(this::mapToResponseDTO);
-    }
-
-
-    @Transactional
-    public Rides findRideEntityByGeneratedId(Integer generatedRidesId) {
-        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
-                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
-    }
 
 
 }

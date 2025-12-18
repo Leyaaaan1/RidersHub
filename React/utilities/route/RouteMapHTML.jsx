@@ -1,8 +1,8 @@
-import routeMapStyles from "./routeMapStyles.js";
+import routeMapStyles from './routeMapStyles.js';
 
 export const createMapHTML = () => {
-    const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    return `
+  const tileLayer = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -20,8 +20,6 @@ export const createMapHTML = () => {
             let markersGroup;
             let userLocationMarker;
             let userLocationAccuracyCircle;
-            
-        
 
             function initMap() {
                 try {
@@ -62,7 +60,6 @@ export const createMapHTML = () => {
                     const latLng = [location.lat, location.lng];
                     const accuracy = location.accuracy || 50;
 
-                    // Remove existing user location marker
                     if (userLocationMarker) {
                         map.removeLayer(userLocationMarker);
                     }
@@ -70,14 +67,12 @@ export const createMapHTML = () => {
                         map.removeLayer(userLocationAccuracyCircle);
                     }
 
-                    // Add accuracy circle
                     userLocationAccuracyCircle = L.circle(latLng, {
                         radius: accuracy,
                         className: 'user-location-accuracy',
                         interactive: false
                     }).addTo(map);
 
-                    // Add user location marker
                     const userIcon = L.divIcon({
                         className: 'custom-div-icon',
                         html: '<div class="user-location-marker"></div>',
@@ -90,7 +85,7 @@ export const createMapHTML = () => {
                         .addTo(map)
                         .bindPopup(\`
                             <div class="route-popup" style="border-color: #2563eb;">
-                                <strong>📍 Your Location</strong><br>
+                                <strong> Your Location</strong><br>
                                 <b>Lat:</b> \${location.lat.toFixed(6)}<br>
                                 <b>Lng:</b> \${location.lng.toFixed(6)}
                             </div>
@@ -106,14 +101,12 @@ export const createMapHTML = () => {
                 try {
                     console.log('=== DISPLAYING ROUTE ===');
                     console.log('Route data type:', typeof routeData);
-                    console.log('Route data structure:', routeData);
 
                     if (!map) {
                         showError('Map not ready');
                         return false;
                     }
 
-                    // Clear existing routes
                     if (routeLayer) {
                         map.removeLayer(routeLayer);
                         routeLayer = null;
@@ -129,7 +122,6 @@ export const createMapHTML = () => {
                         return false;
                     }
 
-                    // Check if routeData is GeoJSON format
                     if (routeData.features && Array.isArray(routeData.features) && routeData.features.length > 0) {
                         console.log('Processing as GeoJSON route data');
                         return displayGeoJsonRoute(routeData);
@@ -164,7 +156,7 @@ export const createMapHTML = () => {
                                 
                                 if (feature.properties.summary) {
                                     const summary = feature.properties.summary;
-                                    popupContent += '<strong>🗺️ Route Information</strong><br>';
+                                    popupContent += '<strong> Route Information</strong><br>';
                                     
                                     if (summary.distance) {
                                         const distance = (summary.distance / 1000).toFixed(2);
@@ -179,7 +171,7 @@ export const createMapHTML = () => {
                                         popupContent += \`<b>Duration:</b> \${durationText}\`;
                                     }
                                 } else {
-                                    popupContent += '<strong>🗺️ Route Information</strong>';
+                                    popupContent += '<strong>️ Route Information</strong>';
                                 }
                                 
                                 popupContent += '</div>';
@@ -187,8 +179,6 @@ export const createMapHTML = () => {
                             }
                         }
                     }).addTo(map);
-
-                    addRouteMarkers();
 
                     const startPoint = window.startingPoint;
                     if (startPoint && startPoint.lat && startPoint.lng) {
@@ -218,9 +208,6 @@ export const createMapHTML = () => {
                     });
 
                     console.log('GeoJSON route displayed successfully');
-                    console.log('Total distance:', (totalDistance / 1000).toFixed(2), 'km');
-                    console.log('Total duration:', Math.floor(totalDuration / 60), 'minutes');
-                    console.log('Coordinate points:', coordinateCount);
 
                     window.ReactNativeWebView?.postMessage(JSON.stringify({
                         type: 'routeLoaded',
@@ -268,8 +255,6 @@ export const createMapHTML = () => {
                         lineCap: 'round'
                     }).addTo(map);
 
-                    addRouteMarkers();
-
                     const startPoint = window.startingPoint;
                     if (startPoint && startPoint.lat && startPoint.lng) {
                         map.setView([startPoint.lat, startPoint.lng], 16, {
@@ -282,7 +267,6 @@ export const createMapHTML = () => {
                     }
 
                     console.log('Coordinate route displayed successfully');
-                    console.log('Coordinate points:', routeCoordinates.length);
     
                     window.ReactNativeWebView?.postMessage(JSON.stringify({
                         type: 'routeLoaded',
@@ -300,40 +284,66 @@ export const createMapHTML = () => {
 
             function addRouteMarkers() {
                 try {
+                    console.log('=== ADDING ROUTE MARKERS ===');
+                    console.log('Window variables check:', {
+                        hasWindow: typeof window !== 'undefined',
+                        startingPoint: window.startingPoint,
+                        endingPoint: window.endingPoint,
+                        stopPoints: window.stopPoints
+                    });
+
                     const startPoint = window.startingPoint;
                     const endPoint = window.endingPoint;
                     const stopPoints = window.stopPoints || [];
 
+                    console.log('DETAILED MARKER DATA:');
+                    console.log('Start Point:', JSON.stringify(startPoint, null, 2));
+                    console.log('End Point:', JSON.stringify(endPoint, null, 2));
+                    console.log('Stop Points:', JSON.stringify(stopPoints, null, 2));
+
+                    let markersAdded = 0;
+
                     const createCustomMarker = (latLng, className, iconText, color, popupText, labelText) => {
-                        const icon = L.divIcon({
-                            className: 'custom-div-icon',
-                            html: \`<div class="custom-marker \${className}">\${iconText}</div>\`,
-                            iconSize: [32, 32],
-                            iconAnchor: [16, 16],
-                            popupAnchor: [0, -16]
-                        });
-
-                        const marker = L.marker(latLng, { icon: icon })
-                            .addTo(markersGroup)
-                            .bindPopup(\`<div class="route-popup" style="border-color: \${color};">\${popupText}</div>\`);
-
-                        if (labelText) {
-                            const label = L.tooltip({
-                                permanent: true,
-                                direction: 'top',
-                                offset: [0, -20],
-                                className: 'location-name-label',
-                                opacity: 1
+                        try {
+                            console.log(\`Creating marker at [\${latLng[0]}, \${latLng[1]}] with class \${className}\`);
+                            
+                            const icon = L.divIcon({
+                                className: 'custom-div-icon',
+                                html: \`<div class="custom-marker \${className}">\${iconText}</div>\`,
+                                iconSize: [32, 32],
+                                iconAnchor: [16, 16],
+                                popupAnchor: [0, -16]
                             });
-                            label.setContent(\`<span style="color: \${color}; border-color: \${color};">\${labelText}</span>\`);
-                            marker.bindTooltip(label);
-                        }
 
-                        return marker;
+                            const marker = L.marker(latLng, { icon: icon })
+                                .addTo(markersGroup)
+                                .bindPopup(\`<div class="route-popup" style="border-color: \${color};">\${popupText}</div>\`);
+
+                            if (labelText) {
+                                const label = L.tooltip({
+                                    permanent: true,
+                                    direction: 'top',
+                                    offset: [0, -20],
+                                    className: 'location-name-label',
+                                    opacity: 1
+                                });
+                                label.setContent(\`<span style="color: \${color}; border-color: \${color};">\${labelText}</span>\`);
+                                marker.bindTooltip(label);
+                            }
+
+                            console.log(\`✓ Marker created successfully: \${className}\`);
+                            markersAdded++;
+                            return marker;
+                        } catch (err) {
+                            console.error(\`✗ Failed to create marker \${className}:\`, err);
+                            return null;
+                        }
                     };
 
+                    // Add START marker
                     if (startPoint && startPoint.lat && startPoint.lng) {
                         const name = startPoint.name || startPoint.address || 'Starting Point';
+                        console.log('→ Adding START marker');
                         createCustomMarker(
                             [startPoint.lat, startPoint.lng],
                             'marker-start',
@@ -342,22 +352,35 @@ export const createMapHTML = () => {
                             \`<strong>🚀 Starting Point</strong><br><b>\${name}</b>\`,
                             name
                         );
+                    } else {
+                        console.warn('✗ Start point INVALID or MISSING');
                     }
 
-                    stopPoints.forEach((stop, index) => {
-                        if (stop.lat && stop.lng) {
-                            const name = stop.name || stop.address || \`Stop \${index + 1}\`;
-                            createCustomMarker(
-                                [stop.lat, stop.lng],
-                                'marker-stop',
-                                (index + 1).toString(),
-                                '#d97706',
-                                \`<strong>🛑 Stop Point \${index + 1}</strong><br><b>\${name}</b>\`,
-                                name
-                            );
-                        }
-                    });
+                    // Add STOP markers
+                    if (Array.isArray(stopPoints) && stopPoints.length > 0) {
+                        console.log(\`→ Processing \${stopPoints.length} stop points\`);
+                        stopPoints.forEach((stop, index) => {
+                            console.log(\`  Checking stop \${index + 1}:\`, stop);
+                            if (stop && stop.lat && stop.lng) {
+                                const name = stop.name || stop.address || \`Stop \${index + 1}\`;
+                                console.log(\`  → Adding STOP \${index + 1} marker\`);
+                                createCustomMarker(
+                                    [stop.lat, stop.lng],
+                                    'marker-stop',
+                                    (index + 1).toString(),
+                                    '#d97706',
+                                    \`<strong>🛑 Stop Point \${index + 1}</strong><br><b>\${name}</b>\`,
+                                    name
+                                );
+                            } else {
+                                console.warn(\`  ✗ Stop \${index + 1} INVALID or MISSING coordinates\`);
+                            }
+                        });
+                    } else {
+                        console.log('ℹ No stop points to add');
+                    }
 
+                    // Add END marker
                     if (endPoint && endPoint.lat && endPoint.lng) {
                         const name = endPoint.name || endPoint.address || 'Ending Point';
                         createCustomMarker(
@@ -368,11 +391,18 @@ export const createMapHTML = () => {
                             \`<strong>🏁 Ending Point</strong><br><b>\${name}</b>\`,
                             name
                         );
+                    } else {
                     }
 
-                    console.log('Route markers added successfully');
+                    console.log(\`=== MARKER SUMMARY: \${markersAdded} markers added ===\`);
+                    
+                    if (markersAdded === 0) {
+                        console.error('️ WARNING: NO MARKERS WERE ADDED! Check data structure.');
+                    }
+
                 } catch (error) {
-                    console.error('Error adding route markers:', error);
+                    console.error('❌ CRITICAL ERROR in addRouteMarkers:', error);
+                    console.error('Stack trace:', error.stack);
                 }
             }
 
@@ -393,26 +423,41 @@ export const createMapHTML = () => {
             }
 
             window.loadRouteData = function(routeData, startPoint, endPoint, stopPoints, userLocation) {
+   
+                // Set window variables FIRST
                 window.routeData = routeData;
                 window.startingPoint = startPoint;
                 window.endingPoint = endPoint;
-                window.stopPoints = stopPoints;
+                window.stopPoints = stopPoints || [];
+                
 
-                if (map) {
-                    displayRoute(routeData);
-                    
-                    // Display user location if available
-                    if (userLocation) {
-                        updateUserLocation(userLocation);
-                    }
-                } else {
+
+                if (!map) {
+                    console.error('❌ Map not ready!');
                     showError('Map not ready for route data');
+                    return;
                 }
+
+                const routeDisplayed = displayRoute(routeData);
+                
+                if (routeDisplayed) {
+                    
+                    setTimeout(() => {
+                        addRouteMarkers();
+                    }, 200);
+                } else {
+                }
+                
+                if (userLocation) {
+                    updateUserLocation(userLocation);
+                }
+                
             };
 
             window.updateUserLocation = updateUserLocation;
 
             document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOM Content Loaded - Initializing map...');
                 initMap();
             });
         </script>

@@ -56,7 +56,7 @@ const RideStep1 = ({
                 <TextInput
                     style={[
                         InputUtilities.inputCenter,
-                        focusedInput === 'rideName' && InputUtilities.inputCenterFocused
+                        focusedInput === 'rideName' && InputUtilities.inputCenterFocused,
                     ]}
                     value={rideName}
                     onChangeText={setRideName}

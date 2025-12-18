@@ -3,6 +3,7 @@ package leyans.RidersHub.Service;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.Repository.RidesRepository;
 import leyans.RidersHub.Repository.StartedRideRepository;
+import leyans.RidersHub.Utility.RidesUtil;
 import leyans.RidersHub.Utility.StartedUtil;
 import leyans.RidersHub.model.Rider;
 import leyans.RidersHub.model.Rides;
@@ -25,19 +26,21 @@ public class StartRideService {
     private final RidesRepository ridesRepository;
 
     private final StartedUtil startedUtil;
+    private final RidesUtil ridesUtil;
 
     @Autowired
     public StartRideService(StartedRideRepository startedRideRepository, RidesRepository ridesRepository,
-                            StartedUtil startedUtil) {
+                            StartedUtil startedUtil, RidesUtil ridesUtil) {
         this.startedRideRepository = startedRideRepository;
         this.ridesRepository = ridesRepository;
         this.startedUtil = startedUtil;
+        this.ridesUtil = ridesUtil;
     }
 
     @Transactional
     public StartRideResponseDTO startRide(Integer generatedRidesId) throws AccessDeniedException {
         Rider initiator = startedUtil.authenticateAndGetInitiator();
-        Rides ride = startedUtil.validateAndGetRide(generatedRidesId, initiator);
+        Rides ride = ridesUtil.validateAndGetRide(generatedRidesId, initiator);
 
         boolean isCreator = ride.getUsername().getUsername().equals(initiator.getUsername());
         boolean isParticipant = ride.getParticipants().stream()

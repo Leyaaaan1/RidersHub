@@ -9,6 +9,7 @@ import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.Service.LocationService;
 import leyans.RidersHub.Service.RiderService;
 import leyans.RidersHub.Service.RidesService;
+import leyans.RidersHub.Utility.RidesUtil;
 import leyans.RidersHub.model.RiderType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,16 +27,14 @@ public class RiderController {
 
     private final RiderService riderService;
     private final RidesService ridesService;
-
-
-
-
+    private final RidesUtil ridesUtil;
 
 
     @Autowired
-    public RiderController(RiderService riderService, RidesService ridesService) {
+    public RiderController(RiderService riderService, RidesService ridesService, RidesUtil ridesUtil) {
         this.riderService = riderService;
         this.ridesService = ridesService;
+        this.ridesUtil = ridesUtil;
     }
 
     @PostMapping("/rider-type")
@@ -92,7 +91,7 @@ public class RiderController {
 
     @GetMapping("/{generatedRidesId}/stop-points")
     public List<StopPointDTO> getStopPointsByRideId(@PathVariable Integer generatedRidesId)   {
-        return ridesService.getStopPointsDTOByGeneratedRideId(generatedRidesId);
+        return ridesUtil.getStopPointsDTOByGeneratedRideId(generatedRidesId);
     }
 
 
@@ -100,7 +99,7 @@ public class RiderController {
     @GetMapping("/{generatedRidesId}/map-image")
     public ResponseEntity<String> getRideMapImage(@PathVariable Integer generatedRidesId) {
         try {
-            String mapImageUrl = ridesService.getRideMapImageUrlById(generatedRidesId);
+            String mapImageUrl = ridesUtil.getRideMapImageUrlById(generatedRidesId);
             return ResponseEntity.ok(mapImageUrl);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -114,7 +113,7 @@ public class RiderController {
     @GetMapping("/{generatedRidesId}")
     public ResponseEntity<?> getRideDetailsByGeneratedId(@PathVariable Integer generatedRidesId) {
         try {
-            RideResponseDTO ride = ridesService.findRideByGeneratedId(generatedRidesId);
+            RideResponseDTO ride = ridesUtil.findRideByGeneratedId(generatedRidesId);
             return ResponseEntity.ok(ride);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -126,12 +125,50 @@ public class RiderController {
         }
     }
 
+//    @GetMapping("/my-rides")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<?> getMyRides() {
+//        try {
+//            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//            List<RideResponseDTO> rides = ridesUtil.findRidesByUsername(username);
+//            return ResponseEntity.ok(rides);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error retrieving rides: " + e.getMessage());
+//        }
+//    }
+//
+//
+//
+//
+//    @GetMapping("/rides")
+//    public ResponseEntity<?> getPaginatedRides(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "5") int size) {
+//        try {
+//                ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
+//                if (authResponse != null) {
+//                    return authResponse;
+//                }
+//
+//                Page<RideResponseDTO> rides = ridesUtil.getPaginatedRides(page, size);
+//                return ResponseEntity.ok(rides);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error retrieving rides: " + e.getMessage());
+//        }
+//    }
+
     @GetMapping("/my-rides")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getMyRides() {
+    public ResponseEntity<?> getMyRides(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            List<RideResponseDTO> rides = ridesService.findRidesByUsername(username);
+            Page<RideResponseDTO> rides = ridesUtil.findRidesByUsernamePaginated(username, page, size);
             return ResponseEntity.ok(rides);
         } catch (Exception e) {
             e.printStackTrace();
@@ -140,27 +177,24 @@ public class RiderController {
         }
     }
 
-
-
     @GetMapping("/rides")
     public ResponseEntity<?> getPaginatedRides(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(defaultValue = "10") int size) {
         try {
-                ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
-                if (authResponse != null) {
-                    return authResponse;
-                }
+            ResponseEntity<?> authResponse = SecurityUtils.validateAuthentication();
+            if (authResponse != null) {
+                return authResponse;
+            }
 
-                Page<RideResponseDTO> rides = ridesService.getPaginatedRides(page, size);
-                return ResponseEntity.ok(rides);
+            Page<RideResponseDTO> rides = ridesUtil.getPaginatedRides(page, size);
+            return ResponseEntity.ok(rides);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error retrieving rides: " + e.getMessage());
         }
     }
-
 
 
 }
