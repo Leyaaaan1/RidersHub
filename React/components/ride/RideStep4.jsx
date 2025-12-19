@@ -13,9 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { fetchRideMapImage, getRideDetails, getLocationImage } from '../../services/rideService';
 import ParticipantListModal from './modal/ParticipantListModal';
-import useJoinRide from './RideHandler';
+import useJoinRide from './util/RideHandler';
 import { startService } from '../../services/startService';
 import RouteMapView from '../../utilities/route/RouteMapView';
+import {processRideCoordinates} from '../../utilities/route/CoordinateUtils';
 
 const RideStep4 = (props) => {
   const navigation = useNavigation();
@@ -37,9 +38,12 @@ const RideStep4 = (props) => {
     username = props.username || routeParams.username,
     stopPoints = props.stopPoints || routeParams.stopPoints,
     currentUsername = props.currentUsername || routeParams.currentUsername,
+    isRideStarted = props.active || routeParams.active || true,
+
+
   } = props;
 
-  console.log('RideStep4 props:', props);
+
 
   const [state, setState] = useState({
     mapImage: null,
@@ -51,11 +55,9 @@ const RideStep4 = (props) => {
     rideNameImageError: null,
     distanceState: distance || '--',
     showParticipantsModal: false,
+    rideDetailsWithCoords: null, // Initialize as null
   });
-
   const { joinRide } = useJoinRide();
-
-  console.log('ride', props);
 
   const formatDate = (date) => {
     if (!date) {return 'Not specified';}
@@ -100,24 +102,52 @@ const RideStep4 = (props) => {
         return 'circle';
     }
   };
+  const mapCoords = processRideCoordinates(state.rideDetailsWithCoords);
+
+  const handleSwipeToMap = () => {
+    // Use the full ride details with coordinates if available
+    const rideDetails = state.rideDetailsWithCoords;
+
+    navigation.navigate('StartedRide', {
+      activeRide: {
+        generatedRidesId,
+        id: generatedRidesId,
+        rideName,
+        locationName,
+        riderType,
+        date,
+        description,
+        distance: state.distanceState || distance,
+        username,
+        startedBy: currentUsername,
+        // Pass coordinate objects, not string names
+        startingPoint: rideDetails?.startingPoint || startingPoint,
+        endingPoint: rideDetails?.endingPoint || endingPoint,
+        stopPoints: rideDetails?.stopPoints || stopPoints || [],
+        participants: participants || [],
+        isActive: true,
+      },
+      token,
+      username: currentUsername,
+      fromRideStep4: true,
+    });
+  };
+
 
   useEffect(() => {
     const loadLocationImage = async () => {
       if (!locationName || !token) {
-        console.log('Missing ride name or token for image fetch');
         return;
       }
 
       try {
         setState(prev => ({ ...prev, rideNameImageLoading: true, rideNameImageError: null }));
         const imageDataList = await getLocationImage(locationName, token);
-        console.log('Location image data list:', imageDataList);
         setState(prev => ({
           ...prev,
           rideNameImage: Array.isArray(imageDataList) ? imageDataList : [],
         }));
       } catch (error) {
-        console.error('Failed to fetch location images:', error);
         setState(prev => ({
           ...prev,
           rideNameImageError: error.message || 'Failed to load location images',
@@ -156,28 +186,45 @@ const RideStep4 = (props) => {
       return;
     }
 
-    console.log('Fetching ride details for ID:', generatedRidesId);
     setState(prev => ({ ...prev, imageLoading: true }));
 
     getRideDetails(generatedRidesId, token)
       .then(rideDetails => {
+
+
         setState(prev => ({
           ...prev,
           startMapImage: rideDetails.magImageStartingLocation || prev.startMapImage,
           endMapImage: rideDetails.magImageEndingLocation || prev.endMapImage,
           distanceState: typeof rideDetails.distance !== 'undefined' ? rideDetails.distance : 'N/A',
+          isRideActive: rideDetails.isActive === true || rideDetails.status === 'active',
+          rideDetailsWithCoords: rideDetails,
         }));
       })
       .catch(error => {
+        console.error('=== Error fetching ride details ===');
         if (error.response) {
           console.error('Response status:', error.response.status);
+          console.error('Response data:', error.response.data);
+        } else {
+          console.error('Error message:', error.message);
         }
-        setState(prev => ({ ...prev, distanceState: 'Error' }));
       })
       .finally(() => {
         setState(prev => ({ ...prev, imageLoading: false }));
       });
   }, [generatedRidesId, token]);
+
+
+  const getLocationDisplayName = (location) => {
+    if (typeof location === 'string') {
+      return location;
+    }
+    if (location && typeof location === 'object') {
+      return location.name || location.address || 'Location';
+    }
+    return 'Not specified';
+  };
 
   return (
     <View style={modernRideStyles.container}>
@@ -205,15 +252,48 @@ const RideStep4 = (props) => {
               <Text style={modernRideStyles.modernJoinButtonText}>Join</Text>
             </TouchableOpacity>
           ) : (
+            // Update the Start button in RideStep4.jsx
+
             <TouchableOpacity
               style={modernRideStyles.modernStartButton}
               onPress={async () => {
                 try {
                   await startService.startRide(generatedRidesId, token);
+
+                  // Pass complete ride data with coordinates
+                  const rideDetails = state.rideDetailsWithCoords;
+                  console.log('rideDetails:', rideDetails);
+
                   navigation.navigate('StartedRide', {
-                    generatedRidesId,
+                    activeRide: {
+                      generatedRidesId,
+                      id: generatedRidesId,
+                      rideName,
+                      locationName,
+                      riderType,
+                      date,
+                      description,
+                      distance: state.distanceState || distance,
+                      username,
+                      startedBy: currentUsername,
+                      // Pass processed coordinate objects - same as what RouteMapView receives
+                      startingPoint: mapCoords.startingPoint,
+                      endingPoint: mapCoords.endingPoint,
+                      stopPoints: mapCoords.stopPoints,
+                      // Also include name strings for display
+                      startingPointName: mapCoords.startingPoint?.name || getLocationDisplayName(startingPoint),
+                      endingPointName: mapCoords.endingPoint?.name || getLocationDisplayName(endingPoint),
+                      participants: participants || [],
+                      mapImage: state.mapImage || null,
+                      startMapImage: state.startMapImage || null,
+                      endMapImage: state.endMapImage || null,
+                      rideNameImage: state.rideNameImage || [],
+                      imageLoading: state.imageLoading || false,
+                    },
                     token,
+                    username: currentUsername,
                   });
+
                 } catch (error) {
                   Alert.alert('Error', error.message || 'Failed to start the ride.');
                 }
@@ -232,9 +312,9 @@ const RideStep4 = (props) => {
             <RouteMapView
               generatedRidesId={generatedRidesId}
               token={token}
-              startingPoint={startingPoint}
-              endingPoint={endingPoint}
-              stopPoints={stopPoints}
+              startingPoint={mapCoords.startingPoint}
+              endingPoint={mapCoords.endingPoint}
+              stopPoints={mapCoords.stopPoints}
               style={{ flex: 1 }}
               isDark={true}
             />
@@ -262,9 +342,9 @@ const RideStep4 = (props) => {
             </View>
 
             {description && (
-                <View style={modernRideStyles.descriptionCard}>
-                  <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>Description</Text>
-                  <Text style={modernRideStyles.descriptionCardText}>{description}</Text>
+              <View style={modernRideStyles.descriptionCard}>
+                <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>Description</Text>
+                <Text style={modernRideStyles.descriptionCardText}>{description}</Text>
               </View>
             )}
 
@@ -273,14 +353,18 @@ const RideStep4 = (props) => {
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                   <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>From</Text>
                 </View>
-                <Text style={modernRideStyles.routePointText}>{startingPoint}</Text>
+                <Text style={modernRideStyles.routePointText}>
+                  {getLocationDisplayName(state.rideDetailsWithCoords?.startingPoint || startingPoint)}
+                </Text>
               </View>
 
               <View style={[modernRideStyles.infoCard, { width: '100%' }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                   <Text style={[modernRideStyles.routePointLabel, { marginLeft: 8 }]}>To</Text>
                 </View>
-                <Text style={modernRideStyles.routePointText}>{endingPoint}</Text>
+                <Text style={modernRideStyles.routePointText}>
+                  {getLocationDisplayName(state.rideDetailsWithCoords?.endingPoint || endingPoint)}
+                </Text>
               </View>
             </View>
           </View>
@@ -295,6 +379,19 @@ const RideStep4 = (props) => {
             </TouchableOpacity>
 
             <View style={modernRideStyles.modernBottomNavDivider} />
+
+            {(isRideStarted) && (
+              <>
+                <View style={modernRideStyles.modernBottomNavDivider} />
+                <TouchableOpacity
+                  style={[modernRideStyles.modernBottomNavButton, { backgroundColor: 'rgba(140, 35, 35, 0.15)' }]}
+                  onPress={handleSwipeToMap}
+                >
+                  <FontAwesome name="map" size={18} color="#8c2323" />
+                  <Text style={[modernRideStyles.modernBottomNavText, { color: '#8c2323' }]}>Map View</Text>
+                </TouchableOpacity>
+              </>
+            )}
 
             <TouchableOpacity
               style={modernRideStyles.modernBottomNavButton}

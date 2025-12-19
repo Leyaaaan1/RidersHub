@@ -5,12 +5,12 @@ import rideRoutesPageUtilities from '../styles/RideRoutesPageUtilities';
 import RouteMapView from '../utilities/route/RouteMapView';
 import startedRideStyles from '../styles/StartedRideStyles';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {processRideCoordinates} from '../utilities/route/CoordinateUtils';
 
-const StartedRide = ({ route }) => {
-  const { activeRide, token, username } = route.params || {};
+const StartedRide = ({ route, navigation }) => {
+  const { activeRide, token } = route.params || {};
   const [showRouteInfo, setShowRouteInfo] = useState(false);
 
-  console.log('StartedRide Props:', { activeRide });
 
   if (!activeRide) {
     return (
@@ -20,63 +20,28 @@ const StartedRide = ({ route }) => {
     );
   }
 
+  const mapData = processRideCoordinates(activeRide);
 
-  console.log('Active Ride Data:', activeRide);
+  const handleSwipeToDetails = () => {
+    navigation.navigate('RideStep4', {
+      generatedRidesId: activeRide.generatedRidesId || activeRide.id,
+      rideName: activeRide.rideName,
+      locationName: activeRide.locationName,
+      riderType: activeRide.riderType,
+      date: activeRide.date,
+      startingPoint: activeRide.startingPoint,
+      endingPoint: activeRide.endingPoint,
+      participants: activeRide.participants,
+      description: activeRide.description,
+      token: token,
+      distance: activeRide.distance,
+      username: activeRide.username,
+      stopPoints: activeRide.stopPoints,
+      currentUsername: activeRide.username,
+      rideDetailsWithCoords: null,
+    });
+  };
 
-  const mapData = (() => {
-    let startingPoint = null;
-    if (activeRide.startingPoint && typeof activeRide.startingPoint === 'object') {
-      startingPoint = {
-        lat: activeRide.startingPoint.lat || activeRide.startingPoint.latitude,
-        lng: activeRide.startingPoint.lng || activeRide.startingPoint.longitude,
-        name: activeRide.startingPoint.name ||  'Starting Point',
-      };
-    } else if (activeRide.startLat !== undefined && activeRide.startLng !== undefined) {
-      startingPoint = {
-        lat: activeRide.startLat,
-        lng: activeRide.startLng,
-        name: activeRide.startingPointName || 'Starting Point',
-      };
-    }
-
-    let endingPoint = null;
-    if (activeRide.endingPoint && typeof activeRide.endingPoint === 'object') {
-      endingPoint = {
-        lat: activeRide.endingPoint.lat || activeRide.endingPoint.latitude,
-        lng: activeRide.endingPoint.lng || activeRide.endingPoint.longitude,
-        name: activeRide.endingPoint.name || activeRide.endingPointName || 'Ending Point',
-      };
-    } else if (activeRide.endLat !== undefined && activeRide.endLng !== undefined) {
-      endingPoint = {
-        lat: activeRide.endLat,
-        lng: activeRide.endLng,
-        name: activeRide.endingPointName || 'Ending Point',
-      };
-    }
-
-    const stopPoints = (activeRide.stopPoints || []).map((stop, index) => {
-      if (!stop) return null;
-
-      console.log('Processing stop point:', stop);
-      if (stop.lat !== undefined && stop.lng !== undefined) {
-        return stop;
-      }
-
-      const lat = stop.lat || stop.latitude || stop.stopLatitude;
-      const lng = stop.lng || stop.longitude || stop.stopLongitude;
-      const name = stop.name || stop.stopName || `Stop ${index + 1}`;
-
-      if (lat !== undefined && lng !== undefined) {
-        return { lat, lng, name };
-      }
-
-      return null;
-    }).filter(Boolean);
-
-    return { startingPoint, endingPoint, stopPoints };
-  })();
-
-  console.log('mapdate', mapData);
   return (
     <View style={[startedRideStyles.contentContainer, { flex: 1 }]}>
       <StatusBar translucent barStyle="light-content" backgroundColor="transparent" />
@@ -228,12 +193,13 @@ const StartedRide = ({ route }) => {
         </View>
 
         {/* Action Buttons at Bottom */}
-        <View style={startedRideStyles.actionButtonsContainer}>
-          <TouchableOpacity style={startedRideStyles.actionButton}>
-            <FontAwesome name="list-alt" size={23} />
-            <Text style={startedRideStyles.actionButtonText}>Rides</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[startedRideStyles.actionButton, { backgroundColor: 'rgba(140, 35, 35, 0.9)' }]}
+          onPress={handleSwipeToDetails}
+        >
+          <FontAwesome name="info-circle" size={23} color="#fff" />
+          <Text style={startedRideStyles.actionButtonText}>Details</Text>
+        </TouchableOpacity>
       </Animated.View>
     </View>
   );

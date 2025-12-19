@@ -1,7 +1,7 @@
 // React/components/ride/RideHandler.jsx
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { joinService } from '../../services/joinService';
+import { joinService } from '../../../services/joinService';
 
 const useJoinRide = () => {
     const [loading, setLoading] = useState(false);

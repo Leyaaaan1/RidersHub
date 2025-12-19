@@ -10,7 +10,7 @@ import {
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-import {getCurrentRiderType} from '../services/rideService';
+import {getCurrentRiderType, getRideDetails} from '../services/rideService';
 import SearchHeader from '../components/ride/util/SearchHeader';
 import { modernUtilities } from '../styles/modernUtilities';
 import {getActiveRide} from '../services/startService';
@@ -65,22 +65,41 @@ const RiderPage = ({ route , navigation}) => {
     }
   };
 
-  const handleRideSelect = (ride) => {
-    navigation.navigate('RideStep4', {
-      generatedRidesId: ride.generatedRidesId,
-      rideName: ride.ridesName,
-      locationName: ride.locationName,
-      riderType: ride.riderType,
-      distance: ride.distance,
-      date: ride.date,
-      startingPoint: ride.startingPointName,
-      endingPoint: ride.endingPointName,
-      participants: ride.participants,
-      description: ride.description,
-      token: token,
-      username: ride.username,
-      currentUsername: username,
-    });
+  const handleRideSelect = async (ride) => {
+    try {
+      // Show loading indicator
+      console.log('[RiderPage] Fetching full ride details for:', ride.generatedRidesId);
+
+      // Fetch complete ride details including coordinates
+      const fullRideDetails = await getRideDetails(ride.generatedRidesId, token);
+
+
+      navigation.navigate('RideStep4', {
+        generatedRidesId: ride.generatedRidesId,
+        rideName: ride.ridesName,
+        locationName: ride.locationName,
+        riderType: ride.riderType,
+        distance: ride.distance,
+        date: ride.date,
+        // Pass coordinate objects from full ride details
+        startingPoint: fullRideDetails.startingPoint,
+        endingPoint: fullRideDetails.endingPoint,
+        stopPoints: fullRideDetails.stopPoints || [],
+        participants: ride.participants,
+
+        startingPointName: ride.startingPointName || fullRideDetails.startingPoint?.name,
+        endingPointName: ride.endingPointName || fullRideDetails.endingPoint?.name,
+        description: ride.description,
+        token: token,
+        username: ride.username,
+        currentUsername: username,
+        rideDetailsWithCoords: fullRideDetails,
+        skipCoordsFetch: true,
+      });
+    } catch (error) {
+      console.error('[RiderPage] Error fetching ride details:', error);
+      Alert.alert('Error', 'Failed to load ride details. Please try again.');
+    }
   };
 
   return (

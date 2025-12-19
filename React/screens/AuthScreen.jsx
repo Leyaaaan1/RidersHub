@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import InputUtilities from '../styles/InputUtilities';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,6 +20,8 @@ const AuthForm = ({
                       toggleMode,
                       navigation,
                   }) => (
+
+
     <View style={InputUtilities.authContainer}>
         <Text style={InputUtilities.authTitle}>{isLogin ? 'Login' : 'Register'}</Text>
 
@@ -89,10 +91,19 @@ const AuthForm = ({
 
 const AuthScreen = ({ navigation }) => {
     const [isLogin, setIsLogin] = useState(true);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('lean');
+    const [password, setPassword] = useState('Lean');
     const [riderType, setRiderType] = useState('');
 
+
+  useEffect(() => {
+    const autoLogin = async () => {
+      if (isLogin && username && password) {
+        await handleAuth();
+      }
+    };
+    autoLogin();
+  }, []);
 
     const API_BASE_URL = BASE_URL  || 'http://localhost:8080';
     console.log(API_BASE_URL);

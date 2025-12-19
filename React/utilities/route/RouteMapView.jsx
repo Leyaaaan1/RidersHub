@@ -29,8 +29,6 @@ const RouteMapView = ({
     updateUserLocationOnMap,
   } = useRouteMapLogic(generatedRidesId, token);
 
-  ;
-
   // Update user location on map whenever it changes
   useEffect(() => {
     if (userLocation && webViewRef.current) {
@@ -41,7 +39,6 @@ const RouteMapView = ({
   const onWebViewLoad = () => {
 
     setTimeout(() => {
-
 
       handleWebViewLoad(
         webViewRef,

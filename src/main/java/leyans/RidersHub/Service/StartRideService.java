@@ -70,6 +70,10 @@ public class StartRideService {
 
         startedRide = startedRideRepository.save(startedRide);
 
+        Rides updateStatus = new Rides();
+        updateStatus.setActive(true);
+        ridesRepository.save(updateStatus);
+
         // Initialize locations for ALL participants with the SAME starting point
         List<ParticipantLocation> participantLocations = startedUtil.initializeParticipantLocations(
                 startedRide,

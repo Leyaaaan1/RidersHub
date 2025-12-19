@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import utilities from '../../styles/utilities';
-import colors from '../../styles/colors';
+import utilities from '../../../styles/utilities';
+import colors from '../../../styles/colors';
 
 const ProgressBar = ({
                          showProgressBar,

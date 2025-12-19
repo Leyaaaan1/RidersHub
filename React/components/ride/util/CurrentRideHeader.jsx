@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
-import utilities from '../styles/utilities';
-import colors from '../styles/colors';
+import utilities from '../../../styles/utilities';
+import colors from '../../../styles/colors';
 
 const CurrentRideHeader = ({ startedRides, startedRidesLoading, startedRidesError }) => (
     <ScrollView horizontal={true} style={utilities.currentRideContainer}>
