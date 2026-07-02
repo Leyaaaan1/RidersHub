@@ -156,15 +156,8 @@ export function useRideShareCard({
         maxHeight: 1920,
         selectionLimit: 1,
       });
-      console.log('[pickPhoto] response:', JSON.stringify(response));
       if (response.didCancel) {
-        console.log('[pickPhoto] user cancelled');
       } else if (response.errorCode) {
-        console.warn(
-          '[pickPhoto] picker error:',
-          response.errorCode,
-          response.errorMessage,
-        );
         Alert.alert(
           'Photo picker error',
           `${response.errorCode}: ${response.errorMessage ?? 'unknown'}`,
@@ -174,7 +167,6 @@ export function useRideShareCard({
         if (asset?.uri) setPhotoUri(asset.uri);
       }
     } catch (e) {
-      console.warn('[pickPhoto] image picker threw:', e);
       Alert.alert('Photo picker crashed', String(e?.message ?? e));
     } finally {
       // Always reset both — no matter what happens above

@@ -72,11 +72,9 @@ const FinishedRideView = ({route, navigation}) => {
     const load = async () => {
       try {
         const statusData = await getRideStatus(generatedRidesId);
-        console.log('statusData:', JSON.stringify(statusData, null, 2));
 
         if (isPersonalSummary) {
           const data = await getPersonalSummary(generatedRidesId);
-          console.log('personal summary data:', JSON.stringify(data, null, 2));
           setFinishedRideData(data);
           return;
         }
@@ -84,10 +82,6 @@ const FinishedRideView = ({route, navigation}) => {
         if (statusData.currentStatus === 'FINISHED') {
           // getFinishedRideSummary now returns routeCoordinates + averageSpeedKph + photos
           const data = await getFinishedRideSummary(generatedRidesId);
-          console.log(
-            'finished ride summary data:',
-            JSON.stringify(data, null, 2),
-          );
           setFinishedRideData(data);
           setPhotos(safe(data.photos));
           return;
@@ -95,7 +89,6 @@ const FinishedRideView = ({route, navigation}) => {
 
         // Still active — load live arrivals (no route stats yet)
         const arrivals = await getCheckpointArrivals(generatedRidesId);
-        console.log('checkpoint arrivals (active ride):', JSON.stringify(arrivals, null, 2));
         setFinishedRideData({
           rideName,
           startingPointName: passedStartingPointName,
@@ -109,7 +102,6 @@ const FinishedRideView = ({route, navigation}) => {
           })),
         });
       } catch (err) {
-        console.log('load() error:', err.message);
         setError(err.message);
       } finally {
         setLoading(false);

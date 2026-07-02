@@ -43,14 +43,12 @@ export const mapInitScript = () => `
 
             return true;
         } catch (error) {
-            console.error('Map init error:', error);
             return false;
         }
     }
 
     // ─── NEW: Load route data into window ──────────────────────────────
     window.loadRouteData = function(routeData, startingPoint, endingPoint, stopPoints, userLocation) {
-        console.log('[Map] loadRouteData called');
         
         // Store data for fitMapToRoute
         window._routeData = routeData;
@@ -78,7 +76,6 @@ export const mapInitScript = () => `
 
     // ─── fitMapToRoute ──────────────────────────────────────────────────
     window.fitMapToRoute = function() {
-    console.log('[Map] fitMapToRoute called');
     
     if (!window.mapInstance) {
         if (window.fitMapResolve) { window.fitMapResolve(false); window.fitMapResolve = null; }
@@ -147,7 +144,6 @@ export const mapInitScript = () => `
         return false;
         
     } catch (error) {
-        console.error('[Map] Error fitting to route:', error);
         if (window.fitMapResolve) { window.fitMapResolve(false); window.fitMapResolve = null; }
         return false;
     }

@@ -150,7 +150,6 @@ const RouteMapView = forwardRef(
     }, [userLocation, updateUserLocationOnMap]);
 
     useEffect(() => {
-      console.log('[RouteMapView] routeData changed:', routeData ? 'HAS DATA' : 'NULL', typeof onRouteDataLoaded);
       if (routeData) {
         onRouteDataLoaded?.(routeData);
       }
@@ -211,23 +210,17 @@ const RouteMapView = forwardRef(
           const msg = JSON.parse(event.nativeEvent.data);
 
           if (msg.type === 'snapshotReady') {
-            console.log(
-              '[Snapshot] snapshotReady received, dataUri length:',
-              msg.dataUri?.length,
-            );
             snapshotResolverRef.current?.(msg.dataUri);
             snapshotResolverRef.current = null;
             return;
           }
           if (msg.type === 'snapshotError') {
-            console.log('[Snapshot] snapshotError received:', msg.error);
             snapshotResolverRef.current?.(null);
             snapshotResolverRef.current = null;
             return;
           }
 
           if (msg.type === 'markerError') {
-            console.warn('[RouteMapView] marker error:', msg.error);
             return;
           }
         } catch (_) {

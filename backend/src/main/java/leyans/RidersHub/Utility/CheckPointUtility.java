@@ -6,8 +6,6 @@ import leyans.RidersHub.ExceptionHandler.RideAuthorizationException;
 import leyans.RidersHub.Repository.RideCheckpointArrivalRepository;
 import leyans.RidersHub.Repository.RiderLocationRepository;
 import leyans.RidersHub.Repository.RidesRepository;
-import leyans.RidersHub.Service.PersonalFinishedRideService;
-import leyans.RidersHub.Service.RideStatusService;
 import leyans.RidersHub.model.*;
 import leyans.RidersHub.model.participant.RideCheckpointArrival;
 import org.locationtech.jts.geom.Point;
@@ -27,21 +25,15 @@ public class CheckPointUtility {
     private final RidesRepository ridesRepository;
     private final RiderLocationRepository locationRepo;
     private final StartedUtil startedUtil;
-    private final RideStatusService rideStatusService;
-    private final PersonalFinishedRideService personalFinishedRideService;
 
     public CheckPointUtility(RideCheckpointArrivalRepository rideCheckpointArrivalRepository,
                              RidesRepository ridesRepository,
                              RiderLocationRepository locationRepo,
-                             StartedUtil startedUtil,
-                             RideStatusService rideStatusService,
-                             PersonalFinishedRideService personalFinishedRideService) {
+                             StartedUtil startedUtil) {
         this.rideCheckpointArrivalRepository = rideCheckpointArrivalRepository;
         this.ridesRepository = ridesRepository;
         this.locationRepo = locationRepo;
         this.startedUtil = startedUtil;
-        this.rideStatusService = rideStatusService;
-        this.personalFinishedRideService = personalFinishedRideService;
     }
 
 
@@ -164,14 +156,12 @@ public class CheckPointUtility {
                     "endingPoint", ride.getEndingPointName(),
                     "distanceMeters", endingDistanceMeters);
 
-            personalFinishedRideService.createPersonalSummaryOnArrival(
-                    rider, ride, endTime
-            );
-
-            rideStatusService.markRiderFinished(
-                    ride.getGeneratedRidesId(),
-                    rider.getUsername()
-            );
+            // NOTE: reaching the ending point only records the arrival.
+            // It does NOT finish the rider's ride — that only happens when the
+            // rider explicitly calls finishRide()/forceFinishOwnRide(), which is
+            // where createPersonalSummaryOnArrival() + markRiderFinished() belong.
+            // Calling them here meant background GPS pings near the finish line
+            // silently finished riders who never tapped "End Your Ride".
         }
     }
     public boolean isRiderFinished(String generatedRidesId, String username) {

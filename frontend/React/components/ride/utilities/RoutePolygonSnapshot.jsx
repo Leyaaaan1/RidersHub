@@ -37,7 +37,6 @@ const projectPoints = (points, width, height, padding) => {
 //   - Plain [[lng,lat], ...] or [{lat,lng}, ...] array
 const normalizeRouteCoords = (raw, sourceLabel = 'route') => {
   if (__DEV__) {
-    console.log('[RPS] normalizeRouteCoords RAW:', sourceLabel, JSON.stringify(raw)?.slice(0, 300));
   }
   if (!raw) {return [];}
 
@@ -45,7 +44,6 @@ const normalizeRouteCoords = (raw, sourceLabel = 'route') => {
     try {
       raw = JSON.parse(raw);
     } catch (e) {
-      if (__DEV__) {console.warn(`[RoutePolygonSnapshot] Failed to parse ${sourceLabel}:`, e.message);}
       return [];
     }
   }
@@ -78,10 +76,8 @@ const normalizeRouteCoords = (raw, sourceLabel = 'route') => {
     });
 
     if (lineCoords.length >= 2) {
-      if (__DEV__) {console.log(`[RoutePolygonSnapshot] ${sourceLabel} → ${lineCoords.length} pts from features`);}
       return lineCoords.map(c => ({ lat: c[1], lng: c[0] }));
     }
-    if (__DEV__) {console.warn(`[RoutePolygonSnapshot] ${sourceLabel} features yielded 0 coordinate pairs`);}
   }
 
   // Plain array: [[lng,lat],...] or [{lat,lng},...]
@@ -116,18 +112,9 @@ const resolveRoutePoints = ({
   routeCoordinates,
   reroutePolygons,
 }) => {
-  if (__DEV__) {
-    console.log('[RoutePolygonSnapshot] resolveRoutePoints input:', {
-      reroutePolygon: typeof reroutePolygon,
-      fixedRoutePolygon: JSON.stringify(fixedRoutePolygon)?.slice(0, 200),
-      routeCoordinates: typeof routeCoordinates,
-    });
-  }
+
 
   const reroutePoints = normalizeRouteCoords(reroutePolygon, 'reroutePolygon');
-  if (__DEV__) {
-    console.log('[RoutePolygonSnapshot] reroute points:', reroutePoints.length);
-  }
 
   let fixedPoints = normalizeRouteCoords(
     fixedRoutePolygon,
@@ -137,9 +124,7 @@ const resolveRoutePoints = ({
     // back-compat fallback only — doesn't override a real fixedRoutePolygon
     fixedPoints = normalizeRouteCoords(routeCoordinates, 'routeCoordinates');
   }
-  if (__DEV__) {
-    console.log('[RoutePolygonSnapshot] fixed points:', fixedPoints.length);
-  }
+
   const historyPointGroups = (reroutePolygons || [])
     .map((entry, i) => normalizeRouteCoords(entry, `reroutePolygons[${i}]`))
     .filter(pts => pts.length >= 2);

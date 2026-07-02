@@ -128,7 +128,6 @@ const RideDetailView = ({ route, navigation }) => {
         setFinishedError(null);
         try {
           const data = await getFinishedRideSummary(generatedRidesId);
-          console.log('🔵 finishedData:', JSON.stringify(data, null, 2)); // ← ADD
 
           setFinishedData(data);
         } catch (err) {

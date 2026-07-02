@@ -7,7 +7,6 @@ import colors from '../../styles/tokens/colors';
 import finishedRideStyles from '../../styles/screens/finishedRideStyles';
 
 const FinishedRideSummary = ({rideData}) => {
-  console.log('ride data from finishedride', rideData);
   const formatTime = timestamp => {
     if (!timestamp) return '—';
     return new Date(timestamp).toLocaleTimeString('en-US', {

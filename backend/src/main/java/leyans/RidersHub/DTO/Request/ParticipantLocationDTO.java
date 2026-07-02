@@ -2,7 +2,8 @@ package leyans.RidersHub.DTO.Request;
 
 import java.time.LocalDateTime;
 
-public class ParticipantLocationDTO {
+public class
+ParticipantLocationDTO {
     private String username;
     private double latitude;
     private double longitude;

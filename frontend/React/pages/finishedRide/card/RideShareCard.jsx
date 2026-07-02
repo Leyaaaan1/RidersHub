@@ -458,7 +458,6 @@ export default RideShareCard;
 // regardless of screen size.
 export async function captureShareCard(cardRef, format = 'feed') {
   if (!cardRef?.current) {
-    console.warn('[captureShareCard] ref not attached');
     return null;
   }
   try {
@@ -474,7 +473,6 @@ export async function captureShareCard(cardRef, format = 'feed') {
       pixelRatio: 1 / renderScale,
     });
   } catch (e) {
-    console.warn('[captureShareCard] failed:', e);
     return null;
   }
 }

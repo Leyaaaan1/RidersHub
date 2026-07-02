@@ -11,6 +11,9 @@ import java.util.List;
 @Repository
 public interface RideCheckpointArrivalRepository extends JpaRepository<RideCheckpointArrival, Integer> {
 
+    void deleteByRideGeneratedRidesId(String generatedRidesId);
+
+
     // All arrivals for a ride — used for summary and checkpoint modal
     @Query("SELECT c FROM RideCheckpointArrival c " +
             "WHERE c.ride.generatedRidesId = :generatedRidesId " +
@@ -18,6 +21,7 @@ public interface RideCheckpointArrivalRepository extends JpaRepository<RideCheck
     List<RideCheckpointArrival> findByRideGeneratedRidesId(
             @Param("generatedRidesId") String generatedRidesId
     );
+
 
 
     @Query("SELECT c FROM RideCheckpointArrival c " +
@@ -31,30 +35,6 @@ public interface RideCheckpointArrivalRepository extends JpaRepository<RideCheck
     );
 
 
-    // All arrivals for a ride filtered by checkpoint type
-    @Query("SELECT c FROM RideCheckpointArrival c " +
-            "WHERE c.ride.generatedRidesId = :generatedRidesId " +
-            "AND c.checkpointType = :checkpointType")
-    List<RideCheckpointArrival> findByRideGeneratedRidesIdAndCheckpointType(
-            @Param("generatedRidesId") String generatedRidesId,
-            @Param("checkpointType") RideCheckpointArrival.CheckpointType checkpointType
-    );
-
-    // Count riders at a specific checkpoint type (e.g. how many reached ENDING)
-    @Query("SELECT COUNT(c) FROM RideCheckpointArrival c " +
-            "WHERE c.ride.generatedRidesId = :generatedRidesId " +
-            "AND c.checkpointType = :checkpointType")
-    long countByRideGeneratedRidesIdAndCheckpointType(
-            @Param("generatedRidesId") String generatedRidesId,
-            @Param("checkpointType") RideCheckpointArrival.CheckpointType checkpointType
-    );
-
-    // Count distinct riders who have any arrival recorded (used for completion status)
-    @Query("SELECT COUNT(DISTINCT c.rider.username) FROM RideCheckpointArrival c " +
-            "WHERE c.ride.generatedRidesId = :generatedRidesId")
-    long countDistinctRidersByGeneratedRidesId(
-            @Param("generatedRidesId") String generatedRidesId
-    );
 
     // Check if a specific rider already arrived at a stop point (prevents duplicates)
     @Query("SELECT COUNT(c) > 0 FROM RideCheckpointArrival c " +
@@ -79,4 +59,5 @@ public interface RideCheckpointArrivalRepository extends JpaRepository<RideCheck
             @Param("riderUsername") String riderUsername,
             @Param("checkpointType") RideCheckpointArrival.CheckpointType checkpointType
     );
+
 }

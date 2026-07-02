@@ -34,16 +34,20 @@ public class PersonalFinishedRideService {
         private final StartedRideRepository startedRideRepository;
         private final RideCheckpointArrivalRepository rideCheckpointArrivalRepository;
         private final ParticipantLocationRepository participantLocationRepository;
+        private final RideStatusService rideStatusService;
 
         public PersonalFinishedRideService(PersonalFinishedRideRepository personalFinishedRideRepository,
                                            RideCheckpointArrivalRepository rideCheckpointArrivalRepository, // ← ADD THIS
                                            StartedUtil startedUtil,
-                                           StartedRideRepository startedRideRepository, ParticipantLocationRepository participantLocationRepository) {
+                                           StartedRideRepository startedRideRepository,
+                                           ParticipantLocationRepository participantLocationRepository,
+                                           RideStatusService rideStatusService) {
                 this.personalFinishedRideRepository = personalFinishedRideRepository;
                 this.rideCheckpointArrivalRepository = rideCheckpointArrivalRepository; // ← ADD THIS
                 this.startedUtil = startedUtil;
                 this.startedRideRepository = startedRideRepository;
-            this.participantLocationRepository = participantLocationRepository;
+                this.participantLocationRepository = participantLocationRepository;
+                this.rideStatusService = rideStatusService;
         }
 
         // ── Read ──────────────────────────────────────────────────────────────────
@@ -56,51 +60,51 @@ public class PersonalFinishedRideService {
 
                 // Checkpoint arrivals filtered to this rider only
                 List<CheckpointArrivalResponse> checkpointArrivals = rideCheckpointArrivalRepository
-                                .findByRideGeneratedRidesId(generatedRidesId)
-                                .stream()
-                                .filter(arrival -> arrival.getRider().getUsername().equals(riderUsername))
-                                .map(CheckpointArrivalResponse::new)
-                                .toList();
+                        .findByRideGeneratedRidesId(generatedRidesId)
+                        .stream()
+                        .filter(arrival -> arrival.getRider().getUsername().equals(riderUsername))
+                        .map(CheckpointArrivalResponse::new)
+                        .toList();
 
                 // ── place this right after checkpointArrivals is built ──────────────────
                 // Re-use the raw arrivals (before mapping to response DTOs) to build segments
                 List<leyans.RidersHub.model.participant.RideCheckpointArrival> rawArrivals = rideCheckpointArrivalRepository
-                                .findByRideGeneratedRidesId(generatedRidesId)
-                                .stream()
-                                .filter(a -> a.getRider().getUsername().equals(riderUsername))
-                                .toList(); // already filtered above — extract to a variable instead
+                        .findByRideGeneratedRidesId(generatedRidesId)
+                        .stream()
+                        .filter(a -> a.getRider().getUsername().equals(riderUsername))
+                        .toList(); // already filtered above — extract to a variable instead
 
                 List<SpeedSegmentDTO> speedSegments = buildSpeedSegments(rawArrivals, ride);
 
                 // Stop points
                 List<StopPointDTO> stopPointDTOs = ride.getStopPoints() != null
-                                ? ride.getStopPoints().stream()
-                                                .map(sp -> new StopPointDTO(
-                                                                sp.getStopName(),
-                                                                sp.getStopLocation().getX(),
-                                                                sp.getStopLocation().getY()))
-                                                .toList()
-                                : new ArrayList<>();
+                        ? ride.getStopPoints().stream()
+                        .map(sp -> new StopPointDTO(
+                                sp.getStopName(),
+                                sp.getStopLocation().getX(),
+                                sp.getStopLocation().getY()))
+                        .toList()
+                        : new ArrayList<>();
 
                 // and stored on the entity — read it directly instead of recomputing.
                 Double personalAverageSpeedKph = personalFinishedRide.getAverageSpeedKph();
 
                 PersonalFinishedRideDTO dto = new PersonalFinishedRideDTO(
-                                personalFinishedRide.getId(),
-                                riderUsername,
-                                ride.getRidesName(),
-                                generatedRidesId,
-                                personalFinishedRide.getStartTime(),
-                                personalFinishedRide.getEndTime(),
-                                personalFinishedRide.getDurationMinutes(),
-                                personalFinishedRide.getCreatedAt(),
-                                checkpointArrivals,
-                                stopPointDTOs,
-                                ride.getStartingPointName(),
-                                ride.getEndingPointName(),
-                                ride.getDistance(), // NEW field — distanceMeters
-                                personalAverageSpeedKph,
-                                speedSegments);
+                        personalFinishedRide.getId(),
+                        riderUsername,
+                        ride.getRidesName(),
+                        generatedRidesId,
+                        personalFinishedRide.getStartTime(),
+                        personalFinishedRide.getEndTime(),
+                        personalFinishedRide.getDurationMinutes(),
+                        personalFinishedRide.getCreatedAt(),
+                        checkpointArrivals,
+                        stopPointDTOs,
+                        ride.getStartingPointName(),
+                        ride.getEndingPointName(),
+                        ride.getDistance(), // NEW field — distanceMeters
+                        personalAverageSpeedKph,
+                        speedSegments);
 
                 return dto;
         }
@@ -117,10 +121,10 @@ public class PersonalFinishedRideService {
         public PersonalFinishedRide getPersonalSummary(String generatedRidesId) {
                 Rider currentUser = startedUtil.authenticateAndGetInitiator();
                 return personalFinishedRideRepository
-                                .findByRideGeneratedRidesIdAndRiderUsername(
-                                                generatedRidesId, currentUser.getUsername())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                                "No personal summary found for rider: " + currentUser.getUsername()));
+                        .findByRideGeneratedRidesIdAndRiderUsername(
+                                generatedRidesId, currentUser.getUsername())
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "No personal summary found for rider: " + currentUser.getUsername()));
         }
 
         // =========================================================================
@@ -129,16 +133,16 @@ public class PersonalFinishedRideService {
         // =========================================================================
         @Transactional
         public void createPersonalSummaryOnArrival(Rider rider,
-                        Rides ride,
-                        LocalDateTime endTime) {
+                                                   Rides ride,
+                                                   LocalDateTime endTime) {
                 String generatedRidesId = ride.getGeneratedRidesId();
                 String username = rider.getUsername();
 
 
                 StartedRide startedRide = startedRideRepository
-                                .findByRideGeneratedRidesId(generatedRidesId)
-                                .orElseThrow(() -> new IllegalStateException(
-                                                "StartedRide not found for ride: " + generatedRidesId));
+                        .findByRideGeneratedRidesId(generatedRidesId)
+                        .orElseThrow(() -> new IllegalStateException(
+                                "StartedRide not found for ride: " + generatedRidesId));
 
                 participantLocationRepository.findByStartedRideAndRider(startedRide, rider)
                         .stream()
@@ -160,12 +164,14 @@ public class PersonalFinishedRideService {
                 // Compute once here, at write-time, since distance and durationMinutes are
                 // both fixed facts by now — store it so reads never need to recompute.
                 Double averageSpeedKph = RideCalculationUtils.computeAverageSpeedKph(
-                                ride.getDistance(), durationMinutes);
+                        ride.getDistance(), durationMinutes);
 
                 PersonalFinishedRide record = new PersonalFinishedRide(
-                                ride, rider, startTime, endTime, durationMinutes, null, averageSpeedKph);
+                        ride, rider, startTime, endTime, durationMinutes, null, averageSpeedKph);
 
                 personalFinishedRideRepository.save(record);
+
+                rideStatusService.markRiderFinished(generatedRidesId, username);
         }
 
         // Add import at top of file:
@@ -174,8 +180,8 @@ public class PersonalFinishedRideService {
         // import java.util.Comparator;
 
         private List<SpeedSegmentDTO> buildSpeedSegments(
-                        List<leyans.RidersHub.model.participant.RideCheckpointArrival> arrivals,
-                        Rides ride) {
+                List<leyans.RidersHub.model.participant.RideCheckpointArrival> arrivals,
+                Rides ride) {
 
                 if (arrivals == null || arrivals.size() < 2)
                         return new ArrayList<>();
@@ -183,14 +189,14 @@ public class PersonalFinishedRideService {
                 Integer totalDistanceMeters = ride.getDistance();
 
                 List<leyans.RidersHub.model.participant.RideCheckpointArrival> sorted = arrivals.stream()
-                                .sorted(Comparator.comparing(
-                                                leyans.RidersHub.model.participant.RideCheckpointArrival::getArrivedAt))
-                                .toList();
+                        .sorted(Comparator.comparing(
+                                leyans.RidersHub.model.participant.RideCheckpointArrival::getArrivedAt))
+                        .toList();
 
                 int numLegs = sorted.size() - 1;
                 double legDistanceMeters = totalDistanceMeters != null
-                                ? (double) totalDistanceMeters / numLegs
-                                : 0;
+                        ? (double) totalDistanceMeters / numLegs
+                        : 0;
 
                 List<SpeedSegmentDTO> segments = new ArrayList<>();
                 for (int i = 0; i < numLegs; i++) {
@@ -198,27 +204,27 @@ public class PersonalFinishedRideService {
                         var to = sorted.get(i + 1);
 
                         long durationMins = ChronoUnit.MINUTES.between(
-                                        from.getArrivedAt(), to.getArrivedAt());
+                                from.getArrivedAt(), to.getArrivedAt());
 
                         double avgKph = durationMins > 0
-                                        ? (legDistanceMeters / 1000.0) / (durationMins / 60.0)
-                                        : 0;
+                                ? (legDistanceMeters / 1000.0) / (durationMins / 60.0)
+                                : 0;
 
                         double roundedKph = Math.round(avgKph * 10.0) / 10.0;
 
                         segments.add(new SpeedSegmentDTO(
-                                        resolveCheckpointLabel(from, ride),
-                                        resolveCheckpointLabel(to, ride),
-                                        legDistanceMeters,
-                                        durationMins,
-                                        roundedKph));
+                                resolveCheckpointLabel(from, ride),
+                                resolveCheckpointLabel(to, ride),
+                                legDistanceMeters,
+                                durationMins,
+                                roundedKph));
                 }
                 return segments;
         }
 
         private String resolveCheckpointLabel(
-                        leyans.RidersHub.model.participant.RideCheckpointArrival arrival,
-                        Rides ride) {
+                leyans.RidersHub.model.participant.RideCheckpointArrival arrival,
+                Rides ride) {
 
                 return switch (arrival.getCheckpointType()) {
                         case STARTING_POINT -> ride.getStartingPointName();
@@ -226,8 +232,8 @@ public class PersonalFinishedRideService {
                         case STOP_POINT -> {
                                 Integer idx = arrival.getCheckpointIndex();
                                 yield (ride.getStopPoints() != null && idx != null && idx < ride.getStopPoints().size())
-                                                ? ride.getStopPoints().get(idx).getStopName()
-                                                : "Stop " + (idx == null ? "?" : idx + 1);
+                                        ? ride.getStopPoints().get(idx).getStopName()
+                                        : "Stop " + (idx == null ? "?" : idx + 1);
                         }
                 };
         }
