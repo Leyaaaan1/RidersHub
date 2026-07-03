@@ -30,7 +30,8 @@ import {
 } from '../../utilities/inviteLinkHandler';
 import scanner from '../../styles/components/scanner';
 import {useAuth} from '../../context/AuthContext';
-import {Buffer} from 'buffer';
+import RNQRGenerator from 'rn-qr-generator';
+
 
 const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
   const {username} = useAuth();
@@ -141,33 +142,13 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
 
       try {
         // ─────────────────────────────────────────────────────────────────
-        // Decode QR using jsQR (pure JavaScript, no native modules)
+        // Decode QR natively (ZXing under the hood on Android). This
+        // decodes the JPEG/PNG itself — unlike jsQR, which needs raw RGBA
+        // pixel data and can't read a compressed image file directly.
         // ─────────────────────────────────────────────────────────────────
-        const jsQR = require('jsqr');
-        const RNFS = require('react-native-fs');
-        const {Image} = require('react-native');
+        const {values} = await RNQRGenerator.detect({uri: imageUri});
 
-        // Get image dimensions
-        const {width, height} = await new Promise((resolve, reject) => {
-          Image.getSize(
-            imageUri,
-            (w, h) => resolve({width: w, height: h}),
-            reject,
-          );
-        });
-
-        // Read image as base64
-        const cleanPath = imageUri.replace('file://', '');
-        const base64 = await RNFS.readFile(cleanPath, 'base64');
-
-        // Convert base64 to pixel array
-        const buffer = Buffer.from(base64, 'base64');
-        const uint8Array = new Uint8ClampedArray(buffer);
-
-        // Decode QR
-        const code = jsQR(uint8Array, width, height);
-
-        if (!code) {
+        if (!values || values.length === 0) {
           Alert.alert(
             'No QR Code Found',
             'Could not find a QR code in this image. Make sure the QR code is clear and fully visible.',
@@ -177,7 +158,7 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
           return;
         }
 
-        const qrValue = code.data;
+        const qrValue = values[0];
 
         // ─────────────────────────────────────────────────────────────────
         // Process the QR value (same logic as camera scanner)

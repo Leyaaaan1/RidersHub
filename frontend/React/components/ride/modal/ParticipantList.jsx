@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  Share,
 } from 'react-native';
 import {fetchMyRides} from '../../../services/rideService';
 import {joinService} from '../../../services/joinService';
@@ -19,7 +18,8 @@ import modal from '../../../styles/components/modal';
 import feedback from '../../../styles/base/feedback';
 import badges from '../../../styles/base/badges';
 import {RideContext} from '../../../context/RideContext';
-
+import Share from 'react-native-share';
+import RNShare from 'react-native-fs';
 import {getRideDetails} from '../../../services/rideService';
 
 const ParticipantList = ({
@@ -52,19 +52,41 @@ const ParticipantList = ({
 
   const isOwner = username === currentUsername;
 
+
+
   const handleShareQrCode = async () => {
     try {
-      if (state.inviteLink) {
-        await Share.share({
-          message: `Join my ride!\n\nUse this link to join:\n${state.inviteLink}`,
+      if (!state.inviteLink) return;
+
+      if (state.qrCodeBase64) {
+        // Strip any data URI prefix if your backend already includes one
+        const base64Data = state.qrCodeBase64.includes('base64,')
+          ? state.qrCodeBase64.split('base64,').pop()
+          : state.qrCodeBase64;
+
+        const filePath = `${RNShare.CachesDirectoryPath}/ride-qr-${generatedRidesId}.png`;
+        await RNShare.writeFile(filePath, base64Data, 'base64');
+
+        await Share.open({
           title: 'Join My Ride',
+          message: `Join my ride!\n\nUse this link to join:\n${state.inviteLink}`,
+          url: `file://${filePath}`, // this is the image attachment
+          type: 'image/png',
+          failOnCancel: false,
+        });
+      } else {
+        // fallback: text-only share if QR image isn't available
+        await Share.open({
+          title: 'Join My Ride',
+          message: `Join my ride!\n\nUse this link to join:\n${state.inviteLink}`,
+          failOnCancel: false,
         });
       }
     } catch (err) {
+      // user cancel also lands here when failOnCancel is true; we set it false above
+      console.log('Share error:', err);
     }
   };
-
-  // ✅ NEW: Fetch fresh ride details to get updated participants list
   const refreshParticipants = useCallback(async () => {
     if (!generatedRidesId) return;
     try {
@@ -72,7 +94,6 @@ const ParticipantList = ({
       const freshParticipants = rideDetails.participants || [];
       setState(prev => ({...prev, participants: freshParticipants}));
 
-      // ✅ Also update context
       updateRideParticipants(freshParticipants);
     } catch (err) {
     }

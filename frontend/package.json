@@ -26,7 +26,6 @@
     "dotenv": "^17.2.3",
     "fast-xml-parser": "^5.7.0",
     "follow-redirects": "^1.16.0",
-    "jsqr": "^1.4.0",
     "picomatch": "^2.3.2",
     "react": "19.0.0",
     "react-native": "0.79.2",
@@ -45,13 +44,15 @@
     "react-native-reanimated": "^3.17.5",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.10.0",
+    "react-native-share": "^12.3.1",
     "react-native-sse": "^1.2.1",
     "react-native-svg": "^15.15.5",
     "react-native-vector-icons": "^10.2.0",
     "react-native-view-shot": "^5.1.0",
     "react-native-vision-camera": "^4.7.3",
     "react-native-webview": "^13.14.0",
-    "react-native-worklets-core": "^1.6.2"
+    "react-native-worklets-core": "^1.6.2",
+    "rn-qr-generator": "^1.4.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
