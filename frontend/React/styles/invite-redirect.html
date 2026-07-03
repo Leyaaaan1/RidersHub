@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Join a ride on Laagan</title>
+  <style>
+      :root { color-scheme: light dark; }
+      body {
+          margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: 20px;
+          font-family: -apple-system, Roboto, system-ui, sans-serif;
+          background: #0d0d0d; color: #fff; text-align: center; padding: 24px;
+      }
+      h1 { font-size: 22px; margin: 0; }
+      p { color: #a3a3a3; margin: 0; max-width: 320px; }
+      a.button {
+          display: inline-block; padding: 14px 28px; border-radius: 999px;
+          background: #cc0000; color: #fff; text-decoration: none; font-weight: 600;
+      }
+      .muted { font-size: 13px; color: #6b6b6b; }
+  </style>
+</head>
+<body>
+<h1>You've been invited to a ride</h1>
+<p>Open this in the Laagan app to see who's going and join in.</p>
+<a class="button" id="cta" href="#">Open in App Store</a>
+<p class="muted">Already have the app? Tap the invite link again — it should jump straight in.</p>
+
+<script>
+  (function () {
+    var token = window.location.pathname.split('/invite/link/')[1] || '';
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+
+    // TODO: replace with your real store listings
+    var IOS_STORE_URL = 'https://apps.apple.com/app/idXXXXXXXXX';
+    var ANDROID_STORE_URL = 'https://play.google.com/store/apps/details?id=com.yourcompany.laagan';
+    var CUSTOM_SCHEME = 'laagan://invite/link/' + token;
+
+    var cta = document.getElementById('cta');
+    cta.href = isIOS ? IOS_STORE_URL : isAndroid ? ANDROID_STORE_URL : IOS_STORE_URL;
+    cta.textContent = isIOS ? 'Get it on the App Store' : isAndroid ? 'Get it on Google Play' : 'Get the app';
+
+    // Best-effort only: if the app IS installed but the OS routed this
+    // tap to the browser anyway (verification hasn't landed yet, or an
+    // in-app browser like Instagram/WhatsApp intercepted it), try the
+    // custom scheme once. If nothing happens, the store button above
+    // remains the fallback — this never blocks the page.
+    if (isIOS || isAndroid) {
+      window.location.href = CUSTOM_SCHEME;
+    }
+  })();
+</script>
+</body>
+</html>

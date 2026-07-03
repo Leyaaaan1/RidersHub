@@ -3,6 +3,7 @@ package leyans.RidersHub.Controller.Auth;
 import leyans.RidersHub.Config.JWT.JwtUtil;
 import leyans.RidersHub.DTO.Request.RefreshTokenRequest;
 import leyans.RidersHub.DTO.Response.RefreshTokenResponse;
+import leyans.RidersHub.Service.Auth.RefreshRotationResult;
 import leyans.RidersHub.Service.Auth.RefreshTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,21 +42,14 @@ public class RefreshTokenController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshAccessToken(
             @Valid @RequestBody RefreshTokenRequest request) {
-
         try {
-            // 1. Validate refresh token and get username
-            String username = refreshTokenService.validateAndRotate(request.getRefreshToken());
-            log.info("Refresh token validated for user: {}", username);
+            RefreshRotationResult result = refreshTokenService.rotateRefreshToken(request.getRefreshToken());
 
-            // 2. Generate new access token
-            String newAccessToken = jwtUtil.generateToken(username);
+            String newAccessToken = jwtUtil.generateToken(result.username());
 
-            // 3. Generate new refresh token (rotate)
-            String newRefreshToken = refreshTokenService.createRefreshToken(username);
-
-            log.info("New tokens issued for user: {}", username);
+            log.info("New tokens issued for user: {}", result.username());
             return ResponseEntity.ok(
-                    new RefreshTokenResponse(newAccessToken, newRefreshToken)
+                    new RefreshTokenResponse(newAccessToken, result.rawRefreshToken())
             );
 
         } catch (RuntimeException e) {
