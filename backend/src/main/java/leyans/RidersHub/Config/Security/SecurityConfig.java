@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/riders/verify-email",
                                 "/riders/resend-verification",
                                 "/riders/check-email-verified",
-                                "/.well-known/assetlinks.json"
+                                "/static/.well-known/assetlinks.json"
 
                         ).permitAll()
                         .requestMatchers(
