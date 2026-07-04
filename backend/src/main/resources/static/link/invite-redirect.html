@@ -118,7 +118,7 @@
 
 <div class="divider"></div>
 
-<a class="homepage-link" href="https://www.leanpaninsoro.dev/laagan/homepage/" target="_blank" rel="noopener">
+<a class="homepage-link" id="homepage-link" href="https://www.leanpaninsoro.dev/laagan/homepage/" target="_blank" rel="noopener">
   New to Laagan? Learn more about the app →
 </a>
 
@@ -139,31 +139,33 @@
     var ua = navigator.userAgent || '';
     var isIOS = /iPhone|iPad|iPod/i.test(ua);
     var isAndroid = /Android/i.test(ua);
-
-    // iOS isn't published yet — show a disabled "coming soon" state instead of a dead link.
     var CUSTOM_SCHEME = 'laagan://invite/link/' + token;
 
     var cta = document.getElementById('cta');
+
     if (isIOS) {
       cta.removeAttribute('href');
       cta.setAttribute('aria-disabled', 'true');
       cta.classList.add('button-disabled');
       cta.textContent = 'Coming soon on the App Store';
     } else if (isAndroid) {
-      cta.href = ANDROID_STORE_URL;
-      cta.textContent = 'Get it on Google Play';
+      cta.textContent = 'Open in Laagan';
+      cta.href = CONFIG.ANDROID_STORE_URL; // fallback if app isn't installed
+      cta.addEventListener('click', function (e) {
+        e.preventDefault();
+        // This click is a real user gesture, so Chrome allows the scheme
+        // navigation (unlike an automatic redirect on page load, which
+        // Chrome silently blocks).
+        window.location.href = CUSTOM_SCHEME;
+        // If the app isn't installed, this tab stays put — fall back to
+        // the Play Store after a short delay if we're still here.
+        setTimeout(function () {
+          window.location.href = CONFIG.ANDROID_STORE_URL;
+        }, 1500);
+      });
     } else {
-      cta.href = 'https://www.leanpaninsoro.dev/laagan/homepage/';
+      cta.href = CONFIG.HOMEPAGE_URL;
       cta.textContent = 'Visit Laagan';
-    }
-
-    // Best-effort only: if the app IS installed but the OS routed this
-    // tap to the browser anyway (verification hasn't landed yet, or an
-    // in-app browser like Instagram/WhatsApp intercepted it), try the
-    // custom scheme once. If nothing happens, the store button above
-    // remains the fallback — this never blocks the page.
-    if (isIOS || isAndroid) {
-      window.location.href = CUSTOM_SCHEME;
     }
   })();
 </script>

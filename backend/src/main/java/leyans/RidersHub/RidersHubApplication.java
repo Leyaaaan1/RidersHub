@@ -19,8 +19,9 @@ import java.nio.file.Paths;
 @EnableCaching
 @EnableJpaRepositories(basePackages = "leyans.RidersHub.Repository")
 public class RidersHubApplication {
-	/*
-	static {
+
+
+	/*static {
 		loadEnvVariables();
 	}
 
