@@ -49,7 +49,8 @@ public class SecurityConfig {
                                 "/riders/verify-email",
                                 "/riders/resend-verification",
                                 "/riders/check-email-verified",
-                                "/static/.well-known/assetlinks.json"
+                                "/.well-known/assetlinks.json",
+                                "/invite/link/**"
 
                         ).permitAll()
                         .requestMatchers(
