@@ -55,23 +55,19 @@ export const openLocationStream = (
   onError,
 ) => {
   const url = `${API_BASE_URL}/location/${rideId}/stream`;
-  console.log('[SSE] connecting to:', url);
 
   const es = new EventSource(url, {
     headers: {Authorization: `Bearer ${token}`},
   });
 
   es.addEventListener('open', () => {
-    console.log('[SSE] connection OPEN');
   });
 
   es.addEventListener('location-update', event => {
-    console.log('[SSE] location-update received:', event.data);
     try {
       const locations = JSON.parse(event.data);
       onLocations(locations);
     } catch (e) {
-      console.log('[SSE] parse error:', e);
     }
   });
 
@@ -88,12 +84,10 @@ export const openLocationStream = (
         onReroute?.(data.newRouteCoordinates); // draw on map
       }
     } catch (e) {
-      console.warn('[SSE] reroute parse error:', e);
     }
   });
 
   es.addEventListener('error', err => {
-    console.log('[SSE] error event:', JSON.stringify(err));
     onError?.(err);
   });
 

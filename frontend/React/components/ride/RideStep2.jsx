@@ -23,6 +23,7 @@ import {buildSearchHandlers} from './utilities/RideStepUtils';
 import {DEFAULT_COORDS} from '../../utilities/route/map/appDefaults';
 import {createMemoCompare} from '../../utilities/propsComparison';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import ZoomControls from '../../utilities/ZoomControls';
 
 const DEFAULT_LAT = parseFloat(DEFAULT_COORDS.latitude);
 const DEFAULT_LNG = parseFloat(DEFAULT_COORDS.longitude);
@@ -361,6 +362,8 @@ const RideStep2 = ({
           </ScrollView>
         )}
       </View>
+
+      <ZoomControls webViewRef={webViewRef} top={insets.top + 75 + 56} />
 
       {/* ── Bottom panel ── */}
       {hasLocation ? (

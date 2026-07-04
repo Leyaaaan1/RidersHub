@@ -87,7 +87,6 @@ const StartedRide = ({route, navigation}) => {
           // Also push to the live map immediately
           mapRef.current?.applyReroute(newRouteCoordinates);
         } catch (e) {
-          console.warn('[StartedRide] Failed to parse live reroute:', e);
         }
       },
       username,
@@ -258,7 +257,6 @@ const StartedRide = ({route, navigation}) => {
           try {
             return typeof entry === 'string' ? JSON.parse(entry) : entry;
           } catch (e) {
-            console.warn('[Snapshot] Failed to parse cached reroute entry:', e);
             return null;
           }
         })

@@ -30,7 +30,6 @@ export const useUserLocation = () => {
 
   useEffect(() => {
     const requestLocationPermission = async () => {
-      console.log('[useUserLocation] starting permission flow…');
       try {
         // Request permission on Android
         if (Platform.OS === 'android') {
@@ -44,22 +43,16 @@ export const useUserLocation = () => {
               buttonNegative: 'Deny',
             },
           );
-          console.log('[useUserLocation] permission result:', granted);
 
           if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
             throw new Error('Location permission denied');
           }
         }
 
-        console.log('[useUserLocation] calling getCurrentPosition (fast)…');
         // Try fast location first
         await new Promise((resolve, reject) => {
           Geolocation.getCurrentPosition(
             position => {
-              console.log(
-                '[useUserLocation] fast lookup SUCCESS:',
-                position.coords,
-              );
               const {latitude, longitude} = position.coords;
               setLocation({
                 latitude,
@@ -74,23 +67,12 @@ export const useUserLocation = () => {
           );
         });
       } catch (err) {
-        console.warn(
-          '[useUserLocation] fast lookup failed:',
-          err?.message || err,
-        );
 
         // Try accurate GPS as fallback
         try {
-          console.log(
-            '[useUserLocation] calling getCurrentPosition (accurate)…',
-          );
           await new Promise((resolve, reject) => {
             Geolocation.getCurrentPosition(
               position => {
-                console.log(
-                  '[useUserLocation] accurate lookup SUCCESS:',
-                  position.coords,
-                );
                 const {latitude, longitude} = position.coords;
                 setLocation({
                   latitude,
@@ -105,15 +87,10 @@ export const useUserLocation = () => {
             );
           });
         } catch (err2) {
-          console.warn(
-            '[useUserLocation] accurate lookup failed:',
-            err2?.message || err2,
-          );
           setError(err2.message);
           // Keep the default coordinates that were set in useState
         }
       } finally {
-        console.log('[useUserLocation] flow finished, loading=false');
         setLoading(false);
       }
     };

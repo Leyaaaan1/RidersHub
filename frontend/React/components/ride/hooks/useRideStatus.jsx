@@ -36,7 +36,6 @@ const useRideStatus = ({
   };
   const [actionStatus, setActionStatus] = useState(() => {
     const {isOwner, hasJoined} = deriveLocalFlags();
-    console.log('[useState init]', {isOwner, hasJoined});
     return {
       isOwner,
       hasJoined,
@@ -54,14 +53,10 @@ const useRideStatus = ({
     setLoading(true);
     try {
       const data = await getRideStatus(generatedRidesId);
-      console.log('[fetchStatus] raw data:', JSON.stringify(data));
 
       const backendStatus = data?.currentStatus;
       const {isOwner, hasJoined} = deriveLocalFlags();
-      console.log('[fetchStatus] after deriveLocalFlags:', {
-        isOwner,
-        hasJoined,
-      });
+
 
       const currentUserRiderStatus = data?.riderStatuses?.find(
         rs => rs.riderUsername === resolvedCurrentUsername,
@@ -87,10 +82,8 @@ const useRideStatus = ({
           effectiveStatus === RIDE_STATUS.ACTIVE ||
           effectiveStatus === RIDE_STATUS.PERSONAL_FINISHED,
       };
-      console.log('[fetchStatus] setting actionStatus:', nextState);
       setActionStatus(nextState);
     } catch (_err) {
-      console.log('[fetchStatus] ERROR — using fallback:', _err?.message);
       const {isOwner, hasJoined} = deriveLocalFlags();
       setActionStatus({
         isOwner,
@@ -108,10 +101,6 @@ const useRideStatus = ({
 
   useEffect(() => {
     fetchCount.current += 1;
-    console.log(
-      '[useEffect] fetchStatus triggered, count:',
-      fetchCount.current,
-    );
     fetchStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [generatedRidesId, ownerUsername, resolvedCurrentUsername]);
@@ -119,14 +108,10 @@ const useRideStatus = ({
   const participantKey = Array.isArray(participants)
     ? participants.map(p => (typeof p === 'string' ? p : p.username)).join(',')
     : '';
-  console.log('[useRideStatus] participantKey:', participantKey);
-  console.log('[useRideStatus] current actionStatus:', actionStatus);
 
   useEffect(() => {
-    console.log('[participantKey effect] triggered, key:', participantKey);
     setActionStatus(prev => {
       const {isOwner, hasJoined} = deriveLocalFlags();
-      console.log('[participantKey effect] updating:', {isOwner, hasJoined});
       return {...prev, isOwner, hasJoined};
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

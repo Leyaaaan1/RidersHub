@@ -18,8 +18,9 @@ export const validateRideDate = date => {
   if (!date) {
     return ERROR_MESSAGES.RIDE_CREATION.RIDE_DATE_REQUIRED;
   }
-  const now = new Date();
-  if (date <= now) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  if (date < startOfToday) {
     return ERROR_MESSAGES.RIDE_CREATION.RIDE_DATE_PAST;
   }
   const sixMonthsFromNow = new Date();
@@ -29,7 +30,6 @@ export const validateRideDate = date => {
   }
   return null;
 };
-
 export const validateCoordinate = coord => {
   const num = typeof coord === 'string' ? parseFloat(coord) : coord;
   if (isNaN(num)) {

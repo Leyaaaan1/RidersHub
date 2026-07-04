@@ -50,7 +50,6 @@ export async function captureRideSnapshot({containerRef, generatedRidesId}) {
 
     return {skipped: false, snapshotUri};
   } catch (e) {
-    console.warn('[captureRideSnapshot] capture failed:', e);
     return {skipped: true, reason: 'CAPTURE_ERROR'};
   } finally {
     captureInFlight.delete(generatedRidesId);

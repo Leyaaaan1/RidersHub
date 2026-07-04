@@ -36,6 +36,7 @@ import RouteTimeline from './utilities/RouteTimeline';
 import ridestep3style from '../../styles/screens/ridestep3style';
 import {createMemoCompare} from '../../utilities/propsComparison';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import ZoomControls from '../../utilities/ZoomControls';
 
 const RideStep3 = ({
   mapMode,
@@ -427,6 +428,8 @@ const RideStep3 = ({
             </ScrollView>
           )}
         </View>
+
+        <ZoomControls webViewRef={webViewRef} top={80} />
       </View>
 
       {/* ══════════════════════════════════════════════════════════════════════ */}

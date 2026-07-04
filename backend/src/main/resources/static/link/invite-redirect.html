@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Join a ride on Laagan</title>
+  <style>
+      :root {
+          color-scheme: dark;
+          --bg: #0d0d0d;
+          --surface: #171717;
+          --border: #2a2a2a;
+          --accent: #cc0000;
+          --accent-hover: #a30000;
+          --text: #ffffff;
+          --text-muted: #a3a3a3;
+          --text-faint: #6b6b6b;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+          margin: 0;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 22px;
+          font-family: -apple-system, Roboto, system-ui, sans-serif;
+          background: radial-gradient(circle at 50% 0%, #1a1a1a 0%, var(--bg) 60%);
+          color: var(--text);
+          text-align: center;
+          padding: 32px 24px;
+      }
+
+      .logo {
+          width: 64px;
+          height: 64px;
+          border-radius: 16px;
+          object-fit: cover;
+          box-shadow: 0 0 24px 2px rgba(204, 0, 0, 0.35);
+      }
+
+      h1 {
+          font-size: 22px;
+          margin: 0;
+          font-weight: 700;
+      }
+
+      p {
+          color: var(--text-muted);
+          margin: 0;
+          max-width: 320px;
+          line-height: 1.5;
+          font-size: 15px;
+      }
+
+      a.button {
+          display: inline-block;
+          padding: 14px 32px;
+          border-radius: 999px;
+          background: var(--accent);
+          color: #fff;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 15px;
+          transition: background 0.15s ease, transform 0.1s ease;
+      }
+
+      a.button:active {
+          background: var(--accent-hover);
+          transform: scale(0.98);
+      }
+
+      a.button.button-disabled {
+          background: var(--surface);
+          color: var(--text-faint);
+          border: 1px solid var(--border);
+          cursor: default;
+          pointer-events: none;
+      }
+
+      .muted {
+          font-size: 13px;
+          color: var(--text-faint);
+      }
+
+      .divider {
+          width: 40px;
+          height: 1px;
+          background: var(--border);
+          margin: 4px 0;
+      }
+
+      a.homepage-link {
+          font-size: 13px;
+          color: var(--text-muted);
+          text-decoration: none;
+          border-bottom: 1px solid transparent;
+      }
+
+      a.homepage-link:hover,
+      a.homepage-link:active {
+          color: var(--text);
+          border-bottom-color: var(--accent);
+      }
+  </style>
+</head>
+<body>
+<img class="logo" src="/image/img.png" alt="Laagan" />
+<h1>You've been invited to a ride</h1>
+<p>Open this in the Laagan app to see who's going and join in.</p>
+
+<a class="button" id="cta" href="#">Open in App Store</a>
+
+<p class="muted">Already have the app? Tap the invite link again — it should jump straight in.</p>
+
+<div class="divider"></div>
+
+<a class="homepage-link" href="https://www.leanpaninsoro.dev/laagan/homepage/" target="_blank" rel="noopener">
+  New to Laagan? Learn more about the app →
+</a>
+
+<script>
+  // ─────────────────────────────────────────────────────────────
+  // CONFIG — update these when moving from closed testing to prod
+  // ─────────────────────────────────────────────────────────────
+  var CONFIG = {
+    // Closed testing link now; swap to the public Play Store listing
+    // (same format) once the app is out of closed/internal testing.
+    ANDROID_STORE_URL: 'https://play.google.com/store/apps/details?id=com.laagan',
+    HOMEPAGE_URL: 'https://www.leanpaninsoro.dev/laagan/homepage/',
+  };
+  // ─────────────────────────────────────────────────────────────
+
+  (function () {
+    var token = window.location.pathname.split('/invite/link/')[1] || '';
+    var ua = navigator.userAgent || '';
+    var isIOS = /iPhone|iPad|iPod/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+
+    // iOS isn't published yet — show a disabled "coming soon" state instead of a dead link.
+    var CUSTOM_SCHEME = 'laagan://invite/link/' + token;
+
+    var cta = document.getElementById('cta');
+    if (isIOS) {
+      cta.removeAttribute('href');
+      cta.setAttribute('aria-disabled', 'true');
+      cta.classList.add('button-disabled');
+      cta.textContent = 'Coming soon on the App Store';
+    } else if (isAndroid) {
+      cta.href = ANDROID_STORE_URL;
+      cta.textContent = 'Get it on Google Play';
+    } else {
+      cta.href = 'https://www.leanpaninsoro.dev/laagan/homepage/';
+      cta.textContent = 'Visit Laagan';
+    }
+
+    // Best-effort only: if the app IS installed but the OS routed this
+    // tap to the browser anyway (verification hasn't landed yet, or an
+    // in-app browser like Instagram/WhatsApp intercepted it), try the
+    // custom scheme once. If nothing happens, the store button above
+    // remains the fallback — this never blocks the page.
+    if (isIOS || isAndroid) {
+      window.location.href = CUSTOM_SCHEME;
+    }
+  })();
+</script>
+</body>
+</html>

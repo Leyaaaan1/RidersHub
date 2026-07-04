@@ -33,12 +33,7 @@ const PersonalSummaryView = ({route, navigation}) => {
   const [snapshotUrl, setSnapshotUrl] = useState(passedSnapshotUrl || null);
   // Bug 3 fix: was logging `setSnapshotUrl.length` (always 1 — the setter
   // function's parameter count) instead of `snapshotUrl.length` (the value).
-  console.log(
-    '[PersonalSummary] snapshotUri received:',
-    passedSnapshotUrl
-      ? 'YES (length: ' + passedSnapshotUrl.length + ')'
-      : 'NULL/UNDEFINED',
-  );
+
   const [rideData, setRideData] = useState(passedData || null);
   const [loading, setLoading] = useState(!passedData && !!generatedRidesId);
   const [error, setError] = useState(null);

@@ -1,33 +1,42 @@
 import {useEffect} from 'react';
 import {useNavigation} from '@react-navigation/native';
-import {Linking} from 'react-native';
+import {Linking, Alert} from 'react-native';
+import {useAuth} from '../context/AuthContext';
+import {resolveInviteLink, describeInviteError} from './inviteLinkHandler';
 
 export const useDeepLinking = () => {
   const navigation = useNavigation();
+  const {username} = useAuth();
 
   useEffect(() => {
-    // Handle deep link when app is running
-    const handleDeepLink = ({url}) => {
-
+    const handleDeepLink = async ({url}) => {
+      if (!url) return;
 
       if (url.includes('verify-email')) {
         const token = new URL(url).searchParams.get('token');
         if (token) {
           navigation.navigate('VerifyEmailLink', {token});
         }
+        return;
+      }
+
+      if (url.includes('/invite/')) {
+        try {
+          const params = await resolveInviteLink(url, username);
+          navigation.navigate('RideStep4', params);
+        } catch (err) {
+          Alert.alert('Error', describeInviteError(err));
+        }
+        return;
       }
     };
 
     const subscription = Linking.addEventListener('url', handleDeepLink);
 
-    // Handle deep link when app launches from deep link
     const checkInitialURL = async () => {
       const url = await Linking.getInitialURL();
-      if (url != null && url.includes('verify-email')) {
-        const token = new URL(url).searchParams.get('token');
-        if (token) {
-          navigation.navigate('VerifyEmailLink', {token});
-        }
+      if (url != null) {
+        handleDeepLink({url});
       }
     };
 
@@ -36,5 +45,5 @@ export const useDeepLinking = () => {
     return () => {
       subscription.remove();
     };
-  }, [navigation]);
+  }, [navigation, username]);
 };

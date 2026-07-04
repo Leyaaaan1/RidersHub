@@ -65,12 +65,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Deep link for email verification -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="ridershub" />
+                <data android:scheme="laagan" />
+            </intent-filter>
+
+            <!-- ⬇️ ADD THIS: App Link for invite QR codes scanned outside the app -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                        android:scheme="https"
+                        android:host="laagan.onrender.com"
+                        android:pathPrefix="/invite" />
             </intent-filter>
 
         </activity>

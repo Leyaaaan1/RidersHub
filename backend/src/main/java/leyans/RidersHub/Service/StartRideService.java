@@ -93,7 +93,6 @@ public class StartRideService {
 
 
 
-
     @Transactional
     public void leaveRide(String generatedRidesId) {
         AppLogger.info(this.getClass(), "leaveRide called", "generatedRidesId", generatedRidesId);
@@ -128,19 +127,42 @@ public class StartRideService {
 
         Set<Rider> remainingParticipants = startedRide.getParticipants();
 
-        // If no one is left (last participant, whether creator or not) — fully clean up
+        // If no one is left (last participant, whether creator or not) — tear down started-ride tracking
         if (remainingParticipants.isEmpty()) {
-            AppLogger.info(this.getClass(), "Last participant left. Cleaning up and deactivating ride.",
+            AppLogger.info(this.getClass(), "Last participant left. Cleaning up started ride.",
                     "generatedRidesId", generatedRidesId);
+
             startedRideRepository.deleteRiderLocationsByStartedRideId(generatedRidesId);
             startedRideRepository.deleteParticipantLocationsByStartedRideId(generatedRidesId);
             startedRideRepository.deleteParticipantsByStartedRideId(generatedRidesId);
             startedRideRepository.delete(startedRide);
             startedRideRepository.flush();
-            ride.setActive(false);
-            ridesRepository.save(ride);
-            AppLogger.info(this.getClass(), "Ride cleaned up and deactivated",
-                    "generatedRidesId", generatedRidesId);
+
+            if (isCreator) {
+                // Owner was the sole remaining participant: remove the ride event itself,
+                // along with any event-related data tied to it (e.g. checkpoint arrivals).
+                AppLogger.info(this.getClass(), "Owner left as sole participant. Deleting ride and related event data.",
+                        "generatedRidesId", generatedRidesId);
+
+                rideCheckpointArrivalRepository.deleteByRideGeneratedRidesId(generatedRidesId);
+
+                ridesRepository.delete(ride);
+
+                AppLogger.info(this.getClass(), "Ride and related event data deleted",
+                        "generatedRidesId", generatedRidesId);
+            } else {
+                // Non-owner was the sole remaining rider: just end the started ride.
+                // The ride event itself stays intact, just marked inactive.
+                AppLogger.info(this.getClass(), "Sole remaining rider (not owner) left. Deactivating ride.",
+                        "generatedRidesId", generatedRidesId);
+
+                ride.setActive(false);
+
+                ridesRepository.save(ride);
+
+                AppLogger.info(this.getClass(), "Ride deactivated", "generatedRidesId", generatedRidesId);
+            }
+
             return;
         }
 

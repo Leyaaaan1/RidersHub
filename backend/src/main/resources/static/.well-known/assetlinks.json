@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.laagan",
+      "sha256_cert_fingerprints": [
+        "69:10:60:59:FF:56:52:4D:92:4B:CB:49:00:0C:28:AF:F7:3B:F2:1E:4A:40:E2:6A:C7:15:91:84:1A:94:C6:46"
+      ]
+    }
+  }
+]

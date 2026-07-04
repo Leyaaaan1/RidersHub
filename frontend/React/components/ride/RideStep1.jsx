@@ -76,6 +76,8 @@ const RideStep1 = ({
   const [focusedInput, setFocusedInput] = useState(null);
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [nameError, setNameError] = useState('');
+
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -90,6 +92,25 @@ const RideStep1 = ({
     setDatePickerOpen(false);
   };
 
+  const handleNext = () => {
+    let hasError = false;
+
+    if (!rideName || !rideName.trim()) {
+      setNameError('Ride name is required');
+      hasError = true;
+    } else {
+      setNameError('');
+    }
+
+    if (!date) {
+      setDateError('Please select a date & time for your ride');
+      hasError = true;
+    }
+
+    if (hasError) return;
+    nextStep();
+  };
+
   return (
     <View style={layout.screen}>
       <StatusBar barStyle="light-content" />
@@ -101,11 +122,13 @@ const RideStep1 = ({
           <Text style={header.subtitle}>Step 1 of 3 — Details</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('RiderPage')}>
-          <Text style={[buttons.textDark, {fontSize: 14, padding: 10}]}>Back</Text>
+          <Text style={[buttons.textDark, {fontSize: 14, padding: 10}]}>
+            Back
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[buttons.row, {paddingVertical: 8}]}
-          onPress={nextStep}
+          onPress={handleNext}
           activeOpacity={0.8}>
           <Text style={buttons.textSm}>Next</Text>
           <FontAwesome
@@ -160,6 +183,11 @@ const RideStep1 = ({
             placeholder="Epic Bukidnon Adventure"
             placeholderTextColor="#94a3b8"
           />
+          {!!nameError && (
+            <Text style={[inputs.errorText, {marginTop: spacing.sm}]}>
+              {nameError}
+            </Text>
+          )}
         </View>
 
         {/* ── Date & ride type ── */}
@@ -223,7 +251,7 @@ const RideStep1 = ({
         {/* ── Next CTA ── */}
         <TouchableOpacity
           style={buttons.primary}
-          onPress={nextStep}
+          onPress={handleNext}
           activeOpacity={0.85}>
           <View
             style={{

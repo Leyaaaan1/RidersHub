@@ -1,4 +1,9 @@
-import React, {useState, useCallback, useImperativeHandle, forwardRef} from 'react';
+import React, {
+  useState,
+  useCallback,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 import {
   View,
   Text,
@@ -9,20 +14,32 @@ import {
   Linking,
   StyleSheet,
 } from 'react-native';
-import { Camera, useCameraDevice, useCameraPermission, useCodeScanner } from 'react-native-vision-camera';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  useCodeScanner,
+} from 'react-native-vision-camera';
+import {launchImageLibrary} from 'react-native-image-picker';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { getRideDetails } from '../../services/rideService';
-import { buildRideStep4Params } from '../../utilities/NavigationParamsBuilder';
+import {getRideDetails} from '../../services/rideService';
+import {buildRideStep4Params} from '../../utilities/NavigationParamsBuilder';
+import {
+  resolveInviteLink,
+  describeInviteError,
+} from '../../utilities/inviteLinkHandler';
 import scanner from '../../styles/components/scanner';
 import {useAuth} from '../../context/AuthContext';
-import {inviteService} from '../../services/inviteService';
+import RNQRGenerator from 'rn-qr-generator';
+
 
 const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
-  const {token, username} = useAuth();
+  const {username} = useAuth();
   const [scannerVisible, setScannerVisible] = useState(false);
   const [scanning, setScanning] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [scanMode, setScanMode] = useState('invite'); // 'invite' or 'ride'
+  const [uploading, setUploading] = useState(false);
 
   const {hasPermission, requestPermission} = useCameraPermission();
   const device = useCameraDevice('back');
@@ -39,36 +56,12 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
         // MODE 1: INVITE LINK (View ride details from invite QR code)
         // ─────────────────────────────────────────────────────────────────
         if (scanMode === 'invite') {
-          let inviteToken = data;
-
-          if (data.includes('/invite/link/')) {
-            inviteToken = data.split('/invite/link/')[1];
-          } else if (data.includes('/invite/')) {
-            inviteToken = data.split('/invite/')[1];
-          }
-
-          if (!inviteToken) {
-            Alert.alert(
-              'Invalid QR Code',
-              'This QR code does not contain a valid invite link.',
-            );
-            setScannerVisible(false);
-            setProcessing(false);
-            return;
-          }
-
-          // ✅ Get invite details to extract ride ID
-          const inviteDetails = await inviteService.getInviteDetailsByToken(
-            inviteToken,
-          );
-          const generatedRidesId = inviteDetails.generatedRidesId;
-
-          // ✅ Fetch full ride details
-          const ride = await getRideDetails(generatedRidesId);
-          const params = buildRideStep4Params(ride, username);
+          // Same resolution path used by the native-camera deep link
+          // handler (see DeepLinkProvider.js) — one place defines what
+          // "an invite QR code" means.
+          const params = await resolveInviteLink(data, username);
 
           setScannerVisible(false);
-
           navigation.navigate('RideStep4', params);
         }
         // ─────────────────────────────────────────────────────────────────
@@ -95,32 +88,13 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
         }
       } catch (error) {
         setScannerVisible(false);
-
-        let errorMessage = 'Failed to process QR code';
-
-        if (scanMode === 'invite') {
-          if (error.message.includes('not found')) {
-            errorMessage = 'Invite or ride not found';
-          } else if (error.message.includes('expired')) {
-            errorMessage = 'This invite link has expired';
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-        } else if (scanMode === 'ride') {
-          if (error.message.includes('not found')) {
-            errorMessage = 'Ride not found';
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-        }
-
-        Alert.alert('Error', errorMessage);
+        Alert.alert('Error', describeInviteError(error));
       } finally {
         setProcessing(false);
         setScanning(true);
       }
     },
-    [scanning, processing, scanMode, username, token, navigation],
+    [scanning, processing, scanMode, username, navigation],
   );
 
   // Use the built-in code scanner
@@ -132,6 +106,101 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
       }
     },
   });
+
+  const uploadQRCode = useCallback(async () => {
+    if (uploading || processing) return;
+    setUploading(true);
+    setProcessing(true);
+
+    try {
+      const response = await launchImageLibrary({
+        mediaType: 'photo',
+        selectionLimit: 1,
+        quality: 1,
+      });
+
+      if (response.didCancel) {
+        setUploading(false);
+        setProcessing(false);
+        return;
+      }
+
+      if (response.errorCode) {
+        Alert.alert('Error', response.errorMessage || 'Failed to pick image');
+        setUploading(false);
+        setProcessing(false);
+        return;
+      }
+
+      const imageUri = response.assets?.[0]?.uri;
+      if (!imageUri) {
+        Alert.alert('Error', 'No image selected');
+        setUploading(false);
+        setProcessing(false);
+        return;
+      }
+
+      try {
+        // ─────────────────────────────────────────────────────────────────
+        // Decode QR natively (ZXing under the hood on Android). This
+        // decodes the JPEG/PNG itself — unlike jsQR, which needs raw RGBA
+        // pixel data and can't read a compressed image file directly.
+        // ─────────────────────────────────────────────────────────────────
+        const {values} = await RNQRGenerator.detect({uri: imageUri});
+
+        if (!values || values.length === 0) {
+          Alert.alert(
+            'No QR Code Found',
+            'Could not find a QR code in this image. Make sure the QR code is clear and fully visible.',
+          );
+          setProcessing(false);
+          setUploading(false);
+          return;
+        }
+
+        const qrValue = values[0];
+
+        // ─────────────────────────────────────────────────────────────────
+        // Process the QR value (same logic as camera scanner)
+        // ─────────────────────────────────────────────────────────────────
+        if (scanMode === 'invite') {
+          const params = await resolveInviteLink(qrValue, username);
+          setScannerVisible(false);
+          navigation.navigate('RideStep4', params);
+        } else if (scanMode === 'ride') {
+          const rideId = qrValue.trim();
+
+          if (!rideId || isNaN(rideId)) {
+            Alert.alert(
+              'Invalid QR Code',
+              'This QR code does not contain a valid ride ID.',
+            );
+            setProcessing(false);
+            setUploading(false);
+            return;
+          }
+
+          const ride = await getRideDetails(parseInt(rideId));
+          const params = buildRideStep4Params(ride, username);
+          setScannerVisible(false);
+          navigation.navigate('RideStep4', params);
+        }
+      } catch (scanError) {
+        console.error('QR Scan Error:', scanError);
+        Alert.alert(
+          'Scan Error',
+          'Could not decode QR code: ' + (scanError.message || 'Unknown error'),
+        );
+      } finally {
+        setProcessing(false);
+        setUploading(false);
+      }
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to upload image');
+      setUploading(false);
+      setProcessing(false);
+    }
+  }, [uploading, processing, scanMode, username, navigation]);
 
   const openScanner = async (mode = 'invite') => {
     if (!hasPermission) {
@@ -233,6 +302,26 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
                 ? 'Point your camera at the ride invite QR code'
                 : 'Point your camera at the ride ID QR code'}
             </Text>
+          </View>
+
+          <View style={scanner.uploadButtonContainer}>
+            <TouchableOpacity
+              style={[
+                scanner.uploadButton,
+                uploading && scanner.uploadButtonDisabled,
+              ]}
+              onPress={uploadQRCode}
+              disabled={uploading}
+              activeOpacity={0.7}>
+              <FontAwesome
+                name="upload"
+                size={16}
+                color={uploading ? '#666666' : '#ffffff'}
+              />
+              <Text style={scanner.uploadButtonText}>
+                {uploading ? 'Loading...' : 'Upload QR Code'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
