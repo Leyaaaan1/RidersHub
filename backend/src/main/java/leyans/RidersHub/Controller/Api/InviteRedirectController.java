@@ -14,11 +14,16 @@ import java.nio.charset.StandardCharsets;
 @RestController
 public class InviteRedirectController {
 
+//    @GetMapping(value = "/invite/link/{token}", produces = MediaType.TEXT_HTML_VALUE)
+//    public String inviteRedirect(@PathVariable String token) throws IOException {
+//        ClassPathResource resource = new ClassPathResource("static/invite-redirect.html");
+//        try (var inputStream = resource.getInputStream()) {
+//            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+//        }
+//    }
+
     @GetMapping(value = "/invite/link/{token}", produces = MediaType.TEXT_HTML_VALUE)
-    public String inviteRedirect(@PathVariable String token) throws IOException {
-        ClassPathResource resource = new ClassPathResource("static/invite-redirect.html");
-        try (var inputStream = resource.getInputStream()) {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        }
+    public String inviteRedirect(@PathVariable String token) {
+        return "<h1>TEST OK - token: " + token + "</h1>";
     }
 }
