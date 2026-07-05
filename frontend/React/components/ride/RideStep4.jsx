@@ -183,7 +183,12 @@ const RideStep4 = props => {
       .finally(() => patchState({rideNameImageLoading: false}));
   }, [locationName]);
 
-
+  const handleEditRide = () => {
+    navigation.navigate('CreateRide', {
+      editMode: true,
+      generatedRidesId,
+    });
+  };
 
   useEffect(() => {
     if (!generatedRidesId || hasFetchedRef.current) return;
@@ -329,6 +334,14 @@ const RideStep4 = props => {
           onPress={() => navigation.goBack()}>
           <FontAwesome name="arrow-left" size={18} color="#fff" />
         </TouchableOpacity>
+        {actionStatus.isOwner && !isRideStarted && (
+          <TouchableOpacity
+            onPress={handleEditRide}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            style={{marginRight: 12, padding: 10}}>
+            <FontAwesome name="pencil" size={18} color="#fff" />
+          </TouchableOpacity>
+        )}
         <View style={header.center}>
           <Text style={header.title} numberOfLines={1}>
             {locationName}

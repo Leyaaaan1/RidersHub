@@ -133,7 +133,7 @@ const resolveRoutePoints = ({
   return {reroutePoints, fixedPoints, historyPointGroups};
 };
 
-function truncate(str, max = 14) {
+function truncate(str, max = 22) {
   if (!str) {return '';}
   return str.length > max ? str.slice(0, max - 1) + '…' : str;
 }
@@ -267,6 +267,21 @@ const RoutePolygonSnapshot = forwardRef(
         key: def._key,
       }))
       .filter(p => p.x != null);
+    const COLLISION_DIST = 40; // px — wider net, these are wide pill labels
+    let originForceLeft = false;
+    let originStackOffset = 0;
+
+    if (rerouteOrigin) {
+      const overlappingPin = pins.find(p => {
+        const dx = p.x - rerouteOrigin.x;
+        const dy = p.y - rerouteOrigin.y;
+        return Math.sqrt(dx * dx + dy * dy) < COLLISION_DIST;
+      });
+      if (overlappingPin) {
+        originForceLeft = true; // force opposite horizontal side from the pin
+        originStackOffset = 26; // and push it further vertically too
+      }
+    }
 
     return (
       <View ref={ref} style={styles.container} collapsable={false}>
@@ -339,14 +354,15 @@ const RoutePolygonSnapshot = forwardRef(
               {(() => {
                 const label = truncate(username || 'Me', 10);
                 const pillW = label.length * 5.6 + 12;
-                const lx =
-                  rerouteOrigin.x + 10 + pillW > WIDTH - 6
-                    ? rerouteOrigin.x - pillW - 10
-                    : rerouteOrigin.x + 10;
+                const lx = originForceLeft
+                  ? rerouteOrigin.x - pillW - 10
+                  : rerouteOrigin.x + 10 + pillW > WIDTH - 6
+                  ? rerouteOrigin.x - pillW - 10
+                  : rerouteOrigin.x + 10;
                 const ly =
                   rerouteOrigin.y < PADDING
-                    ? rerouteOrigin.y + 18
-                    : rerouteOrigin.y - 14;
+                    ? rerouteOrigin.y + 18 + originStackOffset
+                    : rerouteOrigin.y - 14 - originStackOffset;
                 return (
                   <React.Fragment>
                     <Rect
@@ -378,6 +394,7 @@ const RoutePolygonSnapshot = forwardRef(
             const pillW = label.length * 5.6 + 12;
             const lx = x + 10 + pillW > WIDTH - 6 ? x - pillW - 10 : x + 10;
             const ly = y < PADDING ? y + 18 : y - 14;
+
             return (
               <React.Fragment key={key}>
                 <Circle
@@ -409,26 +426,7 @@ const RoutePolygonSnapshot = forwardRef(
             );
           })}
 
-          {/* ── Branding pill (top-right) — ported from RideSnapshotView ── */}
-          <Rect
-            x={WIDTH - 100}
-            y={12}
-            width={88}
-            height={22}
-            rx={11}
-            fill="#f97316"
-            fillOpacity={0.15}
-          />
-          <SvgText
-            x={WIDTH - 56}
-            y={27}
-            textAnchor="middle"
-            fontSize={11}
-            fontWeight="700"
-            fill="#f97316"
-            letterSpacing={0.5}>
-            {appName}
-          </SvgText>
+
         </Svg>
       </View>
     );

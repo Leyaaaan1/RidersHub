@@ -4,26 +4,6 @@ import {captureRef} from 'react-native-view-shot';
 // In-flight guard — prevents double-capture if called twice quickly
 const captureInFlight = new Set();
 
-/**
- * Captures a native screenshot of the view pointed to by `containerRef`.
- *
- * Returns one of:
- *   { skipped: true,  reason: string }          — capture was skipped
- *   { skipped: false, snapshotUri: string }      — data-uri PNG, fully transparent background
- *
- * Transparency notes
- * ──────────────────
- * • format: 'png'   — PNG supports an alpha channel; JPEG does not.
- * • result: 'data-uri' — returns "data:image/png;base64,…"; no temp file,
- *   no storage permissions needed, works on both iOS and Android.
- * • The View/Svg wrapper in RideSnapshotView must have
- *   backgroundColor: 'transparent' (not omitted — on Android the default
- *   background is white, which would bleed through into the capture).
- * • quality is ignored for PNG (it only affects JPEG lossy compression)
- *   but is kept at 1 for forward-compatibility.
- *
- * No AsyncStorage — caller owns the URI and decides what to do with it.
- */
 export async function captureRideSnapshot({containerRef, generatedRidesId}) {
   if (!generatedRidesId) {
     return {skipped: true, reason: 'NO_RIDE_ID'};

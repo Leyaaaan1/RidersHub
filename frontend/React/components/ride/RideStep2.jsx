@@ -119,6 +119,7 @@ const NoSelectionHint = ({bottomInset}) => (
 
 const RideStep2 = ({
   isSearching,
+  isEditMode = false,
   searchResults,
   searchQuery,
   setSearchQuery,
@@ -262,7 +263,9 @@ const RideStep2 = ({
           />
           <Text style={[buttons.textDark, {fontSize: 14}]}>Back</Text>
         </TouchableOpacity>
-        <Text style={[text.label, {color: '#1a1a1a'}]}>SET LOCATION</Text>
+        <Text style={[text.label, {color: '#1a1a1a'}]}>
+          {isEditMode ? 'EDIT LOCATION' : 'SET LOCATION'}
+        </Text>
         <TouchableOpacity
           style={[buttons.row, {paddingVertical: 8, paddingHorizontal: 12}]}
           onPress={nextStep}

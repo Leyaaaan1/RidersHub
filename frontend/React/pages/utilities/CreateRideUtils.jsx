@@ -4,6 +4,8 @@ import {
   searchLocation,
   searchCityOrLandmark,
   createRide,
+  updateRide, // ← NEW import
+  getRideDetails, // ← NEW import
   getLocationImage,
   getAllRiderTypes,
 } from '../../services/rideService';
@@ -21,23 +23,24 @@ import {useUserLocation} from '../../hooks/useUserLocation';
 import {handleWebViewMessage} from '../../utilities/mapUtils';
 import {routeCache} from '../../services/cache/routeCache';
 
-// ─── Default coordinates (Davao City) ────────────────────────────────────────
 const DEFAULT_LAT = '7.0731';
 const DEFAULT_LNG = '125.6128';
 
-const useCreateRide = ({}) => {
+// ── CHANGED: accept editMode + generatedRidesId ────────────────────────────
+const useCreateRide = ({
+  editMode = false,
+  generatedRidesId: editRideId = null,
+} = {}) => {
   const webViewRef = useRef(null);
   const pendingRideIdRef = useRef(null);
 
   const {location, loading: locationLoading} = useUserLocation();
 
-
-  // ── UI state ──────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(editMode); // ← NEW
   const [error, setError] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
 
-  // ── Ride details (Step 1) ─────────────────────────────────────────────────
   const [rideName, setRideName] = useState('');
   const [riderType, setRiderType] = useState('ADV 160');
   const [date, setDate] = useState(new Date());
@@ -46,6 +49,7 @@ const useCreateRide = ({}) => {
 
   const isStartingPointFromSearchRef = useRef(false);
   const isEndingPointFromSearchRef = useRef(false);
+  const isLocationFromSearchRef = useRef(false); // ← NEW — needed for edit hydration
   const setStartingPointFromSearch = val => {
     isStartingPointFromSearchRef.current = val;
   };
@@ -53,7 +57,6 @@ const useCreateRide = ({}) => {
     isEndingPointFromSearchRef.current = val;
   };
 
-  // ── Destination / location (Step 2) ──────────────────────────────────────
   const [locationName, setLocationName] = useState('');
   const [latitude, setLatitude] = useState(location.latitude);
   const [longitude, setLongitude] = useState(location.longitude);
@@ -61,11 +64,11 @@ const useCreateRide = ({}) => {
   const [rideNameImage, setRideNameImage] = useState([]);
 
   useEffect(() => {
+    if (editMode) return; // ← don't clobber hydrated values with GPS location
     setLatitude(location.latitude);
     setLongitude(location.longitude);
-  }, [location]);
+  }, [location, editMode]);
 
-  // ── Route points (Step 3) ─────────────────────────────────────────────────
   const [startingPoint, setStartingPoint] = useState('');
   const [startingLatitude, setStartingLatitude] = useState(location.latitude);
   const [startingLongitude, setStartingLongitude] = useState(
@@ -78,15 +81,11 @@ const useCreateRide = ({}) => {
   );
   const [stopPoints, setStopPoints] = useState([]);
 
-  // ── Search ────────────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // ── Map ───────────────────────────────────────────────────────────────────
   const [mapMode, setMapMode] = useState('starting');
-  // Keep a ref so callbacks (handleMessage, handleLocationSelect) always read
-  // the *current* mapMode without needing it in their dependency arrays.
   const mapModeRef = useRef('starting');
   const _setMapMode = useCallback(val => {
     mapModeRef.current = val;
@@ -96,7 +95,6 @@ const useCreateRide = ({}) => {
   const [riderTypeOptions, setRiderTypeOptions] = useState([]);
   const [riderTypeLoading, setRiderTypeLoading] = useState(false);
 
-  // ── Step-based map mode sync ──────────────────────────────────────────────
   useEffect(() => {
     if (currentStep === 2) {
       _setMapMode('location');
@@ -105,10 +103,75 @@ const useCreateRide = ({}) => {
     }
   }, [currentStep]);
 
-  // ── Generated ride (Step 4) ───────────────────────────────────────────────
-  const [generatedRidesId, setGeneratedRidesId] = useState(null);
+  const [generatedRidesId, setGeneratedRidesId] = useState(
+    editMode ? editRideId : null, // ← seed immediately so Step4 nav guards pass
+  );
 
-  // ─── Step navigation ──────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────────
+  // ── NEW: hydrate all form state from the existing ride when editing ──────
+  // ─────────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!editMode || !editRideId) {
+      setInitialLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const details = await getRideDetails(editRideId);
+        if (cancelled) return;
+
+        setRideName(details.ridesName || '');
+        setRiderType(details.riderType || 'ADV 160');
+        setDate(details.date ? new Date(details.date) : new Date());
+        setDescription(details.description || '');
+        setParticipants(
+          Array.isArray(details.participants) ? details.participants : [],
+        );
+
+        setLocationName(details.locationName || '');
+        setLatitude(details.latitude);
+        setLongitude(details.longitude);
+        setLocationSelected(true);
+        isLocationFromSearchRef.current = true; // treat pre-filled name as resolved
+
+        setStartingPoint(details.startingPointName || '');
+        setStartingLatitude(details.startLat);
+        setStartingLongitude(details.startLng);
+        setStartingPointFromSearch(true); // skip re-geocoding unless user re-picks
+
+        setEndingPoint(details.endingPointName || '');
+        setEndingLatitude(details.endLat);
+        setEndingLongitude(details.endLng);
+        setEndingPointFromSearch(true);
+
+        setStopPoints(
+          (details.stopPoints || []).map(sp => ({
+            lat: sp.stopLatitude,
+            lng: sp.stopLongitude,
+            name: sp.stopName,
+            isFromSearch: true, // pre-filled — skip re-geocode on unchanged stops
+          })),
+        );
+
+        setGeneratedRidesId(editRideId);
+        pendingRideIdRef.current = editRideId;
+      } catch (err) {
+        setError('Failed to load ride details for editing.');
+        Alert.alert('Error', 'Could not load this ride for editing.');
+      } finally {
+        if (!cancelled) setInitialLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editMode, editRideId]);
+
   const nextStep = useCallback(() => {
     setCurrentStep(prev => Math.min(prev + 1, 4));
   }, []);
@@ -117,12 +180,10 @@ const useCreateRide = ({}) => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   }, []);
 
-  // ─── Map tap / drag ───────────────────────────────────────────────────────
-
   const handleMessage = useCallback(
     event =>
       handleWebViewMessage(event, {
-        mapMode: mapModeRef.current, // always current — no stale closure
+        mapMode: mapModeRef.current,
         setLatitude,
         setLongitude,
         setStartingLatitude,
@@ -136,13 +197,9 @@ const useCreateRide = ({}) => {
         setStartingPoint,
         setEndingPoint,
       }),
-    // No mapMode in deps — ref keeps it fresh
     [],
   );
   const handleSearchInputChange = useCallback(value => {
-    // Only reset locationSelected when the user is actively typing new text,
-    // NOT on every call (e.g. clearing the query string sets it to '' which
-    // should not wipe out a previously confirmed search selection).
     if (value) {
       setLocationSelected(false);
     }
@@ -155,20 +212,21 @@ const useCreateRide = ({}) => {
       try {
         const types = await getAllRiderTypes();
         setRiderTypeOptions(types);
-        if (types.length > 0) {
+        if (types.length > 0 && !editMode) {
+          // ← don't override hydrated riderType
           setRiderType(types[0].riderType);
         }
       } catch (error) {
-        setRiderType('ADV 160');
+        if (!editMode) setRiderType('ADV 160');
       } finally {
         setRiderTypeLoading(false);
       }
     };
 
     fetchRiderTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ─── Trigger actual search after debounce settles ─────────────────────────
   useEffect(() => {
     const isValidQuery = searchQuery?.trim().length >= 3;
     if (!isValidQuery || locationSelected) {
@@ -192,50 +250,44 @@ const useCreateRide = ({}) => {
     return () => clearTimeout(timer);
   }, [searchQuery, locationSelected, mapMode]);
 
-  // ─── Location selection (from search result) ──────────────────────────────
+  const handleLocationSelect = useCallback(async location => {
+    const lat = parseFloat(location.lat);
+    const lon = parseFloat(location.lon);
+    setLocationSelected(true);
 
-  const handleLocationSelect = useCallback(
-    async location => {
-      const lat = parseFloat(location.lat);
-      const lon = parseFloat(location.lon);
-      setLocationSelected(true);
+    const selectedName = location.display_name
+      ? location.display_name.split(',')[0].trim()
+      : `${lat}, ${lon}`;
 
-      const selectedName = location.display_name
-        ? location.display_name.split(',')[0].trim()
-        : `${lat}, ${lon}`;
+    const currentMode = mapModeRef.current;
 
-      // Read from ref — always the current mode, never stale
-      const currentMode = mapModeRef.current;
+    if (currentMode === 'location') {
+      setLatitude(lat.toString());
+      setLongitude(lon.toString());
+      setLocationName(selectedName);
+      isLocationFromSearchRef.current = true; // ← NEW: user re-picked, flag it
+      getLocationImage(selectedName)
+        .then(imgs => setRideNameImage(imgs))
+        .catch(() => setRideNameImage([]));
+    } else if (currentMode === 'starting') {
+      setStartingLatitude(lat.toString());
+      setStartingLongitude(lon.toString());
+      setStartingPoint(selectedName);
+      setStartingPointFromSearch(true);
+      _setMapMode('ending');
+    } else if (currentMode === 'ending') {
+      setEndingLatitude(lat.toString());
+      setEndingLongitude(lon.toString());
+      setEndingPoint(selectedName);
+      setEndingPointFromSearch(true);
+    }
 
-      if (currentMode === 'location') {
-        setLatitude(lat.toString());
-        setLongitude(lon.toString());
-        setLocationName(selectedName);
-        getLocationImage(selectedName)
-          .then(imgs => setRideNameImage(imgs))
-          .catch(() => setRideNameImage([]));
-      } else if (currentMode === 'starting') {
-        setStartingLatitude(lat.toString());
-        setStartingLongitude(lon.toString());
-        setStartingPoint(selectedName);
-        setStartingPointFromSearch(true);
-        _setMapMode('ending');
-      } else if (currentMode === 'ending') {
-        setEndingLatitude(lat.toString());
-        setEndingLongitude(lon.toString());
-        setEndingPoint(selectedName);
-        setEndingPointFromSearch(true);
-      }
+    setSearchQuery(selectedName);
+    setSearchResults([]);
 
-      setSearchQuery(selectedName);
-      setSearchResults([]);
+    return selectedName;
+  }, []);
 
-      return selectedName;
-    },
-    // No mapMode in deps — ref keeps it fresh
-    [],
-  );
-  // ─── Build stop-points payload for the API ────────────────────────────────
   const buildStopPointsPayload = () =>
     stopPoints.map(sp => ({
       stopLatitude: sp.lat ?? sp.stopLatitude,
@@ -246,7 +298,6 @@ const useCreateRide = ({}) => {
   const buildStopPointsFromSearchArray = () =>
     stopPoints.map(sp => sp.isFromSearch ?? false);
 
-  // ─── Build participants array from either array or comma-string ───────────
   const buildParticipantsArray = () => {
     if (Array.isArray(participants)) {
       return participants;
@@ -258,11 +309,6 @@ const useCreateRide = ({}) => {
   };
 
   const handleCreateRide = useCallback(async () => {
-    // ────────────────────────────────────────────────────────────────────────────
-    // STEP 1: INPUT VALIDATION
-    // ────────────────────────────────────────────────────────────────────────────
-
-
     const nameError = validateRideName(rideName);
     if (nameError) {
       setError(nameError);
@@ -290,7 +336,6 @@ const useCreateRide = ({}) => {
       Alert.alert('Missing Location', msg);
       return;
     }
-    await createRide;
 
     const coordErrors = validateCoordinates(
       startingLatitude,
@@ -305,14 +350,9 @@ const useCreateRide = ({}) => {
       return;
     }
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // STEP 2: PREPARE RIDE DATA
-    // ────────────────────────────────────────────────────────────────────────────
-
     setLoading(true);
     setError('');
 
-    // Safely parse coordinates (guaranteed to be valid from validation above)
     const startLatParsed = parseFloat(startingLatitude);
     const startLngParsed = parseFloat(startingLongitude);
     const endLatParsed = parseFloat(endingLatitude);
@@ -334,7 +374,9 @@ const useCreateRide = ({}) => {
     const rideData = {
       ridesName: rideName.trim(),
       locationName: locationName.trim(),
-      isLocationFromSearch: locationSelected,
+      isLocationFromSearch: editMode // ← CHANGED
+        ? isLocationFromSearchRef.current
+        : locationSelected,
       riderType: mapRiderTypeToDatabase(riderType),
       date: date.toISOString(),
       description: description.trim(),
@@ -344,26 +386,20 @@ const useCreateRide = ({}) => {
       startLng: startLngParsed,
       endLat: endLatParsed,
       endLng: endLngParsed,
-      startingPoint: startingPoint.trim(),
-      endingPoint: endingPoint.trim(),
-      startingPointName: startingPoint.trim(), //
-      endingPointName: endingPoint.trim(), //
-      isStartingPointFromSearch: isStartingPointFromSearchRef.current, //  always current
-      isEndingPointFromSearch: isEndingPointFromSearchRef.current, //  always current
+      startingPointName: startingPoint.trim(),
+      endingPointName: endingPoint.trim(),
+      isStartingPointFromSearch: isStartingPointFromSearchRef.current,
+      isEndingPointFromSearch: isEndingPointFromSearchRef.current,
       stopPoints: buildStopPointsPayload(),
       stopPointsFromSearch: buildStopPointsFromSearchArray(),
       participants: buildParticipantsArray(),
-    }; // ────────────────────────────────────────────────────────────────────────────
-    // STEP 3: CREATE RIDE (API CALL)
-    // ────────────────────────────────────────────────────────────────────────────
+    };
 
     try {
-
-      const result = await createRide(rideData);
-
-      // ────────────────────────────────────────────────────────────────────────
-      // STEP 4: EXTRACT AND VALIDATE RIDE ID
-      // ────────────────────────────────────────────────────────────────────────
+      // ── CHANGED: branch to updateRide vs createRide ─────────────────────
+      const result = editMode
+        ? await updateRide(editRideId, rideData)
+        : await createRide(rideData);
 
       const generatedId =
         result?.generatedRidesId ??
@@ -371,25 +407,16 @@ const useCreateRide = ({}) => {
         result?.rideId ??
         result?.id ??
         result?.generatedId ??
-        (typeof result === 'string' ? result : null);
+        (editMode ? editRideId : typeof result === 'string' ? result : null);
 
       if (!generatedId) {
         const msg = ERROR_MESSAGES.RIDE_CREATION.RIDE_CREATION_NO_ID;
         setError(msg);
         Alert.alert('Warning', msg, [
-          {
-            text: 'OK',
-            onPress: () => {
-              setLoading(false);
-            },
-          },
+          {text: 'OK', onPress: () => setLoading(false)},
         ]);
         return;
       }
-
-      // ────────────────────────────────────────────────────────────────────────
-      // STEP 5: CACHE THE ROUTE COORDINATES (NEW!)
-      // ────────────────────────────────────────────────────────────────────────
 
       const routeCoordinates = {
         startLat: startLatParsed,
@@ -401,41 +428,30 @@ const useCreateRide = ({}) => {
         endingPointName: endingPoint,
       };
 
-      await routeCache.save(generatedId, routeCoordinates).catch(e => {
-      });
+      await routeCache.save(generatedId, routeCoordinates).catch(() => {});
 
       setGeneratedRidesId(generatedId);
       pendingRideIdRef.current = generatedId;
 
       setCurrentStep(4);
     } catch (err) {
-      // ────────────────────────────────────────────────────────────────────────
-      // STEP 7: ERROR HANDLING
-      // ────────────────────────────────────────────────────────────────────────
-
-
       const errorMsg = resolveErrorMessage(
         err,
-        ERROR_MESSAGES.RIDE_CREATION.RIDE_CREATION_FAILED,
+        editMode
+          ? 'Failed to update ride. Please try again.'
+          : ERROR_MESSAGES.RIDE_CREATION.RIDE_CREATION_FAILED,
       );
 
       setError(errorMsg);
 
-      Alert.alert('Ride Creation Failed', errorMsg, [
-        {
-          text: 'Try Again',
-          onPress: () => {
-            setError('');
-          },
-        },
-        {
-          text: 'Cancel',
-          onPress: () => {
-            setError('');
-          },
-          style: 'cancel',
-        },
-      ]);
+      Alert.alert(
+        editMode ? 'Ride Update Failed' : 'Ride Creation Failed',
+        errorMsg,
+        [
+          {text: 'Try Again', onPress: () => setError('')},
+          {text: 'Cancel', onPress: () => setError(''), style: 'cancel'},
+        ],
+      );
     } finally {
       setLoading(false);
     }
@@ -456,17 +472,20 @@ const useCreateRide = ({}) => {
     riderType,
     participants,
     stopPoints,
+    editMode,
+    editRideId,
   ]);
 
   return {
     webViewRef,
     pendingRideIdRef,
     locationLoading,
+    initialLoading, // ← NEW — consumed in CreateRide.jsx
     loading,
     error,
     currentStep,
-    nextStep, //
-    prevStep, //
+    nextStep,
+    prevStep,
     rideName,
     setRideName,
     riderType,
@@ -499,15 +518,15 @@ const useCreateRide = ({}) => {
     setSearchQuery,
     searchResults,
     isSearching,
-    setStartingPointFromSearch, //
+    setStartingPointFromSearch,
     setEndingPointFromSearch,
-    handleSearchInputChange, //
-    handleLocationSelect, //
+    handleSearchInputChange,
+    handleLocationSelect,
     mapMode,
-    setMapMode: _setMapMode, // children must use this so the ref stays in sync
-    handleMessage, //
+    setMapMode: _setMapMode,
+    handleMessage,
     generatedRidesId,
-    handleCreateRide, //
+    handleCreateRide,
   };
 };
 

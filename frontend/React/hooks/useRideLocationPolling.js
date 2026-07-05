@@ -130,7 +130,6 @@ export const useLocationPermission = () => {
   return {granted, checked};
 };
 
-// ─── useRideLocationPolling ────────────────────────────────────────────────
 
 export const useRideLocationPolling = ({
   rideId,
@@ -173,13 +172,27 @@ export const useRideLocationPolling = ({
   const jitterTimeoutRef = useRef(null);
   const sseReconnectTimeoutRef = useRef(null);
 
-
   // ── movement-tracking refs ───────────────────────────────────────────────
   const lastSentPositionRef = useRef(null);
   const consecutiveSkipCountRef = useRef(0);
   const lastUploadTimestampRef = useRef(null);
   const isFirstPollRef = useRef(true);
 
+  const rerouteHistoryRef = useRef([]);
+  const pushReroute = useCallback(incoming => {
+    let latest;
+    if (Array.isArray(incoming)) {
+      rerouteHistoryRef.current = incoming;
+      latest = incoming[incoming.length - 1] ?? null;
+    } else if (incoming) {
+      rerouteHistoryRef.current = [...rerouteHistoryRef.current, incoming];
+      latest = incoming;
+    }
+    onRerouteRef.current?.({
+      history: rerouteHistoryRef.current,
+      latest,
+    });
+  }, []);
   // ── sync mutable refs ─────────────────────────────────────────────────────
   useEffect(() => {
     enabledRef.current = enabled;
@@ -202,7 +215,7 @@ export const useRideLocationPolling = ({
     (async () => {
       const cached = await loadRerouteCache(rideId);
       if (cached && !cancelled) {
-        onRerouteRef.current?.(cached);
+        pushReroute(cached);
       }
     })();
 
@@ -236,7 +249,7 @@ export const useRideLocationPolling = ({
         _handleLocationsResponse(locations);
       },
       newRouteCoordinates => {
-        onRerouteRef.current?.(newRouteCoordinates); // ← was onReroute
+        pushReroute(newRouteCoordinates);
       },
       () => {
         closeStream(); // actually closes the dead EventSource, not just drops the reference

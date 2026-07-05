@@ -6,6 +6,7 @@ import leyans.RidersHub.Config.Security.SecurityUtils;
 import leyans.RidersHub.DTO.Request.RiderDTO.RiderTypeRequest;
 import leyans.RidersHub.DTO.Request.RidesDTO.RideRequestDTO;
 import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
+import leyans.RidersHub.DTO.Request.UpdateRideRequestDTO;
 import leyans.RidersHub.DTO.Response.RideDetailDTO;    // ← new
 import leyans.RidersHub.DTO.Response.RideSummaryDTO;  // ← new
 import leyans.RidersHub.Service.RiderService;
@@ -95,6 +96,33 @@ public class RiderController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error creating ride: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{generatedRidesId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateRide(
+            @PathVariable String generatedRidesId,
+            @Valid @RequestBody UpdateRideRequestDTO updateRequest) {
+        try {
+            String username = SecurityUtils.getCurrentUsername();
+
+            RideDetailDTO response = ridesService.updateRide(generatedRidesId, username, updateRequest);
+            return ResponseEntity.ok(response);
+
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Ride not found: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid request: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating ride: " + e.getMessage());
         }
     }
 

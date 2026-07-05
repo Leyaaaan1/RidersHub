@@ -88,13 +88,11 @@ export const riderMarkersScript = () => `
                             .bindPopup(popupText);
 
                         const labelText = \`<span style="
-                            background-color: \${markerColor};
-                            color: white;
-                            padding: 2px 6px;
-                            border-radius: 12px;
+                            color: \${markerColor};
                             font-size: 11px;
                             font-weight: bold;
                             white-space: nowrap;
+                            text-shadow: 0 1px 2px rgba(0,0,0,0.6), 0 0 3px rgba(255,255,255,0.8);
                         ">\${riderId}\${isCurrentUser ? ' (Me)' : ''}</span>\`;
 
                         const nameLabel = L.tooltip({

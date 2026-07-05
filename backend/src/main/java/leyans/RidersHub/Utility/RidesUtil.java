@@ -154,6 +154,10 @@ public class RidesUtil {
         Page<Rides> ridesPage = ridesRepository.findByUsernameOrParticipants_UsernamePaginated(username, pageable);
         return ridesPage.map(this::mapToSummaryDTO);
     }
+    @Transactional
+    public Rides saveExistingRide(Rides ride) {
+        return ridesRepository.save(ride);
+    }
 
 
     @Transactional

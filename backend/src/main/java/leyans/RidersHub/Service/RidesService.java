@@ -1,5 +1,6 @@
 package leyans.RidersHub.Service;
 
+import leyans.RidersHub.DTO.Request.UpdateRideRequestDTO;
 import leyans.RidersHub.DTO.Response.RideDetailDTO;
 import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 import leyans.RidersHub.Service.InteractionRequest.RideParticipantService;
@@ -13,8 +14,12 @@ import leyans.RidersHub.model.StopPoint;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -301,6 +306,97 @@ public class RidesService {
 
                 return ridesUtil.mapToDetailDTO(savedRide);
 
+        }
+
+        @Transactional
+        public RideDetailDTO updateRide(String generatedRidesId, String requesterUsername, UpdateRideRequestDTO req) {
+
+                Rides existingRide = ridesUtil.findRideEntityByGeneratedId(generatedRidesId);
+
+                // Only the creator can edit their ride
+                if (existingRide.getUsername() == null
+                        || !existingRide.getUsername().getUsername().equals(requesterUsername)) {
+                        throw new IllegalStateException("You are not allowed to edit this ride");
+                }
+
+                List<StopPointDTO> validStopPoints = req.getStopPoints() == null
+                        ? List.of()
+                        : req.getStopPoints().stream()
+                        .filter(stop -> stop.getStopLongitude() != 0.0 && stop.getStopLatitude() != 0.0)
+                        .collect(Collectors.toList());
+
+                ApiFutures futures = prepareApiFutures(
+                        validStopPoints,
+                        req.getLatitude(), req.getLongitude(),
+                        req.getStartLat(), req.getStartLng(),
+                        req.getEndLat(), req.getEndLng(),
+                        req.getLocationName(),
+                        req.isLocationFromSearch(),
+                        req.isStartingPointFromSearch(),
+                        req.isEndingPointFromSearch(),
+                        req.getStartingPointName(),
+                        req.getEndingPointName(),
+                        req.getStopPointsFromSearch());
+
+                awaitApiFuturesAndCollect(futures);
+
+                String routeCoordinates = futures.routeFuture.join();
+                String resolvedLocationName = futures.mainLocationFuture.join();
+
+                String startLocationName = (req.isStartingPointFromSearch()
+                        && req.getStartingPointName() != null && !req.getStartingPointName().isEmpty())
+                        ? req.getStartingPointName()
+                        : futures.startLocationFuture.join();
+
+                String endLocationName = (req.isEndingPointFromSearch()
+                        && req.getEndingPointName() != null && !req.getEndingPointName().isEmpty())
+                        ? req.getEndingPointName()
+                        : futures.endLocationFuture.join();
+
+                List<RidesUtil.GeocodeResult> geocodedStops = futures.stopPointFutures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList());
+
+                RiderType newRiderType = riderService.getRiderTypeByName(req.getRiderType());
+                List<Rider> newParticipants = rideParticipantService.addRiderParticipants(
+                        req.getParticipants().stream().distinct().collect(Collectors.toList())
+                );
+
+                Point rideLocation = locationService.createPoint(req.getLongitude(), req.getLatitude());
+                Point startPoint = locationService.createPoint(req.getStartLng(), req.getStartLat());
+                Point endPoint = locationService.createPoint(req.getEndLng(), req.getEndLat());
+
+                List<StopPoint> stopPoints = geocodedStops.stream()
+                        .map(result -> new StopPoint(
+                                result.name(),
+                                locationService.createPoint(result.longitude(), result.latitude())))
+                        .collect(Collectors.toList());
+
+                int calculatedDistance = locationService.calculateDistance(startPoint, endPoint);
+
+                // Mutate the existing entity — generatedRidesId and creator (username) are untouched
+                existingRide.setRidesName(req.getRidesName());
+                existingRide.setDescription(req.getDescription());
+                existingRide.setRiderType(newRiderType);
+                existingRide.setDistance(calculatedDistance);
+                existingRide.setLocationName(resolvedLocationName);
+                existingRide.setLocation(rideLocation);
+                existingRide.setStartingLocation(startPoint);
+                existingRide.setStartingPointName(startLocationName);
+                existingRide.setEndingLocation(endPoint);
+                existingRide.setEndingPointName(endLocationName);
+                existingRide.setDate(req.getDate());
+                existingRide.setRouteCoordinates(routeCoordinates);
+                existingRide.setParticipants(new HashSet<>(newParticipants));
+                existingRide.setStopPoints(stopPoints);
+
+                Rides savedRide = ridesUtil.saveExistingRide(existingRide);
+
+
+                AppLogger.info(this.getClass(), "Ride updated successfully",
+                        "rideId", savedRide.getGeneratedRidesId(), "rideName", savedRide.getRidesName());
+
+                return ridesUtil.mapToDetailDTO(savedRide);
         }
 
 }
