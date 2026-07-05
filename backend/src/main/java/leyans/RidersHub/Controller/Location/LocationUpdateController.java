@@ -1,9 +1,7 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Location;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import leyans.RidersHub.DTO.Request.LocationDTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.DTO.Request.Location.LocationUpdateRequestDTO;
 import leyans.RidersHub.DTO.Response.LocationShareResponseDTO;
 import leyans.RidersHub.ExceptionHandler.UnauthorizedAccessException;
 import leyans.RidersHub.Service.RideLocationEmitterRegistry;

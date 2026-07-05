@@ -32,7 +32,7 @@ public class GoogleLoginService {
     private final GoogleAccountRepository googleAccountRepository;
 
     private final RiderRepository riderRepository;
-    @Value("${app.registration.max-users:50}")
+    @Value("${app.registration.max-users}")
     private int maxUsers;
 
     public GoogleLoginService(GoogleTokenVerifier googleTokenVerifier,

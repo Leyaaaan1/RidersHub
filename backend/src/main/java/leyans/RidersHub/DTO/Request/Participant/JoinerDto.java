@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request.JoinDTO;
+package leyans.RidersHub.DTO.Request.Participant;
 
 import leyans.RidersHub.model.Interaction.JoinRequest;
 

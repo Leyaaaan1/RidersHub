@@ -11,6 +11,7 @@ import { fetchMyRides } from '../../../services/rideService';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import colors from '../../../styles/tokens/colors';
 import RideCard from './RideCard';
+import {useFocusEffect} from '@react-navigation/native';
 
 const AUTO_RETRY_DELAY_MS = 8000; // wait 8s then auto-retry on timeout
 
@@ -112,6 +113,14 @@ const RidesList = ({
     if (!userId) return;
     loadRides(0, true);
   }, [userId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (userId) {
+        loadRides(0, true);
+      }
+    }, [userId, loadRides]),
+  );
 
   const handleRefresh = useCallback(() => loadRides(0, true), [mode]);
   const handleLoadMore = useCallback(() => {

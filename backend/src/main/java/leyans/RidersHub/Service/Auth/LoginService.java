@@ -27,7 +27,7 @@ public class LoginService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long LOCKOUT_DURATION_MINUTES = 15;
 
-    @Value("${app.registration.max-users:50}")
+    @Value("${app.registration.max-users}")
     private int maxUsers;
 
     private final AuthenticationManager authenticationManager;

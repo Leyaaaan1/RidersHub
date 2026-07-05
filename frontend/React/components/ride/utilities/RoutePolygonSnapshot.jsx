@@ -133,7 +133,7 @@ const resolveRoutePoints = ({
   return {reroutePoints, fixedPoints, historyPointGroups};
 };
 
-function truncate(str, max = 22) {
+function truncate(str, max = 40) {
   if (!str) {return '';}
   return str.length > max ? str.slice(0, max - 1) + '…' : str;
 }
@@ -352,7 +352,7 @@ const RoutePolygonSnapshot = forwardRef(
                 strokeWidth={2.5}
               />
               {(() => {
-                const label = truncate(username || 'Me', 10);
+                const label = truncate(username || 'Me', 20);
                 const pillW = label.length * 5.6 + 12;
                 const lx = originForceLeft
                   ? rerouteOrigin.x - pillW - 10

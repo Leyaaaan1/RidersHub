@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request;
+package leyans.RidersHub.DTO.Request.Participant;
 
 public class InviteDetailDTO {
     private String inviteToken;

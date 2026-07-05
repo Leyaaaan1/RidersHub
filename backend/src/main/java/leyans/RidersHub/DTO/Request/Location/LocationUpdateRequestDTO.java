@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request.LocationDTO;
+package leyans.RidersHub.DTO.Request.Location;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;

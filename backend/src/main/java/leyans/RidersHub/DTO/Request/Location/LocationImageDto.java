@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request.LocationDTO;
+package leyans.RidersHub.DTO.Request.Location;
 
 public class LocationImageDto {
     private String imageUrl;

@@ -1,6 +1,6 @@
 package leyans.RidersHub.Controller.InteractionRequest;
 
-import leyans.RidersHub.DTO.Request.JoinDTO.JoinerDto;
+import leyans.RidersHub.DTO.Request.Participant.JoinerDto;
 import leyans.RidersHub.Service.InteractionRequest.JoinRequestService;
 import leyans.RidersHub.Utility.ParticipantUtil;
 import leyans.RidersHub.model.Interaction.JoinRequest;

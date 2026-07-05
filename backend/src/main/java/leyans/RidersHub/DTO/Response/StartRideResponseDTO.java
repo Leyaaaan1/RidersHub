@@ -1,6 +1,6 @@
 package leyans.RidersHub.DTO.Response;
 
-import leyans.RidersHub.DTO.Request.ParticipantLocationDTO;
+import leyans.RidersHub.DTO.Request.Participant.ParticipantLocationDTO;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

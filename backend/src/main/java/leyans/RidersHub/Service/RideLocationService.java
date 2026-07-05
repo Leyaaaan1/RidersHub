@@ -1,6 +1,6 @@
 package leyans.RidersHub.Service;
 
-import leyans.RidersHub.DTO.Request.LocationDTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.DTO.Request.Location.LocationUpdateRequestDTO;
 import leyans.RidersHub.DTO.Response.LocationShareResponseDTO;
 import leyans.RidersHub.DTO.Response.RerouteResultDTO;
 import leyans.RidersHub.ExceptionHandler.UnauthorizedAccessException;

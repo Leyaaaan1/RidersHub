@@ -1,7 +1,7 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.InteractionRequest;
 
 import leyans.RidersHub.Config.Security.SecurityUtils;
-import leyans.RidersHub.DTO.Request.JoinDTO.JoinRequestCreateDto;
+import leyans.RidersHub.DTO.Request.Participant.JoinRequestCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Service.InteractionRequest.RideJoinRequestService;

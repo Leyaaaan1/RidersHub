@@ -3,7 +3,7 @@ package leyans.RidersHub.Service.MapService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import leyans.RidersHub.DTO.Request.LocationDTO.LocationImageDto;
+import leyans.RidersHub.DTO.Request.Location.LocationImageDto;
 import leyans.RidersHub.Service.MapService.utilities.ApiHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -14,7 +14,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 @Service

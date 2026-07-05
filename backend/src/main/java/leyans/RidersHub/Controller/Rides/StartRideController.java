@@ -1,21 +1,14 @@
 
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Rides;
 
 import leyans.RidersHub.DTO.Response.ActiveRideDTO;
-import leyans.RidersHub.DTO.Response.RideDetailDTO;
-import leyans.RidersHub.DTO.Response.RideResponseDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
 import leyans.RidersHub.ExceptionHandler.RideAuthorizationException;
 import leyans.RidersHub.Service.StartRideService;
-import leyans.RidersHub.Utility.AppLogger;
 import leyans.RidersHub.Utility.StartedUtil;
-import leyans.RidersHub.model.StartedRide;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/start")

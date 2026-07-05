@@ -2,7 +2,7 @@ package leyans.RidersHub.Service.InteractionRequest;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import leyans.RidersHub.DTO.Request.JoinDTO.JoinerDto;
+import leyans.RidersHub.DTO.Request.Participant.JoinerDto;
 import leyans.RidersHub.Repository.Auth.JoinRequestRepository;
 import leyans.RidersHub.Utility.ParticipantUtil;
 import leyans.RidersHub.Utility.RiderUtil;

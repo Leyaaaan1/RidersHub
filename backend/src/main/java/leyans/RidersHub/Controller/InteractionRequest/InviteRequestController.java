@@ -1,8 +1,7 @@
 package leyans.RidersHub.Controller.InteractionRequest;
 
 
-import com.google.zxing.WriterException;
-import leyans.RidersHub.DTO.Request.InviteDetailDTO;
+import leyans.RidersHub.DTO.Request.Participant.InviteDetailDTO;
 import leyans.RidersHub.Utility.ParticipantUtil;
 import leyans.RidersHub.model.Interaction.InviteRequest;
 import org.springframework.http.ResponseEntity;

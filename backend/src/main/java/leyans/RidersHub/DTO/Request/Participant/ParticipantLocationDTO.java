@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request;
+package leyans.RidersHub.DTO.Request.Participant;
 
 import java.time.LocalDateTime;
 

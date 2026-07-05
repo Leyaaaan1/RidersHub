@@ -1,7 +1,7 @@
 
 package leyans.RidersHub.Utility;
 
-import leyans.RidersHub.DTO.Request.ParticipantLocationDTO;
+import leyans.RidersHub.DTO.Request.Participant.ParticipantLocationDTO;
 import leyans.RidersHub.DTO.Response.ActiveRideDTO;
 import leyans.RidersHub.DTO.Response.RideDetailDTO;
 import leyans.RidersHub.DTO.Response.StartRideResponseDTO;

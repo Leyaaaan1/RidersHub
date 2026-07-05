@@ -3,7 +3,7 @@ package leyans.RidersHub.Service.MapService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import leyans.RidersHub.DTO.Request.LocationDTO.NominatimAddress;
+import leyans.RidersHub.DTO.Request.Location.NominatimAddress;
 import leyans.RidersHub.Service.MapService.utilities.ApiHelper;
 import leyans.RidersHub.Utility.AppLogger;
 import org.springframework.beans.factory.annotation.Value;

@@ -1,6 +1,6 @@
 package leyans.RidersHub.DTO.Response;
 
-import leyans.RidersHub.DTO.Request.LocationDTO.LocationUpdateRequestDTO;
+import leyans.RidersHub.DTO.Request.Location.LocationUpdateRequestDTO;
 
 import java.util.List;
 

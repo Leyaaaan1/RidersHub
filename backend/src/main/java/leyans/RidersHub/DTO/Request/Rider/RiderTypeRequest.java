@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request.RiderDTO;
+package leyans.RidersHub.DTO.Request.Rider;
 
 public class RiderTypeRequest {
     private String riderType;

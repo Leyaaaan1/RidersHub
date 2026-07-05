@@ -1,6 +1,6 @@
 package leyans.RidersHub.Service.InteractionRequest;
 
-import leyans.RidersHub.DTO.Request.JoinDTO.JoinRequestCreateDto;
+import leyans.RidersHub.DTO.Request.Participant.JoinRequestCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseCreateDto;
 import leyans.RidersHub.DTO.Response.JoinResponseDTO;
 import leyans.RidersHub.Repository.ParticipantLocationRepository;

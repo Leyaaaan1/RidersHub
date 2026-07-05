@@ -1,4 +1,4 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Rides;
 
 import leyans.RidersHub.DTO.Response.RideStatusDTO;
 import leyans.RidersHub.Repository.RidesRepository;

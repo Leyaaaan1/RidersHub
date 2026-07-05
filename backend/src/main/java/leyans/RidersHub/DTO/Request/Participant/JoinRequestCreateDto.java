@@ -1,4 +1,4 @@
-package leyans.RidersHub.DTO.Request.JoinDTO;
+package leyans.RidersHub.DTO.Request.Participant;
 
 public class JoinRequestCreateDto {
     private String generatedRidesId;

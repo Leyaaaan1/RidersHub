@@ -1,4 +1,4 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Rides;
 
 import leyans.RidersHub.DTO.Response.FinishedDTO.DetailDTO;
 import leyans.RidersHub.DTO.Response.FinishedDTO.SnapshotResponseDTO;

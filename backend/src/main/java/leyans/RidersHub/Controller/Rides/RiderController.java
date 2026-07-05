@@ -1,9 +1,9 @@
-package leyans.RidersHub.Controller;
+package leyans.RidersHub.Controller.Rides;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import leyans.RidersHub.Config.Security.SecurityUtils;
-import leyans.RidersHub.DTO.Request.RiderDTO.RiderTypeRequest;
+import leyans.RidersHub.DTO.Request.Rider.RiderTypeRequest;
 import leyans.RidersHub.DTO.Request.RidesDTO.RideRequestDTO;
 import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 import leyans.RidersHub.DTO.Request.UpdateRideRequestDTO;

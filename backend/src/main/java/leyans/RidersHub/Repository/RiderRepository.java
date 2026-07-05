@@ -1,6 +1,5 @@
 package leyans.RidersHub.Repository;
 
-import leyans.RidersHub.DTO.Request.RiderDTO.RiderDTO;
 import leyans.RidersHub.model.Rider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
