@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import leyans.RidersHub.DTO.Request.Location.NominatimAddress;
 import leyans.RidersHub.Service.MapService.utilities.ApiHelper;
-import leyans.RidersHub.Utility.AppLogger;
+import leyans.RidersHub.Utility.Logger.AppLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;

@@ -1,9 +1,9 @@
 package leyans.RidersHub.Controller.Rides;
 
-import leyans.RidersHub.DTO.Response.FinishedDTO.DetailDTO;
-import leyans.RidersHub.DTO.Response.FinishedDTO.SnapshotResponseDTO;
-import leyans.RidersHub.Service.PersonalFinishedRideService;
-import leyans.RidersHub.Service.RideDetailService;
+import leyans.RidersHub.DTO.Response.Finished.DetailDTO;
+import leyans.RidersHub.DTO.Response.Finished.SnapshotResponseDTO;
+import leyans.RidersHub.Service.Finished.PersonalFinishedRideService;
+import leyans.RidersHub.Service.Rides.RideDetailService;
 import leyans.RidersHub.Service.UploadService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

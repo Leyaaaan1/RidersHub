@@ -1,10 +1,9 @@
 package leyans.RidersHub.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
-import leyans.RidersHub.Utility.AppLogger;
+import leyans.RidersHub.Utility.Logger.AppLogger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

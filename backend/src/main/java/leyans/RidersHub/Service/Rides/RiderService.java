@@ -1,0 +1,102 @@
+package leyans.RidersHub.Service.Rides;
+
+import jakarta.transaction.Transactional;
+import leyans.RidersHub.Repository.Rides.RiderTypeRepository;
+import leyans.RidersHub.Service.Auth.AccountLockoutService;
+import leyans.RidersHub.Utility.Logger.AppLogger;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Rides.RiderType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import leyans.RidersHub.Repository.Rides.RiderRepository;
+import java.util.ArrayList;
+
+@Service
+@Transactional
+public class RiderService {
+
+    private final RiderRepository riderRepository;
+    private final RiderTypeRepository riderTypeRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public RiderService(RiderRepository riderRepository,
+            RiderTypeRepository riderTypeRepository,
+            PasswordEncoder passwordEncoder) {
+        this.riderRepository = riderRepository;
+        this.riderTypeRepository = riderTypeRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public RiderType addRiderType(String riderTypeName) {
+        RiderType riderType = new RiderType();
+        riderType.setRiderType(riderTypeName);
+        return riderTypeRepository.save(riderType);
+    }
+
+    public String registerRiderWithValidation(String displayUsername, String email,
+            String password, String clientIp,
+            AccountLockoutService lockoutService) {
+        int attempts = lockoutService.getRegisterAttempts(clientIp);
+        if (attempts >= 3) {
+            throw new RuntimeException("Registration limit exceeded for this IP");
+        }
+        return registerRider(displayUsername, password, email);
+    }
+
+    // RiderService.java
+    public String registerRider(String username, String password, String email) {
+        if (riderRepository.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+        String encodedPassword = passwordEncoder.encode(password);
+        Rider newRider = new Rider();
+        newRider.setUsername(username);
+        newRider.setPassword(encodedPassword);
+        newRider.setAuthEmail(email);
+        newRider.setEnabled(true);
+        newRider.setRiderTypes(new ArrayList<>());
+        riderRepository.saveAndFlush(newRider); // ← saveAndFlush, not save
+        return username;
+    }
+
+    public void createGoogleRider(String username, String email) {
+        if (usernameExists(username)) {
+            throw new RuntimeException("Username already taken: " + username);
+        }
+
+        Rider rider = new Rider();
+        rider.setUsername(username);
+        rider.setAuthEmail(email);
+        rider.setPassword(null);
+        rider.setEnabled(true); // Google-only — no password
+        riderRepository.save(rider);
+
+    }
+
+    public Rider getRiderByUsername(String username) {
+        AppLogger.info(this.getClass(), "getRiderByUsername called", "username", username);
+
+        Rider rider = riderRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    AppLogger.throwResourceNotFound(this.getClass(),
+                            "Rider not found: " + username);
+                    return new RuntimeException("Rider not found: " + username);
+                });
+
+        AppLogger.info(this.getClass(), "Rider retrieved successfully", "username", username);
+        return rider;
+    }
+
+    public RiderType getRiderTypeByName(String typeName) {
+        RiderType type = riderTypeRepository.findByRiderType(typeName);
+        if (type == null) {
+            throw new IllegalArgumentException("RiderType not found: " + typeName);
+        }
+        return type;
+    }
+
+    public boolean usernameExists(String username) {
+        return riderRepository.findByUsername(username).isPresent();
+    }
+
+}

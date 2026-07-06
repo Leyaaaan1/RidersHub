@@ -1,13 +1,13 @@
 
 package leyans.RidersHub.Controller.Rides;
 
-import leyans.RidersHub.DTO.Response.CheckpointArrivalResponse;
-import leyans.RidersHub.DTO.Response.FinishedDTO.FinishedRideResponseDTO;
-import leyans.RidersHub.DTO.Response.FinishedDTO.PersonalFinishedRideDTO;
-import leyans.RidersHub.Service.FinishedRideService;
-import leyans.RidersHub.Service.PersonalFinishedRideService;
-import leyans.RidersHub.Utility.CheckPointUtility;
-import leyans.RidersHub.Utility.FinishedRideUtility;
+import leyans.RidersHub.DTO.Response.Rides.CheckpointArrivalResponse;
+import leyans.RidersHub.DTO.Response.Finished.FinishedRideResponseDTO;
+import leyans.RidersHub.DTO.Response.Finished.PersonalFinishedRideDTO;
+import leyans.RidersHub.Service.Finished.FinishedRideService;
+import leyans.RidersHub.Service.Finished.PersonalFinishedRideService;
+import leyans.RidersHub.Utility.Rides.CheckPointUtility;
+import leyans.RidersHub.Utility.Finished.FinishedRideUtility;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

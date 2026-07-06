@@ -1,0 +1,126 @@
+package leyans.RidersHub.Utility.Interaction;
+
+import jakarta.persistence.EntityNotFoundException;
+import leyans.RidersHub.DTO.Request.Interaction.InviteDetailDTO;
+import leyans.RidersHub.DTO.Request.Interaction.JoinerDto;
+import leyans.RidersHub.Repository.Interaction.InviteRequestRepository;
+import leyans.RidersHub.Repository.Interaction.JoinRequestRepository;
+import leyans.RidersHub.Service.Interaction.InviteRequestService;
+import leyans.RidersHub.Utility.Rides.RiderUtil;
+import leyans.RidersHub.model.Interaction.InviteRequest;
+import leyans.RidersHub.model.Interaction.JoinRequest;
+import leyans.RidersHub.model.Rides.Rides;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class ParticipantUtil {
+
+    private final InviteRequestRepository inviteRequestRepository;
+
+    private final JoinRequestRepository joinRequestRepository;
+    private final RiderUtil riderUtil;
+
+    public ParticipantUtil(InviteRequestService inviteRequestService, InviteRequestRepository inviteRequestRepository,
+            JoinRequestRepository joinRequestRepository, RiderUtil riderUtil) {
+        this.inviteRequestRepository = inviteRequestRepository;
+        this.joinRequestRepository = joinRequestRepository;
+        this.riderUtil = riderUtil;
+    }
+
+    @Transactional(readOnly = true)
+    public String getQrCodeUrlByRideId(String generatedRidesId) {
+        InviteRequest invite = findInviteByRideId(generatedRidesId);
+        // validateInviteNotExpired(invite);
+        return invite.getQr();
+    }
+
+    public InviteDetailDTO convertInviteToDetailDto(InviteRequest invite) {
+        return new InviteDetailDTO(
+                invite.getInviteToken(),
+                invite.getRides().getGeneratedRidesId(),
+                invite.getInviteStatus().toString());
+    }
+
+    public InviteRequest findInviteByToken(String inviteToken) {
+        return inviteRequestRepository.findByInviteToken(inviteToken)
+                .orElseThrow(() -> new EntityNotFoundException("Invite not found for token: " + inviteToken));
+    }
+
+    public InviteRequest findInviteByRideId(String generatedRidesId) {
+        List<InviteRequest> invites = inviteRequestRepository.findByRides_GeneratedRidesId(generatedRidesId);
+        if (invites == null || invites.isEmpty()) {
+            throw new EntityNotFoundException("Invite not found for ride ID: " + generatedRidesId);
+        }
+        return invites.get(0);
+    }
+
+    public void validateInviteNotExpired(InviteRequest invite) {
+        if (isExpired(invite)) {
+            throw new EntityNotFoundException("Invite expired for ride ID: " +
+                    (invite.getRides() != null ? invite.getRides().getGeneratedRidesId() : "unknown"));
+        }
+    }
+
+    public boolean isExpired(InviteRequest invite) {
+        LocalDateTime now = LocalDateTime.now();
+        if (invite.getExpiresAt() != null) {
+            return invite.getExpiresAt().isBefore(now);
+        }
+        if (invite.getCreatedAt() != null) {
+            return invite.getCreatedAt().plusMonths(1).isBefore(now);
+        }
+        throw new EntityNotFoundException("Invite missing expiration and creation time for ride ID: " +
+                (invite.getRides() != null ? invite.getRides().getGeneratedRidesId() : "unknown"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<JoinRequest> listJoinRequestsByRideId(String generatedRidesId) {
+        riderUtil.findRideById(generatedRidesId); // validate existence
+        return joinRequestRepository.findByRideId(generatedRidesId);
+    }
+
+    public void validateRideCreator(String generatedRidesId, String currentUsername) {
+        Rides ride = riderUtil.findRideById(generatedRidesId);
+
+        if (!ride.getUsername().getUsername().equals(currentUsername)) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Only the ride creator can approve/reject join requests");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public boolean hasJoinRequest(String generatedRidesId, String username) {
+        riderUtil.findRideById(generatedRidesId); // validate ride existence
+        return joinRequestRepository.findByRideId(generatedRidesId)
+                .stream()
+                .anyMatch(joinRequest -> joinRequest.getRequester().getUsername().equals(username));
+    }
+
+    @Transactional(readOnly = true)
+    public List<JoinerDto> listJoinersByRideIdAndStatus(String generatedRidesId, JoinRequest.JoinStatus status) {
+        Rides ride = riderUtil.findRideById(generatedRidesId);
+        return joinRequestRepository.findByRideIdAndStatus(generatedRidesId, status).stream()
+                .map(j -> new JoinerDto(j.getRequester().getUsername(), j.getJoinStatus(), j.getRequestedAt()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public String getInviteUrlByRideId(String generatedRidesId) {
+        InviteRequest invite = findInviteByRideId(generatedRidesId);
+        // validateInviteNotExpired(invite);
+        return invite.getInviteLink();
+    }
+
+    @Transactional(readOnly = true)
+    public String getQrCodeBase64ByRideId(String generatedRidesId) {
+        InviteRequest invite = findInviteByRideId(generatedRidesId);
+        // validateInviteNotExpired(invite);
+        return invite.getQrCodeBase64();
+    }
+
+}

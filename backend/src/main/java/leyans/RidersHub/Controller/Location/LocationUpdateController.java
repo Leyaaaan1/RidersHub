@@ -2,11 +2,11 @@ package leyans.RidersHub.Controller.Location;
 
 import jakarta.servlet.http.HttpServletResponse;
 import leyans.RidersHub.DTO.Request.Location.LocationUpdateRequestDTO;
-import leyans.RidersHub.DTO.Response.LocationShareResponseDTO;
+import leyans.RidersHub.DTO.Response.Location.LocationShareResponseDTO;
 import leyans.RidersHub.ExceptionHandler.UnauthorizedAccessException;
-import leyans.RidersHub.Service.RideLocationEmitterRegistry;
-import leyans.RidersHub.Service.RideLocationService;
-import leyans.RidersHub.Utility.AppLogger;
+import leyans.RidersHub.Service.Location.RideLocationEmitterRegistry;
+import leyans.RidersHub.Service.Location.RideLocationService;
+import leyans.RidersHub.Utility.Logger.AppLogger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

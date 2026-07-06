@@ -2,9 +2,9 @@
 package leyans.RidersHub.Service.Auth;
 
 import leyans.RidersHub.Repository.Auth.EmailVerificationTokenRepository;
-import leyans.RidersHub.Repository.RiderRepository;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.auth.EmailVerificationToken;
+import leyans.RidersHub.Repository.Rides.RiderRepository;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Auth.EmailVerificationToken;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

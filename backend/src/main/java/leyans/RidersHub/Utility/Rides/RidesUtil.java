@@ -1,0 +1,275 @@
+package leyans.RidersHub.Utility.Rides;
+
+
+import jakarta.persistence.EntityNotFoundException;
+import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
+import leyans.RidersHub.DTO.Response.Rides.ActiveRideDTO;
+import leyans.RidersHub.DTO.Response.Rides.RideDetailDTO;
+import leyans.RidersHub.DTO.Response.Finished.RideSummaryDTO;
+import leyans.RidersHub.Repository.Rides.RiderTypeRepository;
+import leyans.RidersHub.Repository.Rides.RidesRepository;
+import leyans.RidersHub.Repository.Rides.StartedRideRepository;
+import leyans.RidersHub.Service.Interaction.InviteRequestService;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Interaction.InviteRequest;
+import leyans.RidersHub.model.Rides.RiderType;
+import leyans.RidersHub.model.Rides.Rides;
+import leyans.RidersHub.model.Rides.StartedRide;
+import leyans.RidersHub.model.Rides.StopPoint;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class RidesUtil {
+
+    public final RidesRepository ridesRepository;
+    public final InviteRequestService inviteRequestService;
+
+    private final StartedRideRepository startedRideRepository;
+    private final RiderTypeRepository riderTypeRepository;
+
+    private final RiderUtil riderUtil;
+
+    public RidesUtil(RidesRepository ridesRepository, InviteRequestService inviteRequestService, StartedRideRepository startedRideRepository, RiderTypeRepository riderTypeRepository, RiderUtil riderUtil) {
+        this.ridesRepository = ridesRepository;
+        this.inviteRequestService = inviteRequestService;
+        this.startedRideRepository = startedRideRepository;
+        this.riderTypeRepository = riderTypeRepository;
+        this.riderUtil = riderUtil;
+    }
+
+
+    public List<RiderType> getAllRiderTypes() {
+        return riderTypeRepository.findAll();
+    }
+
+    public RiderType getRiderTypeById(Integer id) {
+        return riderTypeRepository.findById(id).orElse(null);
+    }
+
+    public RiderType getRiderTypeByName(String name) {
+        return riderTypeRepository.findByRiderType(name);
+    }
+
+    @Transactional(readOnly = true)
+    public ActiveRideDTO mapToActiveDTO(Rides ride, Integer startedRideId) {
+        List<String> participantsList;
+
+        if (startedRideId != null) {
+            Optional<StartedRide> startedRide = startedRideRepository.findById(startedRideId);
+            participantsList = startedRide.map(sr -> sr.getParticipants().stream()
+                            .map(Rider::getUsername)
+                            .collect(Collectors.toList()))
+                    .orElseGet(() -> ride.getParticipants().stream()
+                            .map(Rider::getUsername)
+                            .collect(Collectors.toList()));
+        } else {
+            // For non-active rides, use Rides participants
+            participantsList = ride.getParticipants().stream()
+                    .map(Rider::getUsername)
+                    .collect(Collectors.toList());
+        }
+
+        List<StopPointDTO> stopDTOs = ride.getStopPoints().stream()
+                .map(sp -> new StopPointDTO(
+                        sp.getStopName(),
+                        sp.getStopLocation().getX(),
+                        sp.getStopLocation().getY()
+                ))
+                .collect(Collectors.toList());
+
+        return new ActiveRideDTO(
+                startedRideId,
+                ride.getGeneratedRidesId(),
+                ride.getRidesName(),
+                ride.getLocationName(),
+                ride.getRiderType().getRiderType(),
+                ride.getDistance(),
+                ride.getDate(),
+                ride.getLocation().getY(),
+                ride.getLocation().getX(),
+                ride.getStartingPointName(),
+                ride.getStartingLocation().getY(),
+                ride.getStartingLocation().getX(),
+                ride.getEndingPointName(),
+                ride.getEndingLocation().getY(),
+                ride.getEndingLocation().getX(),
+                ride.getUsername().getUsername(),
+                participantsList,
+                ride.getDescription(),
+                ride.getActive(),
+                ride.getRouteCoordinates(),
+                stopDTOs
+        );
+    }
+
+    @Transactional
+    public Rides saveRideWithTransaction(Rides ride, Rider creator) {
+        try {
+            Rides saved = ridesRepository.save(ride);
+
+            inviteRequestService.generateInviteForNewRide(
+                    saved.getGeneratedRidesId(),
+                    creator,
+                    InviteRequest.InviteStatus.PENDING,
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusMonths(1)
+            );
+
+
+            return saved;
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to save ride: " + ex.getMessage(), ex);
+        }
+    }
+
+    public record GeocodeResult(double latitude, double longitude, String name) {}
+
+
+
+    @Transactional(readOnly = true)
+    public List<StopPointDTO> getStopPointsDTOByGeneratedRideId(String generatedRidesId) {
+        Rides ride = findRideEntityByGeneratedId(generatedRidesId);
+        return mapStopPointsToDTOs(ride.getStopPoints());
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public RideDetailDTO findRideByGeneratedId(String generatedRidesId) {
+        Rides ride = ridesRepository.findByGeneratedRidesIdWithDetails(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+        return mapToDetailDTO(ride);                    // ← detail mapper
+    }
+
+    @Transactional(readOnly = true)
+    public Page<RideSummaryDTO> findMyAndParticipatingRidesPaginated(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Rides> ridesPage = ridesRepository.findByUsernameOrParticipants_UsernamePaginated(username, pageable);
+        return ridesPage.map(this::mapToSummaryDTO);
+    }
+    @Transactional
+    public Rides saveExistingRide(Rides ride) {
+        return ridesRepository.save(ride);
+    }
+
+
+    @Transactional
+    public Rides findRideEntityByGeneratedId(String generatedRidesId) {
+        return ridesRepository.findByGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new EntityNotFoundException("Ride not found with ID: " + generatedRidesId));
+    }
+
+
+    // ─── Summary mapper — used by paginated list endpoints ───────────────────────
+    public RideSummaryDTO mapToSummaryDTO(Rides ride) {
+        String creatorUsername = (ride.getUsername() != null)
+                ? ride.getUsername().getUsername()
+                : "Unknown";
+        return new RideSummaryDTO(
+                ride.getGeneratedRidesId(),
+                ride.getRidesName(),
+                ride.getLocationName(),
+                ride.getRiderType().getRiderType(),
+                ride.getDistance(),
+                ride.getDate(),
+                ride.getLocation().getY(),          // latitude  = Y
+                ride.getLocation().getX(),          // longitude = X
+                ride.getStartingPointName(),
+                ride.getStartingLocation().getY(),
+                ride.getStartingLocation().getX(),
+                ride.getEndingPointName(),
+                ride.getEndingLocation().getY(),
+                ride.getEndingLocation().getX(),
+                creatorUsername,
+                ride.getParticipants().stream()
+                        .map(r -> r.getUsername())
+                        .collect(Collectors.toList()),
+                ride.getDescription(),
+                ride.getActive()
+        );
+    }
+
+    // ─── Detail mapper — used by single-ride fetch only ──────────────────────────
+    public RideDetailDTO mapToDetailDTO(Rides ride) {
+        List<StopPointDTO> stopDTOs = ride.getStopPoints().stream()
+                .map(sp -> new StopPointDTO(
+                        sp.getStopName(),
+                        sp.getStopLocation().getX(),
+                        sp.getStopLocation().getY()
+                ))
+                .collect(Collectors.toList());
+
+        return new RideDetailDTO(
+                ride.getGeneratedRidesId(),
+                ride.getRidesName(),
+                ride.getLocationName(),
+                ride.getRiderType().getRiderType(),
+                ride.getDistance(),
+                ride.getDate(),
+                ride.getLocation().getY(),
+                ride.getLocation().getX(),
+                ride.getStartingPointName(),
+                ride.getStartingLocation().getY(),
+                ride.getStartingLocation().getX(),
+                ride.getEndingPointName(),
+                ride.getEndingLocation().getY(),
+                ride.getEndingLocation().getX(),
+                ride.getUsername().getUsername(),
+                ride.getParticipants().stream()
+                        .map(r -> r.getUsername())
+                        .collect(Collectors.toList()),
+                ride.getDescription(),
+                ride.getActive(),
+                // detail-only
+                ride.getRouteCoordinates(),
+                stopDTOs
+        );
+    }
+
+    public List<StopPointDTO> mapStopPointsToDTOs(List<StopPoint> stopPoints) {
+        return stopPoints.stream()
+                .map(stopPoint -> new StopPointDTO(
+                        stopPoint.getStopName(),
+                        stopPoint.getStopLocation().getX(),
+                        stopPoint.getStopLocation().getY()
+                ))
+                .toList();
+    }
+
+    public Rides validateAndGetRide(String generatedRidesId, Rider initiator) {
+        Rides ride = riderUtil.findRideById(generatedRidesId);
+
+        if (ride.getUsername() == null) {
+            throw new RuntimeException("Ride does not have a valid creator");
+        }
+        if (startedRideRepository.existsByRide(ride)) {
+            throw new IllegalStateException("This ride has already been started");
+        }
+        if (startedRideRepository.existsByUsername(initiator)) {
+            throw new IllegalStateException("You already have a ride in progress");
+        }
+        return ride;
+    }
+
+
+    public String generateUniqueRideId() {
+        return UUID.randomUUID().toString()
+                .replace("-", "")           // Remove hyphens
+                .substring(0, 12)           // Take first 12 characters (48 bits = ~281 trillion combinations)
+                .toUpperCase();             // Make human-readable
+    }
+
+
+
+}

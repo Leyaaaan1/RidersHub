@@ -2,9 +2,7 @@
 package leyans.RidersHub.Service.Auth;
 
 import leyans.RidersHub.ExceptionHandler.RateLimitExceededException;
-import leyans.RidersHub.ExceptionHandler.RedisUnavailableException;
-import leyans.RidersHub.Utility.AppLogger;
-import org.springframework.beans.factory.annotation.Autowired;
+import leyans.RidersHub.Utility.Logger.AppLogger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;

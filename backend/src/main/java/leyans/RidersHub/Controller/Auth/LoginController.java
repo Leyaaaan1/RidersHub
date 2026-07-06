@@ -2,10 +2,10 @@
 package leyans.RidersHub.Controller.Auth;
 
 import leyans.RidersHub.Config.Security.ClientIpResolver;
-import leyans.RidersHub.DTO.Request.LoginRequest;
-import leyans.RidersHub.DTO.Request.RegisterRequest;
-import leyans.RidersHub.DTO.Response.LoginResponse;
-import leyans.RidersHub.DTO.Response.RegisterResponse;
+import leyans.RidersHub.DTO.Request.Auth.LoginRequest;
+import leyans.RidersHub.DTO.Request.Auth.RegisterRequest;
+import leyans.RidersHub.DTO.Response.Auth.LoginResponse;
+import leyans.RidersHub.DTO.Response.Auth.RegisterResponse;
 import leyans.RidersHub.ExceptionHandler.RateLimitExceededException;
 import leyans.RidersHub.Service.Auth.LoginService;
 import leyans.RidersHub.Service.Auth.TokenBlacklistService;

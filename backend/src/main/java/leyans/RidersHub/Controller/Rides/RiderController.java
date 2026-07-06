@@ -6,14 +6,14 @@ import leyans.RidersHub.Config.Security.SecurityUtils;
 import leyans.RidersHub.DTO.Request.Rider.RiderTypeRequest;
 import leyans.RidersHub.DTO.Request.RidesDTO.RideRequestDTO;
 import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
-import leyans.RidersHub.DTO.Request.UpdateRideRequestDTO;
-import leyans.RidersHub.DTO.Response.RideDetailDTO;    // ← new
-import leyans.RidersHub.DTO.Response.RideSummaryDTO;  // ← new
-import leyans.RidersHub.Service.RiderService;
-import leyans.RidersHub.Service.RidesService;
-import leyans.RidersHub.Utility.AppLogger;
-import leyans.RidersHub.Utility.RidesUtil;
-import leyans.RidersHub.model.RiderType;
+import leyans.RidersHub.DTO.Request.RidesDTO.UpdateRideRequestDTO;
+import leyans.RidersHub.DTO.Response.Rides.RideDetailDTO;    // ← new
+import leyans.RidersHub.DTO.Response.Finished.RideSummaryDTO;  // ← new
+import leyans.RidersHub.Service.Rides.RiderService;
+import leyans.RidersHub.Service.Rides.RidesService;
+import leyans.RidersHub.Utility.Logger.AppLogger;
+import leyans.RidersHub.Utility.Rides.RidesUtil;
+import leyans.RidersHub.model.Rides.RiderType;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

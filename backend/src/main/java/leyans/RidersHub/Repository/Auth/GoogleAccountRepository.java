@@ -1,7 +1,7 @@
 package leyans.RidersHub.Repository.Auth;
 
 
-import leyans.RidersHub.model.auth.GoogleAccount;
+import leyans.RidersHub.model.Auth.GoogleAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

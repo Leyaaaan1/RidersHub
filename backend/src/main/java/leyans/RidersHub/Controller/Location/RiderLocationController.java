@@ -1,7 +1,7 @@
 package leyans.RidersHub.Controller.Location;
 
 import leyans.RidersHub.DTO.Request.Location.LocationUpdateRequestDTO;
-import leyans.RidersHub.Service.RideLocationService;
+import leyans.RidersHub.Service.Location.RideLocationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,11 +1,11 @@
 
 package leyans.RidersHub.Controller.Rides;
 
-import leyans.RidersHub.DTO.Response.ActiveRideDTO;
-import leyans.RidersHub.DTO.Response.StartRideResponseDTO;
+import leyans.RidersHub.DTO.Response.Rides.ActiveRideDTO;
+import leyans.RidersHub.DTO.Response.Rides.StartRideResponseDTO;
 import leyans.RidersHub.ExceptionHandler.RideAuthorizationException;
-import leyans.RidersHub.Service.StartRideService;
-import leyans.RidersHub.Utility.StartedUtil;
+import leyans.RidersHub.Service.Rides.StartRideService;
+import leyans.RidersHub.Utility.Rides.StartedUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

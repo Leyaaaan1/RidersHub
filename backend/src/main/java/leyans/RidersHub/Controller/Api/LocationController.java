@@ -1,8 +1,7 @@
 package leyans.RidersHub.Controller.Api;
 
-import leyans.RidersHub.Service.LocationService;
+import leyans.RidersHub.Service.Location.LocationService;
 import leyans.RidersHub.Service.MapService.NominatimService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

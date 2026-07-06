@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/riders/resend-verification",
                                 "/riders/check-email-verified",
                                 "/.well-known/assetlinks.json",
-                                "/invite/link/**"
+                                "/invite/link/**",
+                                "/image/**"
 
                         ).permitAll()
                         .requestMatchers(
@@ -85,9 +86,6 @@ public class SecurityConfig {
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                // ✅ oauth2Login removed — no longer needed.
-                // The Facebook SDK sends a token directly to /riders/facebook-login.
-                // Spring verifies it via Facebook Graph API — no browser redirect flow.
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

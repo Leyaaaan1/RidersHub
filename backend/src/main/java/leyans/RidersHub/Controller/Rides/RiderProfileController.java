@@ -1,8 +1,8 @@
 package leyans.RidersHub.Controller.Rides;
 
-import leyans.RidersHub.DTO.Request.RiderProfileRequestDTO;
-import leyans.RidersHub.DTO.Response.RiderProfileResponseDTO;
-import leyans.RidersHub.Service.RiderProfileService;
+import leyans.RidersHub.DTO.Request.Rider.RiderProfileRequestDTO;
+import leyans.RidersHub.DTO.Response.Auth.RiderProfileResponseDTO;
+import leyans.RidersHub.Service.Rides.RiderProfileService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
