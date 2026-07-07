@@ -50,18 +50,20 @@ Reverse geocoding in Mindanao needs real barangay-level precision — something 
 
 ## Tech Stack
 
-| Layer | Technology                         |
-|---|------------------------------------|
-| Mobile frontend | React Native                       |
-| Backend | Spring Boot (Java)                 |
-| Database | PostgreSQL + PostGIS               |
+| Layer | Technology |
+|---|---|
+| Mobile frontend | React Native |
+| Backend | Spring Boot (Java) |
+| Database | PostgreSQL + PostGIS |
 | ORM | Spring Data JPA + Hibernate Spatial |
 | Authentication | Spring Security + JWT, Google OAuth |
-| Maps | Leaflet , WebView (interactive)    |
-| Routing | GraphHopper API                    |
-| Caching | Redis (reroute cache)              |
-| Geocoding | PSGC dataset + Nominatim API       |
-| Rate limiting | Bucket4j (Redis-backed)            |
+| Maps | Mapbox (snapshots), WebView (interactive) |
+| Routing | GraphHopper API |
+| Caching | Redis (reroute cache) |
+| Image hosting | Cloudinary |
+| Geocoding | PSGC dataset + Nominatim API |
+| Rate limiting | Bucket4j (Redis-backed) |
+| QR codes | ZXing |
 
 ---
 
