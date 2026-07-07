@@ -7,7 +7,7 @@ import {
   StatusBar,
   Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -87,6 +87,13 @@ const RideStep4 = props => {
   const insets = useSafeAreaInsets();
   const [pendingJoinCount, setPendingJoinCount] = useState(0);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshStatus();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [generatedRidesId]),
+  );
+
   const {
     actionStatus,
     loading: actionStatusLoading,
@@ -98,6 +105,7 @@ const RideStep4 = props => {
     participants,
     isRideStarted,
   });
+
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [state, setState] = useState({

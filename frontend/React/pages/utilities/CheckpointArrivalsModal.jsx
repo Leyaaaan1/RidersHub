@@ -224,7 +224,18 @@ const CheckpointArrivalsModal = ({
   const finishedRiderCount =
     rideStatus?.riderStatuses?.filter(r => r.status === 'RIDER_FINISHED')
       .length ?? 0;
-  const totalRiderCount = rideStatus?.riderStatuses?.length ?? 0;
+
+  // Roster size (creator + participants, deduplicated). Can't be derived from
+  // rideStatus.riderStatuses — the backend only ever writes a Scope.RIDER
+  // entry once someone reaches RIDER_FINISHED, so that array is never a
+  // roster, only a "who's finished" list. Mirrors the same union the backend
+  // uses in PersonalFinishedRideService.allParticipantsFinished.
+  const totalRiderCount = new Set(
+    [...(activeRide?.participants || []), activeRide?.username].filter(Boolean),
+  ).size;
+  const isSoloRide = totalRiderCount <= 1; // defaults to "solo" (hide the
+  // destructive group action) if roster data is missing, rather than risking
+  // exposing "End For Everyone" incorrectly.
 
   const sortedCheckpoints = groupAndSortArrivals(
     arrivals,
@@ -282,7 +293,7 @@ const CheckpointArrivalsModal = ({
             </Text>
           </TouchableOpacity>
 
-          {isCreator && (
+          {isCreator && !isSoloRide && (
             <TouchableOpacity
               disabled={isFinishing}
               onPress={() => {
@@ -354,7 +365,7 @@ const CheckpointArrivalsModal = ({
           </Text>
         </TouchableOpacity>
 
-        {isCreator && (
+        {isCreator && !isSoloRide && (
           <>
             <View style={s.bannerDivider}>
               <View style={s.bannerDividerLine} />

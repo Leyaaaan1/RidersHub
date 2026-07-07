@@ -16,35 +16,24 @@ export const useRouteMapLogic = generatedRidesId => {
   const [isOfflineMode, setIsOfflineMode] = useState(false);
 
   // ── getUserLocationOnce ───────────────────────────────────────────────────
-  const getUserLocationOnce = useCallback(() => {
-    const quickOptions = {
-      enableHighAccuracy: false,
-      timeout: 5000,
-      maximumAge: 60000,
-    };
-    const accurateOptions = {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 30000,
-    };
+  // ── watchIdRef — holds the active GPS watch so it can be cleared on unmount
+  const watchIdRef = useRef(null);
 
-    Geolocation.getCurrentPosition(
+  // ── getUserLocationOnce → now watches continuously so the map marker
+  // tracks live movement instead of freezing at the first fix.
+  const getUserLocationOnce = useCallback(() => {
+    if (watchIdRef.current !== null) return; // already watching
+
+    watchIdRef.current = Geolocation.watchPosition(
       position => {
-        const {latitude, longitude} = position.coords;
-        setUserLocation({lat: latitude, lng: longitude});
+        const {latitude, longitude, accuracy} = position.coords;
+        setUserLocation({lat: latitude, lng: longitude, accuracy});
       },
-      () => {
-        // Quick location failed — retry with GPS
-        Geolocation.getCurrentPosition(
-          position => {
-            const {latitude, longitude} = position.coords;
-            setUserLocation({lat: latitude, lng: longitude});
-          },
-          err =>
-          accurateOptions,
-        );
+      () => {},
+      {
+        enableHighAccuracy: true,
+        distanceFilter: 5, // metres — only fires on real movement, saves battery
       },
-      quickOptions,
     );
   }, []);
 
@@ -71,8 +60,7 @@ export const useRouteMapLogic = generatedRidesId => {
         // iOS — permissions handled via Info.plist
         getUserLocationOnce();
       }
-    } catch (err) {
-    }
+    } catch (err) {}
   }, [getUserLocationOnce]);
 
   // ── fetchRouteData ────────────────────────────────────────────────────────
@@ -82,7 +70,6 @@ export const useRouteMapLogic = generatedRidesId => {
       setError(null);
       setRouteError(null);
 
-      // ✅ FIXED: Single network check call (cached for 5 seconds)
       const networkStatus = await checkNetworkStatus();
       setIsOfflineMode(!networkStatus.isConnected);
 
@@ -99,7 +86,6 @@ export const useRouteMapLogic = generatedRidesId => {
       setError(null);
       setRouteError(null);
       await routeCache.save(generatedRidesId, data);
-
     } catch (err) {
       const message = err?.message || 'Failed to load route data';
 
@@ -174,6 +160,16 @@ export const useRouteMapLogic = generatedRidesId => {
     requestLocationPermission();
   }, [generatedRidesId, fetchRouteData, requestLocationPermission]);
 
+  // ── Stop the GPS watch when this screen unmounts ─────────────────────────
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        Geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+      }
+    };
+  }, []);
+
   // ── updateUserLocationOnMap ───────────────────────────────────────────────
   const updateUserLocationOnMap = useCallback((webViewRef, location) => {
     if (!webViewRef.current || !location) return;
@@ -242,8 +238,7 @@ export const useRouteMapLogic = generatedRidesId => {
             onWebViewLoad();
           }
         }
-      } catch (err) {
-      }
+      } catch (err) {}
     },
     [],
   );

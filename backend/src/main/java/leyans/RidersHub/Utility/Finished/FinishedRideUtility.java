@@ -87,6 +87,7 @@ public class FinishedRideUtility {
 
                 ride.setActive(false);
                 ridesRepository.save(ride);
+                rideStatusService.markFinished(generatedRidesId, "Ride finished");
 
                 startedRideRepository.deleteRiderLocationsByStartedRideId(generatedRidesId);
                 startedRideRepository.deleteParticipantLocationsByStartedRideId(generatedRidesId);
