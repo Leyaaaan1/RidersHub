@@ -1,0 +1,101 @@
+package leyans.RidersHub.model.Rides;
+
+import jakarta.persistence.*;
+import leyans.RidersHub.model.Auth.Rider;
+import org.locationtech.jts.geom.Point;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "started_rides")
+public class StartedRide {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "initiator_username", referencedColumnName = "username", nullable = false)
+    private Rider username;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "generated_rides_id", referencedColumnName = "generated_rides_id", nullable = false)
+    private Rides ride;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(name = "location", columnDefinition = "geometry(Point,4326)")
+    private Point location;
+
+    @ManyToMany
+    @JoinTable(
+            name = "started_ride_participants",
+            joinColumns = @JoinColumn(name = "started_ride_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "rider_username", referencedColumnName = "username")
+    )
+    @JsonIgnore
+    private Set<Rider> participants = new HashSet<>();
+
+    public StartedRide() {}
+
+    public StartedRide(Integer id, Rider username, Rides ride, LocalDateTime startTime, Point location, Set<Rider> participants) {
+        this.id = id;
+        this.username = username;
+        this.ride = ride;
+        this.startTime = startTime;
+        this.location = location;
+        this.participants = participants;
+    }
+
+    public Rider getUsername() {
+        return username;
+    }
+
+    public void setUsername(Rider username) {
+        this.username = username;
+    }
+
+    public Point getLocation() {
+        return location;
+    }
+
+    public void setLocation(Point location) {
+        this.location = location;
+    }
+
+    public Set<Rider> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(Set<Rider> participants) {
+        this.participants = participants;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Rides getRide() {
+        return ride;
+    }
+
+    public void setRide(Rides ride) {
+        this.ride = ride;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+}

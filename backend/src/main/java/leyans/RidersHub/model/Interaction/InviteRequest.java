@@ -1,8 +1,8 @@
 package leyans.RidersHub.model.Interaction;
 
 import jakarta.persistence.*;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.Rides;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Rides.Rides;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

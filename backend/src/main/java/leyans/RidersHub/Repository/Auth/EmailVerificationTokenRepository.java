@@ -1,7 +1,7 @@
 
 package leyans.RidersHub.Repository.Auth;
 
-import leyans.RidersHub.model.auth.EmailVerificationToken;
+import leyans.RidersHub.model.Auth.EmailVerificationToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

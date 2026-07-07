@@ -40,6 +40,7 @@ import ZoomControls from '../../utilities/ZoomControls';
 
 const RideStep3 = ({
   mapMode,
+  isEditMode = false,
   setMapMode,
   isSearching,
   searchResults,
@@ -278,7 +279,6 @@ const RideStep3 = ({
     routeGenerated,
   );
 
-
   const showFinalizeBtn =
     (mapMode === 'starting' && startingPoint) ||
     (mapMode === 'ending' && endingPoint);
@@ -306,43 +306,7 @@ const RideStep3 = ({
           mixedContentMode="compatibility"
         />
 
-        {/* ── Floating navbar ── */}
 
-        <View style={rideCreation.floatingNav}>
-          <TouchableOpacity
-            style={buttons.back}
-            onPress={prevStep}
-            activeOpacity={0.8}>
-            <FontAwesome name="arrow-left" size={14} color="#8c2323" />
-            <Text
-              style={[buttons.textDark, ridestep3style.floatingNavBackText]}>
-              Back
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={[text.label, ridestep3style.floatingNavModeLabel]}>
-            {modeLabel}
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              buttons.row,
-              ridestep3style.floatingNavCreateBtn,
-              !canCreate && buttons.disabled,
-            ]}
-            onPress={handleCreateRide}
-            disabled={!canCreate}
-            activeOpacity={0.8}>
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Text style={buttons.textSm}>Create</Text>
-                <FontAwesome name="check" size={14} color="#fff" />
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
 
         {/* ── Search card ── */}
         <View style={rideCreation.searchContainer}>
@@ -540,7 +504,7 @@ const RideStep3 = ({
                       <ActivityIndicator size="small" color="#fff" />
                     ) : (
                       <Text style={ridestep3style.createBtnText}>
-                        🏁 Create
+                        {isEditMode ? 'Save Changes' : ' Create'}
                       </Text>
                     )}
                   </TouchableOpacity>

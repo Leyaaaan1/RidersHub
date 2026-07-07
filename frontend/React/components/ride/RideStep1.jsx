@@ -59,6 +59,7 @@ const DateDisplay = ({date}) => {
 
 const RideStep1 = ({
   error,
+  isEditMode = false,
   rideName,
   setRideName,
   riderType,
@@ -77,7 +78,6 @@ const RideStep1 = ({
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const [nameError, setNameError] = useState('');
-
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -118,8 +118,12 @@ const RideStep1 = ({
       {/* ── Header ── */}
       <View style={[header.bar, {paddingTop: insets.top}]}>
         <View style={header.left}>
-          <Text style={header.title}>CREATE RIDE</Text>
-          <Text style={header.subtitle}>Step 1 of 3 — Details</Text>
+          <Text style={header.title}>
+            {isEditMode ? 'EDIT RIDE' : 'CREATE RIDE'}
+          </Text>
+          <Text style={header.subtitle}>
+            {isEditMode ? 'Editing — Details' : 'Step 1 of 3 — Details'}
+          </Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate('RiderPage')}>
           <Text style={[buttons.textDark, {fontSize: 14, padding: 10}]}>

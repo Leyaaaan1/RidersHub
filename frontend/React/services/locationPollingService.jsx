@@ -62,6 +62,35 @@ export const getCurrentPosition = async () => {
   });
 };
 
+export const watchCurrentPosition = (onUpdate, onError, options = {}) => {
+  // Foreground-only, same policy as getCurrentPosition() above.
+  if (AppState.currentState !== 'active') return null;
+
+  return Geolocation.watchPosition(
+    position => {
+      onUpdate({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        heading: position.coords.heading,
+        accuracy: position.coords.accuracy,
+        timestamp: position.timestamp,
+      });
+    },
+    err => onError?.(err),
+    {
+      enableHighAccuracy: true,
+      distanceFilter: 5, // metres — only fires on real movement, keeps battery cost low
+      ...options,
+    },
+  );
+};
+
+export const clearPositionWatch = watchId => {
+  if (watchId != null) {
+    Geolocation.clearWatch(watchId);
+  }
+};
+
 export const shareLocationAndFetchAll = async (rideId, latitude, longitude) => {
   if (!rideId) throw new Error('Missing rideId');
 

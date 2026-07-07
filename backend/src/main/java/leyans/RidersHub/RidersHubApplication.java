@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 @EnableJpaRepositories(basePackages = "leyans.RidersHub.Repository")
 public class RidersHubApplication {
 
-
 	/*static {
 		loadEnvVariables();
 	}
@@ -41,7 +40,6 @@ public class RidersHubApplication {
 			System.out.println("Could not load .env from classpath: " + e.getMessage());
 		}
 
-		// Fallback: try file system paths
 		String[] possiblePaths = {
 				"./backend/.env",
 				"./.env",

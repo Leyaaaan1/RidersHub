@@ -121,15 +121,16 @@ const routeMapStyles = `
     }
   }
 
-  .rider-name-label {
+.rider-name-label {
     background: none !important;
     border: none !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-
-  .leaflet-tooltip-top::before {
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+ .leaflet-tooltip-top::before {
     border-top-color: transparent;
-  }
+    display: none;
+}
             
             /* Compass orientation button */
               #compass-container {
@@ -200,18 +201,18 @@ const routeMapStyles = `
                 background: rgba(37, 99, 235, 0.15);
                 border: 2px solid rgba(37, 99, 235, 0.3);
             }
-            .location-name-label {
-                background: white;
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-size: 13px;
-                font-weight: 600;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-                border: 2px solid;
-                white-space: nowrap;
-                max-width: 200px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
+         .location-name-label {
+          background: white;
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 600;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          border: 2px solid;
+          white-space: nowrap;
+          max-width: none;
+          overflow: visible;
+      }
+}
 `;
 export default routeMapStyles;

@@ -14,8 +14,10 @@ import {
   createIntervalManager,
   createTimeoutManager,
   createPollLock,
-  saveRerouteCache, // ← add
-  loadRerouteCache, // ← add
+  saveRerouteCache, //
+  loadRerouteCache, //
+  watchCurrentPosition, //
+  clearPositionWatch, //
 } from '../services/locationPollingService';
 import {useAuth} from '../context/AuthContext';
 import {API_BASE_URL} from '../services/Apiclient';
@@ -130,7 +132,6 @@ export const useLocationPermission = () => {
   return {granted, checked};
 };
 
-// ─── useRideLocationPolling ────────────────────────────────────────────────
 
 export const useRideLocationPolling = ({
   rideId,
@@ -148,6 +149,7 @@ export const useRideLocationPolling = ({
   const [retryCount, setRetryCount] = useState(0);
   const [nextRetryDelay, setNextRetryDelay] = useState(1000);
   const [isOffline, setIsOffline] = useState(false);
+  const [localPosition, setLocalPosition] = useState(null); // ← live GPS for own marker
 
   // ── infrastructure refs ───────────────────────────────────────────────────
   const intervalManager = useRef(createIntervalManager());
@@ -156,6 +158,9 @@ export const useRideLocationPolling = ({
 
   // ── SSE ref — holds the active EventSource (or null when closed/unavailable)
   const esRef = useRef(null);
+
+  // ── GPS watch ref — local marker only, never touches the network
+  const watchIdRef = useRef(null);
 
   // ── auth ref — always holds the latest authenticated username, so the
   // long-lived SSE 'reroute' listener (created once per stream) never reads
@@ -173,13 +178,27 @@ export const useRideLocationPolling = ({
   const jitterTimeoutRef = useRef(null);
   const sseReconnectTimeoutRef = useRef(null);
 
-
   // ── movement-tracking refs ───────────────────────────────────────────────
   const lastSentPositionRef = useRef(null);
   const consecutiveSkipCountRef = useRef(0);
   const lastUploadTimestampRef = useRef(null);
   const isFirstPollRef = useRef(true);
 
+  const rerouteHistoryRef = useRef([]);
+  const pushReroute = useCallback(incoming => {
+    let latest;
+    if (Array.isArray(incoming)) {
+      rerouteHistoryRef.current = incoming;
+      latest = incoming[incoming.length - 1] ?? null;
+    } else if (incoming) {
+      rerouteHistoryRef.current = [...rerouteHistoryRef.current, incoming];
+      latest = incoming;
+    }
+    onRerouteRef.current?.({
+      history: rerouteHistoryRef.current,
+      latest,
+    });
+  }, []);
   // ── sync mutable refs ─────────────────────────────────────────────────────
   useEffect(() => {
     enabledRef.current = enabled;
@@ -202,7 +221,7 @@ export const useRideLocationPolling = ({
     (async () => {
       const cached = await loadRerouteCache(rideId);
       if (cached && !cancelled) {
-        onRerouteRef.current?.(cached);
+        pushReroute(cached);
       }
     })();
 
@@ -236,7 +255,7 @@ export const useRideLocationPolling = ({
         _handleLocationsResponse(locations);
       },
       newRouteCoordinates => {
-        onRerouteRef.current?.(newRouteCoordinates); // ← was onReroute
+        pushReroute(newRouteCoordinates);
       },
       () => {
         closeStream(); // actually closes the dead EventSource, not just drops the reference
@@ -263,6 +282,21 @@ export const useRideLocationPolling = ({
       esRef.current = null;
     }
   }, []);
+
+  // ── LIVE LOCAL GPS WATCH (marker only) ────────────────────────────────────
+  const startLocalWatch = useCallback(() => {
+    if (watchIdRef.current != null) return; // already watching
+    watchIdRef.current = watchCurrentPosition(
+      position => setLocalPosition(position),
+      () => {}, // swallow errors — marker just won't move; upload path is unaffected
+    );
+  }, []);
+
+  const stopLocalWatch = useCallback(() => {
+    clearPositionWatch(watchIdRef.current);
+    watchIdRef.current = null;
+  }, []);
+
   // =========================================================================
   // ERROR HANDLER
   // =========================================================================
@@ -420,9 +454,10 @@ export const useRideLocationPolling = ({
 
     // Close SSE receive stream
     closeStream();
+    stopLocalWatch();
 
     // NOTE: intentionally do NOT reset lastSentPositionRef here.
-  }, [closeStream]);
+  }, [closeStream, stopLocalWatch]);
 
   const startPolling = useCallback(() => {
     if (isPollingRef.current) return; // ← was: intervalManager.current.isRunning()
@@ -435,6 +470,7 @@ export const useRideLocationPolling = ({
     isFirstPollRef.current = true;
 
     openStream();
+    startLocalWatch(); // ← starts the real-time self marker feed
     pollOnceRef.current();
 
     const jitter = Math.floor(Math.random() * 2000);
@@ -491,6 +527,12 @@ export const useRideLocationPolling = ({
       const isNowActive = nextState === 'active';
       const isNowBackground = nextState.match(/inactive|background/);
 
+      // Compliance: kill the GPS watch immediately on backgrounding, same
+      // reason getCurrentPosition() already refuses to run in background.
+      if (isNowBackground) {
+        stopLocalWatch();
+      }
+
       if (wasBackground && isNowActive) {
         if (
           enabledRef.current &&
@@ -498,7 +540,10 @@ export const useRideLocationPolling = ({
           !isPollingRef.current &&
           tokenRef.current
         ) {
-          startPolling();
+          startPolling(); // restarts SSE + watch + poll loop together
+        } else if (isPollingRef.current) {
+          // Polling was already active through the background — just resume the watch.
+          startLocalWatch();
         }
       }
 
@@ -506,7 +551,7 @@ export const useRideLocationPolling = ({
     });
 
     return () => subscription.remove();
-  }, [startPolling, stopPolling]);
+  }, [startPolling, stopPolling, startLocalWatch, stopLocalWatch]);
 
   // =========================================================================
   // CLEANUP
@@ -523,8 +568,18 @@ export const useRideLocationPolling = ({
         esRef.current.close();
         esRef.current = null;
       }
+      clearPositionWatch(watchIdRef.current);
+      watchIdRef.current = null;
     };
   }, []);
 
-  return {isPolling, error, retryCount, nextRetryDelay, isOffline};
+  return {
+    isPolling,
+    error,
+    retryCount,
+    nextRetryDelay,
+    isOffline,
+    localPosition,
+  };
+
 };

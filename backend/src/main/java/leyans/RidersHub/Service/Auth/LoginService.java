@@ -2,14 +2,14 @@
 package leyans.RidersHub.Service.Auth;
 
 import leyans.RidersHub.Config.JWT.JwtUtil;
-import leyans.RidersHub.DTO.Request.LoginRequest;
-import leyans.RidersHub.DTO.Request.RegisterRequest;
-import leyans.RidersHub.DTO.Response.LoginResponse;
-import leyans.RidersHub.DTO.Response.RegisterResponse;
-import leyans.RidersHub.Repository.RiderRepository;
-import leyans.RidersHub.Service.RiderService;
-import leyans.RidersHub.Utility.RiderUtil;
-import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.DTO.Request.Auth.LoginRequest;
+import leyans.RidersHub.DTO.Request.Auth.RegisterRequest;
+import leyans.RidersHub.DTO.Response.Auth.LoginResponse;
+import leyans.RidersHub.DTO.Response.Auth.RegisterResponse;
+import leyans.RidersHub.Repository.Rides.RiderRepository;
+import leyans.RidersHub.Service.Rides.RiderService;
+import leyans.RidersHub.Utility.Rides.RiderUtil;
+import leyans.RidersHub.model.Auth.Rider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +27,7 @@ public class LoginService {
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final long LOCKOUT_DURATION_MINUTES = 15;
 
-    @Value("${app.registration.max-users:50}")
+    @Value("${app.registration.max-users}")
     private int maxUsers;
 
     private final AuthenticationManager authenticationManager;

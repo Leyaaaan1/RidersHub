@@ -76,16 +76,18 @@ const StartedRide = ({route, navigation}) => {
         setCheckpointModalVisible(true);
       },
       mapRef,
-      // Live reroute from server → state → RoutePolygonSnapshot prop
-      newRouteCoordinates => {
+      ({history, latest}) => {
         try {
-          const parsed =
-            typeof newRouteCoordinates === 'string'
-              ? JSON.parse(newRouteCoordinates)
-              : newRouteCoordinates;
-          setRerouteRouteData(parsed);
-          // Also push to the live map immediately
-          mapRef.current?.applyReroute(newRouteCoordinates);
+          setRerouteHistory(history); // full array → feeds reroutePolygons prop
+
+          if (latest) {
+            const parsed =
+              typeof latest === 'string' ? JSON.parse(latest) : latest;
+            setRerouteRouteData(parsed); // newest → feeds reroutePolygon prop
+
+            // Push only the newest route to the live map
+            mapRef.current?.applyReroute(latest);
+          }
         } catch (e) {
         }
       },

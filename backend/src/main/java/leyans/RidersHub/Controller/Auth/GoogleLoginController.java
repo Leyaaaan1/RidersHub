@@ -2,9 +2,8 @@ package leyans.RidersHub.Controller.Auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import leyans.RidersHub.Config.Security.ClientIpResolver;
-import leyans.RidersHub.DTO.Response.LoginResponse;
+import leyans.RidersHub.DTO.Response.Auth.LoginResponse;
 import leyans.RidersHub.Service.Auth.GoogleLoginService;
-import leyans.RidersHub.Utility.Verifier.GoogleTokenVerifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

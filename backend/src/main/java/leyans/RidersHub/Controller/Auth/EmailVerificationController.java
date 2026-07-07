@@ -1,9 +1,9 @@
 
 package leyans.RidersHub.Controller.Auth;
 
-import leyans.RidersHub.Repository.RiderRepository;
+import leyans.RidersHub.Repository.Rides.RiderRepository;
 import leyans.RidersHub.Service.Auth.EmailVerificationService;
-import leyans.RidersHub.model.Rider;
+import leyans.RidersHub.model.Auth.Rider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

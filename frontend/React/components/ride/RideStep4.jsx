@@ -7,7 +7,7 @@ import {
   StatusBar,
   Alert,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -87,6 +87,13 @@ const RideStep4 = props => {
   const insets = useSafeAreaInsets();
   const [pendingJoinCount, setPendingJoinCount] = useState(0);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshStatus();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [generatedRidesId]),
+  );
+
   const {
     actionStatus,
     loading: actionStatusLoading,
@@ -98,6 +105,7 @@ const RideStep4 = props => {
     participants,
     isRideStarted,
   });
+
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [state, setState] = useState({
@@ -183,7 +191,12 @@ const RideStep4 = props => {
       .finally(() => patchState({rideNameImageLoading: false}));
   }, [locationName]);
 
-
+  const handleEditRide = () => {
+    navigation.navigate('CreateRide', {
+      editMode: true,
+      generatedRidesId,
+    });
+  };
 
   useEffect(() => {
     if (!generatedRidesId || hasFetchedRef.current) return;
@@ -329,6 +342,14 @@ const RideStep4 = props => {
           onPress={() => navigation.goBack()}>
           <FontAwesome name="arrow-left" size={18} color="#fff" />
         </TouchableOpacity>
+        {actionStatus.isOwner && !isRideStarted && (
+          <TouchableOpacity
+            onPress={handleEditRide}
+            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+            style={{marginRight: 12, padding: 10}}>
+            <FontAwesome name="pencil" size={18} color="#fff" />
+          </TouchableOpacity>
+        )}
         <View style={header.center}>
           <Text style={header.title} numberOfLines={1}>
             {locationName}

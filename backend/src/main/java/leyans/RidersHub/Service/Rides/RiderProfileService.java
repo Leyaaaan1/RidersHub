@@ -1,0 +1,122 @@
+package leyans.RidersHub.Service.Rides;
+
+import jakarta.transaction.Transactional;
+import leyans.RidersHub.DTO.Request.Rider.RiderProfileRequestDTO;
+import leyans.RidersHub.DTO.Response.Auth.RiderProfileResponseDTO;
+import leyans.RidersHub.Repository.Rides.RiderProfileRepository;
+import leyans.RidersHub.Repository.Rides.RiderTypeRepository;
+import leyans.RidersHub.Utility.Logger.AppLogger;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Auth.RiderProfile;
+import leyans.RidersHub.model.Rides.RiderType;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Transactional
+public class RiderProfileService {
+
+    private final RiderProfileRepository riderProfileRepository;
+    private final RiderTypeRepository riderTypeRepository;
+    private final RiderService riderService;
+
+    public RiderProfileService(RiderProfileRepository riderProfileRepository,
+                               RiderTypeRepository riderTypeRepository,
+                               RiderService riderService) {
+        this.riderProfileRepository = riderProfileRepository;
+        this.riderTypeRepository    = riderTypeRepository;
+        this.riderService           = riderService;
+    }
+
+    public RiderProfileResponseDTO getProfile(String username) {
+        RiderProfile profile = fetchProfileOrThrow(username);
+        return new RiderProfileResponseDTO(profile);
+    }
+
+
+
+    public RiderProfileResponseDTO getOrCreateProfile(String username) {
+        return riderProfileRepository
+                .findByRiderUsernameWithTypes(username)
+                .map(RiderProfileResponseDTO::new)
+                .orElseGet(() -> {
+                    Rider rider = riderService.getRiderByUsername(username);
+                    // Force initialization of rider.riderTypes if needed
+                    rider.getRiderTypes().size();
+
+                    RiderProfile blank = new RiderProfile();
+                    blank.setRider(rider);
+
+                    List<RiderType> registrationRiderTypes = rider.getRiderTypes();
+                    if (registrationRiderTypes != null && !registrationRiderTypes.isEmpty()) {
+                        blank.setRiderTypes(new ArrayList<>(registrationRiderTypes));
+                    }
+
+                    return new RiderProfileResponseDTO(riderProfileRepository.save(blank));
+                });
+    }
+
+
+    public RiderProfileResponseDTO getPublicProfile(String username) {
+        return riderProfileRepository
+                .findByRiderUsernameWithTypes(username)
+                .map(RiderProfileResponseDTO::new)
+                .orElseThrow(() -> {
+                    AppLogger.warn(this.getClass(), "Public profile not found for user", "username", username);
+                    return new IllegalArgumentException("Profile not found for user: " + username);
+                });
+    }
+
+    public RiderProfileResponseDTO updateProfile(String username, RiderProfileRequestDTO request) {
+        RiderProfile profile = fetchProfileOrThrow(username);
+        applyRequestToProfile(profile, request);
+        return new RiderProfileResponseDTO(riderProfileRepository.save(profile));
+    }
+
+    public RiderProfileResponseDTO addRiderType(String username, String riderTypeName) {
+        RiderProfile profile  = fetchProfileOrThrow(username);
+        RiderType    riderType = fetchRiderTypeOrThrow(riderTypeName);
+        profile.addRiderType(riderType);
+        return new RiderProfileResponseDTO(riderProfileRepository.save(profile));
+    }
+
+    public RiderProfileResponseDTO removeRiderType(String username, String riderTypeName) {
+        RiderProfile profile  = fetchProfileOrThrow(username);
+        RiderType    riderType = fetchRiderTypeOrThrow(riderTypeName);
+        profile.removeRiderType(riderType);
+        return new RiderProfileResponseDTO(riderProfileRepository.save(profile));
+    }
+
+    private void applyRequestToProfile(RiderProfile profile, RiderProfileRequestDTO request) {
+        if (request.getDisplayName()       != null) profile.setDisplayName(request.getDisplayName());
+        if (request.getBio()               != null) profile.setBio(request.getBio());
+        if (request.getProfilePictureUrl() != null) profile.setProfilePictureUrl(request.getProfilePictureUrl());
+
+        if (request.getRiderTypeNames() != null && !request.getRiderTypeNames().isEmpty()) {
+            List<RiderType> types = request.getRiderTypeNames().stream()
+                    .map(this::fetchRiderTypeOrThrow)
+                    .collect(Collectors.toList());
+            profile.setRiderTypes(types);
+        }
+    }
+
+    private RiderProfile fetchProfileOrThrow(String username) {
+        return riderProfileRepository
+                .findByRiderUsernameWithTypes(username)
+                .orElseThrow(() -> {
+                    AppLogger.warn(this.getClass(), "Profile not found for user", "username", username);
+                    return new IllegalArgumentException("Profile not found for user: " + username);
+                });
+    }
+
+    private RiderType fetchRiderTypeOrThrow(String typeName) {
+        RiderType type = riderTypeRepository.findByRiderType(typeName);
+        if (type == null) {
+            AppLogger.throwResourceNotFound(this.getClass(), "RiderType not found: " + typeName);
+        }
+        return type;
+    }
+}

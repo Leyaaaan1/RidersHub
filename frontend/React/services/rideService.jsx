@@ -84,17 +84,31 @@ export const getRideDetails = async (generatedRidesId, ) => {
   }
 };
 
-export const fetchRides = async (page = 0, size = 10) => {
-  const response = await api.get(`/riders/rides?page=${page}&size=${size}`);
-  if (!response.ok)
-    throw new Error(`Failed to fetch rides: ${response.status}`);
+export const updateRide = async (generatedRidesId, rideData) => {
+  const response = await api.put(`/riders/${generatedRidesId}`, rideData);
+  const responseText = await response.text();
+  if (!response.ok) throw new Error(`HTTP ${response.status}: ${responseText}`);
 
-  const data = await response.json();
+  // Invalidate stale caches for this ride — never let a cache failure
+  // break a successful update.
+  try {
+    await routeCache.clear(generatedRidesId);
+  } catch (e) {
+    console.warn('[updateRide] routeCache.clear failed (non-fatal):', e);
+  }
+  try {
+    await ridesListCache.clear?.();
+  } catch (e) {
+    console.warn('[updateRide] ridesListCache.clear failed (non-fatal):', e);
+  }
 
-  return data;
-};
-
-export const fetchMyRides = async (page = 0, size = 10) => {
+  if (!responseText || responseText.trim() === '') return {success: true};
+  try {
+    return JSON.parse(responseText);
+  } catch {
+    return {success: true, rawResponse: responseText};
+  }
+};export const fetchMyRides = async (page = 0, size = 10) => {
   // My-rides are user-specific so cached separately under mode 'my'
   const cached = await ridesListCache.get(page, size, 'my');
   if (cached) {

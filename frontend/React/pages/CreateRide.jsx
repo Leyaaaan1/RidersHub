@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, ActivityIndicator, Text } from 'react-native';
+import {View, ActivityIndicator, Text} from 'react-native';
 import RideStep1 from '../components/ride/RideStep1';
 import RideStep2 from '../components/ride/RideStep2';
 import RideStep3 from '../components/ride/RideStep3';
@@ -9,12 +9,24 @@ import {parseCoordinateSafely} from '../utilities/validator/CoordinateValidator'
 import {useAuth} from '../context/AuthContext';
 import LoadingScreen from '../commons/LoadingScreen';
 
-const CreateRide = ({}) => {
+const CreateRide = ({route}) => {
   const {token, username} = useAuth();
 
-  const ride = createRideUtils({token, username});
-  if (ride.loading) {
-    return <LoadingScreen context="creating_ride" />;
+  // ── NEW: read edit params from navigation ──────────────────────────────
+  const editMode = !!route?.params?.editMode;
+  const editGeneratedRidesId = route?.params?.generatedRidesId || null;
+
+  const ride = createRideUtils({
+    token,
+    username,
+    editMode,
+    generatedRidesId: editGeneratedRidesId,
+  });
+
+  if (ride.loading || ride.initialLoading) {
+    return (
+      <LoadingScreen context={editMode ? 'loading_ride' : 'creating_ride'} />
+    );
   }
 
   return (
@@ -22,6 +34,7 @@ const CreateRide = ({}) => {
       {ride.currentStep === 1 && (
         <RideStep1
           error={ride.error}
+          isEditMode={editMode}
           rideName={ride.rideName}
           setRideName={ride.setRideName}
           riderType={ride.riderType}
@@ -36,34 +49,38 @@ const CreateRide = ({}) => {
         />
       )}
 
-      {ride.currentStep === 2 && (
-        ride.locationLoading ? (
-          <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      {ride.currentStep === 2 &&
+        (ride.locationLoading ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <ActivityIndicator size="large" color="#8c2323" />
-            <Text style={{marginTop: 12, color: '#666'}}>Getting your location…</Text>
+            <Text style={{marginTop: 12, color: '#666'}}>
+              Getting your location…
+            </Text>
           </View>
         ) : (
-        <RideStep2
-          isSearching={ride.isSearching}
-          searchResults={ride.searchResults}
-          searchQuery={ride.searchQuery}
-          setSearchQuery={ride.setSearchQuery}
-          handleLocationSelect={ride.handleLocationSelect}
-          handleSearchInputChange={ride.handleSearchInputChange}
-          webViewRef={ride.webViewRef}
-          latitude={ride.latitude}
-          longitude={ride.longitude}
-          handleMessage={ride.handleMessage}
-          locationName={ride.locationName}
-          setLocationName={ride.setLocationName}
-          prevStep={ride.prevStep}
-          nextStep={ride.nextStep}
-        />
-        )
-      )}
+          <RideStep2
+            isEditMode={editMode}
+            isSearching={ride.isSearching}
+            searchResults={ride.searchResults}
+            searchQuery={ride.searchQuery}
+            setSearchQuery={ride.setSearchQuery}
+            handleLocationSelect={ride.handleLocationSelect}
+            handleSearchInputChange={ride.handleSearchInputChange}
+            webViewRef={ride.webViewRef}
+            latitude={ride.latitude}
+            longitude={ride.longitude}
+            handleMessage={ride.handleMessage}
+            locationName={ride.locationName}
+            setLocationName={ride.setLocationName}
+            prevStep={ride.prevStep}
+            nextStep={ride.nextStep}
+          />
+        ))}
 
       {ride.currentStep === 3 && (
         <RideStep3
+          isEditMode={editMode}
           stopPoints={ride.stopPoints}
           setStopPoints={ride.setStopPoints}
           mapMode={ride.mapMode}

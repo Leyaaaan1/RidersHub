@@ -35,9 +35,9 @@ const FORMATS = {
   story: {
     width: 1080,
     height: 1920,
-    mapSize: 640,
-    columnHeight: 460,
-    graphHeight: 300,
+    mapSize: 940, // ~65% of vertical space becomes the hero map
+    columnHeight: 420,
+    graphHeight: 280,
   },
   feed: {
     width: 1080,
@@ -287,7 +287,13 @@ const CardContent = ({data, cfg}) => {
   return (
     <View style={ss.inner}>
       {/* ── Header: rider · date ── */}
+      {/* ── Header: ride name is now the primary title ── */}
       <View style={ss.header}>
+        {ridesName ? (
+          <Text style={ss.rideNameHeader} numberOfLines={1}>
+            {ridesName}
+          </Text>
+        ) : null}
         {riderUsername || date ? (
           <View style={ss.headerPill}>
             <Text style={ss.headerText}>
@@ -301,7 +307,7 @@ const CardContent = ({data, cfg}) => {
         ) : null}
       </View>
 
-      {/* ── Centered focal point: route snapshot + ride name ── */}
+      {/* ── Centered focal point: route snapshot (hero element) ── */}
       <View style={ss.focalWrapper}>
         <View style={[ss.mapCard, {width: mapSize, height: mapSize}]}>
           {snapshotUrl ? (
@@ -316,19 +322,16 @@ const CardContent = ({data, cfg}) => {
             </View>
           )}
         </View>
-
-        {ridesName ? (
-          <Text style={ss.rideName} numberOfLines={2}>
-            {ridesName}
-          </Text>
-        ) : null}
       </View>
 
-      {/* ── Two-column row: stats (left) · graph (right) ── */}
-      {/* ── Two-column row: stats (left 10%) · graph (right 90%) ── */}
       <View style={[ss.columnsRow, {height: columnHeight}]}>
         <View style={ss.statsColumn}>
-          <StatRow label="Distance" value={dist.value} unit={dist.unit} accent />
+          <StatRow
+            label="Distance"
+            value={dist.value}
+            unit={dist.unit}
+            accent
+          />
           <View style={ss.statDivider} />
           <StatRow label="Duration" value={dur} />
           <View style={ss.statDivider} />
@@ -414,9 +417,9 @@ const RideShareCard = forwardRef(function RideShareCard(
                 lighter in the middle so the focal map/photo still reads through. */}
             <LinearGradient
               colors={[
-                'rgba(6,8,12,0.60)',
-                'rgba(6,8,12,0.30)',
-                'rgba(6,8,12,0.80)',
+                'rgba(6,8,12,0.75)',
+                'rgba(6,8,12,0.55)',
+                'rgba(6,8,12,0.88)',
               ]}
               locations={[0, 0.42, 1]}
               start={{x: 0, y: 0}}

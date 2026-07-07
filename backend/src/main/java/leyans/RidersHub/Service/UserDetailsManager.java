@@ -2,11 +2,11 @@ package leyans.RidersHub.Service;
 
 import leyans.RidersHub.Config.JWT.JwtUtil;
 import leyans.RidersHub.Repository.Auth.RefreshTokenRepository;
-import leyans.RidersHub.Repository.RiderProfileRepository;
+import leyans.RidersHub.Repository.Rides.RiderProfileRepository;
 import leyans.RidersHub.Service.Auth.TokenBlacklistService;
-import leyans.RidersHub.Utility.RiderUtil;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.Repository.RiderRepository;
+import leyans.RidersHub.Utility.Rides.RiderUtil;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.Repository.Rides.RiderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

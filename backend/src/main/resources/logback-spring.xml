@@ -79,7 +79,7 @@
         <appender-ref ref="SERVICE_FILE"/>
     </logger>
 
-    <logger name="leyans.RidersHub.Utility.AppLogger" level="INFO" additivity="true">
+    <logger name="leyans.RidersHub.Utility.Logger.AppLogger" level="INFO" additivity="true">
         <appender-ref ref="ASYNC_FILE"/>
     </logger>
 

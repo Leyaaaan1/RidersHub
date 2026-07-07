@@ -1,8 +1,8 @@
 package leyans.RidersHub.model.participant;
 
 import jakarta.persistence.*;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.Rides;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Rides.Rides;
 
 @Entity
 @Table(name = "ride_join_requests")

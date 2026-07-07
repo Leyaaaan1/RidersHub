@@ -2,8 +2,8 @@ package leyans.RidersHub.model.participant;
 
 
 import jakarta.persistence.*;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.StartedRide;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Rides.StartedRide;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;

@@ -2,8 +2,8 @@ package leyans.RidersHub.Repository.Auth;
 
 
 import jakarta.transaction.Transactional;
-import leyans.RidersHub.model.Rider;
-import leyans.RidersHub.model.auth.RefreshToken;
+import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Auth.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

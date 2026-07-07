@@ -37,9 +37,20 @@ export const cardStyles = StyleSheet.create({
   // ── Header ──────────────────────────────────────────────────────
   header: {
     alignItems: 'center',
-    paddingTop: 64,
+    paddingTop: 56,
     paddingHorizontal: 56,
-    marginBottom: 8,
+    marginBottom: 16,
+    gap: 14,
+  },
+  rideNameHeader: {
+    color: cardTokens.textPrimary,
+    fontWeight: '800',
+    fontSize: 52,
+    letterSpacing: -0.5,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: {width: 0, height: 3},
+    textShadowRadius: 12,
   },
   headerPill: {
     paddingHorizontal: 20,
@@ -64,8 +75,7 @@ export const cardStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 48,
-    gap: 28,
+    paddingHorizontal: 40,
   },
   mapCard: {
     overflow: 'hidden',
@@ -83,19 +93,6 @@ export const cardStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   mapPlaceholderText: {color: cardTokens.textMuted, fontSize: 22},
-
-  rideName: {
-    color: cardTokens.textPrimary,
-    fontWeight: '800',
-    fontSize: 64,
-    letterSpacing: -0.5,
-    lineHeight: 72,
-    textAlign: 'center',
-    maxWidth: 880,
-    textShadowColor: 'rgba(0,0,0,0.55)',
-    textShadowOffset: {width: 0, height: 3},
-    textShadowRadius: 12,
-  },
 
   // ── Two-column row: stats (left 10%) · graph (right 90%) ─────────────────
   // Unified container with 2px border, no background fill
@@ -191,20 +188,20 @@ export const cardStyles = StyleSheet.create({
 
   // ── Optional app logo badge (top-right) ─────────────────────────
   logoBadge: {
-      position: 'absolute',
-      top: 56,
-      right: 48,
-      width: 120,        // ← Change from 72
-      height: 120,       // ← Change from 72
-      borderRadius: 24,  // ← Increase proportionally (was 18)
-      backgroundColor: cardTokens.glassBg,
-      borderWidth: 2,    // ← Optional: thicker border for larger badge
-      borderColor: cardTokens.glassBorder,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 16,       // ← Increase padding (was 12)
-    },
-    logoImage: {width: '100%', height: '100%'},
+    position: 'absolute',
+    top: 56,
+    right: 48,
+    width: 120, // ← Change from 72
+    height: 120, // ← Change from 72
+    borderRadius: 24, // ← Increase proportionally (was 18)
+    backgroundColor: cardTokens.glassBg,
+    borderWidth: 2, // ← Optional: thicker border for larger badge
+    borderColor: cardTokens.glassBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16, // ← Increase padding (was 12)
+  },
+  logoImage: {width: '100%', height: '100%'},
 });
 
 // ════════════════════════════════════════════════════════════════════
