@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, useCallback} from 'react';
+import {useState, useEffect, useRef, useCallback, useContext} from 'react';
 import {Alert} from 'react-native';
 import {
   searchLocation,
@@ -22,6 +22,7 @@ import {DEFAULT_COORDS} from '../../utilities/route/map/appDefaults';
 import {useUserLocation} from '../../hooks/useUserLocation';
 import {handleWebViewMessage} from '../../utilities/mapUtils';
 import {routeCache} from '../../services/cache/routeCache';
+import {RideContext} from '../../context/RideContext';
 
 const DEFAULT_LAT = '7.0731';
 const DEFAULT_LNG = '125.6128';
@@ -30,7 +31,10 @@ const DEFAULT_LNG = '125.6128';
 const useCreateRide = ({
   editMode = false,
   generatedRidesId: editRideId = null,
+  username = null,
 } = {}) => {
+  const {notifyRideCreated} = useContext(RideContext);
+
   const webViewRef = useRef(null);
   const pendingRideIdRef = useRef(null);
 
@@ -433,6 +437,20 @@ const useCreateRide = ({
       setGeneratedRidesId(generatedId);
       pendingRideIdRef.current = generatedId;
 
+      if (!editMode) {
+        notifyRideCreated({
+          generatedRidesId: generatedId,
+          ridesName: rideData.ridesName,
+          locationName: rideData.locationName,
+          startingPointName: rideData.startingPointName,
+          endingPointName: rideData.endingPointName,
+          date: rideData.date,
+          riderType: rideData.riderType,
+          participants: rideData.participants,
+          username,
+        });
+      }
+
       setCurrentStep(4);
     } catch (err) {
       const errorMsg = resolveErrorMessage(
@@ -474,6 +492,7 @@ const useCreateRide = ({
     stopPoints,
     editMode,
     editRideId,
+    username,
   ]);
 
   return {

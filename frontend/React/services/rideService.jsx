@@ -55,10 +55,15 @@ export const getLocationImage = async (rideName) => {
   return response.json();
 };
 
-export const createRide = async (rideData) => {
+export const createRide = async rideData => {
   const response = await api.post('/riders/create', rideData);
   const responseText = await response.text();
   if (!response.ok) throw new Error(`HTTP ${response.status}: ${responseText}`);
+
+  try {
+    await ridesListCache.clearAll();
+  } catch (e) {}
+
   if (!responseText || responseText.trim() === '') return {success: true};
   try {
     return JSON.parse(responseText);
@@ -66,7 +71,6 @@ export const createRide = async (rideData) => {
     return {success: true, rawResponse: responseText};
   }
 };
-
 
 export const getRideDetails = async (generatedRidesId, ) => {
   const response = await api.get(`/riders/details/${generatedRidesId}`);
@@ -96,10 +100,8 @@ export const updateRide = async (generatedRidesId, rideData) => {
   } catch (e) {
   }
   try {
-    await ridesListCache.clear?.();
-  } catch (e) {
-  }
-
+    await ridesListCache.clearAll();
+  } catch (e) {}
   if (!responseText || responseText.trim() === '') return {success: true};
   try {
     return JSON.parse(responseText);
@@ -124,11 +126,16 @@ export const deleteRide = async generatedRidesId => {
 };
 
 
-export const fetchMyRides = async (page = 0, size = 10) => {
-  // My-rides are user-specific so cached separately under mode 'my'
-  const cached = await ridesListCache.get(page, size, 'my');
-  if (cached) {
-    return cached;
+export const fetchMyRides = async (
+  page = 0,
+  size = 10,
+  forceRefresh = false,
+) => {
+  if (!forceRefresh) {
+    const cached = await ridesListCache.get(page, size, 'my');
+    if (cached) {
+      return cached;
+    }
   }
 
   const response = await api.get(`/riders/feed?page=${page}&size=${size}`);
@@ -140,7 +147,6 @@ export const fetchMyRides = async (page = 0, size = 10) => {
 
   return data;
 };
-
 
 export const getAllRiderTypes = async () => {
   try {

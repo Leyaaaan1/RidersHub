@@ -30,6 +30,22 @@ export const RideProvider = ({children, token}) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const pollingIntervalRef = useRef(null);
   const isPollingRef = useRef(false);
+  const [deletedRideIds, setDeletedRideIds] = useState(() => new Set());
+  const [newlyCreatedRides, setNewlyCreatedRides] = useState([]);
+
+
+  const notifyRideCreated = useCallback(ride => {
+    if (!ride?.generatedRidesId) return;
+    setNewlyCreatedRides(prev => [
+      ride,
+      ...prev.filter(r => r.generatedRidesId !== ride.generatedRidesId),
+    ]);
+  }, []);
+
+  const notifyRideDeleted = useCallback(rideId => {
+    if (rideId == null) return;
+    setDeletedRideIds(prev => new Set(prev).add(String(rideId)));
+  }, []);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Load cached ride from AsyncStorage on first mount ONLY when a session
@@ -88,12 +104,16 @@ export const RideProvider = ({children, token}) => {
       return safeNext;
     });
   }, []);
+
+
+  const isFetchingActiveRideRef = useRef(false); // re-entrancy guard that doesn't force a new callback identity
+
   const fetchActiveRide = useCallback(
     async generatedRidesId => {
-      if (isRefreshing) return;
+      if (isFetchingActiveRideRef.current) return;
+      isFetchingActiveRideRef.current = true;
+      setIsRefreshing(true);
       try {
-        setIsRefreshing(true);
-        // Pass id through to getActiveRide so it can hit the participant endpoint
         const ride = await Promise.race([
           getActiveRide(generatedRidesId),
           new Promise((_, reject) =>
@@ -104,8 +124,7 @@ export const RideProvider = ({children, token}) => {
       } catch (err) {
         const errorMsg = err?.message || String(err);
         if (errorMsg === 'NOT_FOUND' || errorMsg.includes('404')) {
-          // No active ride on the server — clear storage too
-          setActiveRide(null); // clears cache via the wrapper
+          setActiveRide(null);
           return;
         }
 
@@ -124,10 +143,11 @@ export const RideProvider = ({children, token}) => {
           setActiveRide(null);
         }
       } finally {
+        isFetchingActiveRideRef.current = false;
         setIsRefreshing(false);
       }
     },
-    [activeRide, isRefreshing, setActiveRide],
+    [setActiveRide], // setActiveRide is itself permanently stable (empty deps), so this is now permanently stable too
   );
 
   const startPolling = useCallback(() => {
@@ -195,6 +215,10 @@ export const RideProvider = ({children, token}) => {
         isRefreshing,
         startPolling,
         stopPolling,
+        deletedRideIds,
+        notifyRideDeleted,
+        newlyCreatedRides,
+        notifyRideCreated,
       }}>
       {children}
     </RideContext.Provider>

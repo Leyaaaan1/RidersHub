@@ -1,5 +1,5 @@
 
-import React, {useState, useEffect, useCallback, useContext} from 'react';
+import React, {useState, useEffect, useCallback, useContext, useRef} from 'react';
 import {
   View,
   Text,
@@ -45,7 +45,7 @@ const ParticipantList = ({
   });
 
   const {activeRide, updateRideParticipants} = useContext(RideContext);
-
+  const pendingApprovedRef = useRef(new Set());
   const participants = state.participants.length > 0
     ? state.participants
     : (activeRide?.participants || propParticipants || []);
@@ -90,12 +90,28 @@ const ParticipantList = ({
     if (!generatedRidesId) return;
     try {
       const rideDetails = await getRideDetails(generatedRidesId);
-      const freshParticipants = rideDetails.participants || [];
-      setState(prev => ({...prev, participants: freshParticipants}));
+      const fetched = rideDetails.participants || [];
 
-      updateRideParticipants(freshParticipants);
-    } catch (err) {
-    }
+      const fetchedNames = new Set(
+        fetched.map(p => (typeof p === 'object' ? p.username : p)),
+      );
+
+      // Keep anyone we optimistically approved that the server hasn't
+      // caught up on yet; drop them once they actually appear in the
+      // fresh list (avoids duplicates).
+      const stillPending = [];
+      pendingApprovedRef.current.forEach(name => {
+        if (fetchedNames.has(name)) {
+          pendingApprovedRef.current.delete(name);
+        } else {
+          stillPending.push(name);
+        }
+      });
+
+      const merged = [...fetched, ...stillPending];
+      setState(prev => ({...prev, participants: merged}));
+      updateRideParticipants(merged);
+    } catch (err) {}
   }, [generatedRidesId, updateRideParticipants]);
 
   const loadQrCode = useCallback(async () => {
@@ -148,8 +164,21 @@ const ParticipantList = ({
 
       const approvedUser = state.joinRequests.find(r => r.joinId === joinId);
       if (approvedUser) {
-        // ✅ CHANGED: Refresh participants instead of manually updating
-        await refreshParticipants();
+        pendingApprovedRef.current.add(approvedUser.username);
+        setState(prev => {
+          const already = prev.participants.some(
+            p =>
+              (typeof p === 'object' ? p.username : p) ===
+              approvedUser.username,
+          );
+          return already
+            ? prev
+            : {
+                ...prev,
+                participants: [...prev.participants, approvedUser.username],
+              };
+        });
+        refreshParticipants(); // reconcile in background, no need to await
       }
 
       setState(prev => ({
@@ -168,7 +197,6 @@ const ParticipantList = ({
       'Approve All',
       `Approve all ${pending.length} pending requests?`,
       [
-        {text: 'Cancel', style: 'cancel'},
         {
           text: 'Approve All',
           onPress: async () => {
@@ -178,10 +206,24 @@ const ParticipantList = ({
               );
               Alert.alert('Success', 'All requests approved');
 
-              // ✅ Refresh participants from backend
-              await refreshParticipants();
+              setState(prev => {
+                const existingNames = new Set(
+                  prev.participants.map(p =>
+                    typeof p === 'object' ? p.username : p,
+                  ),
+                );
+                const toAdd = pending
+                  .map(r => r.username)
+                  .filter(name => !existingNames.has(name));
+                toAdd.forEach(name => pendingApprovedRef.current.add(name));
+                return {
+                  ...prev,
+                  participants: [...prev.participants, ...toAdd],
+                };
+              });
 
-              // ✅ Remove approved requests from local state
+              refreshParticipants();
+
               setState(prev => ({
                 ...prev,
                 joinRequests: prev.joinRequests.filter(
@@ -196,6 +238,7 @@ const ParticipantList = ({
             }
           },
         },
+
       ],
     );
   };
@@ -232,25 +275,24 @@ const ParticipantList = ({
     );
   };
 
-  // ✅ NEW: Initialize participants on modal open
   useEffect(() => {
     if (!visible) return;
 
-    // Initialize participants from context, props, or fetch fresh
+    // Paint instantly from whatever we already have (fast, no flash of empty state)...
     if (activeRide?.participants && activeRide.participants.length > 0) {
       setState(prev => ({...prev, participants: activeRide.participants}));
     } else if (propParticipants && propParticipants.length > 0) {
       setState(prev => ({...prev, participants: propParticipants}));
-    } else {
-      // Fetch fresh if neither available
-      refreshParticipants();
     }
+    // ...but always follow up with a real fetch, since prop/context data
+    // is a frozen snapshot from whenever this screen was first opened.
+    refreshParticipants();
 
     if (state.activeTab === 'rides') loadMyRides();
     else if (state.activeTab === 'requests' && generatedRidesId)
       loadJoinRequests();
     if (generatedRidesId) loadQrCode();
-  }, [visible, state.activeTab, generatedRidesId]);
+  }, [visible, state.activeTab, generatedRidesId]);;
 
   const getStatusStyle = status => {
     switch (status) {

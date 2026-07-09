@@ -20,7 +20,6 @@ import {
   Alert,
 } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { getActiveRide } from '../services/startService';
 import { getRideDetails } from '../services/rideService';
 import ScannerHeader from './utilities/ScannerHeader';
 import layout from '../styles/base/layout';
@@ -140,17 +139,27 @@ const StatusBadge = ({ status }) => {
 
 // ─── RiderPage ────────────────────────────────────────────────────────────────
 const RiderPage = ({ navigation }) => {
-  const { username, ready, logout } = useAuth();
+  const {username, ready, logout} = useAuth();
 
   const {
-    activeRide: contextActiveRide,
+    activeRide,
+    fetchActiveRide,
+    isRefreshing: activeRideLoading,
     clearActiveRide: clearContextActiveRide,
+    startPolling, // ← add
+    stopPolling, // ← add
   } = useContext(RideContext);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!ready) return;
+      startPolling(); // fetches immediately + every 10s while focused
+      return () => stopPolling(); // stop when screen loses focus
+    }, [ready, startPolling, stopPolling]),
+  );
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
-  const [fetchedActiveRide, setFetchedActiveRide] = useState(null);
-  const [activeRideLoading, setActiveRideLoading] = useState(false);
   const [profileRefreshing, setProfileRefreshing] = useState(false);
   const [rideCode, setRideCode] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
@@ -161,7 +170,7 @@ const RiderPage = ({ navigation }) => {
   const scannerRef = useRef(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
-  const displayActiveRide = fetchedActiveRide ?? contextActiveRide;
+  const displayActiveRide = activeRide;
   const insets = useSafeAreaInsets();
   const prevUsernameRef = useRef(null);
 
@@ -175,11 +184,10 @@ const RiderPage = ({ navigation }) => {
 
     if (didChange || didLogout) {
       clearContextActiveRide();
-      setFetchedActiveRide(null);  // ← add
-      setProfile(null);            // ← add
-      setRideCode('');             // ← add
-      setSearchError('');          // ← add
-      ridesListRefRef.current?.reset?.(); // ← add (if RidesList exposes reset)
+      setProfile(null);
+      setRideCode('');
+      setSearchError('');
+      ridesListRefRef.current?.reset?.();
     }
 
     // only update ref on real username, so logout (null) is still
@@ -188,29 +196,7 @@ const RiderPage = ({ navigation }) => {
       prevUsernameRef.current = username;
     }
   }, [username, clearContextActiveRide]);
-  ;
 
-  // ── Fetch active ride ─────────────────────────────────────────────────────
-  const fetchActiveRide = useCallback(async () => {
-    try {
-      setActiveRideLoading(true);
-      const result = await getActiveRide();
-      const hasRide = result && (result.generatedRidesId || result.ridesName);
-      setFetchedActiveRide(hasRide ? result : null);
-    } catch (err) {
-      const msg = err?.message ?? '';
-      if (msg === 'NOT_FOUND') {
-        setFetchedActiveRide(null);
-        clearContextActiveRide();
-        return;
-      }
-      if (msg === 'SERVER_ERROR' || msg.startsWith('5')) {
-        return;
-      }
-    } finally {
-      setActiveRideLoading(false);
-    }
-  }, [clearContextActiveRide]);
 
   // ── Fetch profile ─────────────────────────────────────────────────────────
   const fetchProfile = useCallback(async () => {
@@ -226,33 +212,34 @@ const RiderPage = ({ navigation }) => {
     }
   }, []);
 
-// AFTER
+  // AFTER
   useEffect(() => {
-    if (!ready) { return; }
+    if (!ready) {
+      return;
+    }
     fetchProfile();
   }, [ready, fetchProfile]);
 
   useFocusEffect(
     useCallback(() => {
-      if (!ready) { return; }
+      if (!ready) {
+        return;
+      }
       fetchActiveRide();
     }, [ready, fetchActiveRide]),
   );
-
-
 
   const rideStatus = useMemo(
     () => getRideStatus(displayActiveRide),
     [displayActiveRide],
   );
 
-
   if (!ready) {
     return (
       <View
         style={[
           layout.screen,
-          { alignItems: 'center', justifyContent: 'center' },
+          {alignItems: 'center', justifyContent: 'center'},
         ]}>
         <ActivityIndicator color={colors.primary} size="large" />
       </View>
@@ -269,10 +256,12 @@ const RiderPage = ({ navigation }) => {
       Alert.alert('Error', err.message || 'Failed to open ride');
     }
   };
-  const handleCreateRide = () => navigation.navigate('CreateRide', { username });
+  const handleCreateRide = () => navigation.navigate('CreateRide', {username});
 
   const handleOpenActiveRide = () => {
-    if (!displayActiveRide) { return; }
+    if (!displayActiveRide) {
+      return;
+    }
     navigation.navigate('StartedRide', {
       activeRide: displayActiveRide,
       currentUsername: username,
@@ -280,7 +269,7 @@ const RiderPage = ({ navigation }) => {
   };
 
   const handleOpenProfile = () =>
-    navigation.navigate('RiderProfile', { username });
+    navigation.navigate('RiderProfile', {username});
 
   // Uses getRideDetails (same as SearchHeader) — fetches full ride then navigates
   const handleSearchRide = async () => {
@@ -434,6 +423,7 @@ const RiderPage = ({ navigation }) => {
         mode="my"
         userId={username}
         onRideSelect={handleRideSelect}
+        onExtraRefresh={fetchActiveRide}
         style={{flex: 1}}
         contentContainerStyle={{paddingHorizontal: 15, paddingBottom: 40}}
         ListHeaderComponent={
@@ -542,7 +532,6 @@ const RiderPage = ({ navigation }) => {
             </View>
 
             <View style={s.ridesSection}>
-
               {activeRideLoading && !displayActiveRide ? (
                 <View style={s.rideCardSkeleton}>
                   <ActivityIndicator color={colors.primary} size="small" />
