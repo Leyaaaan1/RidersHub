@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {
   getRideDetails,
   getLocationImage,
+  deleteRide,
 } from '../../services/rideService';
 import ParticipantList from './modal/ParticipantList';
 import {startService} from '../../services/startService';
@@ -198,6 +198,54 @@ const RideStep4 = props => {
     });
   };
 
+  const handleDeleteRide = () => {
+    Alert.alert(
+      'Delete Ride',
+      'This will permanently delete the ride, invites, and join requests. This cannot be undone. Are you sure?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteRide(generatedRidesId);
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert('Error', error.message || 'Failed to delete ride.');
+            }
+          },
+        },
+      ],
+    );
+  };
+  const handleLeaveRide = () => {
+    Alert.alert(
+      'Leave Ride',
+      'Are you sure you want to leave this ride?',
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Leave Ride',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await startService.leaveRide(generatedRidesId);
+              await refreshStatus();
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert(
+                'Error',
+                error.message || 'Failed to leave the ride. Please try again.',
+              );
+            }
+          },
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   useEffect(() => {
     if (!generatedRidesId || hasFetchedRef.current) return;
     hasFetchedRef.current = true;
@@ -335,28 +383,34 @@ const RideStep4 = props => {
         barStyle="light-content"
         translucent={false}
       />
-      {/* Header */}
       <View style={[header.bar, {paddingTop: insets.top}]}>
-        <TouchableOpacity
-          style={header.backButton}
-          onPress={() => navigation.goBack()}>
-          <FontAwesome name="arrow-left" size={18} color="#fff" />
-        </TouchableOpacity>
-        {actionStatus.isOwner && !isRideStarted && (
+        <View
+          style={{
+            width: 60,
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
           <TouchableOpacity
-            onPress={handleEditRide}
-            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-            style={{marginRight: 12, padding: 10}}>
-            <FontAwesome name="pencil" size={18} color="#fff" />
+            style={header.backButton}
+            onPress={() => navigation.goBack()}>
+            <FontAwesome name="arrow-left" size={18} color="#fff" />
           </TouchableOpacity>
-        )}
+        </View>
+
         <View style={header.center}>
           <Text style={header.title} numberOfLines={1}>
             {locationName}
           </Text>
           <Text style={header.subtitle}>ID: {generatedRidesId}</Text>
         </View>
-        <View style={header.right}>
+
+        <View
+          style={{
+            width: 60,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}>
           <RideActionButton
             isOwner={actionStatus.isOwner}
             hasJoined={actionStatus.hasJoined}
@@ -369,6 +423,7 @@ const RideStep4 = props => {
           />
         </View>
       </View>
+
       <View style={rideStep4Styles.fadeContainer}>
         {/* Map */}
         <View style={mapStyles.wrapper}>
@@ -404,6 +459,39 @@ const RideStep4 = props => {
           )}
         </View>
 
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 24,
+          }}>
+          {actionStatus.isOwner && !isRideStarted && (
+            <TouchableOpacity
+              onPress={handleEditRide}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              style={{padding: 10}}>
+              <FontAwesome name="pencil" size={18} color="#fff" />
+            </TouchableOpacity>
+          )}
+          {actionStatus.isOwner && !isRideStarted && (
+            <TouchableOpacity
+              onPress={handleDeleteRide}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              style={{padding: 10}}>
+              <FontAwesome name="trash" size={18} color="#fff" />
+            </TouchableOpacity>
+          )}
+          {(actionStatus.isOwner || actionStatus.hasJoined) &&
+            !isRideStarted && (
+              <TouchableOpacity
+                onPress={handleLeaveRide}
+                hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+                style={{padding: 10}}>
+                <FontAwesome name="sign-out" size={18} color="#fff" />
+              </TouchableOpacity>
+            )}
+        </View>
         <ScrollView
           style={rideStep4Styles.scrollContent}
           showsVerticalScrollIndicator={false}>

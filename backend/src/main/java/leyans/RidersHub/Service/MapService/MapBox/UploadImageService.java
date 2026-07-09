@@ -33,10 +33,8 @@ public class UploadImageService {
 
                 return uploadResult.get("secure_url").toString();
             } else {
-                System.err.println("Mapbox API error: " + imageResponse.getStatusCode());
             }
         } catch (Exception e) {
-            System.err.println("Image upload failed: " + e.getMessage());
             e.printStackTrace(); // Add this for more detailed error information
         }
         return null;

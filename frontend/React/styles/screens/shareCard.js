@@ -70,6 +70,22 @@ export const cardStyles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  rankBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,215,0,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.4)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 6,
+  },
+  rankBadgeText: {
+    color: '#FFD700',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
   // ── Centered focal point: map + ride name ────────────────────────
   focalWrapper: {
     flex: 1,

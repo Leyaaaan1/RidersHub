@@ -2,6 +2,8 @@ package leyans.RidersHub.model.Rides;
 
 import jakarta.persistence.*;
 import leyans.RidersHub.model.Auth.Rider;
+import leyans.RidersHub.model.Interaction.InviteRequest;
+import leyans.RidersHub.model.Interaction.JoinRequest;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
@@ -93,6 +95,15 @@ public class Rides {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "generatedRidesId", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<JoinRequest> joinRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "rides", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<InviteRequest> inviteRequests = new ArrayList<>();
+
+    @OneToOne(mappedBy = "ride", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private StartedRide startedRide;
 
     public Rides() {
     }

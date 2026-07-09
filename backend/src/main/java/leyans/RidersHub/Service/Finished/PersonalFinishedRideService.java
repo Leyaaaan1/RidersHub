@@ -53,9 +53,23 @@ public class PersonalFinishedRideService {
 
         @Transactional(readOnly = true)
         public PersonalFinishedRideDTO getPersonalSummaryDTO(String generatedRidesId) {
+
                 PersonalFinishedRide personalFinishedRide = getPersonalSummary(generatedRidesId);
                 Rides ride = personalFinishedRide.getRide();
                 String riderUsername = personalFinishedRide.getRider().getUsername();
+
+                String ridesName = ride != null ? ride.getRidesName() : personalFinishedRide.getRidesName();
+                List<StopPointDTO> stopPointDTOs = ride != null && ride.getStopPoints() != null
+                        ? ride.getStopPoints().stream()
+                        .map(sp -> new StopPointDTO(
+                                sp.getStopName(),
+                                sp.getStopLocation().getX(),
+                                sp.getStopLocation().getY()))
+                        .toList()
+                        : new ArrayList<>();
+                String startingPointName = ride != null ? ride.getStartingPointName() : null;
+                String endingPointName = ride != null ? ride.getEndingPointName() : null;
+                Integer distance = ride != null ? ride.getDistance() : null;
 
                 // Checkpoint arrivals filtered to this rider only
                 List<CheckpointArrivalResponse> checkpointArrivals = rideCheckpointArrivalRepository
@@ -75,15 +89,7 @@ public class PersonalFinishedRideService {
 
                 List<SpeedSegmentDTO> speedSegments = buildSpeedSegments(rawArrivals, ride);
 
-                // Stop points
-                List<StopPointDTO> stopPointDTOs = ride.getStopPoints() != null
-                        ? ride.getStopPoints().stream()
-                        .map(sp -> new StopPointDTO(
-                                sp.getStopName(),
-                                sp.getStopLocation().getX(),
-                                sp.getStopLocation().getY()))
-                        .toList()
-                        : new ArrayList<>();
+
 
                 // and stored on the entity — read it directly instead of recomputing.
                 Double personalAverageSpeedKph = personalFinishedRide.getAverageSpeedKph();
@@ -91,7 +97,7 @@ public class PersonalFinishedRideService {
                 PersonalFinishedRideDTO dto = new PersonalFinishedRideDTO(
                         personalFinishedRide.getId(),
                         riderUsername,
-                        ride.getRidesName(),
+                        ridesName,
                         generatedRidesId,
                         personalFinishedRide.getStartTime(),
                         personalFinishedRide.getEndTime(),
@@ -99,9 +105,9 @@ public class PersonalFinishedRideService {
                         personalFinishedRide.getCreatedAt(),
                         checkpointArrivals,
                         stopPointDTOs,
-                        ride.getStartingPointName(),
-                        ride.getEndingPointName(),
-                        ride.getDistance(), // NEW field — distanceMeters
+                        startingPointName,
+                        endingPointName,
+                        distance,
                         personalAverageSpeedKph,
                         speedSegments);
 
@@ -166,7 +172,7 @@ public class PersonalFinishedRideService {
                         ride.getDistance(), durationMinutes);
 
                 PersonalFinishedRide record = new PersonalFinishedRide(
-                        ride, rider, startTime, endTime, durationMinutes, null, averageSpeedKph);
+                        ride, rider, startTime, endTime, durationMinutes, null, averageSpeedKph,   ride.getRidesName(), ride.getLocationName());
 
                 personalFinishedRideRepository.save(record);
 

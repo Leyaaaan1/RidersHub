@@ -40,6 +40,8 @@ CREATE TABLE public.finished_rides (
                                        id SERIAL PRIMARY KEY,
                                        generated_rides_id VARCHAR(12) NOT NULL REFERENCES public.event_rides(generated_rides_id) ON DELETE CASCADE,
                                        finisher_username VARCHAR(255) NOT NULL REFERENCES public.rider(username) ON DELETE CASCADE,
+                                       ride_name VARCHAR(255),
+                                       location_name VARCHAR(255),
                                        start_time TIMESTAMP NOT NULL,
                                        end_time TIMESTAMP NOT NULL,
                                        duration_minutes INTEGER,
@@ -59,6 +61,8 @@ CREATE TABLE public.finished_ride_participants (
 CREATE TABLE public.personal_finished_rides (
                                                 id SERIAL PRIMARY KEY,
                                                 generated_rides_id VARCHAR(12) NOT NULL REFERENCES public.event_rides(generated_rides_id) ON DELETE CASCADE,
+                                                ride_name VARCHAR(255),
+                                                location_name VARCHAR(255),
                                                 rider_username VARCHAR(255) NOT NULL REFERENCES public.rider(username) ON DELETE CASCADE,
                                                 start_time TIMESTAMP NOT NULL,
                                                 end_time TIMESTAMP NOT NULL,

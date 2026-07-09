@@ -134,7 +134,6 @@ public class RideJoinRequestService {
                     .collect(Collectors.toList());
         }
         catch (Exception e) {
-            System.err.println("Error finding join requests: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to retrieve join requests", e);
         }

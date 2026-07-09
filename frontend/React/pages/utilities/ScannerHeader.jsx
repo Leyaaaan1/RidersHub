@@ -186,7 +186,6 @@ const ScannerHeader = forwardRef(({navigation, cardMode}, ref) => {
           navigation.navigate('RideStep4', params);
         }
       } catch (scanError) {
-        console.error('QR Scan Error:', scanError);
         Alert.alert(
           'Scan Error',
           'Could not decode QR code: ' + (scanError.message || 'Unknown error'),

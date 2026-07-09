@@ -97,7 +97,6 @@ const normalizeRouteCoords = (raw, sourceLabel = 'route') => {
       .filter(Boolean);
   }
 
-  if (__DEV__) {console.warn(`[RoutePolygonSnapshot] ${sourceLabel} — no usable coords found`);}
   return [];
 };
 
@@ -148,7 +147,6 @@ const RoutePolygonSnapshot = forwardRef(
       startingPoint,
       endingPoint,
       stopPoints = [],
-      appName = 'LAAGAN',
       username = '',
     },
     ref,
@@ -162,16 +160,7 @@ const RoutePolygonSnapshot = forwardRef(
       },
     );
 
-    if (__DEV__ && reroutePoints.length === 0 && fixedPoints.length === 0) {
-      console.warn(
-        '[RoutePolygonSnapshot] Both polygons normalized to 0 points.',
-        {
-          reroutePolygon,
-          fixedRoutePolygon,
-          routeCoordinates,
-        },
-      );
-    }
+
 
     // ── Pre-filter each group independently ─────────────────────────────────
     const isValidPt = p =>

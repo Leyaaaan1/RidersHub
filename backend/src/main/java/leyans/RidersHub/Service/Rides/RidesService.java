@@ -399,4 +399,18 @@ public class RidesService {
                 return ridesUtil.mapToDetailDTO(savedRide);
         }
 
+
+        @Transactional
+        public void deleteRide(String generatedRidesId, String requesterUsername) {
+                Rides existingRide = ridesUtil.findRideEntityByGeneratedId(generatedRidesId);
+
+                if (existingRide.getUsername() == null
+                        || !existingRide.getUsername().getUsername().equals(requesterUsername)) {
+                        throw new IllegalStateException("You are not allowed to delete this ride");
+                }
+
+                ridesUtil.deleteRide(existingRide);
+        }
+
+
 }

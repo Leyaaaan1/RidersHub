@@ -29,6 +29,7 @@ import {
   getPersonalSummary,
 } from '../../../services/startService';
 import checkpointModalStyles from '../../../styles/screens/checkpointModalStyles';
+import {useAuth} from '../../../context/AuthContext';
 
 const safe = val => (Array.isArray(val) ? val : []);
 
@@ -68,8 +69,26 @@ const RideDetailView = ({ route, navigation }) => {
 
   const [snapshotUrl, setSnapshotUrl] = useState(null);
 
+  const {user} = useAuth(); // adjust to however useAuth exposes the username
+
   const NOT_YET_AVAILABLE_MESSAGE =
     "You haven't finished this ride yet — your detail view will appear once you do.";
+
+  const rankParticipants = list => {
+    return [...list]
+      .sort((a, b) => {
+        const aComplete = a.status ? a.status === 'COMPLETED' : false;
+        const bComplete = b.status ? b.status === 'COMPLETED' : false;
+        if (aComplete !== bComplete) return aComplete ? -1 : 1;
+        if (aComplete && bComplete) {
+          if (!a.arrivalTime) return 1;
+          if (!b.arrivalTime) return -1;
+          return new Date(a.arrivalTime) - new Date(b.arrivalTime);
+        }
+        return (b.checkpointsReached ?? 0) - (a.checkpointsReached ?? 0);
+      })
+      .map((p, idx) => ({...p, rank: idx + 1}));
+  };
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchDetail = useCallback(
@@ -213,6 +232,13 @@ const RideDetailView = ({ route, navigation }) => {
   const finishedArrivals = safe(finishedData?.checkpointArrivals);
   const finishedStopPoints = safe(finishedData?.stopPoints);
   const finishedParticipantProgress = safe(finishedData?.participantProgress);
+
+  const myRank = finishedParticipantProgress.length
+    ? rankParticipants(finishedParticipantProgress).find(
+        p => p.username === user?.username,
+      )?.rank ?? null
+    : null;
+
   const enrichedParticipants = finishedParticipantProgress.length
     ? finishedParticipantProgress
     : enrichParticipants(
@@ -231,6 +257,7 @@ const RideDetailView = ({ route, navigation }) => {
   const shareData = {
     ...rideDetail, // All DTO fields from getPersonalSummary
     snapshotUrl: snapshotUrl ?? null, // Only add the snapshot separately
+    rank: myRank,
   };
 
   return (

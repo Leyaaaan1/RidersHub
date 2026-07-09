@@ -58,7 +58,6 @@ public class InviteRequestService {
         String cloudinaryUrl = uploadImageService.uploadQrCodeBase64(qrCodeBase64, "ride_invites");
         inviteLink.setQr(cloudinaryUrl);
 
-        System.out.println("Invite token: " + inviteLink.getInviteToken());
 
 
         return inviteRequestRepository.save(inviteLink);

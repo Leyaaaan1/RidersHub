@@ -22,10 +22,6 @@ public class RouteController {
     @PostMapping("/preview")
     public ResponseEntity<JsonNode> getRoutePreview(@RequestBody RouteRequestDTO routeRequest) {
         try {
-            System.out.println("=== ROUTE PREVIEW REQUEST ===");
-            System.out.println("Start: " + routeRequest.getStartLat() + ", " + routeRequest.getStartLng());
-            System.out.println("End: " + routeRequest.getEndLat() + ", " + routeRequest.getEndLng());
-            System.out.println("Stop points: " + (routeRequest.getStopPoints() != null ? routeRequest.getStopPoints().size() : 0));
 
             // Validate coordinates
             if (routeRequest.getStartLat() == 0 || routeRequest.getStartLng() == 0 ||
@@ -46,14 +42,11 @@ public class RouteController {
             if (routeGeoJSON != null && !routeGeoJSON.trim().isEmpty()) {
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode geoJsonNode = mapper.readTree(routeGeoJSON);
-                System.out.println("Returning full GeoJSON route data");
                 return ResponseEntity.ok(geoJsonNode);
             } else {
-                System.out.println("No route data received from DirectionsService");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
         } catch (Exception e) {
-            System.err.println("Error in getRoutePreview: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
