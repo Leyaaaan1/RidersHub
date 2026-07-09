@@ -28,7 +28,7 @@ public interface RideStatusRepository extends JpaRepository<RideStatusEntry, Int
             ORDER BY e.changedAt DESC
             """)
     Optional<RideStatusEntry> findCurrentRideStatus(@Param("rideId") String rideId);
-
+    void deleteByGeneratedRidesId(String generatedRidesId);
     /**
      * Returns the current per-rider status entry for one participant
      * (scope = RIDER, active = true).

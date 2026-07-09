@@ -81,7 +81,7 @@ public class FinishedRideUtility {
                         durationMinutes,
                         participants,
                         null,
-                        averageSpeedKph);
+                        averageSpeedKph,  ride.getRidesName(), ride.getLocationName());
 
                 FinishedRide saved = finishedRideRepository.save(finishedRide);
 

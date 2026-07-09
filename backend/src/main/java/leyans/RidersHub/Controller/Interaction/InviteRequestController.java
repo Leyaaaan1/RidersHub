@@ -27,7 +27,6 @@ public class InviteRequestController {
             String qrUrl = participantUtil.getQrCodeUrlByRideId(generatedRidesId);
             return ResponseEntity.ok(qrUrl);
         } catch (Exception e) {
-            System.err.println("Error getting QR URL for ride " + generatedRidesId + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error");
         }
@@ -39,7 +38,6 @@ public class InviteRequestController {
             String qrBase64 = participantUtil.getQrCodeBase64ByRideId(generatedRidesId);
             return ResponseEntity.ok(qrBase64);
         } catch (Exception e) {
-            System.err.println("Error getting QR base64 for ride " + generatedRidesId + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body("Internal server error");
         }
@@ -58,7 +56,6 @@ public class InviteRequestController {
             InviteDetailDTO detailDto = participantUtil.convertInviteToDetailDto(invite);
             return ResponseEntity.ok(detailDto);
         } catch (Exception e) {
-            System.err.println("Error getting invite details for token " + inviteToken + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(404).body("Invite not found or expired");
         }

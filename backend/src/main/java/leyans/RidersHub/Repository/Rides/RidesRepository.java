@@ -15,6 +15,7 @@ import java.util.Optional;
 @Repository
 public interface RidesRepository extends JpaRepository<Rides, Integer> {
 
+
     @Query("SELECT r FROM Rides r WHERE r.generatedRidesId = :generatedRidesId")
     Optional<Rides> findByGeneratedRidesId(@Param("generatedRidesId") String generatedRidesId);
 

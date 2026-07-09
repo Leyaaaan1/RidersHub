@@ -54,7 +54,6 @@ public class WikimediaImageService {
     @RateLimiter(name = "wikimedia", fallbackMethod = "imagesFallback")
     public List<LocationImageDto> getLocationImage(String locationName) {
         try {
-            System.out.println("Wikimedia fetch for: " + locationName);
 
             String searchTerm = apiHelper.buildMindanaoSearchTerm(locationName);
 
@@ -88,11 +87,9 @@ public class WikimediaImageService {
                 return resolveImageInfo(fileTitles);
 
             } catch (Exception e) {
-                System.err.println("Wikimedia fetch error for '" + locationName + "': " + e.getMessage());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            System.err.println("Redis cache error in getLocationImage: " + e.getMessage());
             // ⚠️ GRACEFUL DEGRADATION: Return empty list instead of crashing
             return new ArrayList<>();
         }
@@ -112,7 +109,6 @@ public class WikimediaImageService {
     @RateLimiter(name = "wikimedia", fallbackMethod = "imagesByCoordsFallback")
     public List<LocationImageDto> searchImagesByCoordinates(double lat, double lon, int radiusMeters) {
         try {
-            System.out.println("Wikimedia geosearch at " + lat + "," + lon);
 
             // generator=geosearch returns pages (files) near the given point
             String url = UriComponentsBuilder.fromHttpUrl(WIKIMEDIA_API)
@@ -159,11 +155,9 @@ public class WikimediaImageService {
                 return images;
 
             } catch (Exception e) {
-                System.err.println("Wikimedia geosearch error: " + e.getMessage());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            System.err.println("Redis cache error in searchImagesByCoordinates: " + e.getMessage());
             // ⚠️ GRACEFUL DEGRADATION: Return empty list instead of crashing
             return new ArrayList<>();
         }
@@ -208,7 +202,6 @@ public class WikimediaImageService {
                 ));
 
             } catch (Exception e) {
-                System.err.println("Wikimedia imageinfo error for '" + fileName + "': " + e.getMessage());
             }
         }
 
@@ -216,13 +209,11 @@ public class WikimediaImageService {
     }
 
     public List<LocationImageDto> imagesFallback(String locationName, Exception ex) {
-        System.err.println("Wikimedia rate limit (name): " + ex.getMessage());
         return new ArrayList<>();
     }
 
     public List<LocationImageDto> imagesByCoordsFallback(double lat, double lon,
                                                          int radiusMeters, Exception ex) {
-        System.err.println("Wikimedia rate limit (geo): " + ex.getMessage());
         return new ArrayList<>();
     }
 

@@ -34,8 +34,6 @@ public class LocationUpdateController {
     public ResponseEntity<List<LocationUpdateRequestDTO>> getAllRiderLocations(
             @PathVariable Integer startedRideId) { // ← Changed to Integer
 
-        System.out.println(
-                "\n [GET /{startedRideId}/all-riders] Fetching all rider locations for Ride: " + startedRideId);
         try {
             List<LocationUpdateRequestDTO> locations = rideLocationService.getAllRiderLocations(startedRideId);
             return ResponseEntity.ok(locations);

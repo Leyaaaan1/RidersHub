@@ -99,6 +99,26 @@ public class RiderController {
         }
     }
 
+    @DeleteMapping("/delete/{generatedRidesId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteRide(@PathVariable String generatedRidesId) {
+        try {
+            String username = SecurityUtils.getCurrentUsername();
+            ridesService.deleteRide(generatedRidesId, username);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Ride not found: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting ride: " + e.getMessage());
+        }
+    }
+
     @PutMapping("/{generatedRidesId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateRide(

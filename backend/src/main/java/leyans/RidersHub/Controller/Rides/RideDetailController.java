@@ -70,4 +70,6 @@ public class RideDetailController {
             @PathVariable String generatedRidesId) {
         return ResponseEntity.ok(uploadService.getPersonalSnapshot(generatedRidesId));
     }
+
+    
 }

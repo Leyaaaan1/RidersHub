@@ -22,9 +22,14 @@ public class FinishedRide {
     private Integer id;
 
     // Only FK to Rides (permanent event) — StartedRide FK removed since it gets deleted
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "generated_rides_id", referencedColumnName = "generated_rides_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "generated_rides_id", referencedColumnName = "generated_rides_id", nullable = true)
     private Rides ride;
+    @Column(name = "ride_name")
+    private String ridesName;
+
+    @Column(name = "location_name")
+    private String locationName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "finisher_username", referencedColumnName = "username", nullable = false)
@@ -62,7 +67,8 @@ public class FinishedRide {
 
     public FinishedRide(Rides ride, Rider finishedBy,
                         LocalDateTime startTime, LocalDateTime endTime,
-                        Integer durationMinutes, Set<Rider> completedParticipants, String snapshotUrl, Double averageSpeedKph) {
+                        Integer durationMinutes, Set<Rider> completedParticipants, String snapshotUrl, Double averageSpeedKph,
+                        String ridesName, String locationName) {
         this.ride = ride;
         this.finishedBy = finishedBy;
         this.startTime = startTime;
@@ -71,6 +77,25 @@ public class FinishedRide {
         this.completedParticipants = completedParticipants;
         this.snapshotUrl = snapshotUrl;
         this.averageSpeedKph = averageSpeedKph;
+        this.ridesName = ridesName;
+        this.locationName = locationName;
+    }
+
+
+    public String getRidesName() {
+        return ridesName;
+    }
+
+    public void setRidesName(String ridesName) {
+        this.ridesName = ridesName;
+    }
+
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
     public Double getAverageSpeedKph() {

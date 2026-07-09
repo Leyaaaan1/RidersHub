@@ -6,6 +6,7 @@ import leyans.RidersHub.DTO.Request.RidesDTO.StopPointDTO;
 import leyans.RidersHub.DTO.Response.Rides.ActiveRideDTO;
 import leyans.RidersHub.DTO.Response.Rides.RideDetailDTO;
 import leyans.RidersHub.DTO.Response.Finished.RideSummaryDTO;
+import leyans.RidersHub.Repository.Rides.RideStatusRepository;
 import leyans.RidersHub.Repository.Rides.RiderTypeRepository;
 import leyans.RidersHub.Repository.Rides.RidesRepository;
 import leyans.RidersHub.Repository.Rides.StartedRideRepository;
@@ -38,13 +39,22 @@ public class RidesUtil {
     private final RiderTypeRepository riderTypeRepository;
 
     private final RiderUtil riderUtil;
+    private final RideStatusRepository rideStatusEntryRepository;
 
-    public RidesUtil(RidesRepository ridesRepository, InviteRequestService inviteRequestService, StartedRideRepository startedRideRepository, RiderTypeRepository riderTypeRepository, RiderUtil riderUtil) {
+    public RidesUtil(RidesRepository ridesRepository, InviteRequestService inviteRequestService, StartedRideRepository startedRideRepository, RiderTypeRepository riderTypeRepository, RiderUtil riderUtil, RideStatusRepository rideStatusEntryRepository) {
         this.ridesRepository = ridesRepository;
         this.inviteRequestService = inviteRequestService;
         this.startedRideRepository = startedRideRepository;
         this.riderTypeRepository = riderTypeRepository;
         this.riderUtil = riderUtil;
+        this.rideStatusEntryRepository = rideStatusEntryRepository;
+    }
+
+
+    @Transactional
+    public void deleteRide(Rides ride) {
+        rideStatusEntryRepository.deleteByGeneratedRidesId(ride.getGeneratedRidesId());
+        ridesRepository.delete(ride);
     }
 
 
