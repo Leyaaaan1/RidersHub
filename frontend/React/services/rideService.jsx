@@ -94,12 +94,10 @@ export const updateRide = async (generatedRidesId, rideData) => {
   try {
     await routeCache.clear(generatedRidesId);
   } catch (e) {
-    console.warn('[updateRide] routeCache.clear failed (non-fatal):', e);
   }
   try {
     await ridesListCache.clear?.();
   } catch (e) {
-    console.warn('[updateRide] ridesListCache.clear failed (non-fatal):', e);
   }
 
   if (!responseText || responseText.trim() === '') return {success: true};
@@ -108,7 +106,25 @@ export const updateRide = async (generatedRidesId, rideData) => {
   } catch {
     return {success: true, rawResponse: responseText};
   }
-};export const fetchMyRides = async (page = 0, size = 10) => {
+};
+
+export const deleteRide = async generatedRidesId => {
+  const response = await api.delete(`/riders/delete/${generatedRidesId}`);
+  if (!response.ok) {
+    const text = await response.text().catch(() => '');
+    throw new Error(`Failed to delete ride: ${response.status} ${text}`);
+  }
+  try {
+    await routeCache.clear(generatedRidesId);
+  } catch (e) {}
+  try {
+    await ridesListCache.clear?.();
+  } catch (e) {}
+  return {success: true};
+};
+
+
+export const fetchMyRides = async (page = 0, size = 10) => {
   // My-rides are user-specific so cached separately under mode 'my'
   const cached = await ridesListCache.get(page, size, 'my');
   if (cached) {

@@ -270,6 +270,7 @@ const CardContent = ({data, cfg}) => {
     durationMinutes = null,
     averageSpeedKph = null,
     speedSegments = [],
+    rank = null,
   } = data;
 
   const date = fmtDate(startTime);
@@ -303,6 +304,11 @@ const CardContent = ({data, cfg}) => {
               {riderUsername && date ? '  ·  ' : ''}
               {date}
             </Text>
+          </View>
+        ) : null}
+        {rank ? (
+          <View style={ss.rankBadge}>
+            <Text style={ss.rankBadgeText}>#{rank}</Text>
           </View>
         ) : null}
       </View>

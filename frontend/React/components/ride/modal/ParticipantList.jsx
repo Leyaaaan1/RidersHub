@@ -84,7 +84,6 @@ const ParticipantList = ({
       }
     } catch (err) {
       // user cancel also lands here when failOnCancel is true; we set it false above
-      console.log('Share error:', err);
     }
   };
   const refreshParticipants = useCallback(async () => {

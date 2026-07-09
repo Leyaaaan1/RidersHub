@@ -27,6 +27,17 @@ const finishedRideStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
   },
+  participantAvatarTop3: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+
+  rankTop3Row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
 
   headerTitle: {
     fontSize: fontSize.lg,

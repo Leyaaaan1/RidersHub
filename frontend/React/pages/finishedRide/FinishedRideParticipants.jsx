@@ -6,6 +6,27 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import colors from '../../styles/tokens/colors';
 import finishedRideStyles from '../../styles/screens/finishedRideStyles';
 
+
+const rankParticipants = list => {
+  return [...list]
+    .sort((a, b) => {
+      const aComplete = a.status ? a.status === 'COMPLETED' : false;
+      const bComplete = b.status ? b.status === 'COMPLETED' : false;
+
+      if (aComplete !== bComplete) return aComplete ? -1 : 1;
+
+      if (aComplete && bComplete) {
+        if (!a.arrivalTime) return 1;
+        if (!b.arrivalTime) return -1;
+        return new Date(a.arrivalTime) - new Date(b.arrivalTime);
+      }
+
+      return (b.checkpointsReached ?? 0) - (a.checkpointsReached ?? 0);
+    })
+    .map((p, idx) => ({...p, rank: idx + 1}));
+};
+
+
 const formatArrivalTime = iso => {
   if (!iso) return null;
   try {
@@ -18,8 +39,13 @@ const formatArrivalTime = iso => {
   }
 };
 
+// Completed riders first (earliest arrival wins), then in-progress riders
+// ranked by checkpoints reached. Missing arrivalTime sorts last within
+// its group.
+
 const FinishedRideParticipants = ({participants, participantCount}) => {
-  const hasParticipants = participants && participants.length > 0;
+  const rankedParticipants = rankParticipants(participants || []);
+  const hasParticipants = rankedParticipants.length > 0;
 
   return (
     <View style={finishedRideStyles.section}>
@@ -37,7 +63,7 @@ const FinishedRideParticipants = ({participants, participantCount}) => {
 
       {hasParticipants ? (
         <View style={finishedRideStyles.participantsList}>
-          {participants.map((participant, idx) => {
+          {rankedParticipants.map((participant, idx) => {
             const pct =
               participant.totalCheckpoints > 0
                 ? Math.round(
@@ -63,12 +89,35 @@ const FinishedRideParticipants = ({participants, participantCount}) => {
                   isLast && finishedRideStyles.participantItemLast,
                 ]}>
                 {/* Avatar */}
-                <View style={finishedRideStyles.participantAvatar}>
-                  <Text style={finishedRideStyles.participantInitial}>
-                    {(participant.username || 'U')[0].toUpperCase()}
-                  </Text>
+                <View
+                  style={[
+                    finishedRideStyles.participantAvatar,
+                    participant.rank <= 3 &&
+                      finishedRideStyles.participantAvatarTop3,
+                  ]}>
+                  {participant.rank <= 3 ? (
+                    <View style={finishedRideStyles.rankTop3Row}>
+                      <FontAwesome
+                        name="trophy"
+                        size={13}
+                        color={
+                          participant.rank === 1
+                            ? '#FFD700'
+                            : participant.rank === 2
+                            ? '#C0C0C0'
+                            : '#CD7F32'
+                        }
+                      />
+                      <Text style={finishedRideStyles.participantInitial}>
+                        {participant.rank}
+                      </Text>
+                    </View>
+                  ) : (
+                    <Text style={finishedRideStyles.participantInitial}>
+                      {participant.rank}
+                    </Text>
+                  )}
                 </View>
-
                 {/* Info */}
                 <View style={finishedRideStyles.participantInfo}>
                   <Text style={finishedRideStyles.participantName}>
@@ -80,7 +129,6 @@ const FinishedRideParticipants = ({participants, participantCount}) => {
                     {arrivalLabel ? `  ·  ${arrivalLabel}` : ''}
                   </Text>
                 </View>
-
                 {/* Completion badge */}
                 <View
                   style={[
