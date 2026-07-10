@@ -224,10 +224,31 @@ const RideDetailView = ({ route, navigation }) => {
     startTime,
     endTime,
     speedSegments = [],
+    startingPointName,
+    endingPointName,
     photo,
   } = rideDetail;
 
-  const hasSegments = speedSegments.length > 0;
+  // If there are no intermediate stops, the backend has nothing to build
+  // legs from and speedSegments comes back empty. There's still one real
+  // leg — Start -> End — so synthesize it from the top-level ride stats
+  // instead of hiding the chart entirely.
+  const chartSegments =
+    speedSegments.length > 0
+      ? speedSegments
+      : distanceMeters != null || durationMinutes != null || averageSpeedKph != null
+        ? [
+          {
+            fromLabel: startingPointName ?? 'Start',
+            toLabel: endingPointName ?? 'End',
+            averageSpeedKph,
+            durationMinutes,
+            distanceMeters,
+          },
+        ]
+        : [];
+
+  const hasSegments = chartSegments.length > 0;
 
   const finishedArrivals = safe(finishedData?.checkpointArrivals);
   const finishedStopPoints = safe(finishedData?.stopPoints);
@@ -256,6 +277,7 @@ const RideDetailView = ({ route, navigation }) => {
 
   const shareData = {
     ...rideDetail, // All DTO fields from getPersonalSummary
+    speedSegments: chartSegments,
     snapshotUrl: snapshotUrl ?? null, // Only add the snapshot separately
     rank: myRank,
   };
@@ -308,7 +330,7 @@ const RideDetailView = ({ route, navigation }) => {
             {hasSegments && (
               <View style={rideDetailStyles.viewChartSection}>
                 <RideDetailSpeedChart
-                  segments={speedSegments}
+                  segments={chartSegments}
                   averageSpeedKph={averageSpeedKph}
                 />
               </View>
@@ -317,7 +339,7 @@ const RideDetailView = ({ route, navigation }) => {
               distanceMeters={distanceMeters}
               durationMinutes={durationMinutes}
               averageSpeedKph={averageSpeedKph}
-              segmentCount={speedSegments.length}
+              segmentCount={chartSegments.length}
               startTime={startTime}
               endTime={endTime}
             />

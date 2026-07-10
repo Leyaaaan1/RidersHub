@@ -91,7 +91,7 @@ const ShareCardButton = ({
             <FontAwesome name="share-alt" size={15} color={colors.white} />
           )}
           <Text style={ss.btnTextPrimary}>
-            {sharing ? 'Preparing…' : 'Share Ride Card'}
+            {sharing ? 'Preparing…' : 'Share Ride Summary'}
           </Text>
         </TouchableOpacity>
 
