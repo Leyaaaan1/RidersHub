@@ -46,9 +46,9 @@ const ParticipantList = ({
 
   const {activeRide, updateRideParticipants} = useContext(RideContext);
   const pendingApprovedRef = useRef(new Set());
-  const participants = state.participants.length > 0
-    ? state.participants
-    : (activeRide?.participants || propParticipants || []);
+
+  const participants = state.participants;
+
 
   const isOwner = username === currentUsername;
 
@@ -275,24 +275,18 @@ const ParticipantList = ({
     );
   };
 
+
   useEffect(() => {
     if (!visible) return;
 
-    // Paint instantly from whatever we already have (fast, no flash of empty state)...
-    if (activeRide?.participants && activeRide.participants.length > 0) {
-      setState(prev => ({...prev, participants: activeRide.participants}));
-    } else if (propParticipants && propParticipants.length > 0) {
-      setState(prev => ({...prev, participants: propParticipants}));
-    }
-    // ...but always follow up with a real fetch, since prop/context data
-    // is a frozen snapshot from whenever this screen was first opened.
+    // Always fetch fresh — no cached/prop data shown while it's in flight.
     refreshParticipants();
 
     if (state.activeTab === 'rides') loadMyRides();
     else if (state.activeTab === 'requests' && generatedRidesId)
       loadJoinRequests();
     if (generatedRidesId) loadQrCode();
-  }, [visible, state.activeTab, generatedRidesId]);;
+  }, [visible, state.activeTab, generatedRidesId]);
 
   const getStatusStyle = status => {
     switch (status) {

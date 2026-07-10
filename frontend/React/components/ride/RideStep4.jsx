@@ -516,6 +516,7 @@ const RideStep4 = props => {
             rideDetailsWithCoords={state.rideDetailsWithCoords}
             startingPointName={startingPointName}
             endingPointName={endingPointName}
+            navigation={navigation}
           />
 
           {/* Bottom nav */}

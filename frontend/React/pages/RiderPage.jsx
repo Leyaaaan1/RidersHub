@@ -146,18 +146,10 @@ const RiderPage = ({ navigation }) => {
     fetchActiveRide,
     isRefreshing: activeRideLoading,
     clearActiveRide: clearContextActiveRide,
-    startPolling, // ← add
-    stopPolling, // ← add
   } = useContext(RideContext);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!ready) return;
-      startPolling(); // fetches immediately + every 10s while focused
-      return () => stopPolling(); // stop when screen loses focus
-    }, [ready, startPolling, stopPolling]),
-  );
 
+  const [manualRefreshing, setManualRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [profileRefreshing, setProfileRefreshing] = useState(false);
@@ -197,6 +189,64 @@ const RiderPage = ({ navigation }) => {
     }
   }, [username, clearContextActiveRide]);
 
+
+  const RefreshIconButton = ({onPress, refreshing}) => {
+    const spin = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+      if (refreshing) {
+        spin.setValue(0);
+        const loop = Animated.loop(
+          Animated.timing(spin, {
+            toValue: 1,
+            duration: 700,
+            useNativeDriver: true,
+          }),
+        );
+        loop.start();
+        return () => loop.stop();
+      }
+      spin.setValue(0);
+    }, [refreshing, spin]);
+
+    const rotate = spin.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+    });
+
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={onPress}
+        disabled={refreshing}
+        hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          height: 30,
+          paddingHorizontal: 10,
+          borderRadius: 15,
+          backgroundColor: 'rgba(255,255,255,0.06)',
+        }}>
+        <Animated.View style={{transform: [{rotate}]}}>
+          <FontAwesome
+            name="refresh"
+            size={13}
+            color={refreshing ? colors.textMuted : colors.primary}
+          />
+        </Animated.View>
+        <Text
+          style={{
+            marginLeft: 6,
+            fontSize: 12,
+            fontWeight: '600',
+            color: refreshing ? colors.textMuted : colors.primary,
+          }}>
+          {refreshing ? 'Refreshing…' : 'Refresh'}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   // ── Fetch profile ─────────────────────────────────────────────────────────
   const fetchProfile = useCallback(async () => {
@@ -272,6 +322,18 @@ const RiderPage = ({ navigation }) => {
     navigation.navigate('RiderProfile', {username});
 
   // Uses getRideDetails (same as SearchHeader) — fetches full ride then navigates
+
+  const handleManualRefresh = async () => {
+    if (manualRefreshing) {
+      return;
+    }
+    setManualRefreshing(true);
+    try {
+      await ridesListRefRef.current?.refresh?.();
+    } finally {
+      setManualRefreshing(false);
+    }
+  };
   const handleSearchRide = async () => {
     const trimmed = rideCode.trim();
     if (!trimmed) {
@@ -422,6 +484,7 @@ const RiderPage = ({ navigation }) => {
       <RidesList
         mode="my"
         userId={username}
+        ref={ridesListRefRef}
         onRideSelect={handleRideSelect}
         onExtraRefresh={fetchActiveRide}
         style={{flex: 1}}
@@ -530,6 +593,33 @@ const RiderPage = ({ navigation }) => {
                 </View>
               </AnimatedPress>
             </View>
+            <View
+              style={[
+                s.sectionHeaderRow,
+                {
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  marginTop: 10,
+                },
+              ]}>
+              <Text style={s.sectionLabel}>My rides</Text>
+              <View style={{alignItems: 'flex-end'}}>
+                <RefreshIconButton
+                  onPress={handleManualRefresh}
+                  refreshing={manualRefreshing}
+                />
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: colors.textMuted,
+                    marginTop: 4,
+                    textAlign: 'right',
+                  }}>
+                  Tap refresh to see the latest updates
+                </Text>
+              </View>
+            </View>
 
             <View style={s.ridesSection}>
               {activeRideLoading && !displayActiveRide ? (
@@ -637,9 +727,6 @@ const RiderPage = ({ navigation }) => {
                   </TouchableOpacity>
                 </View>
               )}
-            </View>
-            <View style={s.sectionHeaderRow}>
-              <Text style={s.sectionLabel}>My rides</Text>
             </View>
           </>
         }

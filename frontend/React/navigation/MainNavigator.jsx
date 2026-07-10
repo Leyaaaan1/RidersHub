@@ -18,6 +18,7 @@ import VerifyEmailLinkScreen from '../screens/VerifyEmailLinkScreen';
 import RideDetailView from '../pages/finishedRide/Details/RideDetailView';
 import ScannerHeader from '../pages/utilities/ScannerHeader';
 import SearchHeader from '../pages/utilities/SearchHeader';
+import RideHeroCard from '../components/ride/utilities/RideHeroCard';
 
 const Stack = createNativeStackNavigator();
 
@@ -63,6 +64,7 @@ const MainNavigator = ({navigationRef}) => {
       <Stack.Screen name="LegalScreen" component={LegalScreen} />
       <Stack.Screen name="FinishedRideView" component={FinishedRideView} />
       <Stack.Screen name="RideDetailView" component={RideDetailView} />
+      <Stack.Screen name="RideHeroCard" component={RideHeroCard} />
       <Stack.Screen
         name="PersonalSummaryView"
         component={PersonalSummaryView}
