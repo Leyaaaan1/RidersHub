@@ -30,10 +30,30 @@ const fmtDur = min => {
 };
 
 const buildHtml = (segments, avgSpeed, isDark) => {
-  const labels = segments.map(s => `${s.fromLabel} → ${s.toLabel}`);
-  const speeds = segments.map(s => s.averageSpeedKph ?? 0);
-  const durs = segments.map(s => s.durationMinutes ?? 0);
-  const singlePoint = segments.length < 2;
+  const points =
+    segments.length === 1
+      ? [
+          {
+            label: segments[0].fromLabel ?? 'Start',
+            speed: segments[0].averageSpeedKph ?? 0,
+            dur: segments[0].durationMinutes ?? 0,
+          },
+          {
+            label: segments[0].toLabel ?? 'End',
+            speed: segments[0].averageSpeedKph ?? 0,
+            dur: segments[0].durationMinutes ?? 0,
+          },
+        ]
+      : segments.map(s => ({
+          label: `${s.fromLabel} → ${s.toLabel}`,
+          speed: s.averageSpeedKph ?? 0,
+          dur: s.durationMinutes ?? 0,
+        }));
+
+  const labels = points.map(p => p.label);
+  const speeds = points.map(p => p.speed);
+  const durs = points.map(p => p.dur);
+  const singlePoint = false; // we now always have >= 2 plotted points, so it's always a real line
 
   const bg = 'transparent';
   const textColor = 'rgba(255,255,255,0.55)';

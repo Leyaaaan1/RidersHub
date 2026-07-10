@@ -1,4 +1,4 @@
-import {ScrollView, Text, View} from 'react-native';
+import {ScrollView, Text, View, TouchableOpacity} from 'react-native';
 import cards from '../../../styles/base/cards';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {formatDate, getLocationDisplayName} from './RideStepUtils';
@@ -15,6 +15,7 @@ export const renderRideHeroCard = ({
   rideDetailsWithCoords,
   startingPointName,
   endingPointName,
+  navigation,
 }) => {
   const displayDistance = distance || rideDetailsWithCoords?.distance || '--';
   const displayStarting =
@@ -36,12 +37,19 @@ export const renderRideHeroCard = ({
           <FontAwesome name="calendar" size={12} color="#8888" />
           <Text style={cards.heroChipText}>{formatDate(date)}</Text>
         </View>
-        <View style={cards.heroChip}>
+        <TouchableOpacity
+          style={cards.heroChip}
+          activeOpacity={0.7}
+          onPress={() => {
+            if (username) {
+              navigation.navigate('RiderProfile', {username});
+            }
+          }}>
           <FontAwesome name="user-circle" size={12} color="#888888" />
           <Text style={cards.heroChipText}>
             {(username || '').toUpperCase()}
           </Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View style={cards.routeContainer}>

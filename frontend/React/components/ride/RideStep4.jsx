@@ -41,9 +41,13 @@ const RideStep4 = props => {
   const navigation = useNavigation();
   const {username: authUsername} = useAuth();
   const {
+    activeRide: contextActiveRide,
     fetchActiveRide: fetchActiveRideCtx,
     setActiveRide: setContextActiveRide,
+    clearActiveRide: clearContextActiveRide,
+    notifyRideDeleted,
   } = React.useContext(RideContext);
+
   const mapRef = useRef(null);
   const routeParams = props.route?.params || {};
   const merged = {...props, ...routeParams};
@@ -210,6 +214,10 @@ const RideStep4 = props => {
           onPress: async () => {
             try {
               await deleteRide(generatedRidesId);
+              if (contextActiveRide?.generatedRidesId === generatedRidesId) {
+                clearContextActiveRide();
+              }
+              notifyRideDeleted(generatedRidesId);
               navigation.goBack();
             } catch (error) {
               Alert.alert('Error', error.message || 'Failed to delete ride.');
@@ -231,6 +239,9 @@ const RideStep4 = props => {
           onPress: async () => {
             try {
               await startService.leaveRide(generatedRidesId);
+              if (contextActiveRide?.generatedRidesId === generatedRidesId) {
+                clearContextActiveRide();
+              }
               await refreshStatus();
               navigation.goBack();
             } catch (error) {
@@ -505,6 +516,7 @@ const RideStep4 = props => {
             rideDetailsWithCoords={state.rideDetailsWithCoords}
             startingPointName={startingPointName}
             endingPointName={endingPointName}
+            navigation={navigation}
           />
 
           {/* Bottom nav */}

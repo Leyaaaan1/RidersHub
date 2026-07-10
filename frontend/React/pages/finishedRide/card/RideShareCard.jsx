@@ -97,11 +97,12 @@ const fmtSpeed = kph => (kph == null ? '—' : Number(kph).toFixed(1));
 
 function extractSpeeds(segments) {
   if (!segments?.length) return [];
-  return segments.map(s =>
+  const speeds = segments.map(s =>
     typeof s === 'number'
       ? s
       : s.speedKph ?? s.speed ?? s.avgSpeedKph ?? s.averageSpeedKph ?? 0,
   );
+  return speeds.length === 1 ? [speeds[0], speeds[0]] : speeds;
 }
 
 // ─── Speed graph (sized to fit inside a half-width column) ────────────────────
@@ -119,11 +120,14 @@ const SpeedGraph = ({segments, averageSpeedKph, width, height}) => {
 
     const minSpd = Math.min(...speeds);
     const maxSpd = Math.max(...speeds);
+    const flatLine = minSpd === maxSpd; // single-leg ride: both points are the same speed
     const span = maxSpd - minSpd || 1;
 
     const pts = speeds.map((spd, i) => ({
       x: pad.left + (i / (speeds.length - 1)) * drawW,
-      y: pad.top + drawH - ((spd - minSpd) / span) * drawH,
+      y: flatLine
+        ? pad.top + drawH / 2 // center the flat line instead of pinning it to the bottom
+        : pad.top + drawH - ((spd - minSpd) / span) * drawH,
     }));
 
     const linePts = pts

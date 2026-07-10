@@ -239,7 +239,7 @@ const riderPage = StyleSheet.create({
   // ── Active rides section ──────────────────────
   ridesSection: {
     marginBottom: spacing.lg,
-    padding: 10,
+    padding: 5,
   },
   rideCard: {
     marginHorizontal: spacing.md,
