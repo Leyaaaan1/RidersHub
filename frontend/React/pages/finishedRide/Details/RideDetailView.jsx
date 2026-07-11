@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import {
   View,
   Text,
@@ -51,13 +51,12 @@ const RideDetailView = ({ route, navigation }) => {
   const { generatedRidesId } = route.params ?? {};
 
   const insets = useSafeAreaInsets();
-
   const [rideDetail, setRideDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  const [activeTab, setActiveTab] = useState('My Stats'); // 'finished' | 'detail' | 'personal'
+  const [activeTab, setActiveTab] = useState('My Stats');
 
   const [finishedData, setFinishedData] = useState(null);
   const [finishedLoading, setFinishedLoading] = useState(false);
@@ -68,8 +67,81 @@ const RideDetailView = ({ route, navigation }) => {
   const [personalError, setPersonalError] = useState(null);
 
   const [snapshotUrl, setSnapshotUrl] = useState(null);
+  const [myRank, setMyRank] = useState(null); // ← moved up
 
-  const {user} = useAuth(); // adjust to however useAuth exposes the username
+  const {user} = useAuth();
+
+
+  // ── Derived data that shareData/ensureRank need — safe even while
+  // rideDetail is still null (loading), since every hook below must run
+  // unconditionally on every render, before any early return. ────────────────
+  const chartSegments = useMemo(() => {
+    if (!rideDetail) return [];
+    const {
+      speedSegments = [],
+      distanceMeters,
+      durationMinutes,
+      averageSpeedKph,
+      startingPointName,
+      endingPointName,
+    } = rideDetail;
+    if (speedSegments.length > 0) return speedSegments;
+    if (
+      distanceMeters != null ||
+      durationMinutes != null ||
+      averageSpeedKph != null
+    ) {
+      return [
+        {
+          fromLabel: startingPointName ?? 'Start',
+          toLabel: endingPointName ?? 'End',
+          averageSpeedKph,
+          durationMinutes,
+          distanceMeters,
+        },
+      ];
+    }
+    return [];
+  }, [rideDetail]);
+
+
+  const computeRank = useCallback(
+    progress => {
+      const list = safe(progress);
+      if (!list.length) return null;
+      const myUsername = rideDetail?.riderUsername; // ← must be this, not user?.username
+      const ranked = rankParticipants(list);
+      return ranked.find(p => p.username === myUsername)?.rank ?? null;
+    },
+    [rideDetail?.riderUsername], // ← dependency changed too
+  );
+
+  const ensureRank = useCallback(async () => {
+    if (finishedData) {
+      const rank = computeRank(finishedData.participantProgress);
+      setMyRank(rank);
+      return rank;
+    }
+    try {
+      const data = await getFinishedRideSummary(generatedRidesId);
+      setFinishedData(data);
+      const rank = computeRank(data.participantProgress);
+      setMyRank(rank);
+      return rank;
+    } catch (e) {
+      return null;
+    }
+  }, [finishedData, generatedRidesId, computeRank]);
+
+  const shareData = useMemo(
+    () => ({
+      ...(rideDetail ?? {}),
+      speedSegments: chartSegments,
+      snapshotUrl: snapshotUrl ?? null,
+      rank: myRank,
+    }),
+    [rideDetail, chartSegments, snapshotUrl, myRank],
+  );
 
   const NOT_YET_AVAILABLE_MESSAGE =
     "You haven't finished this ride yet — your detail view will appear once you do.";
@@ -122,6 +194,8 @@ const RideDetailView = ({ route, navigation }) => {
   useEffect(() => {
     fetchDetail();
   }, [fetchDetail]);
+
+
 
   useEffect(() => {
     if (snapshotUrl || !generatedRidesId) return;
@@ -229,24 +303,7 @@ const RideDetailView = ({ route, navigation }) => {
     photo,
   } = rideDetail;
 
-  // If there are no intermediate stops, the backend has nothing to build
-  // legs from and speedSegments comes back empty. There's still one real
-  // leg — Start -> End — so synthesize it from the top-level ride stats
-  // instead of hiding the chart entirely.
-  const chartSegments =
-    speedSegments.length > 0
-      ? speedSegments
-      : distanceMeters != null || durationMinutes != null || averageSpeedKph != null
-        ? [
-          {
-            fromLabel: startingPointName ?? 'Start',
-            toLabel: endingPointName ?? 'End',
-            averageSpeedKph,
-            durationMinutes,
-            distanceMeters,
-          },
-        ]
-        : [];
+
 
   const hasSegments = chartSegments.length > 0;
 
@@ -254,11 +311,7 @@ const RideDetailView = ({ route, navigation }) => {
   const finishedStopPoints = safe(finishedData?.stopPoints);
   const finishedParticipantProgress = safe(finishedData?.participantProgress);
 
-  const myRank = finishedParticipantProgress.length
-    ? rankParticipants(finishedParticipantProgress).find(
-        p => p.username === user?.username,
-      )?.rank ?? null
-    : null;
+
 
   const enrichedParticipants = finishedParticipantProgress.length
     ? finishedParticipantProgress
@@ -275,12 +328,7 @@ const RideDetailView = ({ route, navigation }) => {
     name: s.name ?? s.stopName,
   }));
 
-  const shareData = {
-    ...rideDetail, // All DTO fields from getPersonalSummary
-    speedSegments: chartSegments,
-    snapshotUrl: snapshotUrl ?? null, // Only add the snapshot separately
-    rank: myRank,
-  };
+
 
   return (
     <SafeAreaView style={finishedRideStyles.container}>
@@ -348,6 +396,7 @@ const RideDetailView = ({ route, navigation }) => {
               shareData={shareData}
               format="story"
               initialPhotoUri={snapshotUrl}
+              onBeforeShare={ensureRank}
             />
           </>
         )}

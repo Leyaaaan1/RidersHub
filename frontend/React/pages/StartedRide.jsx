@@ -600,14 +600,23 @@ const StartedRide = ({route, navigation}) => {
         activeRide={activeRide}
         stopPolling={stopPolling}
         setPollingEnabled={setPollingEnabled}
+
         onRideFinished={async (data, snapshotUrl) => {
           handleCloseModal();
           const params = buildRideStep4Params(activeRide, username);
           clearActiveRide();
           await routeCache.clear(activeRide?.generatedRidesId);
           await clearRerouteCache(activeRide?.generatedRidesId);
-          navigation.navigate('RideStep4', {...params, snapshotUrl});
+
+          navigation.reset({
+            index: 1,
+            routes: [
+              {name: 'RiderPage'},
+              {name: 'RideStep4', params: {...params, snapshotUrl}},
+            ],
+          });
         }}
+
         onNavigateToSummary={async generatedRidesId => {
           handleCloseModal();
 

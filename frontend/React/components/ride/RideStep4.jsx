@@ -238,17 +238,34 @@ const RideStep4 = props => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await startService.leaveRide(generatedRidesId);
+              await startService.leaveRidePreStart(generatedRidesId);
               if (contextActiveRide?.generatedRidesId === generatedRidesId) {
                 clearContextActiveRide();
               }
               await refreshStatus();
               navigation.goBack();
             } catch (error) {
-              Alert.alert(
-                'Error',
-                error.message || 'Failed to leave the ride. Please try again.',
-              );
+              // ← replace this catch block
+              if (actionStatus.isOwner) {
+                Alert.alert(
+                  'Cannot Leave Ride',
+                  'As the owner, you must delete the ride instead of leaving it.',
+                  [
+                    {text: 'Cancel', style: 'cancel'},
+                    {
+                      text: 'Delete Ride',
+                      style: 'destructive',
+                      onPress: handleDeleteRide,
+                    },
+                  ],
+                );
+              } else {
+                Alert.alert(
+                  'Error',
+                  error.message ||
+                    'Failed to leave the ride. Please try again.',
+                );
+              }
             }
           },
         },
@@ -256,7 +273,6 @@ const RideStep4 = props => {
       {cancelable: true},
     );
   };
-
   useEffect(() => {
     if (!generatedRidesId || hasFetchedRef.current) return;
     hasFetchedRef.current = true;

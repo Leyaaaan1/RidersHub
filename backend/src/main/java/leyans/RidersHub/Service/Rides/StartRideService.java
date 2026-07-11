@@ -218,4 +218,42 @@ public class StartRideService {
         AppLogger.info(this.getClass(), "Ride deactivated successfully", "generatedRidesId", generatedRidesId);
         ridesRepository.save(ride);
     }
+
+
+    @Transactional
+    public void leaveRidePreStart(String generatedRidesId) {
+        AppLogger.info(this.getClass(), "leaveRidePreStart called", "generatedRidesId", generatedRidesId);
+
+        Rider rider = startedUtil.authenticateAndGetInitiator();
+
+        Rides ride = ridesRepository.findByGeneratedRidesId(generatedRidesId)
+                .orElseThrow(() -> new IllegalArgumentException("Ride not found: " + generatedRidesId));
+
+        // Guard: if the ride has already been started, this is the wrong endpoint
+        if (ride.getActive()) {
+            throw new IllegalStateException(
+                    "Ride has already been started. Use leaveRide instead.");
+        }
+
+        boolean isParticipant = ride.getParticipants()
+                .stream()
+                .anyMatch(p -> p.getUsername().equals(rider.getUsername()));
+        if (!isParticipant) {
+            throw new IllegalStateException(
+                    "You are not a participant of this ride: " + generatedRidesId);
+        }
+
+        boolean isCreator = ride.getUsername().getUsername().equals(rider.getUsername());
+        if (isCreator) {
+            // Same rule as the started-ride flow — owner must delete/manage the ride instead
+            throw new RideAuthorizationException(
+                    "Creator cannot leave ride. You must delete the ride instead.");
+        }
+
+        ride.getParticipants().remove(rider);
+        ridesRepository.save(ride);
+
+        AppLogger.info(this.getClass(), "Rider left ride (pre-start) successfully",
+                "rider", rider.getUsername(), "generatedRidesId", generatedRidesId);
+    }
 }
