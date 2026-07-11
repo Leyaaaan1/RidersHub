@@ -7,94 +7,99 @@ import spacing from '../styles/tokens/spacing';
 import {fontSize} from '../styles/tokens/typography';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
-const PRIVACY_POLICY = `Privacy Policy for laagan
+const PRIVACY_POLICY = `Privacy Policy
 
 Last updated: May 17, 2026
 
-This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
-
-We use Your Personal Data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy.
+This Privacy Policy describes our policies on the collection, use, and disclosure of your information when you use the laagan app, and explains your privacy rights.
 
 Interpretation and Definitions
 
-Account means a unique account created for You to access our Service or parts of our Service.
+Account — A unique account created for you to access the Service.
 
-Company refers to laagan.
+Company — Refers to laagan.
 
-Country refers to: Philippines
+Country — Philippines.
 
-Device means any device that can access the Service such as a computer, a cell phone or a digital tablet.
+Device — Any device that can access the Service (phone, tablet, computer).
 
-Personal Data is any information that relates to an identified or identifiable individual.
+Personal Data — Any information that relates to an identified or identifiable individual.
 
-Service refers to the Application.
+Service — Refers to the laagan application.
 
-Collections of Your Personal Data
-
-Types of Data Collected
+Data We Collect
 
 Personal Data
-While using Our Service, We may ask You to provide Us with certain personally identifiable information that can be used to contact or identify You. Personally identifiable information may include, but is not limited to:
 
-• Email address
-• Usage Data
+When using our Service, we may ask you to provide:
 
-Usage Data is collected automatically when using the Service. Usage Data may include information such as Your Device's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
+- Email address
+- Username (derived from your email address)
+- Account credentials if you sign in via Facebook (basic profile information such as name and email address provided by Facebook)
+- Location data (see below)
+- Usage Data (automatically collected)
 
-When You access the Service by or through a mobile device, We may collect certain information automatically, including, but not limited to, the type of mobile device You use, Your mobile device's unique ID, the IP address of Your mobile device, Your mobile operating system.
+Usage Data includes your device's IP address, browser type, pages visited, time and date of visits, time spent on pages, and unique device identifiers.
 
-Information Collected while Using the Application
+Location
 
-While using Our Application, in order to provide features of Our Application, We may collect, with Your prior permission:
+We collect your precise location only while the app is open and active in the foreground — to match you with nearby riders and routes. Location tracking stops completely when the app is minimized or closed.
 
-• Information regarding your location
+Your most recent location is saved to our database and is overwritten each time your location updates while the app is active. If you are in an active ride, your saved location stays fixed at the last point recorded and will not change again until your ride ends or you reopen the app.
 
-We use this information to provide features of Our Service, to improve and customize Our Service. You can enable or disable access to this information at any time, through Your Device settings.
+Sharing during rides: while you are part of an active ride, your location is shared with the other rider(s) or driver(s) in that same ride so they can find and coordinate with you. Your location is not shared with anyone outside of your active ride.
 
-Use of Your Personal Data
+Camera
 
-The Company may use Personal Data for the following purposes:
+Camera access is used to scan QR codes and to capture photos during rides (for example, ride or safety documentation). Photos captured through the app are stored only on your own device — they are not uploaded to, or saved on, our servers.
 
-• To provide and maintain our Service
-• To manage Your Account
-• To contact You regarding updates or informative communications
-• To provide You with news, special offers, and general information
-• To manage Your requests
+How We Use Your Data
 
-Retention of Your Personal Data
+- To provide and maintain the Service
+- To manage your account
+- To create your username and let you sign in via email or Facebook
+- To send a verification message to your email when you register, to confirm you own the email address
+- To match you with nearby riders and share your location with other members of your active ride
+- To contact you with updates or important communications
+- To send news, offers, and general information (with your consent)
+- To manage your requests
 
-The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations.
+Sharing Your Data
 
-Account Information: retained for the duration of your account relationship plus up to 24 months after account closure.
+We do not sell your personal data. We share data only in these limited circumstances:
 
-Usage Data: up to 24 months to understand feature adoption and service improvements.
+- With other riders/drivers: your location and username are visible to other members of your active ride, so they can identify and meet you.
+- With service providers: we may share data with trusted third parties who help us operate the Service (e.g. cloud hosting, Facebook for login authentication), bound by confidentiality obligations.
+- For legal reasons: if required to comply with a legal obligation or to protect the rights, safety, or property of laagan, our users, or the public.
 
-Server logs: up to 24 months for security monitoring.
+Data Retention
 
-Delete Your Personal Data
+- Account information: Retained for the duration of your account, plus up to 24 months after closure.
+- Usage Data: Up to 24 months for service improvement.
+- Server logs: Up to 24 months for security monitoring.
 
-You have the right to delete or request that We assist in deleting the Personal Data that We have collected about You.
+Deleting Your Data
 
-You may update, amend, or delete Your information at any time by signing in to Your Account and visiting the account settings section.
+You have the right to delete your Personal Data at any time. Sign in to your account, go to account settings, and you can update, amend, or delete your information. You may also contact us directly.
 
-Security of Your Personal Data
+Security
 
-The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet is 100% secure. While We strive to use commercially reasonable means to protect Your Personal Data, We cannot guarantee its absolute security.
+We use commercially reasonable means to protect your data. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security.
 
 Children's Privacy
 
-Our Service does not address anyone under the age of 16. We do not knowingly collect personally identifiable information from anyone under the age of 16.
+laagan is not directed at anyone under 18. We do not knowingly collect data from minors. If you believe a child has provided us their information, please contact us immediately so we can remove it.
 
-Changes to this Privacy Policy
+Changes to This Policy
 
-We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy in the app.
+We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy in the app.
 
 Contact Us
 
-If you have any questions about this Privacy Policy, You can contact us at:
+Questions about this Privacy Policy? Reach us at:
 paninsorolean@gmail.com`;
 
-const TERMS_OF_SERVICE = `Terms of Service for laagan
+const TERMS_OF_SERVICE = `Terms of Service
 
 Last updated: May 17, 2026
 
@@ -112,31 +117,31 @@ laagan facilitates connections between users. We are not a transportation provid
 
 3. Your Account
 
-• You must provide accurate and complete information when registering.
-• You are responsible for maintaining the confidentiality of your login credentials.
-• You are responsible for all activity that occurs under your account.
-• Notify us immediately at paninsorolean@gmail.com if you suspect unauthorized access.
+- You must provide accurate and complete information when registering.
+- You are responsible for maintaining the confidentiality of your login credentials.
+- You are responsible for all activity that occurs under your account.
+- Notify us immediately at paninsorolean@gmail.com if you suspect unauthorized access.
 
 4. Acceptable Use
 
 You agree not to:
 
-• Use the Service for any unlawful purpose or in violation of Philippine law.
-• Impersonate any person, company, or entity.
-• Harass, threaten, or harm other users.
-• Attempt to gain unauthorized access to any part of the platform.
-• Use the app to organize rides for illegal activities.
-• Post false, misleading, or fraudulent ride listings.
-• Interfere with the proper functioning of the Service.
+- Use the Service for any unlawful purpose or in violation of Philippine law.
+- Impersonate any person, company, or entity.
+- Harass, threaten, or harm other users.
+- Attempt to gain unauthorized access to any part of the platform.
+- Use the app to organize rides for illegal activities.
+- Post false, misleading, or fraudulent ride listings.
+- Interfere with the proper functioning of the Service.
 
 5. Ride Safety and User Responsibility
 
 You are responsible for your conduct during any ride arranged through laagan. All users must:
 
-• Treat fellow riders and drivers with respect.
-• Comply with all applicable traffic and road safety laws.
-• Ensure any vehicle used meets legal roadworthiness requirements.
-• Not use the app while driving.
+- Treat fellow riders and drivers with respect.
+- Comply with all applicable traffic and road safety laws.
+- Ensure any vehicle used meets legal roadworthiness requirements.
+- Not use the app while driving.
 
 6. Intellectual Property
 
@@ -169,11 +174,20 @@ paninsorolean@gmail.com`;
 
 export default function LegalScreen({navigation, route}) {
   // Allow deep-linking to a specific tab via route.params.tab
-  const initialTab = route?.params?.tab === 'terms' ? 'terms' : 'privacy';
+  const initialTab =
+    route?.params?.tab === 'terms'
+      ? 'terms'
+      : route?.params?.tab === 'delete-account'
+      ? 'delete-account'
+      : 'privacy';
   const [activeTab, setActiveTab] = useState(initialTab);
   const insets = useSafeAreaInsets();
 
-  const isPrivacy = activeTab === 'privacy';
+  const TABS = [
+    {key: 'privacy', label: 'Privacy Policy'},
+    {key: 'terms', label: 'Terms of Service'},
+    {key: 'delete-account', label: 'Delete Account'},
+  ];
 
   return (
     <View style={layout.screen}>
@@ -215,59 +229,151 @@ export default function LegalScreen({navigation, route}) {
           borderWidth: 1,
           borderColor: colors.border,
         }}>
-        <TouchableOpacity
-          onPress={() => setActiveTab('privacy')}
-          style={{
-            flex: 1,
-            paddingVertical: spacing.sm,
-            alignItems: 'center',
-            backgroundColor: isPrivacy ? colors.primary : 'transparent',
-          }}>
-          <Text
-            style={{
-              color: isPrivacy ? colors.white : colors.primary,
-              fontWeight: '600',
-              fontSize: fontSize.body,
-            }}>
-            Privacy Policy
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setActiveTab('terms')}
-          style={{
-            flex: 1,
-            paddingVertical: spacing.sm,
-            alignItems: 'center',
-            backgroundColor: !isPrivacy ? colors.primary : 'transparent',
-          }}>
-          <Text
-            style={{
-              color: !isPrivacy ? colors.white : colors.primary,
-              fontWeight: '600',
-              fontSize: fontSize.body,
-            }}>
-            Terms of Service
-          </Text>
-        </TouchableOpacity>
+        {TABS.map(tab => {
+          const isActive = activeTab === tab.key;
+          return (
+            <TouchableOpacity
+              key={tab.key}
+              onPress={() => setActiveTab(tab.key)}
+              style={{
+                flex: 1,
+                paddingVertical: spacing.sm,
+                alignItems: 'center',
+                backgroundColor: isActive ? colors.primary : 'transparent',
+              }}>
+              <Text
+                style={{
+                  color: isActive ? colors.white : colors.primary,
+                  fontWeight: '600',
+                  fontSize: fontSize.body,
+                  textAlign: 'center',
+                }}>
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Content */}
-      <ScrollView
-        key={activeTab}
-        style={{flex: 1}}
-        contentContainerStyle={{
-          paddingHorizontal: spacing.md,
-          paddingVertical: spacing.md,
-        }}>
-        <Text
-          style={{
-            color: colors.white,
-            fontSize: fontSize.body,
-            lineHeight: 24,
+      {activeTab === 'delete-account' ? (
+        <ScrollView
+          key={activeTab}
+          style={{flex: 1}}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.lg,
           }}>
-          {isPrivacy ? PRIVACY_POLICY : TERMS_OF_SERVICE}
-        </Text>
-      </ScrollView>
+          <Text
+            style={{
+              color: colors.white,
+              fontSize: fontSize.body,
+              lineHeight: 24,
+              marginBottom: spacing.md,
+            }}>
+            You can permanently delete your laagan account and all associated
+            data at any time — directly inside the app. This applies to all
+            account types: email, Google, and Facebook.
+          </Text>
+
+          {/* Step 1 */}
+          <View style={{flexDirection: 'row', marginBottom: spacing.md}}>
+            <View
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: spacing.sm,
+              }}>
+              <Text style={{color: colors.white, fontWeight: '700'}}>1</Text>
+            </View>
+            <Text
+              style={{
+                flex: 1,
+                color: colors.white,
+                fontSize: fontSize.body,
+                lineHeight: 22,
+              }}>
+              Tap your profile icon in the top-left corner of the home screen
+            </Text>
+          </View>
+
+          {/* Step 2 */}
+          <View style={{flexDirection: 'row', marginBottom: spacing.lg}}>
+            <View
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: spacing.sm,
+              }}>
+              <Text style={{color: colors.white, fontWeight: '700'}}>2</Text>
+            </View>
+            <Text
+              style={{
+                flex: 1,
+                color: colors.white,
+                fontSize: fontSize.body,
+                lineHeight: 22,
+              }}>
+              Scroll down to the Account section and tap Delete Account, then
+              confirm
+            </Text>
+          </View>
+
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: colors.border,
+              borderRadius: 8,
+              padding: spacing.md,
+              marginBottom: spacing.md,
+            }}>
+            <Text
+              style={{
+                color: colors.textMuted ?? colors.white,
+                fontSize: fontSize.small ?? fontSize.body,
+                lineHeight: 20,
+                textAlign: 'center',
+              }}>
+              All your data — rides, profile, and location history — will be
+              permanently removed within 30 days. This action cannot be undone.
+            </Text>
+          </View>
+
+          <Text
+            style={{
+              color: colors.textMuted ?? colors.white,
+              fontSize: fontSize.small ?? fontSize.body,
+              textAlign: 'center',
+            }}>
+            Need help? Contact us at paninsorolean@gmail.com
+          </Text>
+        </ScrollView>
+      ) : (
+        <ScrollView
+          key={activeTab}
+          style={{flex: 1}}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.md,
+            paddingVertical: spacing.md,
+          }}>
+          <Text
+            style={{
+              color: colors.white,
+              fontSize: fontSize.body,
+              lineHeight: 24,
+            }}>
+            {activeTab === 'privacy' ? PRIVACY_POLICY : TERMS_OF_SERVICE}
+          </Text>
+        </ScrollView>
+      )}
     </View>
   );
 }

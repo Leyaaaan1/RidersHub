@@ -1,10 +1,10 @@
 import EventSource from 'react-native-sse';
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AuthProvider, useAuth } from './React/context/AuthContext';
-import { RideProvider } from './React/context/RideContext';
-import { setAuthContextRef } from './React/services/Apiclient';
+import React, {useEffect, useState} from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {AuthProvider, useAuth} from './React/context/AuthContext';
+import {RideProvider} from './React/context/RideContext';
+import {setAuthContextRef} from './React/services/Apiclient';
 import AuthScreen from './React/screens/AuthScreen';
 import RiderPage from './React/pages/RiderPage';
 import CreateRide from './React/pages/CreateRide';
@@ -13,26 +13,22 @@ import StartedRide from './React/pages/StartedRide';
 import RideRoutesPage from './React/components/ride/utilities/RideRoutesPage';
 import RiderProfile from './React/pages/RiderProfile';
 import HomeScreen from './React/screens/HomeScreen';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { GOOGLE_CLIENT_ID } from '@env';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {GOOGLE_CLIENT_ID} from '@env';
 import LoadingScreen from '../frontend/React/commons/LoadingScreen';
 import LegalScreen from '../frontend/React/screens/LegalScreen';
 import FinishedRideView from './React/pages/finishedRide/FinishedRideView';
 import PersonalSummaryView from './React/pages/finishedRide/PersonalSummaryView';
-import { useDeepLinking } from './React/utilities/deepLinking';
+import {useDeepLinking} from './React/utilities/deepLinking';
 import EmailVerificationScreen from './React/screens/EmailVerificationScreen';
 import VerifyEmailLinkScreen from './React/screens/VerifyEmailLinkScreen';
 import OnboardingTour from './React/screens/OnboardingTour';
-import RideUpdateModal from './React/screens/RideUpdateModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   initialWindowMetrics,
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import RideDetailView from './React/pages/finishedRide/Details/RideDetailView';
-
-const WHATS_NEW_KEY = '@rideapp_whats_new_v1';
-
 
 interface AuthContextValue {
   token: string | null;
@@ -46,7 +42,7 @@ const Stack = createNativeStackNavigator();
 export const googleclientid = GOOGLE_CLIENT_ID;
 
 const AuthStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen name="AuthScreen" component={AuthScreen} />
     <Stack.Screen
       name="EmailVerification"
@@ -58,8 +54,7 @@ const AuthStack = () => (
 );
 
 const AppStack = () => (
-  <Stack.Navigator
-    screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{headerShown: false}}>
     <Stack.Screen name="RiderPage" component={RiderPage} />
     <Stack.Screen name="Home" component={HomeScreen} />
     <Stack.Screen name="CreateRide" component={CreateRide} />
@@ -77,36 +72,25 @@ const AppStack = () => (
 const NavigationContent = () => {
   const auth = useAuth() as unknown as AuthContextValue;
   const [onboardingDone, setOnboardingDone] = useState<boolean | null>(null);
-  const [whatsNewSeen, setWhatsNewSeen] = useState<boolean | null>(null);
 
   useDeepLinking();
   setAuthContextRef(auth);
-  GoogleSignin.configure({ webClientId: googleclientid, offlineAccess: false });
+  GoogleSignin.configure({webClientId: googleclientid, offlineAccess: false});
 
   useEffect(() => {
-    Promise.all([
-      AsyncStorage.getItem('@rideapp_onboarding_done'),
-      AsyncStorage.getItem(WHATS_NEW_KEY),
-    ]).then(([onboarding, whatsNew]) => {
+    AsyncStorage.getItem('@rideapp_onboarding_done').then(onboarding => {
       setOnboardingDone(onboarding === 'true');
-      setWhatsNewSeen(whatsNew === 'true');
     });
   }, []);
 
-  if (!auth.ready || onboardingDone === null || whatsNewSeen === null)
-    return <LoadingScreen />;
-
-  const handleWhatsNewClose = async () => {
-    await AsyncStorage.setItem(WHATS_NEW_KEY, 'true');
-    setWhatsNewSeen(true);
-  };
+  if (!auth.ready || onboardingDone === null) return <LoadingScreen />;
 
   /** Renders the correct stack for the current app state */
   const renderStack = () => {
     if (!onboardingDone) {
       return (
         <Stack.Navigator
-          screenOptions={{ headerShown: false }}
+          screenOptions={{headerShown: false}}
           screenListeners={{
             state: async e => {
               const route = e.data?.state?.routes?.find(
@@ -126,21 +110,11 @@ const NavigationContent = () => {
     return <AppStack />;
   };
 
-  return (
-    <>
-      {renderStack()}
-      {/* "What's New" modal — shown once per version, on top of any screen */}
-      <RideUpdateModal
-        visible={!whatsNewSeen}
-        onClose={handleWhatsNewClose}
-        onConfirm={handleWhatsNewClose}
-      />
-    </>
-  );
+  return renderStack();
 };
 // Add this bridge component between AuthProvider and RideProvider
-const RideProviderWithToken = ({ children }: { children: React.ReactNode }) => {
-  const { token } = useAuth();
+const RideProviderWithToken = ({children}: {children: React.ReactNode}) => {
+  const {token} = useAuth();
   return <RideProvider token={token}>{children}</RideProvider>;
 };
 
