@@ -94,7 +94,12 @@ const fmtDate = iso => {
   }
 };
 const fmtSpeed = kph => (kph == null ? '—' : Number(kph).toFixed(1));
-
+const fmtOrdinal = n => {
+  if (n == null) return '';
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
 function extractSpeeds(segments) {
   if (!segments?.length) return [];
   const speeds = segments.map(s =>
@@ -311,12 +316,12 @@ const CardContent = ({data, cfg}) => {
           </View>
         ) : null}
         {rank ? (
-          <View style={ss.rankBadge}>
-            <Text style={ss.rankBadgeText}>#{rank}</Text>
+          <View style={ss.finisherBadge}>
+            <Text style={ss.finisherBadgeRank}>{fmtOrdinal(rank)}</Text>
+            <Text style={ss.finisherBadgeLabel}>FINISHER</Text>
           </View>
         ) : null}
       </View>
-
       {/* ── Centered focal point: route snapshot (hero element) ── */}
       <View style={ss.focalWrapper}>
         <View style={[ss.mapCard, {width: mapSize, height: mapSize}]}>
@@ -367,10 +372,6 @@ const CardContent = ({data, cfg}) => {
             </View>
           )}
         </View>
-      </View>
-      {/* ── Footer branding ── */}
-      <View style={ss.footer}>
-        <Text style={ss.slogan}>Shared via RideSync</Text>
       </View>
     </View>
   );

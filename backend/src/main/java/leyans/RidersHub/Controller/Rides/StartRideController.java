@@ -86,4 +86,20 @@ public class StartRideController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PostMapping("/leave-pre-start/{generatedRidesId}")
+    public ResponseEntity<Void> leaveRidePreStart(@PathVariable String generatedRidesId) {
+        try {
+            startRideService.leaveRidePreStart(generatedRidesId);
+            return ResponseEntity.ok().build();
+        } catch (RideAuthorizationException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

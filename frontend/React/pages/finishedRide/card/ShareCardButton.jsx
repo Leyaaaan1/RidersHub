@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   TouchableOpacity,
@@ -14,6 +14,7 @@ const ShareCardButton = ({
   shareData,
   format = 'story',
   initialPhotoUri = null,
+  onBeforeShare = null, // NEW
 }) => {
   const {
     CardNode,
@@ -27,8 +28,26 @@ const ShareCardButton = ({
     picking,
   } = useRideShareCard({data: shareData, format, initialPhotoUri});
 
+  const [preparing, setPreparing] = useState(false);
+
   const isLocked = sharing || saving;
 
+  const withPreparedData = useCallback(
+    async action => {
+      if (onBeforeShare) {
+        setPreparing(true);
+        try {
+          const rank = await onBeforeShare();
+          await new Promise(requestAnimationFrame);
+          await new Promise(requestAnimationFrame);
+        } finally {
+          setPreparing(false);
+        }
+      }
+      action();
+    },
+    [onBeforeShare],
+  );
   return (
     <>
       {/* Offscreen card — must be mounted for capture to work */}
@@ -82,30 +101,36 @@ const ShareCardButton = ({
       <View style={ss.row}>
         <TouchableOpacity
           style={[ss.btn, ss.btnPrimary, isLocked && ss.btnDisabled]}
-          onPress={triggerShare}
+          onPress={() => withPreparedData(triggerShare)}
           activeOpacity={0.75}
           disabled={isLocked}>
-          {sharing ? (
+          {sharing || preparing ? (
             <ActivityIndicator size="small" color={colors.white} />
           ) : (
             <FontAwesome name="share-alt" size={15} color={colors.white} />
           )}
           <Text style={ss.btnTextPrimary}>
-            {sharing ? 'Preparing…' : 'Share Ride Summary'}
+            {preparing
+              ? 'Loading…'
+              : sharing
+              ? 'Preparing…'
+              : 'Share Ride Summary'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[ss.btn, ss.btnSecondary, isLocked && ss.btnDisabled]}
-          onPress={triggerSave}
+          onPress={() => withPreparedData(triggerSave)}
           activeOpacity={0.75}
           disabled={isLocked}>
-          {saving ? (
+          {saving || preparing ? (
             <ActivityIndicator size="small" color={colors.primary} />
           ) : (
             <FontAwesome name="download" size={14} color={colors.primary} />
           )}
-          <Text style={ss.btnTextSecondary}>{saving ? 'Saving…' : 'Save'}</Text>
+          <Text style={ss.btnTextSecondary}>
+            {preparing ? 'Loading…' : saving ? 'Saving…' : 'Save'}
+          </Text>
         </TouchableOpacity>
       </View>
 

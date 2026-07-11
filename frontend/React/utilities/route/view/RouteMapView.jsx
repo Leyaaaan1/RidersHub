@@ -33,6 +33,7 @@ const RouteMapView = forwardRef(
     const webViewRef = useRef(null);
     const webViewReadyRef = useRef(false);
     const snapshotResolverRef = useRef(null);
+    const pendingTimeoutsRef = useRef([]);
 
     const {
       isLoading,
@@ -154,12 +155,20 @@ const RouteMapView = forwardRef(
         onRouteDataLoaded?.(routeData);
       }
     }, [routeData, onRouteDataLoaded]);
-
+    useEffect(() => {
+      return () => {
+        webViewReadyRef.current = false;
+        pendingTimeoutsRef.current.forEach(clearTimeout);
+        pendingTimeoutsRef.current = [];
+      };
+    }, []);
 
     const onWebViewLoad = useCallback(() => {
       webViewReadyRef.current = true;
 
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
+        if (!webViewRef.current || !webViewReadyRef.current) return;
+
         const script = `
       if (typeof window.loadRouteData === 'function') {
         window.loadRouteData(
@@ -186,10 +195,14 @@ const RouteMapView = forwardRef(
           injectRiderMarkers(riderMarkers, currentUsername);
         }
 
-        setTimeout(() => {
+        const readyTimeoutId = setTimeout(() => {
+          if (!webViewReadyRef.current) return;
           onMapReady?.();
         }, 3000);
+        pendingTimeoutsRef.current.push(readyTimeoutId);
       }, 500);
+
+      pendingTimeoutsRef.current.push(timeoutId);
     }, [
       routeData,
       startingPoint,
@@ -202,7 +215,6 @@ const RouteMapView = forwardRef(
       injectRiderMarkers,
       onMapReady,
     ]);
-
     // ── onWebViewMessage ──────────────────────────────────────────────────────
     const onWebViewMessage = useCallback(
       event => {

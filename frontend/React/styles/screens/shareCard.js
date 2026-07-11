@@ -70,6 +70,30 @@ export const cardStyles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  finisherBadge: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    alignSelf: 'flex-start', // sits inline in the header column, not floating
+    backgroundColor: cardTokens.accent,
+    paddingHorizontal: 22,
+    paddingVertical: 10,
+    borderRadius: 999,
+    marginTop: 14, // gap below the name/date pill
+    gap: 8,
+  },
+  finisherBadgeRank: {
+    color: '#fff',
+    fontSize: 32, // big — was the "barely say 1" problem
+    fontWeight: '800',
+    lineHeight: 34,
+  },
+  finisherBadgeLabel: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+  },
+
   rankBadge: {
     alignSelf: 'flex-start',
     backgroundColor: 'rgba(255,215,0,0.15)',

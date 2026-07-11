@@ -12,7 +12,7 @@ export const startService = {
       };
       throw new Error(
         messages[response.status] ||
-        'An error occurred while starting the ride.',
+          'An error occurred while starting the ride.',
       );
     }
     return response.json();
@@ -27,7 +27,7 @@ export const startService = {
       };
       throw new Error(
         messages[response.status] ||
-        'An error occurred while stopping the ride.',
+          'An error occurred while stopping the ride.',
       );
     }
     return true;
@@ -43,7 +43,26 @@ export const startService = {
       };
       throw new Error(
         messages[response.status] ||
-        'An error occurred while leaving the ride.',
+          'An error occurred while leaving the ride.',
+      );
+    }
+    return true;
+  },
+
+  leaveRidePreStart: async generatedRidesId => {
+    const response = await api.post(
+      `/start/leave-pre-start/${generatedRidesId}`,
+      {},
+    );
+    if (!response.ok) {
+      const messages = {
+        403: 'Creator cannot leave ride. You must delete the ride instead.',
+        404: 'Ride not found.',
+        409: 'Ride is in a conflicting state.',
+      };
+      throw new Error(
+        messages[response.status] ||
+          'An error occurred while leaving the ride.',
       );
     }
     return true;

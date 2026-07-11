@@ -34,7 +34,6 @@ import {
 } from '../utilities/validator/Authvalidation';
 import {createMemoCompare} from '../utilities/propsComparison';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import RideUpdateModal from './RideUpdateModal';
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,7 +96,6 @@ const AuthForm = React.memo(
     handleFacebookLogin,
     handleGoogleLogin,
     navigation, // ← now received as a prop
-    onShowWhatsNew,
   }) => (
     <KeyboardAvoidingView
       style={layout.center}
@@ -276,35 +274,7 @@ const AuthForm = React.memo(
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={onShowWhatsNew}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: spacing.xs,
-          paddingVertical: spacing.sm,
-          paddingHorizontal: spacing.md,
-          marginTop: spacing.xs,
-          backgroundColor: '#ffffff',
-          borderWidth: 1,
-          borderColor: 'rgba(155,38,38,0.35)',
-          borderRadius: 99,
-          alignSelf: 'center',
-        }}>
-        <FontAwesome name="star" size={11} color={colors.primary} />
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: '700',
-            color: colors.primary,
-            letterSpacing: 0.4,
-          }}>
-          What's New — Ride Analytics
-        </Text>
-      </TouchableOpacity>
 
-      {/* ── Legal Links ── */}
       <View
         style={{
           flexDirection: 'row',
@@ -471,11 +441,7 @@ const AuthScreen = ({navigation}) => {
         onShowWhatsNew={() => setWhatsNewVisible(true)}
       />
 
-      <RideUpdateModal
-        visible={whatsNewVisible}
-        onClose={() => setWhatsNewVisible(false)}
-        onConfirm={() => setWhatsNewVisible(false)}
-      />
+
     </View>
   );
 };
