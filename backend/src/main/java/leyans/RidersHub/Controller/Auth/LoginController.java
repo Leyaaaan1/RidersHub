@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
-
+import leyans.RidersHub.Service.N8nWebhookService;
 import java.util.Map;
 
 
@@ -29,24 +29,29 @@ public class LoginController {
     private final LoginService loginService;
     private final TokenBlacklistService tokenBlacklistService;
     private final ClientIpResolver clientIpResolver;
-
     private final UserDetailsManager userDetailsManager;
+  private final N8nWebhookService n8nWebhookService;
 
     public LoginController(LoginService loginService,
                            TokenBlacklistService tokenBlacklistService,
-                           ClientIpResolver clientIpResolver, UserDetailsManager userDetailsManager) {
+                           ClientIpResolver clientIpResolver, 
+                           UserDetailsManager userDetailsManager,
+                           N8nWebhookService n8nWebhookService) {  
         this.loginService = loginService;
         this.tokenBlacklistService = tokenBlacklistService;
         this.clientIpResolver = clientIpResolver;
         this.userDetailsManager = userDetailsManager;
+        this.n8nWebhookService = n8nWebhookService;  
     }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest,
                                    HttpServletRequest request) {
         try {
             String clientIp = clientIpResolver.getClientIp(request);
             LoginResponse response = loginService.login(loginRequest, clientIp);
+
+            n8nWebhookService.notifyRiderLogin(loginRequest.getEmail());
+
             return ResponseEntity.ok(response);
         } catch (RateLimitExceededException e) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
@@ -69,6 +74,8 @@ public class LoginController {
         try {
             String clientIp = clientIpResolver.getClientIp(request);
             RegisterResponse response = loginService.register(registerRequest, clientIp);
+            n8nWebhookService.notifyNewRiderRegistration(registerRequest.getEmail());
+
             return ResponseEntity.ok(response);
         } catch (RateLimitExceededException e) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
