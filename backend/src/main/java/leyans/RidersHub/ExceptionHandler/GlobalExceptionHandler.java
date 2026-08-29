@@ -2,6 +2,8 @@ package leyans.RidersHub.ExceptionHandler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import leyans.RidersHub.Utility.Logger.AppLogger;
+import leyans.RidersHub.Service.ErrorReportService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,6 +23,9 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @Autowired
+    private ErrorReportService errorReportService;
+
     private Map<String, Object> buildErrorBody(String message, HttpStatus status) {
         Map<String, Object> error = new HashMap<>();
         error.put("timestamp", LocalDateTime.now());
@@ -39,25 +44,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        reportToN8n(ex, "ResourceNotFoundException", request);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(buildErrorBody(ex.getMessage(), HttpStatus.NOT_FOUND));
     }
 
     @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<?> handleInvalidRequest(InvalidRequestException ex) {
+    public ResponseEntity<?> handleInvalidRequest(InvalidRequestException ex, HttpServletRequest request) {
+        reportToN8n(ex, "InvalidRequestException", request);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(buildErrorBody(ex.getMessage(), HttpStatus.BAD_REQUEST));
     }
 
     @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<?> handleUnauthorized(UnauthorizedAccessException ex) {
+    public ResponseEntity<?> handleUnauthorized(UnauthorizedAccessException ex, HttpServletRequest request) {
+        reportToN8n(ex, "UnauthorizedAccessException", request);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(buildErrorBody(ex.getMessage(), HttpStatus.UNAUTHORIZED));
     }
 
     @ExceptionHandler(RideAuthorizationException.class)
-    public ResponseEntity<?> handleRideAuthorizationException(RideAuthorizationException ex) {
+    public ResponseEntity<?> handleRideAuthorizationException(RideAuthorizationException ex,
+            HttpServletRequest request) {
+        reportToN8n(ex, "RideAuthorizationException", request);
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(buildErrorBody(ex.getMessage(), HttpStatus.FORBIDDEN));
     }
@@ -76,13 +86,14 @@ public class GlobalExceptionHandler {
             return null;
         }
 
+        reportToN8n(ex, "UnexpectedException", request);
         log.error("[GlobalExceptionHandler] Unhandled exception at {} {}: {}",
                 request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(buildErrorBody("Unexpected server error", HttpStatus.INTERNAL_SERVER_ERROR));
     }
-    
+
     @ExceptionHandler(org.springframework.web.context.request.async.AsyncRequestTimeoutException.class)
     public ResponseEntity<?> handleAsyncTimeout(
             org.springframework.web.context.request.async.AsyncRequestTimeoutException ex,
@@ -93,9 +104,12 @@ public class GlobalExceptionHandler {
         log.debug("Async/SSE timeout (expected) at {} {}", request.getMethod(), request.getRequestURI());
         return null;
     }
+
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationException(
-            org.springframework.web.bind.MethodArgumentNotValidException ex) {
+            org.springframework.web.bind.MethodArgumentNotValidException ex, HttpServletRequest request) {
+
+        reportToN8n(ex, "ValidationException", request);
 
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
@@ -103,18 +117,35 @@ public class GlobalExceptionHandler {
         response.put("error", "Validation Failed");
 
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
         response.put("errors", errors);
 
         return ResponseEntity.badRequest().body(response);
     }
 
-
     @ExceptionHandler(RedisUnavailableException.class)
-    public ResponseEntity<?> handleRedisUnavailable(RedisUnavailableException ex) {
+    public ResponseEntity<?> handleRedisUnavailable(RedisUnavailableException ex, HttpServletRequest request) {
+        reportToN8n(ex, "RedisUnavailableException", request);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body(buildErrorBody("Redis service temporarily unavailable. Please try again.", HttpStatus.SERVICE_UNAVAILABLE));
+                .body(buildErrorBody("Redis service temporarily unavailable. Please try again.",
+                        HttpStatus.SERVICE_UNAVAILABLE));
+    }
+
+    // Helper method to report errors to n8n
+    private void reportToN8n(Exception e, String errorType, HttpServletRequest request) {
+        try {
+            if (errorReportService != null) {
+                String endpoint = (request != null) ? request.getRequestURI() : "UNKNOWN";
+                errorReportService.reportError(
+                        e.getMessage(),
+                        errorType,
+                        endpoint,
+                        e.toString());
+                log.info("✅ Error reported to n8n: {} | {}", errorType, e.getMessage());
+            }
+        } catch (Exception reportError) {
+            log.error("❌ Failed to report error to n8n", reportError);
+        }
     }
 }
